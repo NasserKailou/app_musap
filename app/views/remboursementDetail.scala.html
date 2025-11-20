@@ -1,0 +1,540 @@
+@import java.time.LocalDateTime
+@import helper._
+@import utils._
+@import java.util
+@(viewMode: String,
+  idReglement: Long,
+  details: models.tables.pojos.ReglementDetail,
+  adherent: models.tables.pojos.Adherent,
+  reglementDetails: List[models.tables.pojos.ReglementDetail],
+  totalRegler: Long,
+  plafondAnnuel: Long
+)(implicit request: Http.Request)
+
+@main("Remboursement Détail") {
+
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Détails du Bon de Commande</h1>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+          <li class="breadcrumb-item"><a href="@controllers.routes.AdherentCtrl.addRembourssement(adherent.getId())">Bons de Commande</a></li>
+          <li class="breadcrumb-item active">Détails</li>
+        </ol>
+      </div>
+      <div class="col-sm-6">
+        <div class="float-sm-right">
+          <a class="btn btn-secondary"
+             href="@controllers.routes.AdherentCtrl.addRembourssement(adherent.getId())">
+            <i class="fas fa-arrow-left"></i> Retour à la liste
+          </a>
+          @if(
+            request.session.get("droit").isPresent &&
+            (request.session.get("droit").get() == "Admin" ||
+             request.session.get("droit").get() == "SuperAdmin" ||
+             request.session.get("droit").get() == "Agent Saisie" ||
+             request.session.get("droit").get() == "Comptable")
+          ) {
+          <button type="button"
+                  class="btn btn-success"
+                  onclick="openDetailModal('CREATE', null)">
+            <i class="fas fa-plus"></i> Ajouter un détail
+          </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+
+    @* ================== INFORMATIONS ADHÉRENT ================== *@
+    @if(adherent != null) {
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary card-outline">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-user"></i> Informations de l'adhérent
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="alert alert-info mb-3">
+                  <h5 class="mb-2">
+                    <i class="fas fa-id-card"></i>
+                    <strong>Matricule n°@adherent.getMatricule()</strong>
+                  </h5>
+                  <p class="mb-1">
+                    <i class="fas fa-user"></i>
+                    <strong>Nom complet :</strong> @adherent.getNomAd @adherent.getPrenomAd
+                  </p>
+                  <p class="mb-0">
+                    <i class="fas fa-phone"></i>
+                    <strong>Téléphone :</strong> @adherent.getTelephone()
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="info-box bg-success">
+                  <span class="info-box-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                  </span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Total des paiements</span>
+                    <span class="info-box-number">@totalRegler F CFA</span>
+                  </div>
+                </div>
+              </div>
+
+              @if(totalRegler > plafondAnnuel) {
+              <div class="col-md-6">
+                <div class="info-box bg-danger">
+                  <span class="info-box-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                  </span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Dépassement - À rembourser</span>
+                    <span class="info-box-number">@(totalRegler - plafondAnnuel) F CFA</span>
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    @* ================== TABLEAU DES DÉTAILS ================== *@
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-list-ul"></i> Liste des lignes de détail
+            </h3>
+            <div class="card-tools">
+              <span class="badge badge-light">
+                @reglementDetails.size() ligne(s)
+              </span>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <table id="reglementDetailsTable" class="table table-bordered table-hover table-striped">
+              <thead>
+                <tr>
+                  <th style="width: 3%">#</th>
+                  <th style="width: 20%">Intitulé</th>
+                  <th style="width: 10%">Quantité</th>
+                  <th style="width: 15%">Prix Unitaire</th>
+                  <th style="width: 15%">Montant (F CFA)</th>
+                  @if(
+                    request.session.get("droit").isPresent &&
+                    (request.session.get("droit").get() == "SuperAdmin" ||
+                     request.session.get("droit").get() == "Comptable" ||
+                     request.session.get("droit").get() == "Admin")
+                  ) {
+                  <th class="text-center" style="width: 15%">Actions</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @if(reglementDetails.isEmpty) {
+                <tr>
+                  <td colspan="6" class="text-center text-muted">
+                    <i class="fas fa-info-circle"></i> Aucun détail enregistré pour ce bon de commande
+                  </td>
+                </tr>
+                } else {
+                @for((c, index) <- reglementDetails.zipWithIndex) {
+                <tr>
+                  <td><strong>@(index + 1)</strong></td>
+                  <td>@c.getIntitule()</td>
+                  <td class="text-right">
+                    <span class="badge badge-info badge-lg">
+                      @c.getQuantite()
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <span class="badge badge-primary badge-lg">
+                      @c.getPrixUnitaire() F CFA
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <span class="badge badge-success badge-lg">
+                      @c.getMontant() F CFA
+                    </span>
+                  </td>
+
+                  @if(
+                    request.session.get("droit").isPresent &&
+                    (request.session.get("droit").get() == "SuperAdmin" ||
+                     request.session.get("droit").get() == "Comptable" ||
+                     request.session.get("droit").get() == "Admin")
+                  ) {
+                  <td class="text-center">
+                    <div class="btn-group">
+                      <button type="button"
+                              class="btn btn-warning btn-sm"
+                              onclick="openDetailModal('EDIT', '@c.getId()')"
+                              title="Modifier">
+                        <i class="fas fa-edit"></i>
+                      </button>
+
+                      @if(request.session.get("droit").get() == "SuperAdmin" || request.session.get("droit").get() == "Admin") {
+                      <button type="button"
+                              class="btn btn-danger btn-sm"
+                              onclick="deleteDetail('@c.getId()')"
+                              title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                      }
+                    </div>
+                  </td>
+                  }
+                </tr>
+                }
+                }
+              </tbody>
+              @if(!reglementDetails.isEmpty) {
+              <tfoot>
+                <tr class="bg-light">
+                  <th colspan="4" class="text-right">Total général :</th>
+                  <th class="text-right">
+                    <span class="badge badge-primary badge-lg">
+                      @reglementDetails.foldLeft(0L)((sum, detail) => sum + detail.getMontant()) F CFA
+                    </span>
+                  </th>
+                  @if(
+                    request.session.get("droit").isPresent &&
+                    (request.session.get("droit").get() == "SuperAdmin" ||
+                     request.session.get("droit").get() == "Comptable" ||
+                     request.session.get("droit").get() == "Admin")
+                  ) {
+                  <th></th>
+                  }
+                </tr>
+              </tfoot>
+              }
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+@* ================== MODAL FORMULAIRE (CREATE/EDIT) ================== *@
+<div class="modal fade" id="modal-detail-reglement" tabindex="-1" role="dialog" aria-labelledby="modalDetailLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <form id="form-detail" method="POST" action="@controllers.routes.ReglementCtrl.reglementDetailsave()">
+        @helper.CSRF.formField
+
+        <input type="hidden" name="viewMode" id="formViewMode" value="">
+        <input type="hidden" name="reglement" value="@idReglement">
+        <input type="hidden" name="adh" value="@adherent.getId()">
+        <input type="hidden" name="id" id="formDetailId" value="">
+
+        <div class="modal-header bg-primary">
+          <h5 class="modal-title" id="modalDetailLabel">
+            <i class="fas fa-file-invoice"></i> <span id="modalTitle">Détail de règlement</span>
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fermer">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="alert alert-info">
+            <i class="icon fas fa-info"></i>
+            Tous les champs avec <span class="text-danger"><strong>*</strong></span> sont obligatoires
+          </div>
+
+          <div class="card card-secondary">
+            <div class="card-header">
+              <h3 class="card-title">Informations du détail</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                @* Intitulé *@
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="intitule">
+                      <i class="fas fa-tag"></i> Intitulé <span class="text-danger">*</span>
+                    </label>
+                    <input type="text"
+                           class="form-control"
+                           id="intitule"
+                           name="intitule"
+                           placeholder="Entrez l'intitulé du détail"
+                           required>
+                    <small class="form-text text-muted">
+                      Décrivez précisément la nature de cette ligne de détail
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                @* Quantité *@
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="quantite">
+                      <i class="fas fa-cubes"></i> Quantité <span class="text-danger">*</span>
+                    </label>
+                    <input type="number"
+                           class="form-control"
+                           id="quantite"
+                           name="quantite"
+                           placeholder="0"
+                           min="1"
+                           step="1"
+                           required>
+                    <small class="form-text text-muted">
+                      Quantité du produit (entier positif)
+                    </small>
+                  </div>
+                </div>
+
+                @* Prix Unitaire *@
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="prixUnitaire">
+                      <i class="fas fa-money-bill-wave"></i> Prix Unitaire (F CFA) <span class="text-danger">*</span>
+                    </label>
+                    <input type="number"
+                           class="form-control"
+                           id="prixUnitaire"
+                           name="prixUnitaire"
+                           placeholder="0"
+                           min="0"
+                           step="1"
+                           required>
+                    <small class="form-text text-muted">
+                      Prix unitaire en Francs CFA (entier positif)
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-default" data-dismiss="modal">
+            <i class="fas fa-times"></i> Fermer
+          </button>
+          <button type="submit" class="btn" id="submitBtn">
+            <i class="fas fa-save"></i> <span id="btnText">Enregistrer</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+@* ================== STYLES CSS ================== *@
+<style>
+  .info-box-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .modal-header.bg-primary {
+    color: white;
+  }
+  
+  .table thead th {
+    vertical-align: middle;
+  }
+  
+  .btn-group .btn {
+    margin: 0 2px;
+  }
+
+  .badge-lg {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .alert-info {
+    border-left: 4px solid #17a2b8;
+  }
+
+  .form-text {
+    font-size: 0.875rem;
+  }
+
+  /* Style pour le total */
+  tfoot tr {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  /* S'assurer que le modal s'affiche correctement */
+  .modal {
+    z-index: 1050;
+  }
+  
+  .modal-backdrop {
+    z-index: 1040;
+  }
+</style>
+
+@* ================== SCRIPT JAVASCRIPT ================== *@
+<script>
+  // Données des détails en JSON
+  const detailsData = {
+    @for(c <- reglementDetails) {
+      "@c.getId()": {
+        id: "@c.getId()",
+        intitule: "@Html(c.getIntitule().replace("\"", "\\\"").replace("'", "\\'"))",
+        quantite: "@c.getQuantite()",
+        prixUnitaire: "@c.getPrixUnitaire()",
+        montant: "@c.getMontant()"
+      }@if(reglementDetails.indexOf(c) < reglementDetails.size - 1){,}
+    }
+  };
+
+  /**
+   * Ouvre le modal en mode CREATE ou EDIT
+   */
+  function openDetailModal(mode, detailId) {
+    console.log('openDetailModal called with mode:', mode, 'detailId:', detailId);
+    
+    // Réinitialiser le formulaire
+    document.getElementById('form-detail').reset();
+    
+    // Définir le mode
+    document.getElementById('formViewMode').value = mode;
+    
+    let modalTitle = '';
+    let btnClass = 'btn-success';
+    let btnText = 'Enregistrer';
+    let btnIcon = 'fa-save';
+
+    if (mode === 'CREATE') {
+      modalTitle = 'Ajouter un détail';
+      document.getElementById('formDetailId').value = '';
+      document.getElementById('intitule').value = '';
+      document.getElementById('quantite').value = '';
+      document.getElementById('prixUnitaire').value = '';
+    } else if (mode === 'EDIT') {
+      modalTitle = 'Modifier un détail';
+      btnClass = 'btn-warning';
+      btnText = 'Modifier';
+      btnIcon = 'fa-edit';
+      
+      // Charger les données du détail
+      if (detailId && detailsData[detailId]) {
+        const data = detailsData[detailId];
+        console.log('Loading data:', data);
+        document.getElementById('formDetailId').value = data.id;
+        document.getElementById('intitule').value = data.intitule;
+        document.getElementById('quantite').value = data.quantite;
+        document.getElementById('prixUnitaire').value = data.prixUnitaire;
+      } else {
+        console.error('Detail not found for id:', detailId);
+      }
+    }
+
+    // Appliquer les changements visuels
+    document.getElementById('modalTitle').textContent = modalTitle;
+    document.getElementById('submitBtn').className = 'btn ' + btnClass;
+    document.getElementById('btnText').textContent = btnText;
+    document.querySelector('#submitBtn i').className = 'fas ' + btnIcon;
+
+    // Ouvrir le modal avec Bootstrap 4
+    $('#modal-detail-reglement').modal('show');
+  }
+
+  /**
+ * Supprime un détail avec confirmation
+ */
+window.deleteDetail = function(detailId) {
+  if (confirm('Voulez-vous vraiment supprimer ce détail de règlement ?')) {
+    // Construire l'URL manuellement pour éviter les problèmes d'encodage
+    var url = '/Reglement-detail/form?subAction=DELETE&idReglement=@idReglement&idAdherent=@adherent.getId()&idDetails=' + detailId;
+    
+    console.log('Redirecting to:', url);
+    window.location.href = url;
+  }
+};
+
+  // Initialisation au chargement du document
+  $(document).ready(function() {
+    console.log('Document ready');
+    
+    // Initialisation DataTable
+    $("#reglementDetailsTable").DataTable({
+      "responsive": true,
+      "lengthChange": true,
+      "autoWidth": false,
+      "pageLength": 25,
+      "order": [[0, "asc"]],
+      "buttons": [
+        {
+          extend: 'copy',
+          text: '<i class="fas fa-copy"></i> Copier',
+          className: 'btn-sm'
+        },
+        {
+          extend: 'csv',
+          text: '<i class="fas fa-file-csv"></i> CSV',
+          className: 'btn-sm'
+        },
+        {
+          extend: 'excel',
+          text: '<i class="fas fa-file-excel"></i> Excel',
+          className: 'btn-sm'
+        },
+        {
+          extend: 'pdf',
+          text: '<i class="fas fa-file-pdf"></i> PDF',
+          className: 'btn-sm'
+        },
+        {
+          extend: 'print',
+          text: '<i class="fas fa-print"></i> Imprimer',
+          className: 'btn-sm'
+        }
+      ],
+      "language": {
+        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+      },
+      "columnDefs": [
+        { "orderable": false, "targets": @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "SuperAdmin" || request.session.get("droit").get() == "Comptable" || request.session.get("droit").get() == "Admin")){5}else{-1} }
+      ]
+    }).buttons().container().appendTo('#reglementDetailsTable_wrapper .col-md-6:eq(0)');
+
+    // Focus sur le premier champ quand le modal s'ouvre
+    $('#modal-detail-reglement').on('shown.bs.modal', function () {
+      $('#intitule').focus();
+    });
+
+    // Vérifier si on doit ouvrir le modal au chargement
+    @if(viewMode.equals("EDIT") && details != null && details.getId() != null) {
+      console.log('Opening modal in EDIT mode');
+      openDetailModal('EDIT', '@details.getId()');
+    }
+    @if(viewMode.equals("CREATE")) {
+      console.log('Opening modal in CREATE mode');
+      openDetailModal('CREATE', null);
+    }
+  });
+</script>
+
+}

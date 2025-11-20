@@ -1,0 +1,214 @@
+@import java.time.LocalDateTime
+@import helper._
+@import java.util
+@(viewMode:String,
+  partenaires: List[models.tables.pojos.VPartenaire],
+  part: models.tables.pojos.StructurePartenaire,
+  regions: List[models.tables.pojos.Region])(implicit request: Http.Request)
+
+@main("Partenaires") {
+
+  <section class="content">
+    <div class="container-fluid">
+
+      <!-- CARD FORMULAIRE STRUCTURE PARTENAIRE -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Gestion des structures partenaires</h3>
+            </div>
+
+            <form method="POST"
+                  name="form"
+                  action="@controllers.routes.StructurePartenaireCtrl.save()"
+                  class="form-horizontal"
+                  role="form">
+              @helper.CSRF.formField
+
+              <!-- hidden fields -->
+              <input type="hidden" name="viewMode" value="@viewMode">
+              <input type="hidden" name="id"       value="@part.getId()">
+
+              <div class="card-body">
+
+                <p class="mb-3 text-muted">
+                  Tous les champs avec
+                  <span style="color:red; font-size:14px;">*</span> sont obligatoires.
+                </p>
+
+                <div class="form-row">
+
+                  <!-- Libellé structure -->
+                  <div class="form-group col-md-4">
+                    <label for="libelle">
+                      <b>Libellé structure
+                        <span style="color:red; font-size:14px;">* :</span>
+                      </b>
+                    </label>
+                    <input type="text"
+                           id="libelle"
+                           name="libelle"
+                           autocomplete="off"
+                           value="@part.getLibelle()"
+                           placeholder="Préciser le nom de la structure"
+                           class="form-control"
+                           required
+                           @if(viewMode.equals("DELETE")) { disabled="disabled" } >
+                  </div>
+
+                  <!-- Région -->
+                  <div class="form-group col-md-4">
+                    <label for="region">
+                      <b>Région
+                        <span style="color:red; font-size:14px;">* :</span>
+                      </b>
+                    </label>
+                    <select id="region"
+                            name="region"
+                            class="form-control"
+                            required
+                            @if(viewMode.equals("DELETE")) { disabled="disabled" }>
+                      <option value="">Sélectionner la région</option>
+                      @for(c <- regions) {
+                        <option value="@c.getId()"
+                                @if(part.getRegion() == c.getId()) { selected="selected" }>
+                          @c.getLibelle()
+                        </option>
+                      }
+                    </select>
+                  </div>
+
+                  <!-- Téléphone -->
+                  <div class="form-group col-md-4">
+                    <label for="telephone">
+                      <b>N° Téléphone
+                        <span style="color:red; font-size:14px;">* :</span>
+                      </b>
+                    </label>
+                    <input type="tel"
+                           id="telephone"
+                           name="telephone"
+                           autocomplete="off"
+                           value="@part.getTelephone()"
+                           placeholder="Numéro de téléphone"
+                           class="form-control"
+                           required
+                           @if(viewMode.equals("DELETE")) { disabled="disabled" } >
+                  </div>
+
+                </div>
+
+              </div><!-- /.card-body -->
+
+              <div class="card-footer text-center">
+
+                <button class="btn btn-secondary"
+                        type="button"
+                        name="Annuler"
+                        value="Retour"
+                        onclick="history.go(-1)">
+                  <i class="fas fa-arrow-left"></i> Retour
+                </button>
+
+                @if(viewMode.equals("CREATE")) {
+                  <button class="btn btn-success"
+                          type="submit"
+                          id="valider"
+                          name="Valider"
+                          title="Enregistrer les informations">
+                    <i class="fas fa-save"></i> Enregistrer
+                  </button>
+                }
+
+                @if(viewMode.equals("EDIT")) {
+                  <button class="btn btn-warning"
+                          type="submit"
+                          id="valider"
+                          name="Valider"
+                          title="Modifier les informations">
+                    <i class="fas fa-edit"></i> Modifier
+                  </button>
+                }
+
+                @if(viewMode.equals("DELETE")) {
+                  <button class="btn btn-danger"
+                          type="submit"
+                          id="valider"
+                          name="Valider"
+                          title="Supprimer cette structure"
+                          onclick="return window.confirm('Voulez-vous supprimer cette structure partenaire ?');">
+                    <i class="fas fa-trash"></i> Supprimer
+                  </button>
+                }
+
+              </div><!-- /.card-footer -->
+
+            </form>
+          </div><!-- /.card -->
+        </div><!-- /.col -->
+      </div><!-- /.row -->
+
+      <!-- CARD LISTE STRUCTURES PARTENAIRES -->
+      <div class="row mt-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Liste des structures partenaires</h3>
+            </div>
+            <div class="card-body table-responsive">
+              <table class="dta-tbl table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Libellé</th>
+                    <th>Région</th>
+                    <th>Téléphone</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for(c <- partenaires) {
+                    <tr>
+                      <td>@c.getId()</td>
+                      <td>@c.getLibelle()</td>
+                      <td>@c.getRegion()</td>
+                      <td>@c.getTelephone()</td>
+                      <td>
+                        <a class="btn btn-primary btn-sm"
+                           title="Modifier"
+                           href='@controllers.routes.StructurePartenaireCtrl.show("EDIT", c.getId())'>
+                          <i class="fas fa-edit"></i>
+                        </a>
+                        <a class="btn btn-danger btn-sm"
+                           title="Supprimer"
+                           href='@controllers.routes.StructurePartenaireCtrl.show("DELETE", c.getId())'
+                           onclick="return window.confirm('Voulez-vous supprimer cette structure partenaire ?');">
+                          <i class="fas fa-trash-alt"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div><!-- /.card-body -->
+          </div><!-- /.card -->
+        </div><!-- /.col -->
+      </div><!-- /.row -->
+
+    </div><!-- /.container-fluid -->
+  </section>
+
+  <script>
+    function openPopup(target, x, y, w, h) {
+      var win = window.open(
+        target,
+        'popup',
+        'height=' + h + ', width=' + w + ', top=' + y + ', left=' + x + ', toolbar=no, menubar=yes, location=no, resizable=yes, scrollbars=yes, status=no'
+      );
+      win.window.focus();
+      return false;
+    }
+  </script>
+
+}

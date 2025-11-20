@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration xmlns="http://www.jooq.org/xsd/jooq-codegen-3.10.1.xsd">
+  <!-- Configure the database connection here -->
+  <jdbc>
+    <driver>org.postgresql.Driver</driver>
+
+    <url>jdbc:postgresql://localhost:5432/anms</url>
+
+    <user>postgres</user>
+    <password>admin</password>
+  </jdbc>
+
+  <generator>
+    <!-- The default code generator. You can override this one, to generate your own code style.
+         Supported generators:
+         - org.jooq.util.JavaGenerator
+         - org.jooq.util.ScalaGenerator
+         Defaults to org.jooq.util.JavaGenerator -->
+    <name>org.jooq.codegen.JavaGenerator</name>
+
+    <database>
+      <!-- The database type. The format here is:
+           org.util.[database].[database]Database -->
+     <!--  <name>org.jooq.util.mysql.MySQLDatabase</name> -->
+     	<name>org.jooq.meta.postgres.PostgresDatabase</name>
+     	
+
+      <!-- The database schema (or in the absence of schema support, in your RDBMS this
+           can be the owner, user, database name) to be generated -->
+      <!--  <inputSchema>library</inputSchema>-->
+      <schemata>
+  			<schema>
+    			<inputSchema>public</inputSchema>
+  			</schema>
+  			
+  			<!--<schema>
+  				<inputSchema>stock</inputSchema>
+  			</schema>-->
+	</schemata>
+
+      <!-- All elements that are generated from your schema
+           (A Java regular expression. Use the pipe to separate several expressions)
+           Watch out for case-sensitivity. Depending on your database, this might be important! -->
+      <includes>.*</includes>
+
+      <!-- All elements that are excluded from your schema
+           (A Java regular expression. Use the pipe to separate several expressions).
+           Excludes match before includes -->
+      <excludes></excludes>
+      
+      
+    </database>
+
+    <target>
+      <!-- The destination package of your generated classes (within the destination directory) -->
+      <packageName>models</packageName>
+
+      <!-- The destination directory of your generated classes. Using Maven directory layout here -->
+
+      <directory>C:\Users\kailo\eclipse-workspace\m_niger\app\</directory>
+
+    </target>
+    <generate>
+    	<pojos>true</pojos>
+    	<daos>true</daos>
+    	<routines>true</routines>
+    </generate>
+  </generator>
+</configuration>

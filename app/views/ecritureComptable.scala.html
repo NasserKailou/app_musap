@@ -1,0 +1,450 @@
+@import java.time.LocalDateTime
+@import helper._
+@import java.util
+@(viewMode:String,  ecritures: List[models.tables.pojos.VEcriture], ecriture: models.tables.pojos.Ecriture, depense: models.tables.pojos.Depense,
+comptes : List[models.tables.pojos.ClassCompte], journals :List[models.tables.pojos.JournalEcriture],cats: List[models.tables.pojos.CategorieCompte])(implicit request: Http.Request)
+
+@main("categories"){
+
+<hr>
+<!-- <div class="col-md-2"></div> -->
+@if( viewMode.equals("CREATE")){
+<div class="col-md-2">
+<button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#ModalLoginForm">
+    Ajouter une nouvelle Ecriture <i class="glyphicon glyphicon-plus"></i>
+</button>
+</div>
+
+<div class="col-md-2">
+<button type="button" class="btn btn-secondary btn-lg" data-toggle="modal" data-target="#ModalCompteForm">
+    Ajouter un Compte <i class="glyphicon glyphicon-plus"></i>
+</button>
+</div>
+
+<div class="col-md-2">
+<button type="button" class="btn btn-danger btn-lg" data-toggle="modal" data-target="#ModalBeneficiaireForm">
+    Ajouter un Bénéficiaire <i class="glyphicon glyphicon-plus"></i>
+</button>
+</div>
+
+<div class="col-md-2">
+<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#ModalPrintJournal">
+    Imprimer Journal <i class="glyphicon glyphicon-print"></i>
+</button>
+</div>
+}
+
+<!-- Modal HTML Markup -->
+<div id="ModalLoginForm" class="modal fade">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Ecriture Comptable  </h3>
+            </div>
+            <div class="modal-body">
+                <form role="form" method="POST" action="@controllers.routes.OperationComptableCtrl.saveEcriture()">
+               		 @helper.CSRF.formField
+					<input value="@viewMode"           name="viewMode" type="hidden">
+					<input value="@depense.getId()" name="depense" type="hidden">
+					<div class="form-group">
+                        <label class="control-label">Date Ecriture</label>
+                        <div>
+                            <input type="date" class="form-control input-lg" placeholder="date opération" name="dateTmp" autocomplete="off" value="">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="control-label">N°Compte</label>
+                        <div>
+                            <input type="text" id="compte" name="compte" class="form-control input-lg autocomplete" placeholder="numero du compte" >
+                             <input type="text" id="compteLibelle" class="form-control input-lg"readonly="readonly">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Ref.Paiement</label>
+                        <div>
+                            <input type="text" class="form-control input-lg" placeholder="intitulé du compte" name="refFacture" autocomplete="off" value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">DESCRIPTION DE L'OPERATION</label>
+                        <div>
+                            <input type="text" class="form-control input-lg" placeholder="Description de l'opération" name="designation" autocomplete="off" value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Bénéficiaire</label>
+                        <div>
+                           <select class="form-control input-lg" required="required" name="journal" value="" >
+	                                	<option value="">Selectionner Le Bénéficiaire</option>
+	                                @for(c<-journals){
+	                               			 <option value="@c.getId()" >@c.getLibelleJournal</option>
+	                                }
+                            </select>
+                        </div>
+                    </div>
+                   
+                   <div class="form-group">
+                        <label class="control-label">Type Opération</label>
+                        <div>
+                             <select class="form-control input-lg" required="required" name="typeOperation" value="" >
+	                                	<option value="">Selectionner Le type de mouvement</option>
+	                                
+	                               			 <option value="CREDIT" >CREDIT</option>
+	                               			 <option value="DEBIT" >DEBIT</option>
+	                                
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="control-label">Montant</label>
+                        <div>
+                            <input type="number" class="form-control input-lg" placeholder="Montant opération" name="montant" autocomplete="off" value="">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div>
+                            <button type="submit" class="btn btn-success">Enregistrer</button>
+
+                          
+                        </div>
+                    </div>
+                </form>
+               
+            </div>
+            <div class="modal-footer">
+		        <button type="button" class="btn btn-primary" data-dismiss="modal">Retour</button>
+		      </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div id="ModalBeneficiaireForm" class="modal fade">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Ajouter un bénéficiare<font style="color:red;"></font> </h3>
+            </div>
+            <div class="modal-body">
+                <form role="form" method="POST" action="@controllers.routes.JournalEcritureCtrl.save()">
+               		 @helper.CSRF.formField
+					<input value="@viewMode"           name="viewMode" type="hidden">
+                    
+                    <div class="form-group">
+                        <label class="control-label">Libellé</label>
+                        <div>
+                            <input type="text" class="form-control input-lg" placeholder="Nom du Bénéficiare" name="libelleJournal" autocomplete="off" value="">
+                        </div>
+                    </div>
+                   
+                    <div class="form-group">
+                        <div>
+                            <button type="submit" class="btn btn-success">Enregistrer</button>
+
+                          
+                        </div>
+                    </div>
+                </form>
+               
+            </div>
+            <div class="modal-footer">
+		        <button type="button" class="btn btn-primary" data-dismiss="modal">Retour</button>
+		      </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div id="ModalPrintJournal" class="modal fade">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Précisez la période d'impression<font style="color:red;"></font> </h3>
+            </div>
+            <div class="modal-body">
+                <form role="form" method="POST" action="@controllers.routes.OperationComptableCtrl.printJournal()">
+               		 @helper.CSRF.formField
+					<input value="@viewMode"           name="viewMode" type="hidden">
+                    
+                    <div class="form-group">
+                        <label class="control-label">Date début :</label>
+                        <div>
+                            <input type="date" class="form-control input-lg" placeholder="Nom du Bénéficiare" name="date1" autocomplete="off" value="">
+                        </div>
+                    </div>
+                   
+                    <div class="form-group">
+                        <label class="control-label">Date fin :</label>
+                        <div>
+                            <input type="date" class="form-control input-lg" placeholder="Nom du Bénéficiare" name="date2" autocomplete="off" value="">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div>
+                            <button type="submit" class="btn btn-success">Imprimer</button>
+
+                          
+                        </div>
+                    </div>
+                </form>
+               
+            </div>
+            <div class="modal-footer">
+		        <button type="button" class="btn btn-primary" data-dismiss="modal">Retour</button>
+		      </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="ModalCompteForm" class="modal fade">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Information Compte <font style="color:red;"></font> </h3>
+            </div>
+            <div class="modal-body">
+                <form role="form" method="POST" action="@controllers.routes.CompteCtrl.saveRapide()">
+               		 @helper.CSRF.formField
+					<input value="@viewMode"           name="viewMode" type="hidden">
+					
+                   
+                    
+                    <div class="form-group">
+                        <label class="control-label">Categorie</label>
+                        <div>
+                           <select class="form-control input-lg" required="required" name="journal" value="" >
+	                                	<option value="">Selectionner La Categorie</option>
+	                                @for(c<-cats){
+	                               			 <option value="@c.getId()" >@c.getLibelle()</option>
+	                                }
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="control-label">N°Compte</label>
+                        <div>
+                            <input type="text" class="form-control input-lg" placeholder="numero du compte" name="numCompte" autocomplete="off" value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Libellé</label>
+                        <div>
+                            <input type="text" class="form-control input-lg" placeholder="intitulé du compte" name="libelleCompte" autocomplete="off" value="">
+                        </div>
+                    </div>
+                   
+                    <div class="form-group">
+                        <div>
+                            <button type="submit" class="btn btn-success">Enregistrer</button>
+
+                          
+                        </div>
+                    </div>
+                </form>
+               
+            </div>
+            <div class="modal-footer">
+		        <button type="button" class="btn btn-primary" data-dismiss="modal">Retour</button>
+		      </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+@if( viewMode.equals("EDIT")){
+<div class="card-header" id="titre_header">
+	<div class="row">
+
+	<form  method="POST" name="form" action="@controllers.routes.OperationComptableCtrl.saveEcriture() "  class="form-horizontal col-md-12 col-sm-12 col-xs-12" role="form">
+			@helper.CSRF.formField
+			<input value="@viewMode"           name="viewMode" type="hidden">
+			<input value="@ecriture.getId()" name="id" type="hidden">
+			<input value="@depense.getId()" name="depense" type="hidden">
+			
+			<center>
+			<fieldset style=" color:#000; width:98%; background-color:#DDE7E9; border-radius:10px; font-size:14px;"  >
+			<br>
+
+					<h6 style="color:#000;">
+						<strong>
+							<i>Tous les champs avec <font style="color:red;  font-size:14px;">*</font> sont obligatoires</i>
+						</strong>
+					</h6>
+					
+			<div  class="row ">
+			   
+			    
+				<div class="col-md-12">
+
+						<br>
+						<div class="form-group row">
+						
+						<label class="col-sm-1 col-form-label">Date Ecriture</label>
+                        <div class="col-sm-2">
+                            <input type="date" class="form-control input-lg" placeholder="date opération" name="dateTmp" autocomplete="off" value="@ecriture.getDateOperation().format("yyyy-MM-dd")">
+                        </div>
+						
+						<label class="col-sm-1 col-form-label">N°Compte</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control input-lg" placeholder="numero du compte" name="compte" autocomplete="off" value="@ecriture.getCompte()">
+                        </div>
+                    
+                    
+                        <label class="col-sm-1 col-form-label">Ref.Paiement</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control input-lg" placeholder="intitulé du compte" name="refFacture" autocomplete="off" value="@ecriture.getRefFacture">
+                        </div>
+                        
+                        <label class="col-sm-1 col-form-label">DESCRIPTION DE L'OPERATION</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control input-lg" placeholder="description" name="designation" autocomplete="off" value="@ecriture.getRefFacture">
+                        </div>
+                    
+                        <label class="col-sm-1 col-form-labell">Bénéficiaire</label>
+                        <div class="col-sm-2">
+                           <select class="form-control input-lg" required="required" name="journal" value="" >
+	                                	<option value="">Selectionner Le Bénéficiaire</option>
+	                                @for(c<-journals){
+	                               			 <option value="@c.getId()" @if(ecriture.getJournal()==c.getId()){selected=selected} >@c.getLibelleJournal</option>
+	                                }
+                            </select>
+                        </div>
+                    
+                   
+                  
+                    <div class="form-group row">
+                        <label class="col-sm-1 col-form-label">Type Opération</label>
+                        <div class="col-sm-2">
+                             <select class="form-control input-lg" required="required" name="typeOpération" value="" >
+	                                	<option value="">Selectionner Le type de mouvement</option>
+	                                
+	                               			 <option value="CREDIT" >CREDIT</option>
+	                               			 <option value="DEBIT" >DEBIT</option>
+	                                
+                            </select>
+                        </div>
+                    
+                        <label class="col-sm-1 col-form-label">Montant</label>
+                        <div class="col-sm-2">
+                            <input type="number" class="form-control input-lg" placeholder="Montant opération" name="montant" autocomplete="off" value="@ecriture.getMontant">
+                        </div>
+                        
+                         
+                    </div>
+						 	
+				</div>	
+			</div>
+						  	
+						  
+				
+
+			
+				
+			<div class="row" style="color:#000;">
+				<div class="col-md-3"></div>
+				<div class="col-md-6">
+				<button class="btn btn-primary" type="submit"  name="Annuler" value="Retour" onclick="history.go(-1)">Retour</button>
+					@if( viewMode.equals("CREATE")){ 
+					<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider(Enregistrer les informations)" >
+						<i class="glyphicon glyphicon-save"></i> Enregistrer
+					</button> } 
+					@if( viewMode.equals("EDIT")){ 
+					<button class="btn btn-warning" type="submit" id="valider" name="Valider" title="Valider(Modifier les informations)">
+						<i class="glyphicon glyphicon-edit"></i> Modifier
+					</button> } 
+					
+					@if( viewMode.equals("DELETE")){ 
+					<button class="btn btn-danger" type="submit" id="valider"
+					 name="Valider" title="Supprimer l'examen"  onclick="return window.confirm('Voulez vous supprimer cet payement?');">
+						<i class="glyphicon glyphicon-edit"></i> Supprimer
+					</button> } 
+					
+<!-- 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
+<!-- 				<button class="btn btn-danger" type="submit"  name="Annuler" value="Annuler">Annuler</button> -->
+				</div>
+				<div class="col-md-3"></div>
+			</div>
+			<br>
+			</fieldset></center>
+			<br>
+		</form>
+	</div>
+	
+</div>
+
+}
+
+<!-- <section class="container"> -->
+	
+	<div class="row">
+
+		<div class = "col-md-12 table-responsive">
+		
+				<table class="dta-tbl table table-bordered table-striped text-center" >
+				<center><div class="badged-title"><h4> <b>L</b>istes des Ecritures<br></div></center>
+					<thead>
+						 <tr>
+							
+							<th style="text-align: center"><b>#</b></th>
+							
+							<th style="text-align: center"><b>Date Ecriture</b></th>
+							<th style="text-align: center"><b>Numero compte</b></th>
+							<th style="text-align: center"><b>Description</b></th>
+							<th style="text-align: center"><b>Reference</b></th>
+							<th style="text-align: center"><b>Bénéficiare</b></th>
+							<th style="text-align: center"><b>Nature Mouvement</b></th>
+							<th style="text-align: center"><b>Montant</b></th>
+							<th style="text-align: center"><b>Action</b></th>
+						 </tr>
+					 </thead>
+					 <tbody>
+						@for(c <-ecritures){
+							 <tr>
+								 <td>@c.getIdEcriture() </td>
+								 <td>@c.getDateOperation().format("yyyy-MM-dd")</td>
+								<td>@c.getNumCompte() </td>
+								<td>@c.getDesignation() </td>
+								<td>@c.getRefFacture()</td>
+								<td>@c.getLibelleJournal()</td>
+								<td>@c.getTypeOperation()</td>
+								<td>@c.getMontant()</td>
+								
+								<td>
+								  <a id="btnReadWrite" class="btn btn-primary" title="Modification"
+									href="@controllers.routes.OperationComptableCtrl.showEcriture("EDIT",c.getIdDepense(), c.getIdEcriture()) " ><i class="glyphicon glyphicon-edit"></i></a>
+										|
+                                    <a id="btnDelete" class="btn btn-danger"
+                                       title="Supprimer"
+                                       href="@controllers.routes.OperationComptableCtrl.showEcriture("DELETE",c.getIdDepense(), c.getIdEcriture())"><i class="glyphicon glyphicon-trash"></i></a>
+                               
+                                </td>
+							 </tr>
+							}
+					  </tbody>
+				</table>
+				
+	
+		</div>
+	</div>
+<!--   </section> -->
+  
+  
+  
+}
+
+
+<script >
+function openPopup(target, x, y, w, h) {
+	var win = window.open(target, 'popup', 'height='+h+', width='+w+', top='+y+', left='+x+', toolbar=no, menubar=yes, location=no, resizable=yes, scrollbars=yes, status=no');
+	win.window.focus();
+	return false;
+}
+
+
+
+</script>
+

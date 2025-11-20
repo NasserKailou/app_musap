@@ -1,0 +1,7 @@
+@(montant:Long)
+
+@{
+	val locale = new java.util.Locale("ne", "NE")
+	val formatter = java.text.NumberFormat.getCurrencyInstance(locale)
+	formatter.format(montant)
+}

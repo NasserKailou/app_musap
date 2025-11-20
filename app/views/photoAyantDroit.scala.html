@@ -1,0 +1,74 @@
+@import java.time.LocalDateTime
+@import helper._
+@import java.util
+@(idAy: Long)(implicit request: Http.Request)
+
+@main("Ayant Droit"){
+
+<script type="text/javascript">
+function openPopup(target, x, y, w, h) {
+	var win = window.open(target, 'popup', 'height='+h+', width='+w+', top='+y+', left='+x+', toolbar=no, menubar=yes, location=no, resizable=yes, scrollbars=yes, status=no');
+	win.window.focus();
+	return false;
+}
+
+</script>
+
+
+<hr>
+<div class="card-header" id="titre_header">
+	<div class="row">
+		                    
+	<form  method="POST" name="form" action="@controllers.routes.AyantDroitCtrl.formProfilSave() "  class="form-horizontal col-md-12 col-sm-12 col-xs-12" role="form" enctype="multipart/form-data">
+			@helper.CSRF.formField
+			<input value="@idAy"           name="id-ay" type="hidden">
+			
+			<center>
+			<fieldset style=" color:#000; width:98%; background-color:#DDE7E9; border-radius:10px; font-size:12px;"  >
+			
+
+					
+			<div  class="row ">
+			    <div class="col-md-12"><h5><u style="color: red;"><b>Charger une photo</b></u> </h5></div>
+				<div class="col-md-12">
+				<br>
+						
+						<div class="form-group row">
+						  
+						  
+						  
+						  	
+						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Choisir une photo<font style="color:red;  font-size:12px;">*:</font></b></label>
+						  	<div class="col-sm-3">
+						  	
+								<input type="file"  id="photo"  name="photo" a
+											class="form-control"  
+											required="required"  />
+							
+						  	</div>
+						  	
+				
+						  	
+						  </div>
+						
+						</div>
+						</div>
+
+			<div class="row" style="color:#000;">
+				<div class="col-md-3"></div>
+				<div class="col-md-6">
+				<button class="btn btn-primary" type="submit"  name="Annuler" value="Retour" onclick="history.go(-1)">Retour</button>
+					<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider(Enregistrer les informations)" >
+						<i class="glyphicon glyphicon-save"></i> Enregistrer
+					</button> 
+				</div>
+				<div class="col-md-3"></div>
+			</div>	
+		</div>
+
+		
+	
+			
+	
+  
+}

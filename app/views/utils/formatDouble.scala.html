@@ -1,0 +1,11 @@
+@(montant: java.math.BigDecimal)
+
+    @{
+        if(null != montant) {
+            val locale = new java.util.Locale("ne", "NE")
+            val formatter = java.text.NumberFormat.getCurrencyInstance(locale)
+            formatter.format(montant)
+        }
+    }
+
+    

@@ -1,0 +1,873 @@
+@import java.time.LocalDateTime
+@import helper._
+@import java.util
+@(viewMode:String,
+  adherents: List[models.tables.pojos.VAdherent],
+  adherent: models.tables.pojos.Adherent,
+  cats: List[models.tables.pojos.Categorie],
+  prgms: List[models.tables.pojos.Programme])(implicit request: Http.Request)
+
+@main("Adherent") {
+
+<script type="text/javascript">
+  function openPopup(target, x, y, w, h) {
+    var win = window.open(target, 'popup',
+      'height=' + h + ', width=' + w + ', top=' + y + ', left=' + x +
+      ', toolbar=no, menubar=yes, location=no, resizable=yes, scrollbars=yes, status=no');
+    win.window.focus();
+    return false;
+  }
+</script>
+
+<style>
+  .img-cell {
+    vertical-align: middle;
+    overflow: visible;
+  }
+
+  .adherantImage {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: zoom-in;
+  }
+
+  .adherantImage:hover {
+    transform: scale(3);
+    box-shadow: 0 0 8px rgba(0,0,0,0.4);
+    position: relative;
+    z-index: 1000;
+  }
+
+  #adherentsTable thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+</style>
+
+<!-- Content Header -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Gestion des Adhérents</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+          <li class="breadcrumb-item active">Adhérents</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+
+    @* ================== FORMULAIRE ADHERENT ================== *@
+    @if(
+      request.session.get("droit").isPresent &&
+      (request.session.get("droit").get() == "Admin"
+        || request.session.get("droit").get() == "Agent Saisie"
+        || request.session.get("droit").get() == "AGENT_CARD_ID"
+        || request.session.get("droit").get() == "SuperAdmin"
+        || request.session.get("droit").get() == "Adherent")
+    ) {
+
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-user-plus"></i> 
+                @if(viewMode.equals("CREATE")) { Nouvel adhérent }
+                @if(viewMode.equals("EDIT")) { Modifier adhérent }
+                @if(viewMode.equals("DELETE")) { Désactiver adhérent }
+              </h3>
+            </div>
+
+            <form method="POST"
+                  name="form"
+                  action='@controllers.routes.AdherentCtrl.save()'
+                  class="form-horizontal"
+                  role="form"
+                  enctype="multipart/form-data">
+              @helper.CSRF.formField
+
+              <input type="hidden" name="viewMode" value="@viewMode">
+              <input type="hidden" name="id"       value="@adherent.getId()">
+              <input type="hidden" name="picture"  value="@adherent.getPicture()">
+
+              <div class="card-body">
+
+                <div class="alert alert-info">
+                  <i class="icon fas fa-info"></i>
+                  Tous les champs avec <span class="text-danger"><strong>*</strong></span> sont obligatoires.
+                </div>
+
+                <h5 class="mb-3">
+                  <i class="fas fa-user-circle text-danger"></i>
+                  <strong>Informations adhérent</strong>
+                </h5>
+
+                <!-- Ligne 1 -->
+                <div class="row">
+
+                  <!-- Matricule -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="fas fa-id-badge"></i> Matricule adhérent 
+                        <span class="text-danger">*</span>
+                      </label>
+                      <input type="text"
+                             id="matricule"
+                             name="matricule"
+                             class="form-control"
+                             autocomplete="off"
+                             value="@adherent.getMatricule()"
+                             placeholder="Matricule de l'agent"
+                             required
+                             @if(viewMode.equals("DELETE")) { readonly="readonly" }>
+                    </div>
+                  </div>
+
+                  <!-- Nom -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="fas fa-user"></i> Nom adhérent 
+                        <span class="text-danger">*</span>
+                      </label>
+                      <input type="text"
+                             name="nomAd"
+                             class="form-control"
+                             autocomplete="off"
+                             value="@adherent.getNomAd()"
+                             placeholder="Nom de l'adhérent"
+                             required
+                             @if(viewMode.equals("DELETE")) { readonly="readonly" }>
+                    </div>
+                  </div>
+
+                  <!-- Prénom -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="fas fa-user"></i> Prénom adhérent 
+                        <span class="text-danger">*</span>
+                      </label>
+                      <input type="text"
+                             name="prenomAd"
+                             class="form-control"
+                             autocomplete="off"
+                             value="@adherent.getPrenomAd()"
+                             placeholder="Prénom de l'adhérent"
+                             required
+                             @if(viewMode.equals("DELETE")) { readonly="readonly" }>
+                    </div>
+                  </div>
+
+                  <!-- Sexe -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="fas fa-venus-mars"></i> Sexe 
+                        <span class="text-danger">*</span>
+                      </label>
+                      <select class="form-control"
+                              id="sexe"
+                              name="sexe"
+                              required
+                              @if(viewMode.equals("DELETE")) { disabled="disabled" }>
+                        <option value="">Sélectionner le sexe</option>
+                        <option value="M" @if("M".equals(adherent.getSexe())) { selected="selected" }>Masculin</option>
+                        <option value="F" @if("F".equals(adherent.getSexe())) { selected="selected" }>Féminin</option>
+                      </select>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Ligne 2 -->
+                <div class="row">
+
+                  <!-- Email -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="fas fa-envelope"></i> E-mail 
+                        <span class="text-danger">*</span>
+                      </label>
+                      <input type="email"
+                             id="email"
+                             name="email"
+                             class="form-control"
+                             autocomplete="off"
+                             value="@adherent.getEmail()"
+                             placeholder="Email adhérent"
+                             required
+                             @if(viewMode.equals("DELETE")) { readonly="readonly" }>
+                    </div>
+                  </div>
+
+                  <!-- Téléphone -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="fas fa-phone"></i> N° téléphone 
+                        <span class="text-danger">*</span>
+                      </label>
+                      <input type="text"
+                             id="telPatient"
+                             name="telephone"
+                             class="form-control"
+                             autocomplete="off"
+                             value="@adherent.getTelephone()"
+                             placeholder="N° Tel de l'adhérent"
+                             required
+                             @if(viewMode.equals("DELETE")) { readonly="readonly" }>
+                    </div>
+                  </div>
+
+                  <!-- Catégorie -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="fas fa-tags"></i> Catégorie 
+                        <span class="text-danger">*</span>
+                      </label>
+                      <select class="form-control"
+                              id="typeConsultation"
+                              name="categorie"
+                              required
+                              @if(viewMode.equals("DELETE")) { disabled="disabled" }>
+                        <option value="">Sélectionner la catégorie</option>
+                        @for(c <- cats) {
+                          <option value="@c.getCode()"
+                            @if(adherent.getCategorie() == c.getCode()) { selected="selected" }>
+                            @c.getCode() -- @c.getLibelle()
+                          </option>
+                        }
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Date Naissance -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="far fa-calendar-alt"></i> Date de naissance 
+                        <span class="text-danger">*</span>
+                      </label>
+                      @if(viewMode.equals("CREATE")) {
+                        <input type="date"
+                               name="tmpDate"
+                               class="form-control"
+                               placeholder="JJ/MM/AAAA"
+                               required>
+                      } else {
+                        <input type="date"
+                               name="tmpDate"
+                               class="form-control"
+                               value='@adherent.getDateNaiss().format("yyyy-MM-dd")'
+                               required>
+                      }
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Ligne 3 -->
+                <div class="row">
+
+                  <!-- Date prise de service -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="far fa-calendar-check"></i> Date prise de service 
+                        <span class="text-danger">*</span>
+                      </label>
+                      @if(viewMode.equals("CREATE")) {
+                        <input type="date"
+                               name="tmpDate2"
+                               class="form-control"
+                               placeholder="JJ/MM/AAAA"
+                               required>
+                      } else {
+                        <input type="date"
+                               name="tmpDate2"
+                               class="form-control"
+                               value='@adherent.getDatePriseService().format("yyyy-MM-dd")'
+                               required>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Fonction -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="fas fa-briefcase"></i> Fonction 
+                        <span class="text-danger">*</span>
+                      </label>
+                      <input type="text"
+                             name="fonction"
+                             class="form-control"
+                             autocomplete="off"
+                             value="@adherent.getFonction()"
+                             placeholder="Fonction de l'adhérent"
+                             required
+                             @if(viewMode.equals("DELETE")) { readonly="readonly" }>
+                    </div>
+                  </div>
+
+                  <!-- Sigle Structure -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="fas fa-building"></i> Sigle structure 
+                        <span class="text-danger">*</span>
+                      </label>
+                      <input type="text"
+                             name="structureSigle"
+                             class="form-control"
+                             autocomplete="off"
+                             value="@adherent.getStructureSigle()"
+                             placeholder="Sigle structure"
+                             required
+                             @if(viewMode.equals("DELETE")) { readonly="readonly" }>
+                    </div>
+                  </div>
+
+                  <!-- Membre actif -->
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>
+                        <i class="fas fa-check-circle"></i> Membre actif ? 
+                        <span class="text-danger">*</span>
+                      </label>
+                      <div class="form-check">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="isMember"
+                               id="membre_actif_oui"
+                               value="true"
+                               @if(adherent.getIsMember()) { checked }>
+                        <label class="form-check-label" for="membre_actif_oui">Oui</label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="isMember"
+                               id="membre_actif_non"
+                               value="false"
+                               @if(!adherent.getIsMember()) { checked }>
+                        <label class="form-check-label" for="membre_actif_non">Non</label>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div><!-- /.card-body -->
+
+              <div class="card-footer text-center">
+                <button class="btn btn-secondary"
+                        type="button"
+                        name="Annuler"
+                        value="Retour"
+                        onclick="history.go(-1)">
+                  <i class="fas fa-arrow-left"></i> Retour
+                </button>
+
+                @if(viewMode.equals("CREATE")) {
+                  <button class="btn btn-success"
+                          type="submit"
+                          id="valider"
+                          name="Valider"
+                          title="Enregistrer les informations">
+                    <i class="fas fa-save"></i> Enregistrer
+                  </button>
+                }
+                @if(viewMode.equals("EDIT")) {
+                  <button class="btn btn-warning"
+                          type="submit"
+                          id="valider"
+                          name="Valider"
+                          title="Modifier les informations">
+                    <i class="fas fa-edit"></i> Modifier
+                  </button>
+                }
+                @if(viewMode.equals("DELETE")) {
+                  <button class="btn btn-danger"
+                          type="submit"
+                          id="valider"
+                          name="Valider"
+                          title="Désactiver"
+                          onclick="return window.confirm('Voulez-vous vraiment désactiver cet adhérent ?');">
+                    <i class="fas fa-trash"></i> Supprimer
+                  </button>
+                }
+              </div><!-- /.card-footer -->
+
+            </form>
+          </div>
+        </div>
+      </div>
+    }
+
+    @* ================== FILTRE ================== *@
+    @if(
+      request.session.get("droit").isPresent &&
+      (request.session.get("droit").get() == "Admin"
+        || request.session.get("droit").get() == "AGENT_CARD_ID"
+        || request.session.get("droit").get() == "Agent Saisie"
+        || request.session.get("droit").get() == "SuperAdmin")
+    ) {
+
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-secondary collapsed-card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-filter"></i> Filtre de recherche
+              </h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <form method="POST"
+                    name="form"
+                    action=""
+                    class="form-horizontal">
+                @helper.CSRF.formField
+
+                <div class="row">
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label><i class="fas fa-user"></i> Nom Ayant-Droit :</label>
+                      <input type="text"
+                             id="nomay"
+                             name="nomay"
+                             class="form-control"
+                             placeholder="Saisissez le nom de l'ayant-droit">
+                    </div>
+                  </div>
+
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label><i class="fas fa-id-badge"></i> Adhérent correspondant :</label>
+                      <input type="text"
+                             id="mattadh"
+                             name="mattadh"
+                             class="form-control"
+                             readonly="readonly">
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>&nbsp;</label>
+                      <input type="text"
+                             id="nomadh"
+                             name="nomadh"
+                             class="form-control"
+                             readonly="readonly">
+                    </div>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    @* ================== LISTE DES ADHERENTS ================== *@
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-users"></i>
+              @if(
+                request.session.get("droit").isPresent &&
+                (request.session.get("droit").get() == "Admin"
+                  || request.session.get("droit").get() == "Agent Saisie")
+              ) {
+                Liste des adhérents
+              } else {
+                Adhérent correspondant
+              }
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="adherentsTable" class="table table-bordered table-striped table-hover text-center w-100">
+                <thead>
+                  <tr>
+                    <th>Photo</th>
+                    <th>Matricule</th>
+                    <th>Nom & Prénom</th>
+                    <th>Téléphone</th>
+
+                    @if(
+                      request.session.get("droit").isPresent &&
+                      (request.session.get("droit").get() == "SuperAdmin"
+                        || request.session.get("droit").get() == "Admin"
+                        || request.session.get("droit").get() == "Agent Saisie"
+                        || request.session.get("droit").get() == "Comptable")
+                    ) {
+                      <th>Bon de Commande</th>
+                      <th>Règlement</th>
+                      <th>Ayant droit</th>
+                      <th>Photo</th>
+                    }
+
+                    @if(
+                      request.session.get("droit").isPresent &&
+                      (request.session.get("droit").get() == "AGENT_CARD_ID"
+                        || request.session.get("droit").get() == "Adherent")
+                    ) {
+                      <th>Ayant droit</th>
+                      <th>Photo</th>
+                    }
+
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for(c <- adherents) {
+                    <tr>
+                      
+                      <td class="img-cell">
+                        <img src="@controllers.routes.AdherentCtrl.path(c.getPicture())"
+                             class="circle adherantImage"
+                             alt="Photo">
+                      </td>
+
+                      <td>@c.getMatricule()</td>
+                      <td>@c.getNomAd() @c.getPrenomAd()</td>
+                      <td>@c.getTelephone()</td>
+
+                      @if(
+                        request.session.get("droit").isPresent &&
+                        (request.session.get("droit").get() == "SuperAdmin"
+                          || request.session.get("droit").get() == "Admin"
+                          || request.session.get("droit").get() == "Agent Saisie"
+                          || request.session.get("droit").get() == "Comptable")
+                      ) {
+                        <td class="text-center">
+                          <a class="btn btn-primary btn-sm"
+                             title="Ajouter un Bon de commande"
+                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId())'>
+                            <i class="fas fa-file-invoice"></i>
+                          </a>
+                        </td>
+                        <td class="text-center">
+                          <a class="btn btn-success btn-sm"
+                             title="Remboursement"
+                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId())'>
+                            <i class="fas fa-money-bill-wave"></i>
+                          </a>
+                        </td>
+                        <td class="text-center">
+                          <a class="btn btn-warning btn-sm"
+                             title="Ajouter des ayants droit"
+                             href='@controllers.routes.AdherentCtrl.addAyantDroit(c.getId())'>
+                            <i class="fas fa-users"></i>
+                          </a>
+                        </td>
+                        <td class="text-center">
+                          <a class="btn btn-info btn-sm"
+                             title="Insérer photo profil"
+                             href='@controllers.routes.AdherentCtrl.formProfil(c.getId())'>
+                            <i class="fas fa-camera"></i>
+                          </a>
+                        </td>
+                      }
+
+                      @if(
+                        request.session.get("droit").isPresent &&
+                        (request.session.get("droit").get() == "AGENT_CARD_ID"
+                          || request.session.get("droit").get() == "Adherent")
+                      ) {
+                        <td class="text-center">
+                          <a class="btn btn-warning btn-sm"
+                             title="Ajouter des ayants droit"
+                             href='@controllers.routes.AdherentCtrl.addAyantDroit(c.getId())'>
+                            <i class="fas fa-users"></i>
+                          </a>
+                        </td>
+                        <td class="text-center">
+                          <a class="btn btn-info btn-sm"
+                             title="Insérer photo profil"
+                             href='@controllers.routes.AdherentCtrl.formProfil(c.getId())'>
+                            <i class="fas fa-camera"></i>
+                          </a>
+                        </td>
+                      }
+
+                      <td class="text-center">
+                        <div class="btn-group">
+                          <!-- Voir détails (modale) -->
+                          <button type="button"
+                                  class="btn btn-success btn-sm"
+                                  data-toggle="modal"
+                                  data-target="#detailModal@c.getId()"
+                                  title="Voir les détails">
+                            <i class="fas fa-eye"></i>
+                          </button>
+
+                          @if(
+                            request.session.get("droit").isPresent &&
+                            request.session.get("droit").get() == "SuperAdmin"
+                          ) {
+                            <a class="btn btn-primary btn-sm"
+                               title="Modifier"
+                               href='@controllers.routes.AdherentCtrl.show("EDIT", c.getId())'>
+                              <i class="fas fa-edit"></i>
+                            </a>
+                            
+                            <a class="btn btn-danger btn-sm"
+                               title="Désactiver adhérent"
+                               href='@controllers.routes.AdherentCtrl.show("DELETE", c.getId())'
+                               onclick="return window.confirm('Voulez-vous vraiment désactiver cet adhérent ?');">
+                              <i class="fas fa-trash"></i>
+                            </a>
+                          }
+
+                          @if(
+                            request.session.get("droit").isPresent &&
+                            (request.session.get("droit").get() == "AGENT_CARD_ID"
+                              || request.session.get("droit").get() == "Adherent")
+                          ) {
+                            <a class="btn btn-primary btn-sm"
+                               title="Modifier"
+                               href='@controllers.routes.AdherentCtrl.show("EDIT", c.getId())'>
+                              <i class="fas fa-edit"></i>
+                            </a>
+                          }
+
+                          @if(
+                            request.session.get("droit").isPresent &&
+                            (request.session.get("droit").get() == "SuperAdmin"
+                              || request.session.get("droit").get() == "Adherent"
+                              || request.session.get("droit").get() == "Admin"
+                              || request.session.get("droit").get() == "Agent Saisie"
+                              || request.session.get("droit").get() == "Comptable")
+                          ) {
+                            <a class="btn btn-secondary btn-sm"
+                               title="Imprimer la situation des paiements"
+                               href='@controllers.routes.AdherentCtrl.print(c.getMatricule(), "situation_paiement_adherrent")'
+                               onclick="return(openPopup(this.href, 600, 600, 600, 600));">
+                              <i class="fas fa-print"></i>
+                            </a>
+                          }
+
+                          @if(
+                            request.session.get("droit").isPresent &&
+                            (request.session.get("droit").get() == "SuperAdmin"
+                              || request.session.get("droit").get() == "Admin"
+                              || request.session.get("droit").get() == "Agent Saisie"
+                              || request.session.get("droit").get() == "AGENT_CARD_ID")
+                          ) {
+                            <a class="btn btn-info btn-sm"
+                               title="Imprimer la carte d'adhérent"
+                               href='@controllers.routes.AdherentCtrl.printCarte(c.getId(), "badge_adherent")'
+                               onclick="return(openPopup(this.href, 600, 600, 600, 600));">
+                              <i class="fas fa-id-card"></i>
+                            </a>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th>Photo</th>
+                    <th>Matricule</th>
+                    <th>Nom & Prénom</th>
+                    <th>Téléphone</th>
+                    @if(
+                      request.session.get("droit").isPresent &&
+                      (request.session.get("droit").get() == "SuperAdmin"
+                        || request.session.get("droit").get() == "Admin"
+                        || request.session.get("droit").get() == "Agent Saisie"
+                        || request.session.get("droit").get() == "Comptable")
+                    ) {
+                      <th>Bon de Commande</th>
+                      <th>Règlement</th>
+                      <th>Ayant droit</th>
+                      <th>Photo</th>
+                    }
+                    @if(
+                      request.session.get("droit").isPresent &&
+                      (request.session.get("droit").get() == "AGENT_CARD_ID"
+                        || request.session.get("droit").get() == "Adherent")
+                    ) {
+                      <th>Ayant droit</th>
+                      <th>Photo</th>
+                    }
+                    <th>Actions</th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @* ================== MODALES DETAILS ADHERENT ================== *@
+    @for(c <- adherents) {
+      <div class="modal fade" id="detailModal@c.getId()" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header bg-primary">
+              <h5 class="modal-title text-white">
+                <i class="fas fa-user-circle"></i> Détail adhérent @c.getNomAd() @c.getPrenomAd()
+              </h5>
+              <button type="button" class="close text-white" data-dismiss="modal">
+                <span>&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-4 text-center">
+                  <img src='@controllers.routes.AdherentCtrl.path(c.getPicture())'
+                       class="img-circle img-fluid"
+                       style="max-width: 200px;"
+                       alt="Photo">
+                </div>
+                <div class="col-md-8">
+                  <table class="table table-sm">
+                    <tr><th>Matricule :</th><td>@c.getMatricule()</td></tr>
+                    <tr><th>Nom & Prénom :</th><td>@c.getNomAd() @c.getPrenomAd()</td></tr>
+                    <tr>
+                      <th>Sexe :</th>
+                      <td>
+                        @if(c.getSexe() == "M") { Homme } else { Femme }
+                      </td>
+                    </tr>
+                    <tr><th>Téléphone :</th><td>@c.getTelephone()</td></tr>
+                    <tr><th>Catégorie :</th><td>@c.getCategorie()</td></tr>
+                    <tr><th>Fonction :</th><td>@c.getFonction()</td></tr>
+                    <tr><th>Service :</th><td>@c.getStructureSigle()</td></tr>
+                    <tr><th>Date naissance :</th><td>@c.getDateNaiss().format("dd/MM/yyyy")</td></tr>
+                    <tr><th>Âge :</th><td>@c.getAge() ans</td></tr>
+                    <tr><th>Prise de service :</th><td>@c.getDatePriseService().format("dd/MM/yyyy")</td></tr>
+                    <tr><th>Ancienneté :</th><td>@c.getAnciennete() ans</td></tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                <i class="fas fa-times"></i> Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+  </div><!-- /.container-fluid -->
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  console.log('=== Initialisation DataTables ===');
+
+  // Vérifier que jQuery est là
+  if (typeof jQuery === 'undefined') {
+    console.error("jQuery n'est pas chargé !");
+    return;
+  }
+
+  if (typeof $.fn.DataTable === 'undefined') {
+    console.error("DataTables n'est pas chargé !");
+    return;
+  }
+
+  var $table = $('#adherentsTable');
+  console.log('Table trouvée:', $table.length);
+
+  if ($table.length === 0) {
+    console.error('Table #adherentsTable non trouvée !');
+    return;
+  }
+
+  if ($.fn.DataTable.isDataTable('#adherentsTable')) {
+    console.log("Destruction de l'instance DataTable existante...");
+    $table.DataTable().destroy();
+  }
+
+  var dtInstance = $table.DataTable({
+    language: {
+      sProcessing: "Traitement en cours...",
+      sSearch: "Rechercher&nbsp;:",
+      sLengthMenu: "Afficher _MENU_ éléments",
+      sInfo: "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
+      sInfoEmpty: "Affichage de l'élément 0 à 0 sur 0 élément",
+      sInfoFiltered: "(filtré de _MAX_ éléments au total)",
+      sLoadingRecords: "Chargement en cours...",
+      sZeroRecords: "Aucun élément à afficher",
+      sEmptyTable: "Aucune donnée disponible dans le tableau",
+      oPaginate: {
+        sFirst: "Premier",
+        sPrevious: "Précédent",
+        sNext: "Suivant",
+        sLast: "Dernier"
+      },
+      oAria: {
+        sSortAscending: ": activer pour trier la colonne par ordre croissant",
+        sSortDescending: ": activer pour trier la colonne par ordre décroissant"
+      }
+    },
+    responsive: true,
+    lengthChange: true,
+    autoWidth: false,
+    pageLength: 10,
+    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
+    order: [[1, 'asc']],
+    columnDefs: [
+      { orderable: false, targets: [0, -1] }
+    ],
+    dom:
+      "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+      "<'row'<'col-sm-12'tr>>" +
+      "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+    initComplete: function (settings, json) {
+      console.log("✓ DataTable initialisé avec succès !");
+      console.log("Nombre de lignes:", this.api().rows().count());
+    },
+    drawCallback: function (settings) {
+      console.log("Table redessinée");
+    }
+  });
+
+  // Auto-open modal selon viewMode
+  var viewMode = '@viewMode';
+  if (viewMode && viewMode.trim() !== '') {
+    console.log('Ouverture du modal pour viewMode:', viewMode);
+    setTimeout(function () {
+      $('#ayantDroitModal').modal('show');
+    }, 100);
+  }
+});
+</script>
+
+
+}

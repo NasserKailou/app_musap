@@ -1,0 +1,7 @@
+@(montant:Double)
+
+@{
+	val locale = new java.util.Locale("fr", "FR")
+	val formatter = java.text.NumberFormat.getIntegerInstance(locale)
+	formatter.format(montant)
+}

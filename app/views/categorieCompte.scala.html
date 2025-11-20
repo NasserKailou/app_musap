@@ -1,0 +1,207 @@
+@import java.time.LocalDateTime
+@import helper._
+@import java.util
+@(viewMode:String, mode:String,  categories: List[models.tables.pojos.CategorieCompte], cat: models.tables.pojos.CategorieCompte)(implicit request: Http.Request)
+
+@main("categories"){
+<hr>
+<div class="col-md-2"></div>
+@if( viewMode.equals("CREATE")){
+<div class="col-md-4">
+<button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#ModalLoginForm">
+      @if(mode.equals("COMPTA")){Ajouter une nouvelle classification}else{Ajouter une classification Budgetaire} <i class="glyphicon glyphicon-plus"></i>
+</button>
+</div>
+}
+
+<!-- Modal HTML Markup -->
+<div id="ModalLoginForm" class="modal fade">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Informations sur les categorie de compte</font> </h3>
+            </div>
+            <div class="modal-body">
+                <form role="form" method="POST" action="@controllers.routes.CategorieCompteCtrl.save() ">
+               		 @helper.CSRF.formField
+					<input value="@viewMode"           name="viewMode" type="hidden">
+					<input value="@cat.getId()" name="id" type="hidden">
+					<input value="@mode" name="mode" type="hidden">
+                    <input type="hidden" name="_token" value="">
+                    <div class="form-group">
+                        <label class="control-label">N°Class Categorie</label>
+                        <div>
+                            <input type="text" class="form-control input-lg" placeholder="numero de la categorie" name="numCategore" autocomplete="off" value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Libellé</label>
+                        <div>
+                            <input type="text" class="form-control input-lg" placeholder="preciser le nom de la categorie de compte" name="libelle" autocomplete="off" value="">
+                        </div>
+                    </div>
+                   
+                    <div class="form-group">
+                        <div>
+                            <button type="submit" class="btn btn-success">Enregistrer</button>
+
+                          
+                        </div>
+                    </div>
+                </form>
+               
+            </div>
+            <div class="modal-footer">
+		        <button type="button" class="btn btn-primary" data-dismiss="modal">Retour</button>
+		      </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+@if( viewMode.equals("EDIT")){
+<div class="card-header" id="titre_header">
+	<div class="row">
+
+	<form  method="POST" name="form" action="@controllers.routes.CategorieCompteCtrl.save() "  class="form-horizontal col-md-12 col-sm-12 col-xs-12" role="form">
+			@helper.CSRF.formField
+			<input value="@viewMode"           name="viewMode" type="hidden">
+			<input value="@cat.getId()" name="id" type="hidden">
+			
+			<center>
+			<fieldset style=" color:#000; width:98%; background-color:#DDE7E9; border-radius:10px; font-size:14px;"  >
+			<br>
+
+					<h6 style="color:#000;">
+						<strong>
+							<i>Tous les champs avec <font style="color:red;  font-size:14px;">*</font> sont obligatoires</i>
+						</strong>
+					</h6>
+			<div  class="row ">
+			   
+			    
+				<div class="col-md-12">
+
+						<br>
+						<div class="form-group row">
+						
+						 	 <label class="col-sm-1 col-form-label" for="libelle" ><b>N°Class Categorie<font style="color:red;  font-size:14px;">*:</font></b></label>
+						  	<div class="col-sm-2">
+								<input type="numeric" id="montant"  name="numCategore" autocomplete="off" value="@cat.getNumCategore()"
+											placeholder="numero de la categorie" @if( viewMode.equals("DELETE")){ disabled=disabled}
+											class="form-control autocomplete"
+											required="required"  />
+						  	</div>
+						  	
+						  <label class="col-sm-1 col-form-label" for="libelle" ><b>Libelle Structure<font style="color:red;  font-size:14px;">*:</font></b></label>
+						  	<div class="col-sm-2">
+								<input type="text" id="refFacture"  name="libelle" autocomplete="off" value="@cat.getLibelle()"
+											placeholder="preciser le nom de la categorie de compte" @if( viewMode.equals("DELETE")){ disabled=disabled}
+											class="form-control autocomplete"
+											required="required"  />
+						  	</div>
+						 	
+				</div>	
+			</div>
+						  	
+						  
+				
+
+			
+				
+			<div class="row" style="color:#000;">
+				<div class="col-md-3"></div>
+				<div class="col-md-6">
+				<button class="btn btn-primary" type="submit"  name="Annuler" value="Retour" onclick="history.go(-1)">Retour</button>
+					@if( viewMode.equals("CREATE")){ 
+					<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider(Enregistrer les informations)" >
+						<i class="glyphicon glyphicon-save"></i> Enregistrer
+					</button> } 
+					@if( viewMode.equals("EDIT")){ 
+					<button class="btn btn-warning" type="submit" id="valider" name="Valider" title="Valider(Modifier les informations)">
+						<i class="glyphicon glyphicon-edit"></i> Modifier
+					</button> } 
+					
+					@if( viewMode.equals("DELETE")){ 
+					<button class="btn btn-danger" type="submit" id="valider"
+					 name="Valider" title="Supprimer l'examen"  onclick="return window.confirm('Voulez vous supprimer cet payement?');">
+						<i class="glyphicon glyphicon-edit"></i> Supprimer
+					</button> } 
+					
+<!-- 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
+<!-- 				<button class="btn btn-danger" type="submit"  name="Annuler" value="Annuler">Annuler</button> -->
+				</div>
+				<div class="col-md-3"></div>
+			</div>
+			<br>
+			</fieldset></center>
+			<br>
+		</form>
+	</div>
+	
+</div>
+}
+<hr>
+<section class="container">
+	
+	<div class="row">
+
+		<div class = "col-md-12 table-responsive">
+		
+				<table class="dta-tbl table table-bordered table-striped text-center" >
+				<center><div class="badged-title"><h4> <b>L</b>istes des Categories Compte<br></div></center>
+					<thead>
+						 <tr>
+							
+							<th style="text-align: center"><b>#</b></th>
+							<th style="text-align: center"><b>Numero compte</b></th>
+							<th style="text-align: center"><b>Libelle</b></th>
+							<th style="text-align: center"><b>Comptes</b></th>
+							<th style="text-align: center"><b>Action</b></th>
+						 </tr>
+					 </thead>
+					 <tbody>
+						@for(c <-categories){
+							 <tr>
+							  <td>@c.getId() </td>
+								<td>@c.getNumCategore() </td>
+								<td>@c.getLibelle()</td>
+								
+								<td><a id="btnReadWrite" class="btn btn-primary" title="Ajouter des Comptes"
+									href="@controllers.routes.CompteCtrl.show("CREATE",mode, c.getNumCategore(), 0L) " ><i class="glyphicon glyphicon-list"></i></a></td>
+								<td>
+								  <a id="btnReadWrite" class="btn btn-primary" title="Modification"
+									href="@controllers.routes.CategorieCompteCtrl.show("EDIT",mode, c.getId()) " ><i class="glyphicon glyphicon-edit"></i></a>
+										|
+                                    <a id="btnDelete" class="btn btn-danger"
+                                       title="Supprimer"
+                                       href="@controllers.routes.CategorieCompteCtrl.show("DELETE",mode, c.getId())"><i class="glyphicon glyphicon-trash"></i></a>
+                               
+                                </td>
+							 </tr>
+							}
+					  </tbody>
+				</table>
+				
+	
+		</div>
+	</div>
+  </section>
+  
+  
+  
+}
+
+
+<script >
+function openPopup(target, x, y, w, h) {
+	var win = window.open(target, 'popup', 'height='+h+', width='+w+', top='+y+', left='+x+', toolbar=no, menubar=yes, location=no, resizable=yes, scrollbars=yes, status=no');
+	win.window.focus();
+	return false;
+}
+
+
+
+</script>
+

@@ -1,0 +1,93 @@
+@import helper._
+@(implicit request: Http.Request)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ges-Dossier TGI</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="@routes.Assets.versioned("dist/css/googleapis.css")">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="@routes.Assets.versioned("plugins/fontawesome-free/css/all.min.css")">
+  <!-- icheck bootstrap -->
+  <link rel="stylesheet" href="@routes.Assets.versioned("plugins/icheck-bootstrap/icheck-bootstrap.min.css")">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="@routes.Assets.versioned("dist/css/adminlte.min.css")">
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+ 
+ <div style="margin-left: 0px; width: 390px">
+	           @if(request.flash.get("error").isPresent()) {
+	                            <div id="feedBackArea" style="margin-bottom: 6px !important;" class="alert alert-danger"> @request.flash.get("error").get</div>
+	                        }
+	                        @if(request.flash.get("warning").isPresent()) {
+	                            <div id="feedBackArea" style="margin-bottom: 6px !important;" class="alert alert-warning">@request.flash.get("warning").get</div>
+	                        }
+	                        @if(request.flash.get("success").isPresent()) {
+	                            <div id="feedBackArea" style="margin-bottom: 6px !important;" class="alert alert-success">@request.flash.get("success").get</div>
+	                        }
+	        </div>
+ 
+  <div class="card card-outline card-primary">
+    <div class="card-header text-center">
+      <img src="@routes.Assets.versioned("images/logo.png")" class="profile-img-card0" style="width: 220px;height:150px; border: 1px solid ;border-radius:5px;">
+<!-- 	       
+      <h4><b>TGI de Niamey</b></h4> -->
+    </div>
+    <div class="card-body">
+      <p class="login-box-msg">Tribunal de Grande Instance de Niamey</p>
+
+      <form action="@CSRF(controllers.routes.AuthenticationCtrl.authentification())" method="post">
+      @helper.CSRF.formField
+        <div class="input-group mb-3">
+          <input type="mail" class="form-control" required="required"  name="login" placeholder="Login">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-envelope"></span>
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="password" class="form-control" name="passe" required="required" placeholder="Password">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-8">
+            <div class="icheck-primary">
+              <input type="checkbox" id="remember">
+              <label for="remember">
+                Se Souvenir de moi?
+              </label>
+            </div>
+          </div>
+          <!-- /.col -->
+          <div class="col-5">
+            <button type="submit" class="btn btn-primary btn-block">Connexion</button>
+          </div>
+          <!-- /.col -->
+        </div>
+      </form>
+
+     
+    </div>
+    <!-- /.card-body -->
+  </div>
+  <!-- /.card -->
+</div>
+<!-- /.login-box -->
+
+<!-- jQuery -->
+<script src="@routes.Assets.versioned("plugins/jquery/jquery.min.js")"></script>
+<!-- Bootstrap 4 -->
+<script src="@routes.Assets.versioned("plugins/bootstrap/js/bootstrap.bundle.min.js")"></script>
+<!-- AdminLTE App -->
+<script src="@routes.Assets.versioned("dist/js/adminlte.min.js")"></script>
+</body>
+</html>

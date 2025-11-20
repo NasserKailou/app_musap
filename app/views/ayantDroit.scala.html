@@ -1,0 +1,561 @@
+@import java.time.LocalDateTime
+@import helper._
+@import java.util
+@import views.html.utils._
+@(viewMode:String,
+  ayantDroits: List[models.tables.pojos.VAyantDroit],
+  ayantDroit: models.tables.pojos.AyantDroit,
+  adherent: models.tables.pojos.Adherent
+)(implicit request: Http.Request)
+
+@main("Ayants Droits") {
+
+<!-- Content Header (Page header) -->
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="m-0">
+          <i class="fas fa-users"></i>
+          Ayants Droits
+        </h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i> Accueil</a></li>
+          <li class="breadcrumb-item"><a href="#"><i class="fas fa-user-friends"></i> Adhérents</a></li>
+          <li class="breadcrumb-item active">Ayants Droits</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary card-outline">
+
+          <!-- ============ HEADER ============ -->
+          <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+              <div>
+                <h3 class="card-title mb-0">
+                  <i class="fas fa-list-alt"></i>
+                  Ayants droits de l'adhérent
+                </h3>
+                @if(adherent != null) {
+                  <small class="d-block text-muted mt-1">
+                   <i class="fas fa-id-card text-primary"></i>
+                   <b>  Matricule n°@adherent.getMatricule(),
+                    @adherent.getNomAd @adherent.getPrenomAd - @adherent.getTelephone()</b>
+                  </small>
+                }
+              </div>
+
+              <div class="btn-toolbar mt-2 mt-md-0">
+                @* Nouveau Ayant Droit : on passe par le contrôleur qui renvoie viewMode="CREATE" *@
+                <a href='@controllers.routes.AyantDroitCtrl.show("CREATE", 0L, adherent.getId())'
+                   class="btn btn-success btn-sm mr-2">
+                  <i class="fas fa-user-plus"></i> Nouvel ayant droit
+                </a>
+
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        onclick="window.history.back();">
+                  <i class="fas fa-arrow-left"></i> Retour
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============ BODY ============ -->
+          <div class="card-body">
+
+            @* Message / rappel *@
+            <div class="alert alert-info alert-dismissible fade show">
+              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+              <i class="fas fa-info-circle"></i>
+              Tous les champs avec <span style="color:red; font-weight:bold;">*</span> sont obligatoires
+            </div>
+
+            @* Liste des ayants droits *@
+            <div class="table-responsive">
+              <table id="ayantDroitsTable" class="table table-bordered table-striped table-hover text-center w-100">
+                <thead class="thead-light">
+                  <tr>
+                    <th style="text-align: center"><i class="fas fa-image"></i> <b>#</b></th>
+                    <th style="text-align: center"><i class="fas fa-user"></i> <b>Nom</b></th>
+                    <th style="text-align: center"><i class="fas fa-venus-mars"></i> <b>Genre</b></th>
+                    <th style="text-align: center"><i class="fas fa-link"></i> <b>Lien</b></th>
+                    <th style="text-align: center"><i class="fas fa-birthday-cake"></i> <b>Date de Naissance</b></th>
+                    <th style="text-align: center"><i class="fas fa-calendar-alt"></i> <b>Age</b></th>
+                    <th style="text-align: center"><i class="fas fa-check-circle"></i> <b>Status</b></th>
+                    <th style="text-align: center"><i class="fas fa-camera"></i> <b>Photo</b></th>
+                    <th style="text-align: center"><i class="fas fa-cogs"></i> <b>Action</b></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if(ayantDroits.isEmpty()) {
+                    <tr>
+                      <td colspan="9" class="text-center">
+                        <div class="alert alert-warning mb-0">
+                          <i class="fas fa-exclamation-triangle"></i>
+                          Aucun ayant droit enregistré pour cet adhérent.
+                        </div>
+                      </td>
+                    </tr>
+                  } else {
+                    @for(c <- ayantDroits) {
+                      <tr>
+                        <td>
+                          <img src='@controllers.routes.AyantDroitCtrl.path(c.getPicture())'
+                               class="img-circle img-thumbnail adherantImage"
+                               style="width: 50px; height: 50px; object-fit: cover;">
+                        </td>
+                        <td><strong>@c.getNomAy()</strong></td>
+                        <td>
+                          @if(c.getGenre() == "MASCULIN") {
+                            <span class="badge badge-info">
+                              <i class="fas fa-mars"></i> @c.getGenre()
+                            </span>
+                          } else {
+                            <span class="badge badge-pink">
+                              <i class="fas fa-venus"></i> @c.getGenre()
+                            </span>
+                          }
+                        </td>
+                        <td>
+                          @if(c.getLien().equals("CONJOINT")) {
+                            <span class="badge badge-warning">
+                              <i class="fas fa-heart"></i> @c.getLien()
+                            </span>
+                          } else {
+                            <span class="badge badge-primary">
+                              <i class="fas fa-child"></i> @c.getLien()
+                            </span>
+                          }
+                        </td>
+                        <td>
+                          <i class="far fa-calendar"></i>
+                          @c.getDateNaiss().format("yyyy-MM-dd")
+                        </td>
+                        <td>
+                          <span class="badge @if(c.getAge() >= 25 && c.getLien().equals("ENFANT")) {badge-danger} else {badge-success}">
+                            @c.getAge() ans
+                          </span>
+                        </td>
+                        <td>
+                          @if(c.getAge() >= 25 && c.getLien().equals("ENFANT")) {
+                            <span class="badge badge-danger">
+                              <i class="fas fa-times-circle"></i> Non pris en charge, âge dépassé !!!
+                            </span>
+                          } else {
+                            <span class="badge badge-success">
+                              <i class="fas fa-check-circle"></i> Pris en charge
+                            </span>
+                          }
+                        </td>
+                        <td>
+                          <a class="btn btn-info btn-sm"
+                             type="button"
+                             title="Insérer photo profil"
+                             href='@controllers.routes.AyantDroitCtrl.formProfil(c.getId())'>
+                            <i class="fas fa-user"></i>
+                          </a>
+                        </td>
+                        <td>
+                          <div class="btn-group btn-group-sm" role="group">
+                            <a id="btnReadWrite"
+                               class="btn btn-primary btn-sm"
+                               title="Modification"
+                               href='@controllers.routes.AyantDroitCtrl.show("EDIT", c.getId(), c.getAdherent())'>
+                              <i class="fas fa-edit"></i>
+                            </a>
+
+                            @if(request.session.get("droit").get() == "Admin"
+                                || request.session.get("droit").get() == "SuperAdmin") {
+                              
+                              <a id="btnDelete"
+                                 class="btn btn-danger btn-sm"
+                                 title="Supprimer"
+                                 href='@controllers.routes.AyantDroitCtrl.show("DELETE", c.getId(), c.getAdherent())'>
+                                <i class="fas fa-trash"></i>
+                              </a>
+                              
+                              <a class="btn btn-secondary btn-sm"
+                                 type="button"
+                                 title="Imprimer la carte d'accès du bénéficiaire"
+                                 href='@controllers.routes.AyantDroitCtrl.printCarte(c.getId(), "badge_ayantdroit")'
+                                 onclick="return(openPopup(this.href, 600, 600, 600, 600));">
+                                <i class="fas fa-id-card"></i>
+                              </a>
+                            }
+
+                            @if(request.session.get("droit").get() == "AGENT_CARD_ID"
+                                || request.session.get("droit").get() == "SuperAdmin"
+                                || request.session.get("droit").get() == "Admin") {
+                              
+                              <a class="btn btn-success btn-sm"
+                                 type="button"
+                                 title="Imprimer la carte d'accès du bénéficiaire"
+                                 href='@controllers.routes.AyantDroitCtrl.printCarte(c.getId(), "badge_ayantdroit")'
+                                 onclick="return(openPopup(this.href, 600, 600, 600, 600));">
+                                <i class="fas fa-credit-card"></i>
+                              </a>
+                            }
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+
+          </div><!-- /.card-body -->
+        </div><!-- /.card -->
+      </div><!-- /.col -->
+    </div><!-- /.row -->
+
+  </div><!-- /.container-fluid -->
+</section>
+
+@* ============ MODAL FORMULAIRE AYANT DROIT ============ *@
+<div class="modal fade" id="ayantDroitModal" tabindex="-1" aria-labelledby="ayantDroitModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+
+      <div class="modal-header @if(viewMode.equals("CREATE")) {bg-success} @if(viewMode.equals("EDIT")) {bg-warning} @if(viewMode.equals("DELETE")) {bg-danger} @if(viewMode.equals("TRAITER")) {bg-info}">
+        <h5 class="modal-title text-white" id="ayantDroitModalLabel">
+          @if(viewMode.equals("CREATE")) {
+            <i class="fas fa-user-plus"></i> Nouvel ayant droit
+          } else if(viewMode.equals("EDIT")) {
+            <i class="fas fa-edit"></i> Modifier un ayant droit
+          } else if(viewMode.equals("DELETE")) {
+            <i class="fas fa-trash-alt"></i> Supprimer un ayant droit
+          } else {
+            <i class="fas fa-user"></i> Ayant droit
+          }
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fermer">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <form method="POST"
+              name="form"
+              action='@controllers.routes.AyantDroitCtrl.save()'
+              class="form-horizontal"
+              role="form">
+
+          @helper.CSRF.formField
+
+          <input value="@viewMode"              name="viewMode" type="hidden">
+          <input value="@adherent.getId()"      name="adherent" type="hidden">
+          <input value="@ayantDroit.getId()"    name="id" type="hidden">
+          <input value="@ayantDroit.getPicture()" name="picture" type="hidden">
+
+          <div class="card card-outline card-primary">
+            <div class="card-body" style="background-color:#f4f6f9;">
+
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong><em>Tous les champs avec <span style="color:red; font-size:14px;">*</span> sont obligatoires</em></strong>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12">
+                  <h4 class="text-center">
+                    <u style="color: red;"><b>Informations Ayant Droit</b></u>
+                  </h4>
+                </div>
+                @if(adherent != null) {
+                  <div class="col-md-12">
+                    <h5 class="text-center">
+                      <u style="color: blue;">
+                        <b>Adhérent Matricule n°@adherent.getMatricule(), de @adherent.getNomAd @adherent.getPrenomAd - @adherent.getTelephone()</b>
+                      </u>
+                    </h5>
+                  </div>
+                }
+              </div>
+
+              <div class="col-md-12">
+                <br>
+                <div class="form-group row">
+
+                  <!-- Nom -->
+                  <label class="col-sm-1 col-form-label" for="nomAy">
+                    <b>Nom<font style="color:red; font-size:14px;">* :</font></b>
+                  </label>
+                  <div class="col-sm-2">
+                    <input type="text"
+                           id="nomAy"
+                           name="nomAy"
+                           autocomplete="off"
+                           value="@ayantDroit.getNomAy()"
+                           placeholder="Nom de l'ayant droit"
+                           class="form-control autocomplete"
+                           required="required"
+                           @if(viewMode.equals("DELETE")) { disabled }>
+                  </div>
+
+                  <!-- Genre -->
+                  <label class="col-sm-1 col-form-label" for="genre">
+                    <b>Genre<font style="color:red; font-size:14px;">* :</font></b>
+                  </label>
+                  <div class="col-sm-1">
+                    <select class="form-control"
+                            required="required"
+                            id="genre"
+                            name="genre"
+                            @if(viewMode.equals("DELETE")) { disabled }>
+                      <option value="">Sélectionner le genre</option>
+                      <option value="MASCULIN" @if(ayantDroit.getGenre() == "MASCULIN") { selected="selected" }>MASCULIN</option>
+                      <option value="FEMININ"  @if(ayantDroit.getGenre() == "FEMININ")  { selected="selected" }>FEMININ</option>
+                    </select>
+                  </div>
+
+                  <!-- Lien -->
+                  <label class="col-sm-1 col-form-label" for="lien">
+                    <b>Lien<font style="color:red; font-size:14px;">* :</font></b>
+                  </label>
+                  <div class="col-sm-2">
+                    <select class="form-control"
+                            required="required"
+                            id="lien"
+                            name="lien"
+                            @if(viewMode.equals("DELETE")) { disabled }>
+                      <option value="">Sélectionner le lien</option>
+                      <option value="CONJOINT" @if(ayantDroit.getLien() == "CONJOINT") { selected="selected" }>CONJOINT(E)</option>
+                      <option value="ENFANT"   @if(ayantDroit.getLien() == "ENFANT")   { selected="selected" }>ENFANT</option>
+                    </select>
+                  </div>
+
+                  <!-- Date de Naissance -->
+                  <label class="col-sm-2 col-form-label" for="tmpDate">
+                    <b>Date de Naissance<font style="color:red; font-size:14px;">* :</font></b>
+                  </label>
+                  <div class="col-sm-2">
+                    @if(viewMode.equals("EDIT") || viewMode.equals("DELETE")) {
+                      <input value='@ayantDroit.getDateNaiss().format("yyyy-MM-dd")'
+                             name="tmpDate"
+                             id="tmpDate"
+                             type="date"
+                             placeholder="JJ/MM/AAAA"
+                             class="form-control"
+                             required="required"
+                             @if(viewMode.equals("DELETE")) { disabled }>
+                    }
+                    @if(viewMode.equals("CREATE")) {
+                      <input value=""
+                             name="tmpDate"
+                             id="tmpDate"
+                             type="date"
+                             placeholder="JJ/MM/AAAA"
+                             class="form-control"
+                             required="required">
+                    }
+                  </div>
+
+                </div>
+              </div>
+
+            </div><!-- /.card-body -->
+          </div><!-- /.card -->
+
+          <div class="row" style="color:#000;">
+            <div class="col-md-3"></div>
+            <div class="col-md-6 text-center">
+
+              <button type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal">
+                <i class="fas fa-times"></i> Fermer
+              </button>
+
+              @if(viewMode.equals("CREATE")) {
+                @if(request.session.get("droit").get() == "Admin"
+                    || request.session.get("droit").get() == "SuperAdmin") {
+                  <button class="btn btn-success"
+                          type="submit"
+                          id="valider"
+                          name="Valider"
+                          title="Enregistrer les informations">
+                    <i class="fas fa-save"></i> Enregistrer
+                  </button>
+                }
+              }
+
+              @if(viewMode.equals("EDIT")) {
+                <button class="btn btn-warning"
+                        type="submit"
+                        id="valider"
+                        name="Valider"
+                        title="Modifier les informations">
+                  <i class="fas fa-edit"></i> Modifier
+                </button>
+              }
+
+              @if(viewMode.equals("TRAITER")) {
+                <button class="btn btn-success"
+                        type="submit"
+                        id="valider"
+                        name="Valider"
+                        title="Valider les informations">
+                  <i class="fas fa-check"></i> Valider
+                </button>
+              }
+
+              @if(viewMode.equals("DELETE")) {
+                <button class="btn btn-danger"
+                        type="submit"
+                        id="valider"
+                        name="Valider"
+                        title="Supprimer l'ayant droit"
+                        onclick="return window.confirm('Voulez-vous supprimer cet ayant droit ?');">
+                  <i class="fas fa-trash-alt"></i> Supprimer
+                </button>
+              }
+
+            </div>
+            <div class="col-md-3"></div>
+          </div>
+          <br>
+
+        </form>
+
+      </div><!-- /.modal-body -->
+    </div>
+  </div>
+</div>
+
+<style>
+/* Custom badge color for female */
+.badge-pink {
+  background-color: #e83e8c;
+  color: white;
+}
+
+/* DataTable styling */
+#ayantDroitsTable thead th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+/* Better button spacing */
+.btn-group-vertical .btn {
+  margin-bottom: 2px;
+}
+
+/* Card outline */
+.card-outline.card-primary {
+  border-top: 3px solid #007bff;
+}
+
+/* Modal header text color */
+.modal-header.bg-success .close,
+.modal-header.bg-warning .close,
+.modal-header.bg-danger .close,
+.modal-header.bg-info .close {
+  color: white;
+  opacity: 0.8;
+}
+
+.modal-header.bg-success .close:hover,
+.modal-header.bg-warning .close:hover,
+.modal-header.bg-danger .close:hover,
+.modal-header.bg-info .close:hover {
+  opacity: 1;
+}
+
+/* Alert improvements */
+.alert i {
+  margin-right: 8px;
+}
+
+/* Image styling */
+.img-circle {
+  border-radius: 50%;
+}
+
+.adherantImage {
+  border: 2px solid #007bff;
+}
+</style>
+
+<script type="text/javascript">
+// Function openPopup (pour impression)
+function openPopup(url, left, top, width, height) {
+  window.open(url, '_blank', 'left=' + left + ',top=' + top + ',width=' + width + ',height=' + height + ',toolbar=no,menubar=no,location=no,status=no');
+  return false;
+}
+
+// Attendre que jQuery soit chargé
+(function checkJQuery() {
+  if (typeof jQuery !== 'undefined') {
+    initPage();
+  } else {
+    setTimeout(checkJQuery, 50);
+  }
+})();
+
+function initPage() {
+  jQuery(document).ready(function($) {
+    console.log('Page chargée, initialisation...');
+    
+    // Initialize DataTable
+    try {
+      var table = $('#ayantDroitsTable');
+      console.log('Table trouvée:', table.length);
+      
+      if (table.length > 0) {
+        // Détruire l'instance existante si présente
+        if ($.fn.DataTable.isDataTable('#ayantDroitsTable')) {
+          console.log('DataTable existe déjà, destruction...');
+          $('#ayantDroitsTable').DataTable().destroy();
+        }
+        
+        // Initialiser DataTable
+        console.log('Initialisation de DataTable...');
+        var dtInstance = $('#ayantDroitsTable').DataTable({
+          "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+          },
+          "responsive": true,
+          "lengthChange": true,
+          "autoWidth": false,
+          "pageLength": 10,
+          "order": [[1, 'asc']],
+          "initComplete": function() {
+            console.log('DataTable initialisé avec succès');
+          }
+        });
+      }
+    } catch (e) {
+      console.error('Erreur lors de l\'initialisation du DataTable:', e);
+    }
+
+    // Auto-open modal based on viewMode
+    var viewMode = '@viewMode';
+    console.log('ViewMode détecté:', viewMode);
+    
+    if (viewMode && viewMode.trim() !== '') {
+      console.log('Ouverture du modal...');
+      setTimeout(function() {
+        $('#ayantDroitModal').modal('show');
+        console.log('Modal affiché');
+      }, 10);
+    }
+  });
+}
+</script>
+
+}

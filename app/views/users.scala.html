@@ -1,0 +1,412 @@
+@(viewMode: String, users: List[models.tables.pojos.Users], user: models.tables.pojos.Users)(implicit request: Http.Request)
+
+@import helper._
+
+@main("Utilisateurs") {
+
+  <section class="content">
+    <div class="container-fluid">
+
+      @* ========= MODAL CREATE / EDIT (viewMode = CREATE) ========= *@
+      <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Informations utilisateur</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card card-success">
+                    <div class="card-header">
+                      <h3 class="card-title">Gestion des utilisateurs</h3>
+                    </div>
+
+                    <form class="form-horizontal"
+                          method="POST"
+                          name="form"
+                          action='@controllers.routes.UserCtrl.save()'
+                          role="form">
+                      @helper.CSRF.formField
+
+                      <input type="hidden" name="viewMode" value="@viewMode">
+                      <input type="hidden" name="id"       value="@user.getId()">
+
+                      <div class="card-body">
+                        <p class="text-center text-muted">
+                          Tous les champs avec
+                          <span style="color:red; font-size:14px;">*</span> sont obligatoires.
+                        </p>
+
+                        <div class="form-row">
+                          <div class="form-group col-sm-6">
+                            <label>Nom & Prénom
+                              <span style="color:red;">*</span>
+                            :</label>
+                            <input type="text"
+                                   class="form-control"
+                                   name="nomPrenom"
+                                   value="@user.getNomPrenom()"
+                                   required
+                                   placeholder="Nom & Prénom de l'utilisateur">
+                          </div>
+
+                          <div class="form-group col-sm-6">
+                            <label>Login
+                              <span style="color:red;">*</span>
+                            :</label>
+                            <input type="text"
+                                   class="form-control"
+                                   name="login"
+                                   value="@user.getLogin()"
+                                   required
+                                   placeholder="Login de l'utilisateur">
+                          </div>
+                        </div>
+
+                        <div class="form-row">
+                          <div class="form-group col-sm-6">
+                            <label>Mot de passe
+                              <span style="color:red;">*</span>
+                            :</label>
+                            <input type="password"
+                                   class="form-control"
+                                   name="passe"
+                                   value="@user.getPasse()"
+                                   required
+                                   placeholder="Mot de passe">
+                          </div>
+
+                        <div class="col-sm-6">
+  <div class="form-group">
+    <label><b>Rôle <span style="color:red;">*</span></b></label>
+    <select class="form-control"
+            name="droit"
+            required
+            @if(viewMode.equals("VIEW")) { disabled="disabled" }>
+
+      <option value="">Sélectionner un rôle...</option>
+
+      <option value="Agent Saisie"
+        @if(user.getDroit() != null && user.getDroit().equals("Agent Saisie")) { selected="selected" }>
+        Agent Saisie
+      </option>
+
+      <option value="Adherent"
+        @if(user.getDroit() != null && user.getDroit().equals("Adherent")) { selected="selected" }>
+        Adhérent
+      </option>
+
+      <option value="AGENT_CARD_ID"
+        @if(user.getDroit() != null && user.getDroit().equals("AGENT_CARD_ID")) { selected="selected" }>
+        AGENT CARD ID
+      </option>
+
+      @* --- Rôles visibles seulement par SuperAdmin --- *@
+      @if(request.session.get("droit").get() == "SuperAdmin") {
+
+        <option value="Admin"
+          @if(user.getDroit() != null && user.getDroit().equals("Admin")) { selected="selected" }>
+          Admin
+        </option>
+
+        <option value="SuperAdmin"
+          @if(user.getDroit() != null && user.getDroit().equals("SuperAdmin")) { selected="selected" }>
+          Super Admin
+        </option>
+
+        <option value="Comptable"
+          @if(user.getDroit() != null && user.getDroit().equals("Comptable")) { selected="selected" }>
+          Comptable
+        </option>
+
+      }
+    </select>
+  </div>
+</div>
+
+                        </div>
+
+                        <div class="form-row">
+                          <div class="form-group col-sm-6">
+                            <label>État
+                              <span style="color:red;">*</span>
+                            :</label>
+                            <select class="form-control"
+                                    name="etat"
+                                    required
+                                    @if(viewMode.equals("VIEW")) { disabled="disabled" }>
+                              <option value="">Sélectionner l'état</option>
+                              <option value="false"
+                                @if(user.getEtat() != null && !user.getEtat()) { selected="selected" }>
+                                Désactivé
+                              </option>
+                              <option value="true"
+                                @if(user.getEtat() != null && user.getEtat()) { selected="selected" }>
+                                Activé
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="card-footer">
+                        @if(!viewMode.equals("VIEW")) {
+                          <div class="row">
+                            <div class="col-md-12 text-right">
+                              <a href='@controllers.routes.UserCtrl.index()'
+                                 class="btn btn-default">
+                                Retour
+                              </a>
+                              <button type="submit" class="btn btn-primary">
+                                @if(!viewMode.equals("CREATE")) { Modifier } else { Valider }
+                              </button>
+                            </div>
+                          </div>
+                        } else {
+                          <a href='@controllers.routes.UserCtrl.index()'
+                             class="btn btn-default">
+                            Retour
+                          </a>
+                        }
+                      </div>
+
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      @* ========= BOUTON "AJOUTER" (viewMode = CREATE) ========= *@
+      @if(viewMode.equals("CREATE")) {
+        <div class="card">
+          <div class="card-body">
+            <button type="button"
+                    class="btn btn-success"
+                    data-toggle="modal"
+                    data-target="#modal-xl">
+              Ajouter un nouvel utilisateur
+              <span class="fas fa-plus"></span>
+            </button>
+          </div>
+        </div>
+      }
+
+      @* ========= FORM EDIT / VIEW (viewMode = EDIT ou VIEW) ========= *@
+      @if(viewMode.equals("EDIT") || viewMode.equals("VIEW")) {
+        <div class="row">
+          <div class="col-md-10">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Gestion des utilisateurs</h3>
+              </div>
+
+              <form class="form-horizontal"
+                    method="POST"
+                    name="form"
+                    action='@controllers.routes.UserCtrl.save()'
+                    role="form">
+                @helper.CSRF.formField
+
+                <input type="hidden" name="viewMode" value="@viewMode">
+                <input type="hidden" name="id"       value="@user.getId()">
+
+                <div class="card-body">
+                  <p class="text-center text-muted">
+                    Tous les champs avec
+                    <span style="color:red; font-size:14px;">*</span> sont obligatoires.
+                  </p>
+
+                  <div class="form-row">
+                    <div class="form-group col-sm-6">
+                      <label>Nom & Prénom
+                        <span style="color:red;">*</span>
+                      :</label>
+                      <input type="text"
+                             class="form-control"
+                             name="nomPrenom"
+                             value="@user.getNomPrenom()"
+                             required
+                             placeholder="Nom & Prénom de l'utilisateur">
+                    </div>
+
+                    <div class="form-group col-sm-6">
+                      <label>Login
+                        <span style="color:red;">*</span>
+                      :</label>
+                      <input type="text"
+                             class="form-control"
+                             name="login"
+                             value="@user.getLogin()"
+                             required
+                             placeholder="Login de l'utilisateur">
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-sm-6">
+                      <label>Mot de passe
+                        <span style="color:red;">*</span>
+                      :</label>
+                      <input type="password"
+                             class="form-control"
+                             name="passe"
+                             value="@user.getPasse()"
+                             required
+                             placeholder="Mot de passe">
+                    </div>
+
+                    <div class="form-group col-sm-6">
+                      <label>Catégorie
+                        <span style="color:red;">*</span>
+                      :</label>
+                      <select class="form-control"
+                              name="droit"
+                              required
+                              @if(viewMode.equals("VIEW")) { disabled="disabled" }>
+                        <option value="">Sélectionner une catégorie...</option>
+                        <option value="Admin"
+                          @if(user.getDroit() != null && user.getDroit().equals("Admin")) { selected="selected" }>
+                          Admin
+                        </option>
+                        <option value="Agent Saisie"
+                          @if(user.getDroit() != null && user.getDroit().equals("Agent Saisie")) { selected="selected" }>
+                          Agent Saisie
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-sm-6">
+                      <label>État
+                        <span style="color:red;">*</span>
+                      :</label>
+                      <select class="form-control"
+                              name="etat"
+                              required
+                              @if(viewMode.equals("VIEW")) { disabled="disabled" }>
+                        <option value="">Sélectionner l'état</option>
+                        <option value="false"
+                          @if(user.getEtat() != null && !user.getEtat()) { selected="selected" }>
+                          Désactivé
+                        </option>
+                        <option value="true"
+                          @if(user.getEtat() != null && user.getEtat()) { selected="selected" }>
+                          Activé
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card-footer">
+                  @if(!viewMode.equals("VIEW")) {
+                    <div class="row">
+                      <div class="col-md-12 text-right">
+                        <a href='@controllers.routes.UserCtrl.index()'
+                           class="btn btn-default">Retour</a>
+                        <button type="submit" class="btn btn-primary">
+                          @if(!viewMode.equals("CREATE")) { Modifier } else { Valider }
+                        </button>
+                      </div>
+                    </div>
+                  } else {
+                    <a href='@controllers.routes.UserCtrl.index()'
+                       class="btn btn-default">Retour</a>
+                  }
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      }
+
+      @* ========= LISTE DES UTILISATEURS ========= *@
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+
+            <div class="card-header">
+              <h3 class="card-title">Liste des utilisateurs</h3>
+            </div>
+
+            <div class="card-body">
+              <table class="dta-tbl table table-bordered table-striped table-hover text-center">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Login</th>
+                    <th>État</th>
+                    <th>Droit</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for(d <- users) {
+                    <tr>
+                      <td class="text-center" width="1%">@d.getId()</td>
+                      <td class="text-center" width="3%">@d.getLogin()</td>
+                      <td class="text-center" width="5%">
+                        @if(d.getEtat() != null && d.getEtat()) { Actif } else { Désactivé }
+                      </td>
+                      <td class="text-center" width="10%">@d.getDroit()</td>
+                      <td class="text-center" width="10%">
+                        <a class="btn btn-success btn-sm"
+                           href='@controllers.routes.UserCtrl.show("EDIT", d.getLogin())'
+                           role="button"
+                           title="Éditer">
+                          <span class="fas fa-edit"></span>
+                        </a>
+                        |
+                        <a class="btn btn-warning btn-sm"
+                           href='@controllers.routes.UserCtrl.show("VIEW", d.getLogin())'
+                           role="button"
+                           title="Aperçu">
+                          <span class="fas fa-eye"></span>
+                        </a>
+                        |
+                        @if(d.getEtat() != null && d.getEtat()) {
+                          <a class="btn btn-danger btn-sm"
+                             href='@controllers.routes.UserCtrl.delete(d.getLogin(), false)'
+                             role="button"
+                             title="Désactiver"
+                             onclick="return window.confirm('Voulez-vous désactiver cet utilisateur ?');">
+                            <span class="fas fa-trash"></span>
+                          </a>
+                        } else {
+                          <a class="btn btn-info btn-sm"
+                             href='@controllers.routes.UserCtrl.delete(d.getLogin(), true)'
+                             role="button"
+                             title="Activer"
+                             onclick="return window.confirm('Voulez-vous activer cet utilisateur ?');">
+                            <span class="fas fa-check"></span>
+                          </a>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+}
