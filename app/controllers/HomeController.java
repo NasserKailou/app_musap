@@ -25,6 +25,9 @@ import services.StructureMainServices;
 import utils.Login;
 import models.tables.pojos.Reglement;
 import models.tables.pojos.StructurePartenaire;
+import models.tables.pojos.Adherent;
+import models.tables.pojos.AyantDroit;
+import services.AyantDroitMainServices;
 import play.libs.Json;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -41,17 +44,19 @@ public class HomeController extends Controller {
 	ParamsServices paramsService;
 	ReglementMainServices reglementServices;
 	StructureMainServices structureServices;
+	AyantDroitMainServices ayantDroitServices;
 	
 	@Inject
 	public HomeController(FormFactory formatFactory, AdherentMainServices consultationServices,
 			ParamsServices paramsService, ReglementMainServices reglementServices,
-			StructureMainServices structureServices) {
+			StructureMainServices structureServices, AyantDroitMainServices ayantDroitServices) {
 
 		this.formatFactory = formatFactory;
 		this.consultationServices = consultationServices;
 		this.paramsService = paramsService;
 		this.reglementServices = reglementServices;
 		this.structureServices = structureServices;
+		this.ayantDroitServices = ayantDroitServices;
 		
 
 	}
@@ -109,58 +114,73 @@ public class HomeController extends Controller {
 	}
 	
 	/**
-	 * API pour récupérer les statistiques des règlements par structure partenaire
+	 * API pour récupérer les statistiques des bons de commande par structure partenaire
 	 * @param request
 	 * @return JSON avec les données pour le graphique
 	 */
 	public Result getStatsReglementsByStructure(Request request) {
 		try {
-			// Récupérer tous les règlements non supprimés
+			// Récupérer tous les règlements (bons de commande) non supprimés
 			List<Reglement> reglements = reglementServices.findAll();
 			
 			// Récupérer toutes les structures partenaires
 			List<StructurePartenaire> structures = structureServices.findAll();
 			
-			// Map pour compter les règlements par structure
-			Map<Long, Integer> reglementCount = new HashMap<>();
-			Map<Long, Integer> bonCount = new HashMap<>();
+			// Récupérer les adhérents et ayants droit
+			List<Adherent> adherents = consultationServices.findAll();
+			List<AyantDroit> ayantsDroit = ayantDroitServices.findAll();
+			
+			// Map pour compter les bons de commande par structure
+			Map<Long, Integer> bonsConfirmesCount = new HashMap<>();
+			Map<Long, Integer> bonsNonConfirmesCount = new HashMap<>();
 			
 			// Initialiser les compteurs pour chaque structure
 			for (StructurePartenaire struct : structures) {
-				reglementCount.put(struct.getId(), 0);
-				bonCount.put(struct.getId(), 0);
+				bonsConfirmesCount.put(struct.getId(), 0);
+				bonsNonConfirmesCount.put(struct.getId(), 0);
 			}
 			
-			// Compter les règlements et bons de commande par structure
+			// Compter les bons de commande confirmés et non confirmés par structure
+			int totalBonsConfirmes = 0;
+			int totalBonsNonConfirmes = 0;
+			
 			for (Reglement reg : reglements) {
 				if (reg.getStructure() != null) {
-					// Compter les règlements
-					reglementCount.put(reg.getStructure(), 
-						reglementCount.getOrDefault(reg.getStructure(), 0) + 1);
-					
-					// Compter les bons de commande confirmés
+					// Vérifier si le bon est confirmé
 					if (reg.getIsConfirmedBon() != null && reg.getIsConfirmedBon()) {
-						bonCount.put(reg.getStructure(), 
-							bonCount.getOrDefault(reg.getStructure(), 0) + 1);
+						// Bon confirmé (consommé)
+						bonsConfirmesCount.put(reg.getStructure(), 
+							bonsConfirmesCount.getOrDefault(reg.getStructure(), 0) + 1);
+						totalBonsConfirmes++;
+					} else {
+						// Bon non confirmé (isConfirmedBon est false ou null)
+						bonsNonConfirmesCount.put(reg.getStructure(), 
+							bonsNonConfirmesCount.getOrDefault(reg.getStructure(), 0) + 1);
+						totalBonsNonConfirmes++;
 					}
 				}
 			}
 			
 			// Construire le JSON de réponse
 			ArrayNode structuresArray = Json.newArray();
-			ArrayNode reglementsArray = Json.newArray();
-			ArrayNode bonsArray = Json.newArray();
+			ArrayNode bonsConfirmesArray = Json.newArray();
+			ArrayNode bonsNonConfirmesArray = Json.newArray();
 			
 			for (StructurePartenaire struct : structures) {
 				structuresArray.add(struct.getLibelle() != null ? struct.getLibelle() : "Structure #" + struct.getId());
-				reglementsArray.add(reglementCount.get(struct.getId()));
-				bonsArray.add(bonCount.get(struct.getId()));
+				bonsConfirmesArray.add(bonsConfirmesCount.get(struct.getId()));
+				bonsNonConfirmesArray.add(bonsNonConfirmesCount.get(struct.getId()));
 			}
 			
 			ObjectNode result = Json.newObject();
 			result.set("structures", structuresArray);
-			result.set("reglements", reglementsArray);
-			result.set("bons", bonsArray);
+			result.set("bonsConfirmes", bonsConfirmesArray);
+			result.set("bonsNonConfirmes", bonsNonConfirmesArray);
+			result.put("totalAdherents", adherents.size());
+			result.put("totalAyantsDroit", ayantsDroit.size());
+			result.put("totalBonsConfirmes", totalBonsConfirmes);
+			result.put("totalBonsNonConfirmes", totalBonsNonConfirmes);
+			result.put("totalStructures", structures.size());
 			
 			return ok(result);
 			

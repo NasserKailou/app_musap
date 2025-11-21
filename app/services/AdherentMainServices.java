@@ -149,4 +149,12 @@ public class AdherentMainServices extends AdherentDao {
 		}
 
 	}
+	
+	public List<Adherent> findAll() {
+		List<Adherent> adherents = con.connection().selectFrom(models.Tables.ADHERENT)
+				.where(models.Tables.ADHERENT.ON_DELETED.isFalse())
+				.fetchInto(Adherent.class);
+		con.connection().close();
+		return adherents;
+	}
 }

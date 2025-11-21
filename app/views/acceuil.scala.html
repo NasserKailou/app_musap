@@ -41,10 +41,10 @@
 
         <div class="col-12 col-sm-6 col-md-3">
           <div class="info-box mb-3">
-            <span class="info-box-icon bg-success elevation-1"><i class="fas fa-file-invoice-dollar"></i></span>
+            <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-user-friends"></i></span>
             <div class="info-box-content">
-              <span class="info-box-text">Règlements</span>
-              <span class="info-box-number" id="totalReglements">
+              <span class="info-box-text">Ayants Droit</span>
+              <span class="info-box-number" id="totalAyantsDroit">
                 <span class="spinner-border spinner-border-sm" role="status"></span>
               </span>
             </div>
@@ -53,10 +53,10 @@
 
         <div class="col-12 col-sm-6 col-md-3">
           <div class="info-box mb-3">
-            <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-file-alt"></i></span>
+            <span class="info-box-icon bg-success elevation-1"><i class="fas fa-check-circle"></i></span>
             <div class="info-box-content">
-              <span class="info-box-text">Bons de Commande</span>
-              <span class="info-box-number" id="totalBons">
+              <span class="info-box-text">Bons Confirmés</span>
+              <span class="info-box-number" id="totalBonsConfirmes">
                 <span class="spinner-border spinner-border-sm" role="status"></span>
               </span>
             </div>
@@ -64,6 +64,21 @@
         </div>
 
         <div class="col-12 col-sm-6 col-md-3">
+          <div class="info-box mb-3">
+            <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-clock"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Bons Non Confirmés</span>
+              <span class="info-box-number" id="totalBonsNonConfirmes">
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Info Row -->
+      <div class="row">
+        <div class="col-12 col-sm-6 col-md-4">
           <div class="info-box mb-3">
             <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-hospital"></i></span>
             <div class="info-box-content">
@@ -74,21 +89,53 @@
             </div>
           </div>
         </div>
+
+        <div class="col-12 col-sm-6 col-md-4">
+          <div class="info-box mb-3">
+            <span class="info-box-icon bg-teal elevation-1"><i class="fas fa-file-alt"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Total Bons de Commande</span>
+              <span class="info-box-number" id="totalBons">
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-4">
+          <div class="info-box mb-3">
+            <span class="info-box-icon bg-indigo elevation-1"><i class="fas fa-percentage"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Taux de Confirmation</span>
+              <span class="info-box-number" id="tauxConfirmation">
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Charts Row -->
       <div class="row">
-        <!-- Graphique des Règlements par Structure -->
+        <!-- Graphique des Bons de Commande par Structure -->
         <div class="col-lg-8">
           <div class="card">
             <div class="card-header border-0">
               <div class="d-flex justify-content-between">
-                <h3 class="card-title">Règlements et Bons de Commande par Structure Partenaire</h3>
+                <h3 class="card-title">Bons de Commande par Structure Partenaire</h3>
               </div>
             </div>
             <div class="card-body">
+              <div class="d-flex mb-3">
+                <div class="mr-3">
+                  <span class="text-success"><i class="fas fa-square"></i></span> Bons Confirmés (Consommés)
+                </div>
+                <div>
+                  <span class="text-warning"><i class="fas fa-square"></i></span> Bons Non Confirmés (En attente)
+                </div>
+              </div>
               <div class="position-relative mb-4">
-                <canvas id="reglementsChart" height="200"></canvas>
+                <canvas id="bonsChart" height="200"></canvas>
               </div>
             </div>
           </div>
@@ -98,7 +145,7 @@
         <div class="col-lg-4">
           <div class="card">
             <div class="card-header border-0">
-              <h3 class="card-title">Répartition des Règlements</h3>
+              <h3 class="card-title">Répartition des Bons de Commande</h3>
             </div>
             <div class="card-body">
               <canvas id="repartitionChart" height="250"></canvas>
@@ -107,12 +154,12 @@
         </div>
       </div>
 
-      <!-- Activités récentes -->
+      <!-- Statistiques détaillées -->
       <div class="row">
         <div class="col-md-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Activités Récentes</h3>
+              <h3 class="card-title">Statistiques par Structure Partenaire</h3>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                   <i class="fas fa-minus"></i>
@@ -120,47 +167,27 @@
               </div>
             </div>
             <div class="card-body p-0">
-              <ul class="products-list product-list-in-card pl-2 pr-2">
-                <li class="item">
-                  <div class="product-img">
-                    <i class="fas fa-check-circle text-success" style="font-size: 30px;"></i>
-                  </div>
-                  <div class="product-info">
-                    <a href="javascript:void(0)" class="product-title">Nouveau règlement créé
-                      <span class="badge badge-success float-right">Aujourd'hui</span></a>
-                    <span class="product-description">
-                      Un nouveau règlement a été enregistré pour l'adhérent #12345
-                    </span>
-                  </div>
-                </li>
-                <li class="item">
-                  <div class="product-img">
-                    <i class="fas fa-user-plus text-info" style="font-size: 30px;"></i>
-                  </div>
-                  <div class="product-info">
-                    <a href="javascript:void(0)" class="product-title">Nouvel adhérent
-                      <span class="badge badge-info float-right">Hier</span></a>
-                    <span class="product-description">
-                      Un nouvel adhérent a été ajouté au système
-                    </span>
-                  </div>
-                </li>
-                <li class="item">
-                  <div class="product-img">
-                    <i class="fas fa-hospital text-warning" style="font-size: 30px;"></i>
-                  </div>
-                  <div class="product-info">
-                    <a href="javascript:void(0)" class="product-title">Structure mise à jour
-                      <span class="badge badge-warning float-right">Il y a 2 jours</span></a>
-                    <span class="product-description">
-                      Les informations d'une structure partenaire ont été mises à jour
-                    </span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="card-footer text-center">
-              <a href="javascript:void(0)" class="uppercase">Voir toutes les activités</a>
+              <div class="table-responsive">
+                <table class="table table-striped table-valign-middle" id="statsTable">
+                  <thead>
+                    <tr>
+                      <th>Structure Partenaire</th>
+                      <th>Bons Confirmés</th>
+                      <th>Bons Non Confirmés</th>
+                      <th>Total</th>
+                      <th>Taux de Confirmation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td colspan="5" class="text-center">
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                        Chargement des données...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -180,7 +207,9 @@ $(document).ready(function() {
         success: '#28a745',
         warning: '#ffc107',
         danger: '#dc3545',
-        info: '#17a2b8'
+        info: '#17a2b8',
+        teal: '#20c997',
+        indigo: '#6610f2'
     };
     
     // Charger les statistiques
@@ -189,41 +218,39 @@ $(document).ready(function() {
         method: 'GET',
         dataType: 'json',
         success: function(data) {
-            // Calculer les totaux
-            let totalReglements = 0;
-            let totalBons = 0;
-            let totalStructures = data.structures.length;
-            
-            for (let i = 0; i < data.reglements.length; i++) {
-                totalReglements += data.reglements[i];
-                totalBons += data.bons[i];
-            }
-            
             // Mettre à jour les info-boxes
-            $('#totalReglements').html(totalReglements);
+            $('#totalAdherents').html(data.totalAdherents);
+            $('#totalAyantsDroit').html(data.totalAyantsDroit);
+            $('#totalBonsConfirmes').html(data.totalBonsConfirmes);
+            $('#totalBonsNonConfirmes').html(data.totalBonsNonConfirmes);
+            $('#totalStructures').html(data.totalStructures);
+            
+            let totalBons = data.totalBonsConfirmes + data.totalBonsNonConfirmes;
             $('#totalBons').html(totalBons);
-            $('#totalStructures').html(totalStructures);
-            $('#totalAdherents').html('<i class="fas fa-chart-line"></i>'); // Placeholder
+            
+            // Calculer et afficher le taux de confirmation
+            let tauxConfirmation = totalBons > 0 ? ((data.totalBonsConfirmes / totalBons) * 100).toFixed(1) : 0;
+            $('#tauxConfirmation').html(tauxConfirmation + '%');
             
             // Créer le graphique à barres
-            const ctxBar = document.getElementById('reglementsChart').getContext('2d');
+            const ctxBar = document.getElementById('bonsChart').getContext('2d');
             new Chart(ctxBar, {
                 type: 'bar',
                 data: {
                     labels: data.structures,
                     datasets: [
                         {
-                            label: 'Règlements',
-                            data: data.reglements,
-                            backgroundColor: colors.primary,
-                            borderColor: colors.primary,
+                            label: 'Bons Confirmés (Consommés)',
+                            data: data.bonsConfirmes,
+                            backgroundColor: colors.success,
+                            borderColor: colors.success,
                             borderWidth: 1
                         },
                         {
-                            label: 'Bons de Commande Confirmés',
-                            data: data.bons,
-                            backgroundColor: colors.success,
-                            borderColor: colors.success,
+                            label: 'Bons Non Confirmés (En attente)',
+                            data: data.bonsNonConfirmes,
+                            backgroundColor: colors.warning,
+                            borderColor: colors.warning,
                             borderWidth: 1
                         }
                     ]
@@ -236,6 +263,10 @@ $(document).ready(function() {
                             ticks: {
                                 beginAtZero: true,
                                 stepSize: 1
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Nombre de Bons'
                             }
                         }],
                         xAxes: [{
@@ -252,54 +283,31 @@ $(document).ready(function() {
                     },
                     tooltips: {
                         mode: 'index',
-                        intersect: false
+                        intersect: false,
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                let label = data.datasets[tooltipItem.datasetIndex].label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += tooltipItem.yLabel + ' bon(s)';
+                                return label;
+                            }
+                        }
                     }
                 }
             });
             
-            // Créer le graphique circulaire
+            // Créer le graphique circulaire (répartition confirmés vs non confirmés)
             const ctxPie = document.getElementById('repartitionChart').getContext('2d');
-            
-            // Préparer les données pour le pie chart (top 5 structures)
-            let structuresData = [];
-            for (let i = 0; i < data.structures.length; i++) {
-                structuresData.push({
-                    label: data.structures[i],
-                    value: data.reglements[i]
-                });
-            }
-            
-            // Trier par valeur décroissante et prendre les 5 premiers
-            structuresData.sort((a, b) => b.value - a.value);
-            let top5 = structuresData.slice(0, 5);
-            
-            // Calculer les "Autres"
-            let autresTotal = 0;
-            for (let i = 5; i < structuresData.length; i++) {
-                autresTotal += structuresData[i].value;
-            }
-            
-            if (autresTotal > 0) {
-                top5.push({ label: 'Autres', value: autresTotal });
-            }
-            
-            const pieLabels = top5.map(item => item.label);
-            const pieData = top5.map(item => item.value);
             
             new Chart(ctxPie, {
                 type: 'doughnut',
                 data: {
-                    labels: pieLabels,
+                    labels: ['Bons Confirmés', 'Bons Non Confirmés'],
                     datasets: [{
-                        data: pieData,
-                        backgroundColor: [
-                            colors.primary,
-                            colors.success,
-                            colors.warning,
-                            colors.danger,
-                            colors.info,
-                            '#6c757d'
-                        ]
+                        data: [data.totalBonsConfirmes, data.totalBonsNonConfirmes],
+                        backgroundColor: [colors.success, colors.warning]
                     }]
                 },
                 options: {
@@ -322,12 +330,40 @@ $(document).ready(function() {
                 }
             });
             
+            // Remplir le tableau des statistiques
+            let tableBody = '';
+            for (let i = 0; i < data.structures.length; i++) {
+                let confirmes = data.bonsConfirmes[i];
+                let nonConfirmes = data.bonsNonConfirmes[i];
+                let total = confirmes + nonConfirmes;
+                let taux = total > 0 ? ((confirmes / total) * 100).toFixed(1) : 0;
+                
+                tableBody += '<tr>';
+                tableBody += '<td><strong>' + data.structures[i] + '</strong></td>';
+                tableBody += '<td><span class="badge badge-success">' + confirmes + '</span></td>';
+                tableBody += '<td><span class="badge badge-warning">' + nonConfirmes + '</span></td>';
+                tableBody += '<td><span class="badge badge-info">' + total + '</span></td>';
+                tableBody += '<td>';
+                tableBody += '<div class="progress progress-xs">';
+                tableBody += '<div class="progress-bar bg-success" style="width: ' + taux + '%"></div>';
+                tableBody += '</div>';
+                tableBody += '<span class="badge badge-secondary">' + taux + '%</span>';
+                tableBody += '</td>';
+                tableBody += '</tr>';
+            }
+            
+            $('#statsTable tbody').html(tableBody);
+            
         },
         error: function(xhr, status, error) {
             console.error('Erreur lors du chargement des statistiques:', error);
-            $('#totalReglements').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
-            $('#totalBons').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
+            $('#totalAdherents').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
+            $('#totalAyantsDroit').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
+            $('#totalBonsConfirmes').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
+            $('#totalBonsNonConfirmes').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
             $('#totalStructures').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
+            $('#totalBons').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
+            $('#tauxConfirmation').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
             
             // Afficher un message d'erreur
             $('.content').prepend(
@@ -336,6 +372,12 @@ $(document).ready(function() {
                 '<h5><i class="icon fas fa-ban"></i> Erreur!</h5>' +
                 'Impossible de charger les statistiques. Veuillez réessayer plus tard.' +
                 '</div>'
+            );
+            
+            $('#statsTable tbody').html(
+                '<tr><td colspan="5" class="text-center text-danger">' +
+                '<i class="fas fa-exclamation-triangle"></i> Erreur de chargement' +
+                '</td></tr>'
             );
         }
     });

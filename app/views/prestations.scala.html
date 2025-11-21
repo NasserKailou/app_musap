@@ -7,15 +7,38 @@
 
 @main("Prestations") {
 
+  <!-- Content Header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Gestion des Prestations</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/accueil">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="#">Paramètrages</a></li>
+            <li class="breadcrumb-item active">Prestations</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <section class="content">
     <div class="container-fluid">
 
-      <!-- CARD FORMULAIRE STRUCTURE PARTENAIRE -->
+      <!-- CARD FORMULAIRE PRESTATION -->
       <div class="row">
         <div class="col-12">
           <div class="card card-primary">
             <div class="card-header">
-              <h3 class="card-title">Gestion des prestations</h3>
+              <h3 class="card-title">
+                <i class="fas fa-hand-holding-medical mr-2"></i>
+                @if(viewMode.equals("CREATE")) { Nouvelle Prestation }
+                @if(viewMode.equals("EDIT")) { Modifier la Prestation }
+                @if(viewMode.equals("DELETE")) { Supprimer la Prestation }
+              </h3>
             </div>
 
             <form method="POST"
@@ -25,103 +48,112 @@
                   role="form">
               @helper.CSRF.formField
 
-              <!-- hidden fields -->
               <input type="hidden" name="viewMode" value="@viewMode">
               <input type="hidden" name="id"       value="@part.getId()">
 
               <div class="card-body">
 
-                <p class="mb-3 text-muted">
-                  Tous les champs avec
-                  <span style="color:red; font-size:14px;">*</span> sont obligatoires.
-                </p>
+                <div class="alert alert-info">
+                  <i class="icon fas fa-info-circle"></i>
+                  Tous les champs avec <span class="text-danger font-weight-bold">*</span> sont obligatoires.
+                </div>
 
                 <div class="form-row">
 
-                  <!-- Libellé structure -->
-                  <div class="form-group col-md-4">
-                    <label for="libelle">
-                      <b>Libellé Prestation
-                        <span style="color:red; font-size:14px;">* :</span>
-                      </b>
+                  <!-- Libellé Prestation -->
+                  <div class="form-group col-md-6">
+                    <label for="prestation">
+                      <i class="fas fa-tag text-primary"></i>
+                      Libellé de la Prestation
+                      <span class="text-danger">*</span>
                     </label>
                     <input type="text"
                            id="prestation"
                            name="prestation"
                            autocomplete="off"
                            value="@part.getPrestation()"
-                           placeholder="Préciser la prestation"
-                           class="form-control"
+                           placeholder="Ex: Consultation médicale, Hospitalisation, etc."
+                           class="form-control @if(viewMode.equals("DELETE")) { is-invalid }"
                            required
-                           @if(viewMode.equals("DELETE")) { disabled="disabled" } >
+                           @if(viewMode.equals("DELETE")) { disabled="disabled" readonly } >
+                    <small class="form-text text-muted">
+                      Précisez le type de prestation offerte
+                    </small>
                   </div>
 
-                  <!-- Région -->
-                
-
-                  <!-- Téléphone -->
-                  <div class="form-group col-md-4">
-                    <label for="telephone">
-                      <b>Taux de couverture en %
-                        <span style="color:red; font-size:14px;">* :</span>
-                      </b>
+                  <!-- Taux de Couverture -->
+                  <div class="form-group col-md-6">
+                    <label for="couverture">
+                      <i class="fas fa-percentage text-success"></i>
+                      Taux de Couverture (%)
+                      <span class="text-danger">*</span>
                     </label>
-                    <input type="tel"
-                           id="couverture"
-                           name="couverture"
-                           autocomplete="off"
-                           value="@part.getCouverture()"
-                           placeholder="Taux de couverture en %(exmple 80 pour 80%)"
-                           class="form-control"
-                           required
-                           @if(viewMode.equals("DELETE")) { disabled="disabled" } >
+                    <div class="input-group">
+                      <input type="number"
+                             id="couverture"
+                             name="couverture"
+                             autocomplete="off"
+                             value="@part.getCouverture()"
+                             placeholder="Ex: 80 pour 80%"
+                             class="form-control"
+                             min="0"
+                             max="100"
+                             required
+                             @if(viewMode.equals("DELETE")) { disabled="disabled" readonly } >
+                      <div class="input-group-append">
+                        <span class="input-group-text">
+                          <i class="fas fa-percent"></i>
+                        </span>
+                      </div>
+                    </div>
+                    <small class="form-text text-muted">
+                      Pourcentage de prise en charge (0-100%)
+                    </small>
                   </div>
 
                 </div>
 
               </div><!-- /.card-body -->
 
-              <div class="card-footer text-center">
+              <div class="card-footer">
+                <div class="row">
+                  <div class="col-md-12 text-right">
+                    
+                    <a href="@controllers.routes.PrestationCtrl.show("CREATE", 0L)"
+                       class="btn btn-secondary">
+                      <i class="fas fa-arrow-left"></i> Retour
+                    </a>
 
-                <button class="btn btn-secondary"
-                        type="button"
-                        name="Annuler"
-                        value="Retour"
-                        onclick="history.go(-1)">
-                  <i class="fas fa-arrow-left"></i> Retour
-                </button>
+                    @if(viewMode.equals("CREATE")) {
+                      <button class="btn btn-success"
+                              type="submit"
+                              id="valider"
+                              name="Valider">
+                        <i class="fas fa-save"></i> Enregistrer
+                      </button>
+                    }
 
-                @if(viewMode.equals("CREATE")) {
-                  <button class="btn btn-success"
-                          type="submit"
-                          id="valider"
-                          name="Valider"
-                          title="Enregistrer les informations">
-                    <i class="fas fa-save"></i> Enregistrer
-                  </button>
-                }
+                    @if(viewMode.equals("EDIT")) {
+                      <button class="btn btn-warning"
+                              type="submit"
+                              id="valider"
+                              name="Valider">
+                        <i class="fas fa-edit"></i> Modifier
+                      </button>
+                    }
 
-                @if(viewMode.equals("EDIT")) {
-                  <button class="btn btn-warning"
-                          type="submit"
-                          id="valider"
-                          name="Valider"
-                          title="Modifier les informations">
-                    <i class="fas fa-edit"></i> Modifier
-                  </button>
-                }
+                    @if(viewMode.equals("DELETE")) {
+                      <button class="btn btn-danger"
+                              type="submit"
+                              id="valider"
+                              name="Valider"
+                              onclick="return window.confirm('Êtes-vous sûr de vouloir supprimer cette prestation ?');">
+                        <i class="fas fa-trash"></i> Supprimer
+                      </button>
+                    }
 
-                @if(viewMode.equals("DELETE")) {
-                  <button class="btn btn-danger"
-                          type="submit"
-                          id="valider"
-                          name="Valider"
-                          title="Supprimer cette structure"
-                          onclick="return window.confirm('Voulez-vous supprimer cette structure partenaire ?');">
-                    <i class="fas fa-trash"></i> Supprimer
-                  </button>
-                }
-
+                  </div>
+                </div>
               </div><!-- /.card-footer -->
 
             </form>
@@ -129,43 +161,70 @@
         </div><!-- /.col -->
       </div><!-- /.row -->
 
-      <!-- CARD LISTE STRUCTURES PARTENAIRES -->
+      <!-- CARD LISTE DES PRESTATIONS -->
       <div class="row mt-3">
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Liste des structures prestation</h3>
+              <h3 class="card-title">
+                <i class="fas fa-list mr-2"></i>
+                Liste des Prestations
+              </h3>
+              <div class="card-tools">
+                <span class="badge badge-primary">@prestations.size() prestation(s)</span>
+              </div>
             </div>
-            <div class="card-body table-responsive">
-              <table class="dta-tbl table table-bordered table-hover">
+            <div class="card-body table-responsive p-0">
+              <table class="table table-head-fixed table-bordered table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Prestation</th>
-                    <th>Taux</th>
-                    <th>Action</th>
+                    <th class="text-center" style="width: 80px;">#</th>
+                    <th><i class="fas fa-hand-holding-medical mr-1"></i> Prestation</th>
+                    <th class="text-center" style="width: 150px;">
+                      <i class="fas fa-percentage mr-1"></i> Taux de Couverture
+                    </th>
+                    <th class="text-center" style="width: 200px;">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for(c <- prestations) {
+                  @if(prestations.isEmpty()) {
                     <tr>
-                      <td>@c.getId()</td>
-                      <td>@c.getPrestation()</td>
-                      <td>@c.getCouverture() %</td>
-                      <td>
-                        <a class="btn btn-primary btn-sm"
-                           title="Modifier"
-                           href='@controllers.routes.PrestationCtrl.show("EDIT", c.getId())'>
-                          <i class="fas fa-edit"></i>
-                        </a>
-                        <a class="btn btn-danger btn-sm"
-                           title="Supprimer"
-                           href='@controllers.routes.PrestationCtrl.show("DELETE", c.getId())'
-                           onclick="return window.confirm('Voulez-vous supprimer cette  prestation ?');">
-                          <i class="fas fa-trash-alt"></i>
-                        </a>
+                      <td colspan="4" class="text-center text-muted">
+                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                        <p>Aucune prestation enregistrée</p>
                       </td>
                     </tr>
+                  } else {
+                    @for(c <- prestations) {
+                      <tr>
+                        <td class="text-center"><strong>@c.getId()</strong></td>
+                        <td>
+                          <i class="fas fa-tag text-primary mr-2"></i>
+                          <strong>@c.getPrestation()</strong>
+                        </td>
+                        <td class="text-center">
+                          <span class="badge badge-success badge-lg">
+                            <i class="fas fa-percentage mr-1"></i>
+                            @c.getCouverture() %
+                          </span>
+                        </td>
+                        <td class="text-center">
+                          <div class="btn-group">
+                            <a class="btn btn-sm btn-warning"
+                               title="Modifier cette prestation"
+                               href='@controllers.routes.PrestationCtrl.show("EDIT", c.getId())'>
+                              <i class="fas fa-edit"></i>
+                            </a>
+                            <a class="btn btn-sm btn-danger"
+                               title="Supprimer cette prestation"
+                               href='@controllers.routes.PrestationCtrl.show("DELETE", c.getId())'
+                               onclick="return window.confirm('Êtes-vous sûr de vouloir supprimer cette prestation ?');">
+                              <i class="fas fa-trash-alt"></i>
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    }
                   }
                 </tbody>
               </table>
@@ -178,15 +237,21 @@
   </section>
 
   <script>
-    function openPopup(target, x, y, w, h) {
-      var win = window.open(
-        target,
-        'popup',
-        'height=' + h + ', width=' + w + ', top=' + y + ', left=' + x + ', toolbar=no, menubar=yes, location=no, resizable=yes, scrollbars=yes, status=no'
-      );
-      win.window.focus();
-      return false;
-    }
+    $(document).ready(function() {
+      // Initialize DataTable
+      $('.table').DataTable({
+        "paging": true,
+        "lengthChange": true,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+        "language": {
+          "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+        }
+      });
+    });
   </script>
 
 }
