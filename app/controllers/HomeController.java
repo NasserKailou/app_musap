@@ -28,8 +28,15 @@ import models.tables.pojos.StructurePartenaire;
 import models.tables.pojos.Adherent;
 import models.tables.pojos.AyantDroit;
 import models.tables.pojos.TypePrestation;
+<<<<<<< HEAD
 import services.AyantDroitMainServices;
 import services.TypePrestationMainService;
+=======
+import models.tables.pojos.VBonDeCommande;
+import services.AyantDroitMainServices;
+import services.TypePrestationMainService;
+import services.VBonDeCommandeServices;
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 import play.libs.Json;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -48,12 +55,20 @@ public class HomeController extends Controller {
 	StructureMainServices structureServices;
 	AyantDroitMainServices ayantDroitServices;
 	TypePrestationMainService typePrestationServices;
+<<<<<<< HEAD
+=======
+	VBonDeCommandeServices bonDeCommandeServices;
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 	
 	@Inject
 	public HomeController(FormFactory formatFactory, AdherentMainServices consultationServices,
 			ParamsServices paramsService, ReglementMainServices reglementServices,
 			StructureMainServices structureServices, AyantDroitMainServices ayantDroitServices,
+<<<<<<< HEAD
 			TypePrestationMainService typePrestationServices) {
+=======
+			TypePrestationMainService typePrestationServices, VBonDeCommandeServices bonDeCommandeServices) {
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 
 		this.formatFactory = formatFactory;
 		this.consultationServices = consultationServices;
@@ -62,6 +77,10 @@ public class HomeController extends Controller {
 		this.structureServices = structureServices;
 		this.ayantDroitServices = ayantDroitServices;
 		this.typePrestationServices = typePrestationServices;
+<<<<<<< HEAD
+=======
+		this.bonDeCommandeServices = bonDeCommandeServices;
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 		
 
 	}
@@ -120,11 +139,16 @@ public class HomeController extends Controller {
 	
 	/**
 	 * API pour récupérer les statistiques des bons de commande par structure partenaire
+<<<<<<< HEAD
+=======
+	 * Utilise la vue VBonDeCommande qui contient toutes les données consolidées
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 	 * @param request
 	 * @return JSON avec les données pour le graphique
 	 */
 	public Result getStatsReglementsByStructure(Request request) {
 		try {
+<<<<<<< HEAD
 			// Récupérer tous les règlements (bons de commande) non supprimés
 			List<Reglement> reglements = reglementServices.findAll();
 			
@@ -155,11 +179,28 @@ public class HomeController extends Controller {
 				bonsConfirmesCount.put(struct.getId(), 0);
 				bonsNonConfirmesCount.put(struct.getId(), 0);
 			}
+=======
+			// Récupérer tous les bons de commande depuis la vue VBonDeCommande
+			List<VBonDeCommande> bonsDeCommande = bonDeCommandeServices.findAll();
+			
+			// Récupérer les adhérents et ayants droit pour les totaux
+			List<Adherent> adherents = consultationServices.findAll();
+			List<AyantDroit> ayantsDroit = ayantDroitServices.findAll();
+			
+			// Map pour regrouper par structure (utilise le nom de la structure)
+			Map<String, Integer> bonsConfirmesCount = new HashMap<>();
+			Map<String, Integer> bonsNonConfirmesCount = new HashMap<>();
+			Map<String, Long> structureIds = new HashMap<>();
+			
+			// Map pour compter les bons par type de prestation
+			Map<String, Integer> bonsByTypePrestation = new HashMap<>();
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 			
 			// Compter les bons de commande confirmés et non confirmés par structure
 			int totalBonsConfirmes = 0;
 			int totalBonsNonConfirmes = 0;
 			
+<<<<<<< HEAD
 			for (Reglement reg : reglements) {
 				if (reg.getStructure() != null) {
 					// Vérifier si le bon est confirmé
@@ -172,14 +213,47 @@ public class HomeController extends Controller {
 						// Bon non confirmé (isConfirmedBon est false ou null)
 						bonsNonConfirmesCount.put(reg.getStructure(), 
 							bonsNonConfirmesCount.getOrDefault(reg.getStructure(), 0) + 1);
+=======
+			for (VBonDeCommande bon : bonsDeCommande) {
+				String structureName = bon.getStructure();
+				if (structureName != null) {
+					// Stocker l'ID de la structure
+					if (!structureIds.containsKey(structureName) && bon.getIdStructure() != null) {
+						structureIds.put(structureName, bon.getIdStructure());
+					}
+					
+					// Initialiser les compteurs pour cette structure si nécessaire
+					if (!bonsConfirmesCount.containsKey(structureName)) {
+						bonsConfirmesCount.put(structureName, 0);
+						bonsNonConfirmesCount.put(structureName, 0);
+					}
+					
+					// Vérifier si le bon est confirmé
+					if (bon.getIsConfirmedBon() != null && bon.getIsConfirmedBon()) {
+						// Bon confirmé (consommé)
+						bonsConfirmesCount.put(structureName, 
+							bonsConfirmesCount.get(structureName) + 1);
+						totalBonsConfirmes++;
+					} else {
+						// Bon non confirmé (isConfirmedBon est false ou null)
+						bonsNonConfirmesCount.put(structureName, 
+							bonsNonConfirmesCount.get(structureName) + 1);
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 						totalBonsNonConfirmes++;
 					}
 				}
 				
 				// Compter par type de prestation
+<<<<<<< HEAD
 				if (reg.getTypePrestation() != null) {
 					bonsByTypePrestation.put(reg.getTypePrestation(), 
 						bonsByTypePrestation.getOrDefault(reg.getTypePrestation(), 0) + 1);
+=======
+				String prestationName = bon.getPrestation();
+				if (prestationName != null && !prestationName.trim().isEmpty()) {
+					bonsByTypePrestation.put(prestationName, 
+						bonsByTypePrestation.getOrDefault(prestationName, 0) + 1);
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 				}
 			}
 			
@@ -188,21 +262,36 @@ public class HomeController extends Controller {
 			ArrayNode bonsConfirmesArray = Json.newArray();
 			ArrayNode bonsNonConfirmesArray = Json.newArray();
 			
+<<<<<<< HEAD
 			for (StructurePartenaire struct : structures) {
 				structuresArray.add(struct.getLibelle() != null ? struct.getLibelle() : "Structure #" + struct.getId());
 				bonsConfirmesArray.add(bonsConfirmesCount.get(struct.getId()));
 				bonsNonConfirmesArray.add(bonsNonConfirmesCount.get(struct.getId()));
+=======
+			// Ajouter les données pour chaque structure qui a des bons
+			for (String structureName : bonsConfirmesCount.keySet()) {
+				structuresArray.add(structureName);
+				bonsConfirmesArray.add(bonsConfirmesCount.get(structureName));
+				bonsNonConfirmesArray.add(bonsNonConfirmesCount.get(structureName));
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 			}
 			
 			// Construire les données par type de prestation
 			ArrayNode typePrestationsArray = Json.newArray();
 			ArrayNode bonsByTypePrestationArray = Json.newArray();
 			
+<<<<<<< HEAD
 			for (TypePrestation tp : typePrestations) {
 				int count = bonsByTypePrestation.get(tp.getId());
 				if (count > 0) { // N'inclure que les prestations avec des bons
 					typePrestationsArray.add(tp.getPrestation() != null ? tp.getPrestation() : "Prestation #" + tp.getId());
 					bonsByTypePrestationArray.add(count);
+=======
+			for (Map.Entry<String, Integer> entry : bonsByTypePrestation.entrySet()) {
+				if (entry.getValue() > 0) { // N'inclure que les prestations avec des bons
+					typePrestationsArray.add(entry.getKey());
+					bonsByTypePrestationArray.add(entry.getValue());
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 				}
 			}
 			
@@ -214,7 +303,11 @@ public class HomeController extends Controller {
 			result.put("totalAyantsDroit", ayantsDroit.size());
 			result.put("totalBonsConfirmes", totalBonsConfirmes);
 			result.put("totalBonsNonConfirmes", totalBonsNonConfirmes);
+<<<<<<< HEAD
 			result.put("totalStructures", structures.size());
+=======
+			result.put("totalStructures", structureIds.size());
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 			result.set("typePrestations", typePrestationsArray);
 			result.set("bonsByTypePrestation", bonsByTypePrestationArray);
 			
@@ -223,6 +316,10 @@ public class HomeController extends Controller {
 		} catch (Exception e) {
 			ObjectNode error = Json.newObject();
 			error.put("error", "Erreur lors de la récupération des statistiques: " + e.getMessage());
+<<<<<<< HEAD
+=======
+			e.printStackTrace();
+>>>>>>> 4becd870c547d7c5ad0c62db0cefa0fdcd519681
 			return internalServerError(error);
 		}
 	}
