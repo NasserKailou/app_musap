@@ -12,6 +12,80 @@
 
 @main("Dashboard Analytics") {
 
+<style>
+/* Style pour maximiser l'utilisation de l'espace */
+.content-wrapper {
+    min-height: calc(100vh - 60px) !important;
+}
+
+.content {
+    padding: 10px 0 !important;
+}
+
+.content-header {
+    padding: 10px 0.5rem !important;
+}
+
+.content-header .row {
+    margin-bottom: 8px !important;
+}
+
+.container-fluid {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+.row {
+    margin-left: -5px !important;
+    margin-right: -5px !important;
+}
+
+.col-md-8, .col-md-4, .col-lg-3 {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+}
+
+.card {
+    margin-bottom: 10px !important;
+    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2) !important;
+}
+
+.card-body {
+    padding: 12px !important;
+}
+
+.card-header {
+    padding: 8px 12px !important;
+}
+
+.small-box {
+    margin-bottom: 10px !important;
+}
+
+.small-box .inner {
+    padding: 12px !important;
+}
+
+/* Augmenter la taille des graphiques */
+canvas {
+    max-height: 450px !important;
+}
+
+/* Style pour le tableau */
+.table-responsive {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+.table {
+    font-size: 0.9rem;
+}
+
+.table th, .table td {
+    padding: 0.5rem !important;
+}
+</style>
+
 <div class="content-wrapper">
     <!-- Content Header -->
     <div class="content-header">
@@ -136,7 +210,7 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <canvas id="remboursementsMensuelsChart" style="height: 300px;"></canvas>
+                            <canvas id="remboursementsMensuelsChart" style="height: 400px;"></canvas>
                         </div>
                     </div>
                 </div>
@@ -156,7 +230,7 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <canvas id="remboursementsTypeChart" style="height: 300px;"></canvas>
+                            <canvas id="remboursementsTypeChart" style="height: 400px;"></canvas>
                         </div>
                     </div>
                 </div>
@@ -238,7 +312,7 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <canvas id="adherentsStructureChart" style="height: 300px;"></canvas>
+                            <canvas id="adherentsStructureChart" style="height: 400px;"></canvas>
                         </div>
                     </div>
                 </div>
