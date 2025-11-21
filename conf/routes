@@ -21,6 +21,13 @@ GET     /login                          controllers.AuthenticationCtrl.login(req
 GET     /login                          controllers.AuthenticationCtrl.logout(request:Request)
 GET     /returnFirtPageConnexion                           controllers.AuthenticationCtrl.returnFirtPageConnexion(login: String, request:Request)
 POST     /first-auth                           controllers.AuthenticationCtrl.firstConnexion(request:Request) 
+#Dashboard Analytics
+GET     /dashboard                          controllers.DashboardCtrl.index(request:Request)
+GET     /dashboard/api/mensuels            controllers.DashboardCtrl.getRemboursementsMensuelsJson(request:Request)
+GET     /dashboard/api/types               controllers.DashboardCtrl.getRemboursementsParTypePrestationJson(request:Request)
+GET     /dashboard/api/structures          controllers.DashboardCtrl.getAdherentsParStructureJson(request:Request)
+GET     /dashboard/api/all                 controllers.DashboardCtrl.getAllIndicateursJson(request:Request)
+
 #User ressources
 GET     /user                           controllers.UserCtrl.show(viewMode: String, login: String,request:Request)
 POST     /user/save                         controllers.UserCtrl.save(request:Request)
