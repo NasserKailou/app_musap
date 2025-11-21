@@ -23,12 +23,14 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetails implements Serializable {
 
-    private static final long serialVersionUID = 1944248450;
+    private static final long serialVersionUID = 49561061;
 
     private Long      id;
     private Long      reglement;
     private String    intitule;
     private Long      montant;
+    private Long      quantite;
+    private Long      prixUnitaire;
     private String    whoDone;
     private Timestamp whenDone;
     private Boolean   onDeleted;
@@ -53,6 +55,8 @@ public class VReglementDetails implements Serializable {
         this.reglement = value.reglement;
         this.intitule = value.intitule;
         this.montant = value.montant;
+        this.quantite = value.quantite;
+        this.prixUnitaire = value.prixUnitaire;
         this.whoDone = value.whoDone;
         this.whenDone = value.whenDone;
         this.onDeleted = value.onDeleted;
@@ -76,6 +80,8 @@ public class VReglementDetails implements Serializable {
         Long      reglement,
         String    intitule,
         Long      montant,
+        Long      quantite,
+        Long      prixUnitaire,
         String    whoDone,
         Timestamp whenDone,
         Boolean   onDeleted,
@@ -97,6 +103,8 @@ public class VReglementDetails implements Serializable {
         this.reglement = reglement;
         this.intitule = intitule;
         this.montant = montant;
+        this.quantite = quantite;
+        this.prixUnitaire = prixUnitaire;
         this.whoDone = whoDone;
         this.whenDone = whenDone;
         this.onDeleted = onDeleted;
@@ -145,6 +153,22 @@ public class VReglementDetails implements Serializable {
 
     public void setMontant(Long montant) {
         this.montant = montant;
+    }
+
+    public Long getQuantite() {
+        return this.quantite;
+    }
+
+    public void setQuantite(Long quantite) {
+        this.quantite = quantite;
+    }
+
+    public Long getPrixUnitaire() {
+        return this.prixUnitaire;
+    }
+
+    public void setPrixUnitaire(Long prixUnitaire) {
+        this.prixUnitaire = prixUnitaire;
     }
 
     public String getWhoDone() {
@@ -283,6 +307,8 @@ public class VReglementDetails implements Serializable {
         sb.append(", ").append(reglement);
         sb.append(", ").append(intitule);
         sb.append(", ").append(montant);
+        sb.append(", ").append(quantite);
+        sb.append(", ").append(prixUnitaire);
         sb.append(", ").append(whoDone);
         sb.append(", ").append(whenDone);
         sb.append(", ").append(onDeleted);

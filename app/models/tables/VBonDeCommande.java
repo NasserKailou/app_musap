@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VBonDeCommande extends TableImpl<VBonDeCommandeRecord> {
 
-    private static final long serialVersionUID = -906289332;
+    private static final long serialVersionUID = 484022872;
 
     /**
      * The reference instance of <code>public.v_bon_de_commande</code>
@@ -102,6 +102,16 @@ public class VBonDeCommande extends TableImpl<VBonDeCommandeRecord> {
      * The column <code>public.v_bon_de_commande.when_done</code>.
      */
     public final TableField<VBonDeCommandeRecord, Timestamp> WHEN_DONE = createField("when_done", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>public.v_bon_de_commande.is_confirmed_bon</code>.
+     */
+    public final TableField<VBonDeCommandeRecord, Boolean> IS_CONFIRMED_BON = createField("is_confirmed_bon", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>public.v_bon_de_commande.when_confirmed_bon</code>.
+     */
+    public final TableField<VBonDeCommandeRecord, Timestamp> WHEN_CONFIRMED_BON = createField("when_confirmed_bon", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
     /**
      * The column <code>public.v_bon_de_commande.annee</code>.

@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VBonDeCommande implements Serializable {
 
-    private static final long serialVersionUID = 399441888;
+    private static final long serialVersionUID = 1499075958;
 
     private Long      id;
     private String    nomAd;
@@ -36,6 +36,8 @@ public class VBonDeCommande implements Serializable {
     private Timestamp datePayement;
     private String    whoDone;
     private Timestamp whenDone;
+    private Boolean   isConfirmedBon;
+    private Timestamp whenConfirmedBon;
     private String    annee;
     private Boolean   onDeleted;
     private String    prestation;
@@ -63,6 +65,8 @@ public class VBonDeCommande implements Serializable {
         this.datePayement = value.datePayement;
         this.whoDone = value.whoDone;
         this.whenDone = value.whenDone;
+        this.isConfirmedBon = value.isConfirmedBon;
+        this.whenConfirmedBon = value.whenConfirmedBon;
         this.annee = value.annee;
         this.onDeleted = value.onDeleted;
         this.prestation = value.prestation;
@@ -89,6 +93,8 @@ public class VBonDeCommande implements Serializable {
         Timestamp datePayement,
         String    whoDone,
         Timestamp whenDone,
+        Boolean   isConfirmedBon,
+        Timestamp whenConfirmedBon,
         String    annee,
         Boolean   onDeleted,
         String    prestation,
@@ -113,6 +119,8 @@ public class VBonDeCommande implements Serializable {
         this.datePayement = datePayement;
         this.whoDone = whoDone;
         this.whenDone = whenDone;
+        this.isConfirmedBon = isConfirmedBon;
+        this.whenConfirmedBon = whenConfirmedBon;
         this.annee = annee;
         this.onDeleted = onDeleted;
         this.prestation = prestation;
@@ -213,6 +221,22 @@ public class VBonDeCommande implements Serializable {
 
     public void setWhenDone(Timestamp whenDone) {
         this.whenDone = whenDone;
+    }
+
+    public Boolean getIsConfirmedBon() {
+        return this.isConfirmedBon;
+    }
+
+    public void setIsConfirmedBon(Boolean isConfirmedBon) {
+        this.isConfirmedBon = isConfirmedBon;
+    }
+
+    public Timestamp getWhenConfirmedBon() {
+        return this.whenConfirmedBon;
+    }
+
+    public void setWhenConfirmedBon(Timestamp whenConfirmedBon) {
+        this.whenConfirmedBon = whenConfirmedBon;
     }
 
     public String getAnnee() {
@@ -326,6 +350,8 @@ public class VBonDeCommande implements Serializable {
         sb.append(", ").append(datePayement);
         sb.append(", ").append(whoDone);
         sb.append(", ").append(whenDone);
+        sb.append(", ").append(isConfirmedBon);
+        sb.append(", ").append(whenConfirmedBon);
         sb.append(", ").append(annee);
         sb.append(", ").append(onDeleted);
         sb.append(", ").append(prestation);

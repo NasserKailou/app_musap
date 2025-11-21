@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetails extends TableImpl<VReglementDetailsRecord> {
 
-    private static final long serialVersionUID = 346708483;
+    private static final long serialVersionUID = -2060785547;
 
     /**
      * The reference instance of <code>public.v_reglement_details</code>
@@ -67,6 +67,16 @@ public class VReglementDetails extends TableImpl<VReglementDetailsRecord> {
      * The column <code>public.v_reglement_details.montant</code>.
      */
     public final TableField<VReglementDetailsRecord, Long> MONTANT = createField("montant", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.v_reglement_details.quantite</code>.
+     */
+    public final TableField<VReglementDetailsRecord, Long> QUANTITE = createField("quantite", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.v_reglement_details.prix_unitaire</code>.
+     */
+    public final TableField<VReglementDetailsRecord, Long> PRIX_UNITAIRE = createField("prix_unitaire", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.v_reglement_details.who_done</code>.
