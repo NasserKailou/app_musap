@@ -1,0 +1,506 @@
+@import java.math.BigDecimal
+@import java.text.NumberFormat
+@import java.util.Locale
+
+@(totalAdherents: Long, 
+  totalAyantsDroit: Long, 
+  totalRemboursements: BigDecimal, 
+  nombreRemboursements: Long,
+  croissance: java.util.Map[String, Object],
+  derniersRemboursements: java.util.List[java.util.Map[String, Object]],
+  request: Http.Request)(implicit r: Http.Request)
+
+@main("Dashboard Analytics") {
+
+<style>
+/* Style pour maximiser l'utilisation de l'espace */
+.content-wrapper {
+    min-height: calc(100vh - 60px) !important;
+}
+
+.content {
+    padding: 10px 0 !important;
+}
+
+.content-header {
+    padding: 10px 0.5rem !important;
+}
+
+.content-header .row {
+    margin-bottom: 8px !important;
+}
+
+.container-fluid {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+.row {
+    margin-left: -5px !important;
+    margin-right: -5px !important;
+}
+
+.col-md-8, .col-md-4, .col-lg-3 {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+}
+
+.card {
+    margin-bottom: 10px !important;
+    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2) !important;
+}
+
+.card-body {
+    padding: 12px !important;
+}
+
+.card-header {
+    padding: 8px 12px !important;
+}
+
+.small-box {
+    margin-bottom: 10px !important;
+}
+
+.small-box .inner {
+    padding: 12px !important;
+}
+
+/* Augmenter la taille des graphiques */
+canvas {
+    max-height: 450px !important;
+}
+
+/* Style pour le tableau */
+.table-responsive {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+.table {
+    font-size: 0.9rem;
+}
+
+.table th, .table td {
+    padding: 0.5rem !important;
+}
+</style>
+
+<div class="content-wrapper">
+    <!-- Content Header -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Dashboard Analytics</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="@routes.HomeController.acceuil()">Accueil</a></li>
+                        <li class="breadcrumb-item active">Dashboard</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            
+            <!-- Cartes de statistiques principales -->
+            <div class="row">
+                <!-- Adhérents Actifs -->
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>@totalAdherents</h3>
+                            <p>Adhérents Actifs</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        @if(croissance.get("pctAdherents") != null) {
+                            @defining(croissance.get("pctAdherents").asInstanceOf[Double]) { pct =>
+                                <a href="#" class="small-box-footer">
+                                    @if(pct >= 0) {
+                                        <span class="text-success"><i class="fas fa-arrow-up"></i> +@{String.format("%.1f", pct)}%</span> ce mois
+                                    } else {
+                                        <span class="text-danger"><i class="fas fa-arrow-down"></i> @{String.format("%.1f", pct)}%</span> ce mois
+                                    }
+                                </a>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Ayants Droit -->
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>@totalAyantsDroit</h3>
+                            <p>Ayants Droit</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                        <a href="#" class="small-box-footer">
+                            Total bénéficiaires <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Nombre de Remboursements -->
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>@nombreRemboursements</h3>
+                            <p>Remboursements</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        @if(croissance.get("pctRemboursements") != null) {
+                            @defining(croissance.get("pctRemboursements").asInstanceOf[Double]) { pct =>
+                                <a href="#" class="small-box-footer">
+                                    @if(pct >= 0) {
+                                        <span class="text-success"><i class="fas fa-arrow-up"></i> +@{String.format("%.1f", pct)}%</span> ce mois
+                                    } else {
+                                        <span class="text-danger"><i class="fas fa-arrow-down"></i> @{String.format("%.1f", pct)}%</span> ce mois
+                                    }
+                                </a>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Montant Total Remboursé -->
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            @defining(NumberFormat.getInstance(new Locale("fr", "FR"))) { nf =>
+                                <h3>@{nf.format(totalRemboursements)} <sup style="font-size: 20px">FCFA</sup></h3>
+                            }
+                            <p>Montant Total Remboursé</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <a href="#" class="small-box-footer">
+                            Tous les temps <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphiques -->
+            <div class="row">
+                <!-- Graphique des remboursements mensuels -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header border-transparent">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-line mr-1"></i>
+                                Évolution des Bons de Commande (Année en cours)
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="remboursementsMensuelsChart" style="height: 400px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphique des remboursements par type -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header border-transparent">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-pie mr-1"></i>
+                                Par Type de Prestation
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="remboursementsTypeChart" style="height: 400px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tableau des derniers remboursements et graphique structures -->
+            <div class="row">
+                <!-- Derniers remboursements -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header border-transparent">
+                            <h3 class="card-title">
+                                <i class="fas fa-list mr-1"></i>
+                                Derniers Remboursements
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table m-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Référence</th>
+                                            <th>Adhérent</th>
+                                            <th>Prestation</th>
+                                            <th>Montant</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    @if(derniersRemboursements != null && !derniersRemboursements.isEmpty) {
+                                        @for(remb <- scala.jdk.CollectionConverters.IteratorHasAsScala(derniersRemboursements.iterator()).asScala.toSeq) {
+                                            @defining(NumberFormat.getInstance(new Locale("fr", "FR"))) { nf =>
+                                                <tr>
+                                                    <td>@remb.get("reference")</td>
+                                                    <td>@remb.get("adherent")</td>
+                                                    <td>@remb.get("prestation")</td>
+                                                    <td>
+                                                        <span class="badge badge-success">
+                                                            @{nf.format(remb.get("montant"))} FCFA
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        @if(remb.get("date") != null) {
+                                                            @{new java.text.SimpleDateFormat("dd/MM/yyyy").format(remb.get("date"))}
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    } else {
+                                        <tr>
+                                            <td colspan="5" class="text-center">Aucun remboursement récent</td>
+                                        </tr>
+                                    }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphique adhérents par structure -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header border-transparent">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-bar mr-1"></i>
+                                Top 10 Structures (Bons Émis)
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="adherentsStructureChart" style="height: 400px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</div>
+
+<!-- jQuery (REQUIS pour AJAX et Chart.js) -->
+<script src="@routes.Assets.versioned("plugins/jquery/jquery.min.js")"></script>
+
+<!-- Chart.js -->
+<script src="@routes.Assets.versioned("plugins/chart.js/Chart.min.js")"></script>
+
+<script>
+$(document).ready(function() {
+    console.log('Dashboard: Initialisation...');
+    console.log('Chart.js:', typeof Chart);
+    
+    // Configuration des couleurs
+    const colors = {
+        primary: 'rgba(60, 141, 188, 0.8)',
+        success: 'rgba(0, 166, 90, 0.8)',
+        warning: 'rgba(243, 156, 18, 0.8)',
+        danger: 'rgba(221, 75, 57, 0.8)',
+        info: 'rgba(0, 192, 239, 0.8)'
+    };
+
+    const chartColors = [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+        'rgba(199, 199, 199, 0.8)',
+        'rgba(83, 102, 255, 0.8)',
+        'rgba(255, 99, 255, 0.8)',
+        'rgba(99, 255, 132, 0.8)'
+    ];
+
+    // 1. Graphique des remboursements mensuels
+    console.log('Requête: remboursements mensuels');
+    $.ajax({
+        url: '@routes.DashboardCtrl.getRemboursementsMensuelsJson()',
+        method: 'GET',
+        success: function(data) {
+            console.log('✓ Mensuels:', data);
+            const ctx = document.getElementById('remboursementsMensuelsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Nombre de bons de commande',
+                        data: data.nombres,
+                        borderColor: colors.primary,
+                        backgroundColor: 'rgba(60, 141, 188, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const montant = data.montants[context.dataIndex];
+                                    return 'Montant: ' + montant.toLocaleString('fr-FR') + ' FCFA';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error('✗ Mensuels:', error, xhr.status, xhr.responseText);
+        }
+    });
+
+    // 2. Graphique par type de prestation (Doughnut)
+    console.log('Requête: types prestations');
+    $.ajax({
+        url: '@routes.DashboardCtrl.getRemboursementsParTypePrestationJson()',
+        method: 'GET',
+        success: function(data) {
+            console.log('✓ Types:', data);
+            const ctx = document.getElementById('remboursementsTypeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.montants,
+                        backgroundColor: chartColors,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return label + ': ' + value.toLocaleString('fr-FR') + ' FCFA (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error('✗ Types:', error, xhr.status, xhr.responseText);
+        }
+    });
+
+    // 3. Graphique adhérents par structure (Bar horizontal)
+    console.log('Requête: structures');
+    $.ajax({
+        url: '@routes.DashboardCtrl.getAdherentsParStructureJson()',
+        method: 'GET',
+        success: function(data) {
+            console.log('✓ Structures:', data);
+            const ctx = document.getElementById('adherentsStructureChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Nombre de bons émis',
+                        data: data.nombres,
+                        backgroundColor: colors.success,
+                        borderColor: colors.success,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error('✗ Structures:', error, xhr.status, xhr.responseText);
+        }
+    });
+
+});
+</script>
+
+}
