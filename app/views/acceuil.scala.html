@@ -76,7 +76,7 @@
         </div>
       </div>
 
-      <!-- Additional Info Row -->
+      <!-- Secondary info boxes -->
       <div class="row">
         <div class="col-12 col-sm-6 col-md-4">
           <div class="info-box mb-3">
@@ -91,25 +91,25 @@
         </div>
 
         <div class="col-12 col-sm-6 col-md-4">
-          <div class="info-box mb-3">
-            <span class="info-box-icon bg-teal elevation-1"><i class="fas fa-file-alt"></i></span>
-            <div class="info-box-content">
-              <span class="info-box-text">Total Bons de Commande</span>
-              <span class="info-box-number" id="totalBons">
-                <span class="spinner-border spinner-border-sm" role="status"></span>
-              </span>
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3 id="tauxConfirmation">-</h3>
+              <p>Taux de Confirmation</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-percentage"></i>
             </div>
           </div>
         </div>
 
         <div class="col-12 col-sm-6 col-md-4">
-          <div class="info-box mb-3">
-            <span class="info-box-icon bg-indigo elevation-1"><i class="fas fa-percentage"></i></span>
-            <div class="info-box-content">
-              <span class="info-box-text">Taux de Confirmation</span>
-              <span class="info-box-number" id="tauxConfirmation">
-                <span class="spinner-border spinner-border-sm" role="status"></span>
-              </span>
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3 id="totalBeneficiaires">-</h3>
+              <p>Bénéficiaires Totaux</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-id-card"></i>
             </div>
           </div>
         </div>
@@ -123,15 +123,22 @@
             <div class="card-header border-0">
               <div class="d-flex justify-content-between">
                 <h3 class="card-title">Bons de Commande par Structure Partenaire</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
               </div>
             </div>
             <div class="card-body">
-              <div class="d-flex mb-3">
-                <div class="mr-3">
-                  <span class="text-success"><i class="fas fa-square"></i></span> Bons Confirmés (Consommés)
+              <div class="d-flex mb-2">
+                <div class="mr-4">
+                  <span class="badge badge-success mr-1">■</span>
+                  <small>Bons Confirmés (Consommés)</small>
                 </div>
                 <div>
-                  <span class="text-warning"><i class="fas fa-square"></i></span> Bons Non Confirmés (En attente)
+                  <span class="badge badge-warning mr-1">■</span>
+                  <small>Bons Non Confirmés</small>
                 </div>
               </div>
               <div class="position-relative mb-4">
@@ -141,11 +148,16 @@
           </div>
         </div>
 
-        <!-- Graphique circulaire -->
+        <!-- Graphiques circulaires -->
         <div class="col-lg-4">
           <div class="card">
             <div class="card-header border-0">
-              <h3 class="card-title">Répartition des Bons de Commande</h3>
+              <h3 class="card-title">Répartition des Bons</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
             </div>
             <div class="card-body">
               <canvas id="repartitionChart" height="250"></canvas>
@@ -154,12 +166,12 @@
         </div>
       </div>
 
-      <!-- Statistiques détaillées -->
+      <!-- Statistiques par Structure -->
       <div class="row">
         <div class="col-md-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Statistiques par Structure Partenaire</h3>
+              <h3 class="card-title">Détails par Structure Partenaire</h3>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                   <i class="fas fa-minus"></i>
@@ -168,26 +180,85 @@
             </div>
             <div class="card-body p-0">
               <div class="table-responsive">
-                <table class="table table-striped table-valign-middle" id="statsTable">
+                <table class="table table-striped" id="tableStructures">
                   <thead>
                     <tr>
-                      <th>Structure Partenaire</th>
-                      <th>Bons Confirmés</th>
-                      <th>Bons Non Confirmés</th>
-                      <th>Total</th>
-                      <th>Taux de Confirmation</th>
+                      <th>Structure</th>
+                      <th class="text-center">Bons Confirmés</th>
+                      <th class="text-center">Bons Non Confirmés</th>
+                      <th class="text-center">Total</th>
+                      <th class="text-center">Taux Confirmation</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
                       <td colspan="5" class="text-center">
                         <span class="spinner-border spinner-border-sm" role="status"></span>
-                        Chargement des données...
+                        Chargement...
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activités récentes -->
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Activités Récentes</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              <ul class="products-list product-list-in-card pl-2 pr-2">
+                <li class="item">
+                  <div class="product-img">
+                    <i class="fas fa-check-circle text-success" style="font-size: 30px;"></i>
+                  </div>
+                  <div class="product-info">
+                    <a href="javascript:void(0)" class="product-title">Bon de commande confirmé
+                      <span class="badge badge-success float-right">Aujourd'hui</span></a>
+                    <span class="product-description">
+                      Un bon de commande a été confirmé et consommé
+                    </span>
+                  </div>
+                </li>
+                <li class="item">
+                  <div class="product-img">
+                    <i class="fas fa-user-plus text-info" style="font-size: 30px;"></i>
+                  </div>
+                  <div class="product-info">
+                    <a href="javascript:void(0)" class="product-title">Nouvel adhérent
+                      <span class="badge badge-info float-right">Hier</span></a>
+                    <span class="product-description">
+                      Un nouvel adhérent a été ajouté au système
+                    </span>
+                  </div>
+                </li>
+                <li class="item">
+                  <div class="product-img">
+                    <i class="fas fa-file-alt text-warning" style="font-size: 30px;"></i>
+                  </div>
+                  <div class="product-info">
+                    <a href="javascript:void(0)" class="product-title">Nouveau bon de commande
+                      <span class="badge badge-warning float-right">Il y a 2 jours</span></a>
+                    <span class="product-description">
+                      Un nouveau bon de commande a été créé
+                    </span>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="card-footer text-center">
+              <a href="javascript:void(0)" class="uppercase">Voir toutes les activités</a>
             </div>
           </div>
         </div>
@@ -203,13 +274,12 @@ $(document).ready(function() {
     
     // Couleurs pour les graphiques
     const colors = {
+        confirme: '#28a745',
+        nonConfirme: '#ffc107',
         primary: '#007bff',
-        success: '#28a745',
-        warning: '#ffc107',
         danger: '#dc3545',
         info: '#17a2b8',
-        teal: '#20c997',
-        indigo: '#6610f2'
+        secondary: '#6c757d'
     };
     
     // Charger les statistiques
@@ -218,18 +288,21 @@ $(document).ready(function() {
         method: 'GET',
         dataType: 'json',
         success: function(data) {
+            console.log('Données reçues:', data);
+            
             // Mettre à jour les info-boxes
-            $('#totalAdherents').html(data.totalAdherents);
-            $('#totalAyantsDroit').html(data.totalAyantsDroit);
-            $('#totalBonsConfirmes').html(data.totalBonsConfirmes);
-            $('#totalBonsNonConfirmes').html(data.totalBonsNonConfirmes);
-            $('#totalStructures').html(data.totalStructures);
+            $('#totalAdherents').html('<strong>' + data.totalAdherents + '</strong>');
+            $('#totalAyantsDroit').html('<strong>' + data.totalAyantsDroit + '</strong>');
+            $('#totalBonsConfirmes').html('<strong>' + data.totalBonsConfirmes + '</strong>');
+            $('#totalBonsNonConfirmes').html('<strong>' + data.totalBonsNonConfirmes + '</strong>');
+            $('#totalStructures').html('<strong>' + data.totalStructures + '</strong>');
             
+            // Calculer les totaux et statistiques
+            let totalBeneficiaires = data.totalAdherents + data.totalAyantsDroit;
             let totalBons = data.totalBonsConfirmes + data.totalBonsNonConfirmes;
-            $('#totalBons').html(totalBons);
-            
-            // Calculer et afficher le taux de confirmation
             let tauxConfirmation = totalBons > 0 ? ((data.totalBonsConfirmes / totalBons) * 100).toFixed(1) : 0;
+            
+            $('#totalBeneficiaires').html(totalBeneficiaires);
             $('#tauxConfirmation').html(tauxConfirmation + '%');
             
             // Créer le graphique à barres
@@ -242,15 +315,15 @@ $(document).ready(function() {
                         {
                             label: 'Bons Confirmés (Consommés)',
                             data: data.bonsConfirmes,
-                            backgroundColor: colors.success,
-                            borderColor: colors.success,
+                            backgroundColor: colors.confirme,
+                            borderColor: colors.confirme,
                             borderWidth: 1
                         },
                         {
-                            label: 'Bons Non Confirmés (En attente)',
+                            label: 'Bons Non Confirmés',
                             data: data.bonsNonConfirmes,
-                            backgroundColor: colors.warning,
-                            borderColor: colors.warning,
+                            backgroundColor: colors.nonConfirme,
+                            borderColor: colors.nonConfirme,
                             borderWidth: 1
                         }
                     ]
@@ -266,7 +339,7 @@ $(document).ready(function() {
                             },
                             scaleLabel: {
                                 display: true,
-                                labelString: 'Nombre de Bons'
+                                labelString: 'Nombre de bons'
                             }
                         }],
                         xAxes: [{
@@ -283,31 +356,20 @@ $(document).ready(function() {
                     },
                     tooltips: {
                         mode: 'index',
-                        intersect: false,
-                        callbacks: {
-                            label: function(tooltipItem, data) {
-                                let label = data.datasets[tooltipItem.datasetIndex].label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                label += tooltipItem.yLabel + ' bon(s)';
-                                return label;
-                            }
-                        }
+                        intersect: false
                     }
                 }
             });
             
-            // Créer le graphique circulaire (répartition confirmés vs non confirmés)
+            // Créer le graphique circulaire (statut des bons)
             const ctxPie = document.getElementById('repartitionChart').getContext('2d');
-            
             new Chart(ctxPie, {
                 type: 'doughnut',
                 data: {
                     labels: ['Bons Confirmés', 'Bons Non Confirmés'],
                     datasets: [{
                         data: [data.totalBonsConfirmes, data.totalBonsNonConfirmes],
-                        backgroundColor: [colors.success, colors.warning]
+                        backgroundColor: [colors.confirme, colors.nonConfirme]
                     }]
                 },
                 options: {
@@ -318,11 +380,11 @@ $(document).ready(function() {
                     },
                     tooltips: {
                         callbacks: {
-                            label: function(tooltipItem, data) {
-                                const label = data.labels[tooltipItem.index];
-                                const value = data.datasets[0].data[tooltipItem.index];
-                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(1);
+                            label: function(tooltipItem, chartData) {
+                                const label = chartData.labels[tooltipItem.index];
+                                const value = chartData.datasets[0].data[tooltipItem.index];
+                                const total = chartData.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
                                 return label + ': ' + value + ' (' + percentage + '%)';
                             }
                         }
@@ -330,29 +392,34 @@ $(document).ready(function() {
                 }
             });
             
-            // Remplir le tableau des statistiques
-            let tableBody = '';
+            // Remplir le tableau des structures
+            let tableHtml = '';
             for (let i = 0; i < data.structures.length; i++) {
-                let confirmes = data.bonsConfirmes[i];
-                let nonConfirmes = data.bonsNonConfirmes[i];
-                let total = confirmes + nonConfirmes;
-                let taux = total > 0 ? ((confirmes / total) * 100).toFixed(1) : 0;
+                const confirmes = data.bonsConfirmes[i];
+                const nonConfirmes = data.bonsNonConfirmes[i];
+                const total = confirmes + nonConfirmes;
+                const taux = total > 0 ? ((confirmes / total) * 100).toFixed(1) : 0;
                 
-                tableBody += '<tr>';
-                tableBody += '<td><strong>' + data.structures[i] + '</strong></td>';
-                tableBody += '<td><span class="badge badge-success">' + confirmes + '</span></td>';
-                tableBody += '<td><span class="badge badge-warning">' + nonConfirmes + '</span></td>';
-                tableBody += '<td><span class="badge badge-info">' + total + '</span></td>';
-                tableBody += '<td>';
-                tableBody += '<div class="progress progress-xs">';
-                tableBody += '<div class="progress-bar bg-success" style="width: ' + taux + '%"></div>';
-                tableBody += '</div>';
-                tableBody += '<span class="badge badge-secondary">' + taux + '%</span>';
-                tableBody += '</td>';
-                tableBody += '</tr>';
+                tableHtml += '<tr>';
+                tableHtml += '<td><strong>' + data.structures[i] + '</strong></td>';
+                tableHtml += '<td class="text-center"><span class="badge badge-success">' + confirmes + '</span></td>';
+                tableHtml += '<td class="text-center"><span class="badge badge-warning">' + nonConfirmes + '</span></td>';
+                tableHtml += '<td class="text-center"><strong>' + total + '</strong></td>';
+                tableHtml += '<td class="text-center">';
+                tableHtml += '<div class="progress" style="height: 20px;">';
+                tableHtml += '<div class="progress-bar bg-success" role="progressbar" style="width: ' + taux + '%">';
+                tableHtml += taux + '%';
+                tableHtml += '</div>';
+                tableHtml += '</div>';
+                tableHtml += '</td>';
+                tableHtml += '</tr>';
             }
             
-            $('#statsTable tbody').html(tableBody);
+            if (tableHtml === '') {
+                tableHtml = '<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>';
+            }
+            
+            $('#tableStructures tbody').html(tableHtml);
             
         },
         error: function(xhr, status, error) {
@@ -362,8 +429,6 @@ $(document).ready(function() {
             $('#totalBonsConfirmes').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
             $('#totalBonsNonConfirmes').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
             $('#totalStructures').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
-            $('#totalBons').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
-            $('#tauxConfirmation').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
             
             // Afficher un message d'erreur
             $('.content').prepend(
@@ -374,11 +439,7 @@ $(document).ready(function() {
                 '</div>'
             );
             
-            $('#statsTable tbody').html(
-                '<tr><td colspan="5" class="text-center text-danger">' +
-                '<i class="fas fa-exclamation-triangle"></i> Erreur de chargement' +
-                '</td></tr>'
-            );
+            $('#tableStructures tbody').html('<tr><td colspan="5" class="text-center text-danger">Erreur de chargement</td></tr>');
         }
     });
 });
