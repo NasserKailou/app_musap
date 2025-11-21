@@ -73,3 +73,46 @@ CREATE OR REPLACE VIEW public.v_reglement_details
     COALESCE(det.montant, 0::bigint) * det.quantite * (100 - reg.couverture::integer)::bigint / 100 AS total_restant
    FROM reglement_detail det
      JOIN v_bon_de_commande reg ON det.reglement = reg.id;
+
+
+
+
+DROP VIEW public.v_reglement;
+
+CREATE OR REPLACE VIEW public.v_reglement
+ AS
+ SELECT reg.id,
+    ad.nom_ad,
+    ad.prenom_ad,
+    ad.id AS id_adherent,
+    ad.matricule,
+    reg.ref_facture,
+    struc.libelle AS structure,
+    reg.date_payement,
+    reg.who_done,
+    reg.when_done,
+    "substring"(reg.date_payement::character varying::text, 1, 4)::character varying AS annee,
+    reg.on_deleted,
+    ty.prestation,
+    ty.couverture,
+    ay.nom_ay,
+    ay.lien,
+    ay.genre,
+    reg.ayant_droit,
+    COALESCE(( SELECT sum(COALESCE(reglement_detail.montant, 0::bigint)) AS sum
+           FROM reglement_detail
+          WHERE reglement_detail.reglement = reg.id AND reglement_detail.on_deleted IS FALSE), 0::bigint::numeric)::bigint AS montant_total,
+    COALESCE(( SELECT sum(COALESCE(reglement_detail.montant, 0::bigint)) * ty.couverture::bigint::numeric / 100::numeric AS sum
+           FROM reglement_detail
+          WHERE reglement_detail.reglement = reg.id AND reglement_detail.on_deleted IS FALSE), 0::bigint::numeric)::bigint AS montant_reglement,
+    COALESCE(( SELECT sum(COALESCE(reglement_detail.montant, 0::bigint)) * (100::bigint - ty.couverture::bigint)::numeric / 100::numeric AS sum
+           FROM reglement_detail
+          WHERE reglement_detail.reglement = reg.id AND reglement_detail.on_deleted IS FALSE), 0::bigint::numeric)::bigint AS montant_paye,
+    struc.id AS id_structure
+   FROM structure_partenaire struc,
+    adherent ad,
+    type_prestation ty,
+    reglement reg
+     LEFT JOIN ayant_droit ay ON reg.ayant_droit = ay.id
+  WHERE reg.structure = struc.id AND reg.adherent = ad.id AND reg.type_prestation = ty.id AND reg.on_deleted IS FALSE
+  ORDER BY reg.id;

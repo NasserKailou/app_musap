@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglement implements Serializable {
 
-    private static final long serialVersionUID = -1947862930;
+    private static final long serialVersionUID = -847732527;
 
     private Long      id;
     private String    nomAd;
@@ -35,6 +35,9 @@ public class VReglement implements Serializable {
     private Timestamp datePayement;
     private String    whoDone;
     private Timestamp whenDone;
+    private Boolean   isConfirmedBon;
+    private Timestamp whenConfirmedBon;
+    private Timestamp dateExpiration;
     private String    annee;
     private Boolean   onDeleted;
     private String    prestation;
@@ -61,6 +64,9 @@ public class VReglement implements Serializable {
         this.datePayement = value.datePayement;
         this.whoDone = value.whoDone;
         this.whenDone = value.whenDone;
+        this.isConfirmedBon = value.isConfirmedBon;
+        this.whenConfirmedBon = value.whenConfirmedBon;
+        this.dateExpiration = value.dateExpiration;
         this.annee = value.annee;
         this.onDeleted = value.onDeleted;
         this.prestation = value.prestation;
@@ -86,6 +92,9 @@ public class VReglement implements Serializable {
         Timestamp datePayement,
         String    whoDone,
         Timestamp whenDone,
+        Boolean   isConfirmedBon,
+        Timestamp whenConfirmedBon,
+        Timestamp dateExpiration,
         String    annee,
         Boolean   onDeleted,
         String    prestation,
@@ -109,6 +118,9 @@ public class VReglement implements Serializable {
         this.datePayement = datePayement;
         this.whoDone = whoDone;
         this.whenDone = whenDone;
+        this.isConfirmedBon = isConfirmedBon;
+        this.whenConfirmedBon = whenConfirmedBon;
+        this.dateExpiration = dateExpiration;
         this.annee = annee;
         this.onDeleted = onDeleted;
         this.prestation = prestation;
@@ -201,6 +213,30 @@ public class VReglement implements Serializable {
 
     public void setWhenDone(Timestamp whenDone) {
         this.whenDone = whenDone;
+    }
+
+    public Boolean getIsConfirmedBon() {
+        return this.isConfirmedBon;
+    }
+
+    public void setIsConfirmedBon(Boolean isConfirmedBon) {
+        this.isConfirmedBon = isConfirmedBon;
+    }
+
+    public Timestamp getWhenConfirmedBon() {
+        return this.whenConfirmedBon;
+    }
+
+    public void setWhenConfirmedBon(Timestamp whenConfirmedBon) {
+        this.whenConfirmedBon = whenConfirmedBon;
+    }
+
+    public Timestamp getDateExpiration() {
+        return this.dateExpiration;
+    }
+
+    public void setDateExpiration(Timestamp dateExpiration) {
+        this.dateExpiration = dateExpiration;
     }
 
     public String getAnnee() {
@@ -313,6 +349,9 @@ public class VReglement implements Serializable {
         sb.append(", ").append(datePayement);
         sb.append(", ").append(whoDone);
         sb.append(", ").append(whenDone);
+        sb.append(", ").append(isConfirmedBon);
+        sb.append(", ").append(whenConfirmedBon);
+        sb.append(", ").append(dateExpiration);
         sb.append(", ").append(annee);
         sb.append(", ").append(onDeleted);
         sb.append(", ").append(prestation);

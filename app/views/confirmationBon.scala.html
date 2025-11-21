@@ -3,10 +3,9 @@
 @import java.util
 @(bonsNonConfirmes: List[models.tables.pojos.VReglement],
   adherent: models.tables.pojos.Adherent,
-  structures: List[models.tables.pojos.StructurePartenaire],
-  request: Http.Request)
+  structures: List[models.tables.pojos.StructurePartenaire])(implicit request: Http.Request)
 
-@main("Confirmation Bon de Commande") {
+@main("Confirmation Bon de Commande"){
 
 <!-- Content Header -->
 <section class="content-header">
@@ -177,16 +176,16 @@
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <form method="POST" action='@controllers.routes.ReglementCtrl.save()'>
-        @helper.CSRF.formField
+      
 
         <input type="hidden" name="viewMode" value="CONFIRM_BON">
         <input type="hidden" name="id" value="@bon.getId()">
         <input type="hidden" name="adherent" value="@bon.getIdAdherent()">
         <input type="hidden" name="structure" value="@bon.getIdStructure()">
-        <input type="hidden" name="typePrestation" value="@bon.getIdTypePrestation()">
-        @if(bon.getIdAyantDroit() != null) {
-          <input type="hidden" name="ayantDroit" value="@bon.getIdAyantDroit()">
-          <input type="hidden" name="benef" value="@bon.getIdAyantDroit()">
+        <input type="hidden" name="typePrestation" value="@bon.getPrestation()">
+        @if(bon.getAyantDroit() != null) {
+          <input type="hidden" name="ayantDroit" value="@bon.getAyantDroit()">
+          <input type="hidden" name="benef" value="@bon.getAyantDroit()">
         } else {
           <input type="hidden" name="benef" value="@bon.getIdAdherent()">
         }
