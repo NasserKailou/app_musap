@@ -127,7 +127,7 @@
                         <div class="card-header border-transparent">
                             <h3 class="card-title">
                                 <i class="fas fa-chart-line mr-1"></i>
-                                Évolution des Remboursements (Année en cours)
+                                Évolution des Bons de Commande (Année en cours)
                             </h3>
                             <div class="card-tools">
                                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -229,7 +229,7 @@
                         <div class="card-header border-transparent">
                             <h3 class="card-title">
                                 <i class="fas fa-chart-bar mr-1"></i>
-                                Top 10 Structures
+                                Top 10 Structures (Bons Émis)
                             </h3>
                             <div class="card-tools">
                                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -294,7 +294,7 @@ $(document).ready(function() {
                 data: {
                     labels: data.labels,
                     datasets: [{
-                        label: 'Nombre de remboursements',
+                        label: 'Nombre de bons de commande',
                         data: data.nombres,
                         borderColor: colors.primary,
                         backgroundColor: 'rgba(60, 141, 188, 0.1)',
@@ -394,7 +394,7 @@ $(document).ready(function() {
                 data: {
                     labels: data.labels,
                     datasets: [{
-                        label: 'Nombre d\'adhérents',
+                        label: 'Nombre de bons émis',
                         data: data.nombres,
                         backgroundColor: colors.success,
                         borderColor: colors.success,

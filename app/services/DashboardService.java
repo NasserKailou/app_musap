@@ -209,7 +209,8 @@ public class DashboardService {
     }
 
     /**
-     * Récupère la répartition des adhérents par structure
+     * Récupère la répartition des bons de commande (reglements) par structure
+     * Top 10 des structures qui ont émis le plus de bons de commande
      */
     public Map<String, Object> getAdherentsParStructure() {
         try {
@@ -218,8 +219,9 @@ public class DashboardService {
                     Tables.ADHERENT.STRUCTURE,
                     DSL.count().as("nombre")
                 )
-                .from(Tables.ADHERENT)
-                .where(Tables.ADHERENT.ON_DELETED.isFalse())
+                .from(Tables.REGLEMENT)
+                .join(Tables.ADHERENT).on(Tables.ADHERENT.ID.eq(Tables.REGLEMENT.ADHERENT))
+                .where(Tables.REGLEMENT.ON_DELETED.isFalse())
                 .and(Tables.ADHERENT.STRUCTURE.isNotNull())
                 .groupBy(Tables.ADHERENT.STRUCTURE)
                 .orderBy(DSL.count().desc())
