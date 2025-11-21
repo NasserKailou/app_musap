@@ -8,7 +8,7 @@
   nombreRemboursements: Long,
   croissance: java.util.Map[String, Object],
   derniersRemboursements: java.util.List[java.util.Map[String, Object]],
-  request: Http.Request)
+  request: Http.Request)(implicit r: Http.Request)
 
 @main("Dashboard Analytics") {
 
@@ -22,7 +22,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="@routes.HomeController.acceuil(request)">Accueil</a></li>
+                        <li class="breadcrumb-item"><a href="@routes.HomeController.acceuil()">Accueil</a></li>
                         <li class="breadcrumb-item active">Dashboard</li>
                     </ol>
                 </div>
@@ -192,7 +192,7 @@
                                     </thead>
                                     <tbody>
                                     @if(derniersRemboursements != null && !derniersRemboursements.isEmpty) {
-                                        @for(remb <- scala.collection.JavaConverters.asScalaIterator(derniersRemboursements.iterator()).toSeq) {
+                                        @for(remb <- scala.jdk.CollectionConverters.IteratorHasAsScala(derniersRemboursements.iterator()).asScala.toSeq) {
                                             @defining(NumberFormat.getInstance(new Locale("fr", "FR"))) { nf =>
                                                 <tr>
                                                     <td>@remb.get("reference")</td>
@@ -278,7 +278,7 @@ $(document).ready(function() {
 
     // 1. Graphique des remboursements mensuels
     $.ajax({
-        url: '@routes.DashboardCtrl.getRemboursementsMensuelsJson(request)',
+        url: '@routes.DashboardCtrl.getRemboursementsMensuelsJson()',
         method: 'GET',
         success: function(data) {
             const ctx = document.getElementById('remboursementsMensuelsChart').getContext('2d');
@@ -330,7 +330,7 @@ $(document).ready(function() {
 
     // 2. Graphique par type de prestation (Doughnut)
     $.ajax({
-        url: '@routes.DashboardCtrl.getRemboursementsParTypePrestationJson(request)',
+        url: '@routes.DashboardCtrl.getRemboursementsParTypePrestationJson()',
         method: 'GET',
         success: function(data) {
             const ctx = document.getElementById('remboursementsTypeChart').getContext('2d');
@@ -374,7 +374,7 @@ $(document).ready(function() {
 
     // 3. Graphique adhérents par structure (Bar horizontal)
     $.ajax({
-        url: '@routes.DashboardCtrl.getAdherentsParStructureJson(request)',
+        url: '@routes.DashboardCtrl.getAdherentsParStructureJson()',
         method: 'GET',
         success: function(data) {
             const ctx = document.getElementById('adherentsStructureChart').getContext('2d');
@@ -415,6 +415,10 @@ $(document).ready(function() {
         }
     });
 
+});
+</script>
+
+}
 });
 </script>
 

@@ -7,10 +7,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http.Request;
@@ -36,7 +32,7 @@ public class DashboardCtrl extends Controller {
      */
     public Result index(Request request) {
         // Vérifier l'authentification
-        if (request.session().get("login").isEmpty()) {
+        if (!request.session().get("login").isPresent()) {
             return redirect(routes.HomeController.index())
                 .flashing("error", "Vous devez être connecté pour accéder au dashboard");
         }
@@ -74,8 +70,10 @@ public class DashboardCtrl extends Controller {
      * API JSON - Remboursements mensuels
      */
     public Result getRemboursementsMensuelsJson(Request request) {
-        if (request.session().get("login").isEmpty()) {
-            return unauthorized(Json.toJson(Map.of("error", "Non authentifié")));
+        if (!request.session().get("login").isPresent()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Non authentifié");
+            return unauthorized(Json.toJson(error));
         }
 
         try {
@@ -83,9 +81,9 @@ public class DashboardCtrl extends Controller {
             return ok(Json.toJson(data));
         } catch (Exception e) {
             e.printStackTrace();
-            return internalServerError(Json.toJson(
-                Map.of("error", "Erreur lors de la récupération des données: " + e.getMessage())
-            ));
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Erreur lors de la récupération des données: " + e.getMessage());
+            return internalServerError(Json.toJson(error));
         }
     }
 
@@ -93,8 +91,10 @@ public class DashboardCtrl extends Controller {
      * API JSON - Remboursements par type de prestation
      */
     public Result getRemboursementsParTypePrestationJson(Request request) {
-        if (request.session().get("login").isEmpty()) {
-            return unauthorized(Json.toJson(Map.of("error", "Non authentifié")));
+        if (!request.session().get("login").isPresent()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Non authentifié");
+            return unauthorized(Json.toJson(error));
         }
 
         try {
@@ -102,9 +102,9 @@ public class DashboardCtrl extends Controller {
             return ok(Json.toJson(data));
         } catch (Exception e) {
             e.printStackTrace();
-            return internalServerError(Json.toJson(
-                Map.of("error", "Erreur lors de la récupération des données: " + e.getMessage())
-            ));
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Erreur lors de la récupération des données: " + e.getMessage());
+            return internalServerError(Json.toJson(error));
         }
     }
 
@@ -112,8 +112,10 @@ public class DashboardCtrl extends Controller {
      * API JSON - Adhérents par structure
      */
     public Result getAdherentsParStructureJson(Request request) {
-        if (request.session().get("login").isEmpty()) {
-            return unauthorized(Json.toJson(Map.of("error", "Non authentifié")));
+        if (!request.session().get("login").isPresent()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Non authentifié");
+            return unauthorized(Json.toJson(error));
         }
 
         try {
@@ -121,9 +123,9 @@ public class DashboardCtrl extends Controller {
             return ok(Json.toJson(data));
         } catch (Exception e) {
             e.printStackTrace();
-            return internalServerError(Json.toJson(
-                Map.of("error", "Erreur lors de la récupération des données: " + e.getMessage())
-            ));
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Erreur lors de la récupération des données: " + e.getMessage());
+            return internalServerError(Json.toJson(error));
         }
     }
 
@@ -131,8 +133,10 @@ public class DashboardCtrl extends Controller {
      * API JSON - Tous les indicateurs pour le dashboard
      */
     public Result getAllIndicateursJson(Request request) {
-        if (request.session().get("login").isEmpty()) {
-            return unauthorized(Json.toJson(Map.of("error", "Non authentifié")));
+        if (!request.session().get("login").isPresent()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Non authentifié");
+            return unauthorized(Json.toJson(error));
         }
 
         try {
@@ -158,9 +162,9 @@ public class DashboardCtrl extends Controller {
             return ok(Json.toJson(allData));
         } catch (Exception e) {
             e.printStackTrace();
-            return internalServerError(Json.toJson(
-                Map.of("error", "Erreur lors de la récupération des données: " + e.getMessage())
-            ));
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Erreur lors de la récupération des données: " + e.getMessage());
+            return internalServerError(Json.toJson(error));
         }
     }
 }
