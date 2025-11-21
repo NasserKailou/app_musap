@@ -9,7 +9,6 @@ GET     /accueil                           controllers.HomeController.acceuil(re
 POST    /login                  	controllers.HomeController.authentification(request:Request)
 GET     /logout                 	controllers.HomeController.deconnecter(request:Request)
 GET     /acceuil                    controllers.HomeController.acceuil(request:Request)
-GET     /api/stats/reglements-structure    controllers.HomeController.getStatsReglementsByStructure(request:Request)
 
 
 
@@ -67,7 +66,7 @@ POST			/impression-global-situation-betewenne/    	 controllers.ReglementCtrl.ra
 POST			/alerte-email/    	 controllers.ReglementCtrl.infoViaMail(request:Request)
 GET			/Reglement/Eamil-alerte/    		controllers.ReglementCtrl.showAlerteView(request:Request)
 GET   /reglement/detail/json/:id     controllers.ReglementCtrl.detailJson(id: Long)
-GET   /reglement/json/:id    controllers.ReglementCtrl.getReglementJson(id: Long)
+GET   /reglement/json/:id /reglement/json/:id    controllers.ReglementCtrl.getReglementJson(id: Long)
 
 
 
@@ -114,4 +113,3 @@ GET     /json-CompteBudget                    	 controllers.ServerJson.jsonCompt
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 ### fin stock Routes
-GET    /Reglement/confirm-bon/:subAction/    controllers.ReglementCtrl.showConfirmBon(subAction: String, idAdherent: Long, request:Request)
