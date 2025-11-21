@@ -253,11 +253,8 @@
 
 <script>
 $(document).ready(function() {
-    console.log("Dashboard: Initialisation des graphiques...");
-    console.log("Chart.js disponible:", typeof Chart !== "undefined");
-    
-    console.log('Dashboard: Initialisation des graphiques...');
-    console.log('Chart.js disponible:', typeof Chart !== 'undefined');
+    console.log('Dashboard: Initialisation...');
+    console.log('Chart.js:', typeof Chart);
     
     // Configuration des couleurs
     const colors = {
@@ -277,19 +274,17 @@ $(document).ready(function() {
         'rgba(255, 159, 64, 0.8)',
         'rgba(199, 199, 199, 0.8)',
         'rgba(83, 102, 255, 0.8)',
-    console.log("Chargement graphique remboursements mensuels...");
         'rgba(255, 99, 255, 0.8)',
         'rgba(99, 255, 132, 0.8)'
     ];
 
     // 1. Graphique des remboursements mensuels
-            console.log("Données mensuelles reçues:", data);
-    console.log('Chargement graphique remboursements mensuels...');
+    console.log('Requête: remboursements mensuels');
     $.ajax({
         url: '@routes.DashboardCtrl.getRemboursementsMensuelsJson()',
         method: 'GET',
         success: function(data) {
-            console.log('Données mensuelles reçues:', data);
+            console.log('✓ Mensuels:', data);
             const ctx = document.getElementById('remboursementsMensuelsChart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
@@ -333,16 +328,17 @@ $(document).ready(function() {
             });
         },
         error: function(xhr, status, error) {
-            console.error('Erreur chargement données mensuelles:', error);
-            console.error("Status:", status, "Response:", xhr.responseText);
+            console.error('✗ Mensuels:', error, xhr.status, xhr.responseText);
         }
     });
 
     // 2. Graphique par type de prestation (Doughnut)
+    console.log('Requête: types prestations');
     $.ajax({
         url: '@routes.DashboardCtrl.getRemboursementsParTypePrestationJson()',
         method: 'GET',
         success: function(data) {
+            console.log('✓ Types:', data);
             const ctx = document.getElementById('remboursementsTypeChart').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
@@ -378,15 +374,17 @@ $(document).ready(function() {
             });
         },
         error: function(xhr, status, error) {
-            console.error('Erreur chargement types prestations:', error);
+            console.error('✗ Types:', error, xhr.status, xhr.responseText);
         }
     });
 
     // 3. Graphique adhérents par structure (Bar horizontal)
+    console.log('Requête: structures');
     $.ajax({
         url: '@routes.DashboardCtrl.getAdherentsParStructureJson()',
         method: 'GET',
         success: function(data) {
+            console.log('✓ Structures:', data);
             const ctx = document.getElementById('adherentsStructureChart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
@@ -421,18 +419,7 @@ $(document).ready(function() {
             });
         },
         error: function(xhr, status, error) {
-            console.error('Erreur chargement structures:', error);
-            console.error('Status:', status, 'Response:', xhr.responseText);
-        }
-    });
-    
-    console.log('Dashboard: Tous les appels AJAX lancés');
-
-});
-</script>
-
-}
-tures:', error);
+            console.error('✗ Structures:', error, xhr.status, xhr.responseText);
         }
     });
 
