@@ -26,7 +26,7 @@ import org.jooq.impl.TableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VBonDeCommandeRecord extends TableRecordImpl<VBonDeCommandeRecord> {
 
-    private static final long serialVersionUID = -1330283599;
+    private static final long serialVersionUID = -374120807;
 
     /**
      * Setter for <code>public.v_bon_de_commande.id</code>.
@@ -211,171 +211,185 @@ public class VBonDeCommandeRecord extends TableRecordImpl<VBonDeCommandeRecord> 
     }
 
     /**
+     * Setter for <code>public.v_bon_de_commande.date_expiration</code>.
+     */
+    public void setDateExpiration(Timestamp value) {
+        set(13, value);
+    }
+
+    /**
+     * Getter for <code>public.v_bon_de_commande.date_expiration</code>.
+     */
+    public Timestamp getDateExpiration() {
+        return (Timestamp) get(13);
+    }
+
+    /**
      * Setter for <code>public.v_bon_de_commande.annee</code>.
      */
     public void setAnnee(String value) {
-        set(13, value);
+        set(14, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.annee</code>.
      */
     public String getAnnee() {
-        return (String) get(13);
+        return (String) get(14);
     }
 
     /**
      * Setter for <code>public.v_bon_de_commande.on_deleted</code>.
      */
     public void setOnDeleted(Boolean value) {
-        set(14, value);
+        set(15, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.on_deleted</code>.
      */
     public Boolean getOnDeleted() {
-        return (Boolean) get(14);
+        return (Boolean) get(15);
     }
 
     /**
      * Setter for <code>public.v_bon_de_commande.prestation</code>.
      */
     public void setPrestation(String value) {
-        set(15, value);
+        set(16, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.prestation</code>.
      */
     public String getPrestation() {
-        return (String) get(15);
+        return (String) get(16);
     }
 
     /**
      * Setter for <code>public.v_bon_de_commande.couverture</code>.
      */
     public void setCouverture(String value) {
-        set(16, value);
+        set(17, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.couverture</code>.
      */
     public String getCouverture() {
-        return (String) get(16);
+        return (String) get(17);
     }
 
     /**
      * Setter for <code>public.v_bon_de_commande.nom_ay</code>.
      */
     public void setNomAy(String value) {
-        set(17, value);
+        set(18, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.nom_ay</code>.
      */
     public String getNomAy() {
-        return (String) get(17);
+        return (String) get(18);
     }
 
     /**
      * Setter for <code>public.v_bon_de_commande.lien</code>.
      */
     public void setLien(String value) {
-        set(18, value);
+        set(19, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.lien</code>.
      */
     public String getLien() {
-        return (String) get(18);
+        return (String) get(19);
     }
 
     /**
      * Setter for <code>public.v_bon_de_commande.genre</code>.
      */
     public void setGenre(String value) {
-        set(19, value);
+        set(20, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.genre</code>.
      */
     public String getGenre() {
-        return (String) get(19);
+        return (String) get(20);
     }
 
     /**
      * Setter for <code>public.v_bon_de_commande.ayant_droit</code>.
      */
     public void setAyantDroit(Long value) {
-        set(20, value);
+        set(21, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.ayant_droit</code>.
      */
     public Long getAyantDroit() {
-        return (Long) get(20);
+        return (Long) get(21);
     }
 
     /**
      * Setter for <code>public.v_bon_de_commande.montant_total</code>.
      */
     public void setMontantTotal(Long value) {
-        set(21, value);
+        set(22, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.montant_total</code>.
      */
     public Long getMontantTotal() {
-        return (Long) get(21);
+        return (Long) get(22);
     }
 
     /**
      * Setter for <code>public.v_bon_de_commande.montant_reglement</code>.
      */
     public void setMontantReglement(Long value) {
-        set(22, value);
+        set(23, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.montant_reglement</code>.
      */
     public Long getMontantReglement() {
-        return (Long) get(22);
+        return (Long) get(23);
     }
 
     /**
      * Setter for <code>public.v_bon_de_commande.montant_paye</code>.
      */
     public void setMontantPaye(Long value) {
-        set(23, value);
+        set(24, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.montant_paye</code>.
      */
     public Long getMontantPaye() {
-        return (Long) get(23);
+        return (Long) get(24);
     }
 
     /**
      * Setter for <code>public.v_bon_de_commande.id_structure</code>.
      */
     public void setIdStructure(Long value) {
-        set(24, value);
+        set(25, value);
     }
 
     /**
      * Getter for <code>public.v_bon_de_commande.id_structure</code>.
      */
     public Long getIdStructure() {
-        return (Long) get(24);
+        return (Long) get(25);
     }
 
     // -------------------------------------------------------------------------
@@ -392,7 +406,7 @@ public class VBonDeCommandeRecord extends TableRecordImpl<VBonDeCommandeRecord> 
     /**
      * Create a detached, initialised VBonDeCommandeRecord
      */
-    public VBonDeCommandeRecord(Long id, String nomAd, String prenomAd, String codeCarnet, Long idAdherent, String matricule, String refFacture, String structure, Timestamp datePayement, String whoDone, Timestamp whenDone, Boolean isConfirmedBon, Timestamp whenConfirmedBon, String annee, Boolean onDeleted, String prestation, String couverture, String nomAy, String lien, String genre, Long ayantDroit, Long montantTotal, Long montantReglement, Long montantPaye, Long idStructure) {
+    public VBonDeCommandeRecord(Long id, String nomAd, String prenomAd, String codeCarnet, Long idAdherent, String matricule, String refFacture, String structure, Timestamp datePayement, String whoDone, Timestamp whenDone, Boolean isConfirmedBon, Timestamp whenConfirmedBon, Timestamp dateExpiration, String annee, Boolean onDeleted, String prestation, String couverture, String nomAy, String lien, String genre, Long ayantDroit, Long montantTotal, Long montantReglement, Long montantPaye, Long idStructure) {
         super(VBonDeCommande.V_BON_DE_COMMANDE);
 
         set(0, id);
@@ -408,17 +422,18 @@ public class VBonDeCommandeRecord extends TableRecordImpl<VBonDeCommandeRecord> 
         set(10, whenDone);
         set(11, isConfirmedBon);
         set(12, whenConfirmedBon);
-        set(13, annee);
-        set(14, onDeleted);
-        set(15, prestation);
-        set(16, couverture);
-        set(17, nomAy);
-        set(18, lien);
-        set(19, genre);
-        set(20, ayantDroit);
-        set(21, montantTotal);
-        set(22, montantReglement);
-        set(23, montantPaye);
-        set(24, idStructure);
+        set(13, dateExpiration);
+        set(14, annee);
+        set(15, onDeleted);
+        set(16, prestation);
+        set(17, couverture);
+        set(18, nomAy);
+        set(19, lien);
+        set(20, genre);
+        set(21, ayantDroit);
+        set(22, montantTotal);
+        set(23, montantReglement);
+        set(24, montantPaye);
+        set(25, idStructure);
     }
 }

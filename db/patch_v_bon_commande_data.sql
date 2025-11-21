@@ -16,6 +16,7 @@ CREATE OR REPLACE VIEW public.v_bon_de_commande
     reg.when_done,
 	reg.is_confirmed_bon,
 	reg.when_confirmed_bon,
+	reg.date_expiration,
     "substring"(reg.date_payement::character varying::text, 1, 4)::character varying AS annee,
     reg.on_deleted,
     ty.prestation,
@@ -65,6 +66,9 @@ CREATE OR REPLACE VIEW public.v_reglement_details
     reg.date_payement,
     reg.prestation,
     reg.lien,
+	reg.is_confirmed_bon,
+	reg.when_confirmed_bon,
+	reg.date_expiration,
     COALESCE(det.montant, 0::bigint) * det.quantite * reg.couverture::bigint / 100 AS total_couvert,
     COALESCE(det.montant, 0::bigint) * det.quantite * (100 - reg.couverture::integer)::bigint / 100 AS total_restant
    FROM reglement_detail det

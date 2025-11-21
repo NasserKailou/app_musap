@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetails implements Serializable {
 
-    private static final long serialVersionUID = 49561061;
+    private static final long serialVersionUID = 1801018578;
 
     private Long      id;
     private Long      reglement;
@@ -45,6 +45,9 @@ public class VReglementDetails implements Serializable {
     private Timestamp datePayement;
     private String    prestation;
     private String    lien;
+    private Boolean   isConfirmedBon;
+    private Timestamp whenConfirmedBon;
+    private Timestamp dateExpiration;
     private Long      totalCouvert;
     private Long      totalRestant;
 
@@ -71,6 +74,9 @@ public class VReglementDetails implements Serializable {
         this.datePayement = value.datePayement;
         this.prestation = value.prestation;
         this.lien = value.lien;
+        this.isConfirmedBon = value.isConfirmedBon;
+        this.whenConfirmedBon = value.whenConfirmedBon;
+        this.dateExpiration = value.dateExpiration;
         this.totalCouvert = value.totalCouvert;
         this.totalRestant = value.totalRestant;
     }
@@ -96,6 +102,9 @@ public class VReglementDetails implements Serializable {
         Timestamp datePayement,
         String    prestation,
         String    lien,
+        Boolean   isConfirmedBon,
+        Timestamp whenConfirmedBon,
+        Timestamp dateExpiration,
         Long      totalCouvert,
         Long      totalRestant
     ) {
@@ -119,6 +128,9 @@ public class VReglementDetails implements Serializable {
         this.datePayement = datePayement;
         this.prestation = prestation;
         this.lien = lien;
+        this.isConfirmedBon = isConfirmedBon;
+        this.whenConfirmedBon = whenConfirmedBon;
+        this.dateExpiration = dateExpiration;
         this.totalCouvert = totalCouvert;
         this.totalRestant = totalRestant;
     }
@@ -283,6 +295,30 @@ public class VReglementDetails implements Serializable {
         this.lien = lien;
     }
 
+    public Boolean getIsConfirmedBon() {
+        return this.isConfirmedBon;
+    }
+
+    public void setIsConfirmedBon(Boolean isConfirmedBon) {
+        this.isConfirmedBon = isConfirmedBon;
+    }
+
+    public Timestamp getWhenConfirmedBon() {
+        return this.whenConfirmedBon;
+    }
+
+    public void setWhenConfirmedBon(Timestamp whenConfirmedBon) {
+        this.whenConfirmedBon = whenConfirmedBon;
+    }
+
+    public Timestamp getDateExpiration() {
+        return this.dateExpiration;
+    }
+
+    public void setDateExpiration(Timestamp dateExpiration) {
+        this.dateExpiration = dateExpiration;
+    }
+
     public Long getTotalCouvert() {
         return this.totalCouvert;
     }
@@ -323,6 +359,9 @@ public class VReglementDetails implements Serializable {
         sb.append(", ").append(datePayement);
         sb.append(", ").append(prestation);
         sb.append(", ").append(lien);
+        sb.append(", ").append(isConfirmedBon);
+        sb.append(", ").append(whenConfirmedBon);
+        sb.append(", ").append(dateExpiration);
         sb.append(", ").append(totalCouvert);
         sb.append(", ").append(totalRestant);
 

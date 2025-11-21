@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetails extends TableImpl<VReglementDetailsRecord> {
 
-    private static final long serialVersionUID = -2060785547;
+    private static final long serialVersionUID = 110070592;
 
     /**
      * The reference instance of <code>public.v_reglement_details</code>
@@ -147,6 +147,21 @@ public class VReglementDetails extends TableImpl<VReglementDetailsRecord> {
      * The column <code>public.v_reglement_details.lien</code>.
      */
     public final TableField<VReglementDetailsRecord, String> LIEN = createField("lien", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement_details.is_confirmed_bon</code>.
+     */
+    public final TableField<VReglementDetailsRecord, Boolean> IS_CONFIRMED_BON = createField("is_confirmed_bon", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>public.v_reglement_details.when_confirmed_bon</code>.
+     */
+    public final TableField<VReglementDetailsRecord, Timestamp> WHEN_CONFIRMED_BON = createField("when_confirmed_bon", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>public.v_reglement_details.date_expiration</code>.
+     */
+    public final TableField<VReglementDetailsRecord, Timestamp> DATE_EXPIRATION = createField("date_expiration", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
     /**
      * The column <code>public.v_reglement_details.total_couvert</code>.

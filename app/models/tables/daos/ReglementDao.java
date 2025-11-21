@@ -162,4 +162,11 @@ public class ReglementDao extends DAOImpl<ReglementRecord, models.tables.pojos.R
     public List<models.tables.pojos.Reglement> fetchByWhenConfirmedBon(Timestamp... values) {
         return fetch(Reglement.REGLEMENT.WHEN_CONFIRMED_BON, values);
     }
+
+    /**
+     * Fetch records that have <code>date_expiration IN (values)</code>
+     */
+    public List<models.tables.pojos.Reglement> fetchByDateExpiration(Timestamp... values) {
+        return fetch(Reglement.REGLEMENT.DATE_EXPIRATION, values);
+    }
 }

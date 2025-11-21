@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Reglement implements Serializable {
 
-    private static final long serialVersionUID = 1038289480;
+    private static final long serialVersionUID = -399251275;
 
     private Long      id;
     private Long      adherent;
@@ -40,6 +40,7 @@ public class Reglement implements Serializable {
     private String    numBon;
     private Boolean   isConfirmedBon;
     private Timestamp whenConfirmedBon;
+    private Timestamp dateExpiration;
 
     public Reglement() {}
 
@@ -59,6 +60,7 @@ public class Reglement implements Serializable {
         this.numBon = value.numBon;
         this.isConfirmedBon = value.isConfirmedBon;
         this.whenConfirmedBon = value.whenConfirmedBon;
+        this.dateExpiration = value.dateExpiration;
     }
 
     public Reglement(
@@ -76,7 +78,8 @@ public class Reglement implements Serializable {
         String    telStructureEmettrice,
         String    numBon,
         Boolean   isConfirmedBon,
-        Timestamp whenConfirmedBon
+        Timestamp whenConfirmedBon,
+        Timestamp dateExpiration
     ) {
         this.id = id;
         this.adherent = adherent;
@@ -93,6 +96,7 @@ public class Reglement implements Serializable {
         this.numBon = numBon;
         this.isConfirmedBon = isConfirmedBon;
         this.whenConfirmedBon = whenConfirmedBon;
+        this.dateExpiration = dateExpiration;
     }
 
     public Long getId() {
@@ -215,6 +219,14 @@ public class Reglement implements Serializable {
         this.whenConfirmedBon = whenConfirmedBon;
     }
 
+    public Timestamp getDateExpiration() {
+        return this.dateExpiration;
+    }
+
+    public void setDateExpiration(Timestamp dateExpiration) {
+        this.dateExpiration = dateExpiration;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Reglement (");
@@ -234,6 +246,7 @@ public class Reglement implements Serializable {
         sb.append(", ").append(numBon);
         sb.append(", ").append(isConfirmedBon);
         sb.append(", ").append(whenConfirmedBon);
+        sb.append(", ").append(dateExpiration);
 
         sb.append(")");
         return sb.toString();

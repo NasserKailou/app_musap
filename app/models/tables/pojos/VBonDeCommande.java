@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VBonDeCommande implements Serializable {
 
-    private static final long serialVersionUID = 1499075958;
+    private static final long serialVersionUID = 1820298111;
 
     private Long      id;
     private String    nomAd;
@@ -38,6 +38,7 @@ public class VBonDeCommande implements Serializable {
     private Timestamp whenDone;
     private Boolean   isConfirmedBon;
     private Timestamp whenConfirmedBon;
+    private Timestamp dateExpiration;
     private String    annee;
     private Boolean   onDeleted;
     private String    prestation;
@@ -67,6 +68,7 @@ public class VBonDeCommande implements Serializable {
         this.whenDone = value.whenDone;
         this.isConfirmedBon = value.isConfirmedBon;
         this.whenConfirmedBon = value.whenConfirmedBon;
+        this.dateExpiration = value.dateExpiration;
         this.annee = value.annee;
         this.onDeleted = value.onDeleted;
         this.prestation = value.prestation;
@@ -95,6 +97,7 @@ public class VBonDeCommande implements Serializable {
         Timestamp whenDone,
         Boolean   isConfirmedBon,
         Timestamp whenConfirmedBon,
+        Timestamp dateExpiration,
         String    annee,
         Boolean   onDeleted,
         String    prestation,
@@ -121,6 +124,7 @@ public class VBonDeCommande implements Serializable {
         this.whenDone = whenDone;
         this.isConfirmedBon = isConfirmedBon;
         this.whenConfirmedBon = whenConfirmedBon;
+        this.dateExpiration = dateExpiration;
         this.annee = annee;
         this.onDeleted = onDeleted;
         this.prestation = prestation;
@@ -239,6 +243,14 @@ public class VBonDeCommande implements Serializable {
         this.whenConfirmedBon = whenConfirmedBon;
     }
 
+    public Timestamp getDateExpiration() {
+        return this.dateExpiration;
+    }
+
+    public void setDateExpiration(Timestamp dateExpiration) {
+        this.dateExpiration = dateExpiration;
+    }
+
     public String getAnnee() {
         return this.annee;
     }
@@ -352,6 +364,7 @@ public class VBonDeCommande implements Serializable {
         sb.append(", ").append(whenDone);
         sb.append(", ").append(isConfirmedBon);
         sb.append(", ").append(whenConfirmedBon);
+        sb.append(", ").append(dateExpiration);
         sb.append(", ").append(annee);
         sb.append(", ").append(onDeleted);
         sb.append(", ").append(prestation);
