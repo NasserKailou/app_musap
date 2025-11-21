@@ -49,4 +49,8 @@ private final IConnectionHelper con;
 		con.connection().close();
 		return c;
 	}
+	
+	public List<TypePrestation> getAllTypePrestation() {
+		return findAll();
+	}
 }

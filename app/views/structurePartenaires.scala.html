@@ -6,7 +6,25 @@
   part: models.tables.pojos.StructurePartenaire,
   regions: List[models.tables.pojos.Region])(implicit request: Http.Request)
 
-@main("Partenaires") {
+@main("Structures Partenaires") {
+
+  <!-- Content Header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-hospital"></i> Gestion des Structures Partenaires</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/accueil">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="#">Paramètrages</a></li>
+            <li class="breadcrumb-item active">Structures Partenaires</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <section class="content">
     <div class="container-fluid">
@@ -16,7 +34,12 @@
         <div class="col-12">
           <div class="card card-primary">
             <div class="card-header">
-              <h3 class="card-title">Gestion des structures partenaires</h3>
+              <h3 class="card-title">
+                <i class="fas fa-hospital-alt mr-2"></i>
+                @if(viewMode.equals("CREATE")) { Nouvelle Structure Partenaire }
+                @if(viewMode.equals("EDIT")) { Modifier la Structure Partenaire }
+                @if(viewMode.equals("DELETE")) { Supprimer la Structure Partenaire }
+              </h3>
             </div>
 
             <form method="POST"
@@ -32,44 +55,47 @@
 
               <div class="card-body">
 
-                <p class="mb-3 text-muted">
-                  Tous les champs avec
-                  <span style="color:red; font-size:14px;">*</span> sont obligatoires.
-                </p>
+                <div class="alert alert-info">
+                  <i class="icon fas fa-info-circle"></i>
+                  Tous les champs avec <span class="text-danger font-weight-bold">*</span> sont obligatoires.
+                </div>
 
                 <div class="form-row">
 
                   <!-- Libellé structure -->
                   <div class="form-group col-md-4">
                     <label for="libelle">
-                      <b>Libellé structure
-                        <span style="color:red; font-size:14px;">* :</span>
-                      </b>
+                      <i class="fas fa-building text-primary"></i>
+                      Libellé Structure
+                      <span class="text-danger">*</span>
                     </label>
                     <input type="text"
                            id="libelle"
                            name="libelle"
                            autocomplete="off"
                            value="@part.getLibelle()"
-                           placeholder="Préciser le nom de la structure"
-                           class="form-control"
+                           placeholder="Ex: Hôpital Central, Clinique ABC..."
+                           class="form-control @if(viewMode.equals("DELETE")) { is-invalid }"
                            required
-                           @if(viewMode.equals("DELETE")) { disabled="disabled" } >
+                           @if(viewMode.equals("DELETE")) { disabled="disabled" readonly } >
+                    <small class="form-text text-muted">
+                      Nom complet de la structure partenaire
+                    </small>
                   </div>
 
                   <!-- Région -->
                   <div class="form-group col-md-4">
                     <label for="region">
-                      <b>Région
-                        <span style="color:red; font-size:14px;">* :</span>
-                      </b>
+                      <i class="fas fa-map-marked-alt text-success"></i>
+                      Région
+                      <span class="text-danger">*</span>
                     </label>
                     <select id="region"
                             name="region"
-                            class="form-control"
+                            class="form-control @if(viewMode.equals("DELETE")) { is-invalid }"
                             required
                             @if(viewMode.equals("DELETE")) { disabled="disabled" }>
-                      <option value="">Sélectionner la région</option>
+                      <option value="">Sélectionner la région...</option>
                       @for(c <- regions) {
                         <option value="@c.getId()"
                                 @if(part.getRegion() == c.getId()) { selected="selected" }>
@@ -77,71 +103,85 @@
                         </option>
                       }
                     </select>
+                    <small class="form-text text-muted">
+                      Zone géographique de la structure
+                    </small>
                   </div>
 
                   <!-- Téléphone -->
                   <div class="form-group col-md-4">
                     <label for="telephone">
-                      <b>N° Téléphone
-                        <span style="color:red; font-size:14px;">* :</span>
-                      </b>
+                      <i class="fas fa-phone text-info"></i>
+                      N° Téléphone
+                      <span class="text-danger">*</span>
                     </label>
-                    <input type="tel"
-                           id="telephone"
-                           name="telephone"
-                           autocomplete="off"
-                           value="@part.getTelephone()"
-                           placeholder="Numéro de téléphone"
-                           class="form-control"
-                           required
-                           @if(viewMode.equals("DELETE")) { disabled="disabled" } >
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          <i class="fas fa-phone-alt"></i>
+                        </span>
+                      </div>
+                      <input type="tel"
+                             id="telephone"
+                             name="telephone"
+                             autocomplete="off"
+                             value="@part.getTelephone()"
+                             placeholder="Ex: +227 20 XX XX XX"
+                             class="form-control @if(viewMode.equals("DELETE")) { is-invalid }"
+                             required
+                             @if(viewMode.equals("DELETE")) { disabled="disabled" readonly } >
+                    </div>
+                    <small class="form-text text-muted">
+                      Numéro de contact principal
+                    </small>
                   </div>
 
                 </div>
 
               </div><!-- /.card-body -->
 
-              <div class="card-footer text-center">
+              <div class="card-footer">
+                <div class="row">
+                  <div class="col-md-12 text-right">
 
-                <button class="btn btn-secondary"
-                        type="button"
-                        name="Annuler"
-                        value="Retour"
-                        onclick="history.go(-1)">
-                  <i class="fas fa-arrow-left"></i> Retour
-                </button>
+                    <a href="@controllers.routes.StructurePartenaireCtrl.show("CREATE", 0L)"
+                       class="btn btn-secondary">
+                      <i class="fas fa-arrow-left"></i> Retour
+                    </a>
 
-                @if(viewMode.equals("CREATE")) {
-                  <button class="btn btn-success"
-                          type="submit"
-                          id="valider"
-                          name="Valider"
-                          title="Enregistrer les informations">
-                    <i class="fas fa-save"></i> Enregistrer
-                  </button>
-                }
+                    @if(viewMode.equals("CREATE")) {
+                      <button class="btn btn-success"
+                              type="submit"
+                              id="valider"
+                              name="Valider"
+                              title="Enregistrer les informations">
+                        <i class="fas fa-save"></i> Enregistrer
+                      </button>
+                    }
 
-                @if(viewMode.equals("EDIT")) {
-                  <button class="btn btn-warning"
-                          type="submit"
-                          id="valider"
-                          name="Valider"
-                          title="Modifier les informations">
-                    <i class="fas fa-edit"></i> Modifier
-                  </button>
-                }
+                    @if(viewMode.equals("EDIT")) {
+                      <button class="btn btn-warning"
+                              type="submit"
+                              id="valider"
+                              name="Valider"
+                              title="Modifier les informations">
+                        <i class="fas fa-edit"></i> Modifier
+                      </button>
+                    }
 
-                @if(viewMode.equals("DELETE")) {
-                  <button class="btn btn-danger"
-                          type="submit"
-                          id="valider"
-                          name="Valider"
-                          title="Supprimer cette structure"
-                          onclick="return window.confirm('Voulez-vous supprimer cette structure partenaire ?');">
-                    <i class="fas fa-trash"></i> Supprimer
-                  </button>
-                }
+                    @if(viewMode.equals("DELETE")) {
+                      <button class="btn btn-danger"
+                              type="submit"
+                              id="valider"
+                              name="Valider"
+                              title="Supprimer cette structure"
+                              onclick="return window.confirm('Êtes-vous sûr de vouloir supprimer cette structure partenaire ?');">
+                        <i class="fas fa-trash"></i> Supprimer
+                      </button>
+                    }
 
+                  </div>
+                </div>
               </div><!-- /.card-footer -->
 
             </form>
@@ -154,40 +194,68 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Liste des structures partenaires</h3>
+              <h3 class="card-title">
+                <i class="fas fa-list mr-2"></i>
+                Liste des Structures Partenaires
+              </h3>
+              <div class="card-tools">
+                <span class="badge badge-primary">@partenaires.size() structure(s)</span>
+              </div>
             </div>
-            <div class="card-body table-responsive">
-              <table class="dta-tbl table table-bordered table-hover">
+            <div class="card-body table-responsive p-0">
+              <table class="table table-head-fixed table-bordered table-hover text-nowrap">
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Libellé</th>
-                    <th>Région</th>
-                    <th>Téléphone</th>
-                    <th>Action</th>
+                    <th class="text-center" style="width: 80px;">#</th>
+                    <th><i class="fas fa-hospital mr-1"></i> Libellé</th>
+                    <th><i class="fas fa-map-marker-alt mr-1"></i> Région</th>
+                    <th class="text-center"><i class="fas fa-phone mr-1"></i> Téléphone</th>
+                    <th class="text-center" style="width: 150px;">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for(c <- partenaires) {
+                  @if(partenaires.isEmpty()) {
                     <tr>
-                      <td>@c.getId()</td>
-                      <td>@c.getLibelle()</td>
-                      <td>@c.getRegion()</td>
-                      <td>@c.getTelephone()</td>
-                      <td>
-                        <a class="btn btn-primary btn-sm"
-                           title="Modifier"
-                           href='@controllers.routes.StructurePartenaireCtrl.show("EDIT", c.getId())'>
-                          <i class="fas fa-edit"></i>
-                        </a>
-                        <a class="btn btn-danger btn-sm"
-                           title="Supprimer"
-                           href='@controllers.routes.StructurePartenaireCtrl.show("DELETE", c.getId())'
-                           onclick="return window.confirm('Voulez-vous supprimer cette structure partenaire ?');">
-                          <i class="fas fa-trash-alt"></i>
-                        </a>
+                      <td colspan="5" class="text-center text-muted">
+                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                        <p>Aucune structure partenaire enregistrée</p>
                       </td>
                     </tr>
+                  } else {
+                    @for(c <- partenaires) {
+                      <tr>
+                        <td class="text-center"><strong>@c.getId()</strong></td>
+                        <td>
+                          <i class="fas fa-hospital-alt text-primary mr-2"></i>
+                          <strong>@c.getLibelle()</strong>
+                        </td>
+                        <td>
+                          <i class="fas fa-map-pin text-success mr-2"></i>
+                          @c.getRegion()
+                        </td>
+                        <td class="text-center">
+                          <span class="badge badge-info">
+                            <i class="fas fa-phone-alt mr-1"></i>
+                            @c.getTelephone()
+                          </span>
+                        </td>
+                        <td class="text-center">
+                          <div class="btn-group">
+                            <a class="btn btn-sm btn-warning"
+                               title="Modifier cette structure"
+                               href='@controllers.routes.StructurePartenaireCtrl.show("EDIT", c.getId())'>
+                              <i class="fas fa-edit"></i>
+                            </a>
+                            <a class="btn btn-sm btn-danger"
+                               title="Supprimer cette structure"
+                               href='@controllers.routes.StructurePartenaireCtrl.show("DELETE", c.getId())'
+                               onclick="return window.confirm('Êtes-vous sûr de vouloir supprimer cette structure partenaire ?');">
+                              <i class="fas fa-trash-alt"></i>
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    }
                   }
                 </tbody>
               </table>
@@ -200,15 +268,21 @@
   </section>
 
   <script>
-    function openPopup(target, x, y, w, h) {
-      var win = window.open(
-        target,
-        'popup',
-        'height=' + h + ', width=' + w + ', top=' + y + ', left=' + x + ', toolbar=no, menubar=yes, location=no, resizable=yes, scrollbars=yes, status=no'
-      );
-      win.window.focus();
-      return false;
-    }
+    $(document).ready(function() {
+      // Initialize DataTable
+      $('.table').DataTable({
+        "paging": true,
+        "lengthChange": true,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+        "language": {
+          "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+        }
+      });
+    });
   </script>
 
 }

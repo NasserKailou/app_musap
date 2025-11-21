@@ -88,4 +88,12 @@ public class StructureMainServices extends StructurePartenaireDao {
 	public StructurePartenaire findById(Long id) {
 		return super.findById(id);
 	}
+	
+	public List<StructurePartenaire> findAll() {
+		List<StructurePartenaire> structures = con.connection().selectFrom(models.Tables.STRUCTURE_PARTENAIRE)
+				.where(models.Tables.STRUCTURE_PARTENAIRE.IS_DELETED.isFalse())
+				.fetchInto(StructurePartenaire.class);
+		con.connection().close();
+		return structures;
+	}
 }

@@ -1,334 +1,385 @@
 @import java.time.LocalDateTime
 @import helper._
 @import java.util
-@import views.html.utils._
 @(implicit request: Http.Request)
 
-@main("Situations"){
-<script type="text/javascript">
-function openPopup(target, x, y, w, h) {
-	var win = window.open(target, 'popup', 'height='+h+', width='+w+', top='+y+', left='+x+', toolbar=no, menubar=yes, location=no, resizable=yes, scrollbars=yes, status=no');
-	win.window.focus();
-	return false;
+@main("Rapports et Statistiques"){
+
+  <!-- Content Header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Rapports et Statistiques</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/accueil">Accueil</a></li>
+            <li class="breadcrumb-item active">Rapports</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+
+      @if(request.session.get("droit").isPresent() && request.session.get("droit").get() == "Admin"){
+        
+        <!-- Situation Globale Annuelle -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-chart-line mr-2"></i>
+                  Situation Globale par Année
+                </h3>
+              </div>
+              <form method="POST" 
+                    name="form" 
+                    action="@controllers.routes.ReglementCtrl.rapportAnnuel("situation_global_annuel")" 
+                    class="form-horizontal">
+                @helper.CSRF.formField
+                
+                <div class="card-body">
+                  <div class="form-group">
+                    <label for="annee1">
+                      <i class="fas fa-calendar-alt"></i> Année
+                      <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" 
+                           id="annee1" 
+                           name="annee" 
+                           placeholder="AAAA" 
+                           class="form-control"
+                           min="2000"
+                           max="2100"
+                           required />
+                  </div>
+                </div>
+                
+                <div class="card-footer">
+                  <button class="btn btn-success" type="submit">
+                    <i class="fas fa-print mr-1"></i> Générer le Rapport
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Situation des Dépassements -->
+          <div class="col-md-6">
+            <div class="card card-info">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-exclamation-triangle mr-2"></i>
+                  Situation des Dépassements par Année
+                </h3>
+              </div>
+              <form method="POST" 
+                    name="form" 
+                    action="@controllers.routes.ReglementCtrl.rapportAnnuel("situation_depassement")" 
+                    class="form-horizontal">
+                @helper.CSRF.formField
+                
+                <div class="card-body">
+                  <div class="form-group">
+                    <label for="annee2">
+                      <i class="fas fa-calendar-alt"></i> Année
+                      <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" 
+                           id="annee2" 
+                           name="annee" 
+                           placeholder="AAAA" 
+                           class="form-control"
+                           min="2000"
+                           max="2100"
+                           required />
+                  </div>
+                </div>
+                
+                <div class="card-footer">
+                  <button class="btn btn-info" type="submit">
+                    <i class="fas fa-print mr-1"></i> Générer le Rapport
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      }
+
+      @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "SuperAdmin" || request.session.get("droit").get() == "Comptable")){
+        
+        <!-- État de Paiement par Période -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card-success">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-money-bill-wave mr-2"></i>
+                  État de Paiement par Période
+                </h3>
+              </div>
+              <form method="POST" 
+                    name="form" 
+                    action="@controllers.routes.AdherentCtrl.rapportBetwenne()" 
+                    class="form-horizontal">
+                @helper.CSRF.formField
+                
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-5">
+                      <div class="form-group">
+                        <label for="tmpDate1">
+                          <i class="fas fa-calendar-day"></i> Date de Début
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate1" 
+                               name="tmpDate" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-5">
+                      <div class="form-group">
+                        <label for="tmpDate2_1">
+                          <i class="fas fa-calendar-day"></i> Date de Fin
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate2_1" 
+                               name="tmpDate2" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                      <label>&nbsp;</label>
+                      <button class="btn btn-success btn-block" type="submit">
+                        <i class="fas fa-print mr-1"></i> Générer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Situation Adhérents par Période -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card-warning">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-users mr-2"></i>
+                  Situation des Adhérents par Période
+                </h3>
+              </div>
+              <form method="POST" 
+                    name="form" 
+                    action="@controllers.routes.AdherentCtrl.rapportAdhBetwenne()" 
+                    class="form-horizontal">
+                @helper.CSRF.formField
+                
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label for="tmpDate3">
+                          <i class="fas fa-calendar-day"></i> Date de Début
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate3" 
+                               name="tmpDate" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label for="tmpDate2_2">
+                          <i class="fas fa-calendar-day"></i> Date de Fin
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate2_2" 
+                               name="tmpDate2" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label for="adherent">
+                          <i class="fas fa-id-card"></i> Matricule Adhérent
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" 
+                               id="adherent" 
+                               name="adherent"
+                               placeholder="Ex: 01, 120, 292" 
+                               class="form-control" 
+                               required />
+                        <input type="hidden" id="partenaireid" name="partenaireid">
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-1">
+                      <label>&nbsp;</label>
+                      <button class="btn btn-warning btn-block" type="submit">
+                        <i class="fas fa-print"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Situation Globale par Période -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card-danger">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-chart-bar mr-2"></i>
+                  Situation Globale par Période
+                </h3>
+              </div>
+              <form method="POST" 
+                    name="form" 
+                    action="@controllers.routes.ReglementCtrl.rapportBetwenne()" 
+                    class="form-horizontal">
+                @helper.CSRF.formField
+                
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-5">
+                      <div class="form-group">
+                        <label for="tmpDate4">
+                          <i class="fas fa-calendar-day"></i> Date de Début
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate4" 
+                               name="tmpDate" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-5">
+                      <div class="form-group">
+                        <label for="tmpDate2_3">
+                          <i class="fas fa-calendar-day"></i> Date de Fin
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate2_3" 
+                               name="tmpDate2" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                      <label>&nbsp;</label>
+                      <button class="btn btn-danger btn-block" type="submit">
+                        <i class="fas fa-print mr-1"></i> Générer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      }
+
+      @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "AGENT_CARD_ID" || request.session.get("droit").get() == "SuperAdmin" || request.session.get("droit").get() == "Admin")){
+        
+        <!-- Impression des Cartes d'Accès -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card-purple">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-id-card mr-2"></i>
+                  Impression des Cartes d'Accès MAINS
+                </h3>
+              </div>
+              <form method="POST" 
+                    name="form" 
+                    action="@controllers.routes.AdherentCtrl.impressionCarteMainsGlobal()" 
+                    class="form-horizontal">
+                @helper.CSRF.formField
+                
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-10">
+                      <div class="form-group">
+                        <label for="libelleCarte">
+                          <i class="fas fa-list"></i> Type de Carte
+                          <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-control" 
+                                required 
+                                id="libelleCarte" 
+                                name="libelleCarte">
+                          <option value="">Sélectionner le type de carte...</option>
+                          <option value="badge_principale">
+                            <i class="fas fa-user"></i> Cartes Globales Adhérents
+                          </option>
+                          <option value="badge_principale_ay">
+                            <i class="fas fa-user-friends"></i> Cartes Globales Ayants Droit
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                      <label>&nbsp;</label>
+                      <button class="btn btn-purple btn-block" 
+                              type="submit" 
+                              style="background-color: #6f42c1; border-color: #6f42c1; color: white;">
+                        <i class="fas fa-print mr-1"></i> Imprimer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      }
+
+    </div><!-- /.container-fluid -->
+  </section>
+
+  <script>
+    $(document).ready(function() {
+      // Set default dates
+      const today = new Date().toISOString().split('T')[0];
+      const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+      
+      // Optionally set default date values
+      // $('input[type="date"]').val(today);
+    });
+  </script>
+
 }
-
-</script>
-
-<hr>
-<div class="card-header" id="titre_header">
-				<div class="row">
-		
-			
-			<br>
-			@if(request.session.get("droit").get() == "Admin"){
-			<center>
-		
-		<form  method="POST" name="form" action="@controllers.routes.ReglementCtrl.rapportAnnuel("situation_global_annuel")"  class="form-horizontal col-md-12 col-sm-12 col-xs-12" >
-			@helper.CSRF.formField
-			<fieldset style=" color:#000; width:90%; background-color:#DDE7E9; border-radius:10px; font-size:14px;" >
-			
-					<h6 style="color:#000;">
-						<strong>
-							<i> <font style="color:red;  font-size:14px;">Situations Global par année :</font> </i>	
-						</strong>
-					</h6>
-					<center>
-						<div class="form-group row">
-						 
-						 
-						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Année</b></label>
-						  	<div class="col-sm-2">
-								<input type="number" id="annee"  name="annee" placeholder="AAAA" class="form-control" />
-							</div>
-
-						  	 
-						 <div class="col-sm-2">
-						  	<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider les informations" >	<i class="glyphicon glyphicon-print"></i> Imprimer</button> 
-						</div>
-						  </div>
-				</center>
-			
-			
-				</fieldset>
-			
-			</form>
-			
-			</center>
-			
-			
-			<center>
-		
-		<form  method="POST" name="form" action="@controllers.routes.ReglementCtrl.rapportAnnuel("situation_depassement")"  class="form-horizontal col-md-12 col-sm-12 col-xs-12" >
-			@helper.CSRF.formField
-			<fieldset style=" color:#000; width:90%; background-color:#DDE7E9; border-radius:10px; font-size:14px;" >
-			
-					<h6 style="color:#000;">
-						<strong>
-							<i> <font style="color:blue;  font-size:14px;">Situations des dépassement Global par année :</font> </i>	
-						</strong>
-					</h6>
-					<center>
-						<div class="form-group row">
-						 
-						 
-						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Année</b></label>
-						  	<div class="col-sm-2">
-								<input type="number" id="annee"  name="annee" placeholder="AAAA" class="form-control" />
-							</div>
-
-						  	 
-						 <div class="col-sm-2">
-						  	<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider les informations" >	<i class="glyphicon glyphicon-print"></i> Imprimer</button> 
-						</div>
-						  </div>
-				</center>
-			
-			
-				</fieldset>
-			
-			</form>
-			
-			</center>
-			}
-			
-			@if(request.session.get("droit").get() == "SuperAdmin" || request.session.get("droit").get() == "Comptable" ){
-						<center>
-		
-		<form  method="POST" name="form" action="@controllers.routes.AdherentCtrl.rapportBetwenne()"  class="form-horizontal col-md-12 col-sm-12 col-xs-12" >
-			@helper.CSRF.formField
-			<fieldset style=" color:#000; width:90%; background-color:#DDE7E9; border-radius:10px; font-size:14px;" >
-			
-					<h6 style="color:#000;">
-						<strong>
-							<i> <font style="color:green;  font-size:16px;">Etat de paiement par période </font> </i>	
-						</strong>
-					</h6>
-						<div class="form-group row">
-						 
-						 
-						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Date début:</b></label>
-						  	<div class="col-sm-2">
-								<input type="date" id="tmpDate"  name="tmpDate" placeholder="JJ/MM/AAAA" class="form-control" />
-							</div>
-						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Date fin:</b></label>
-						  	<div class="col-sm-2">
-								<input type="date" id="tmpDate2"  name="tmpDate2" placeholder="JJ/MM/AAAA" class="form-control" />
-							</div>
-						  	
-						  	 
-						 <div class="col-sm-2">
-						  	<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider les informations" >	<i class="glyphicon glyphicon-print"></i> Imprimer</button> 
-						</div>
-						  </div>
-				
-			
-			
-				</fieldset>
-			
-			</form>
-			
-			</center>
-			
-			<br>
-			<center>
-		
-		<form  method="POST" name="form" action="@controllers.routes.AdherentCtrl.rapportAdhBetwenne()"  class="form-horizontal col-md-12 col-sm-12 col-xs-12" >
-			@helper.CSRF.formField
-			<fieldset style=" color:#000; width:90%; background-color:#DDE7E9; border-radius:10px; font-size:14px;" >
-			
-					<h6 style="color:#000;">
-						<strong>
-							<i> <font style="color:red;  font-size:14px;">Situations adherents par pariode </font> </i>	
-						</strong>
-					</h6>
-						<div class="form-group row">
-						 
-						 
-						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Date début:</b></label>
-						  	<div class="col-sm-2">
-								<input type="date" id="tmpDate"  name="tmpDate" placeholder="JJ/MM/AAAA" class="form-control" />
-							</div>
-						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Date fin:</b></label>
-						  	<div class="col-sm-2">
-								<input type="date" id="tmpDate2"  name="tmpDate2" placeholder="JJ/MM/AAAA" class="form-control" />
-							</div>
-						  	
-						  	 <label class="col-sm-1 col-form-label" for="nom" ><b>Matricule Agent<font style="color:red;  font-size:12px;">*:</font></b></label>
-						  	<div class="col-sm-2">
-								<input type="number" id="partenaire"  name="adherent" 
-								 placeholder="Ex: 01, 120, 292" class="form-control" required="required" />
-							<input type="hidden" id="partenaireid" required="required" name="partenaireid">
-						  	</div>
-						 <div class="col-sm-2">
-						  	<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider les informations" >	<i class="glyphicon glyphicon-print"></i> Imprimer</button> 
-						</div>
-						  </div>
-				
-			
-			
-				</fieldset>
-			
-			</form>
-			
-			</center>
-			
-			<br>
-			
-
-			<center>
-		
-		<form  method="POST" name="form" action="@controllers.routes.ReglementCtrl.rapportAnnuel("situation_global_annuel")"  class="form-horizontal col-md-12 col-sm-12 col-xs-12" >
-			@helper.CSRF.formField
-			<fieldset style=" color:#000; width:90%; background-color:#DDE7E9; border-radius:10px; font-size:14px;" >
-			
-					<h6 style="color:#000;">
-						<strong>
-							<i> <font style="color:red;  font-size:14px;">Situations Global par année :</font> </i>	
-						</strong>
-					</h6>
-					<center>
-						<div class="form-group row">
-						 
-						 
-						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Année</b></label>
-						  	<div class="col-sm-2">
-								<input type="number" id="annee"  name="annee" placeholder="AAAA" class="form-control" />
-							</div>
-
-						  	 
-						 <div class="col-sm-2">
-						  	<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider les informations" >	<i class="glyphicon glyphicon-print"></i> Imprimer</button> 
-						</div>
-						  </div>
-				</center>
-			
-			
-				</fieldset>
-			
-			</form>
-			
-			</center>
-			
-			
-			<center>
-		
-		<form  method="POST" name="form" action="@controllers.routes.ReglementCtrl.rapportAnnuel("situation_depassement")"  class="form-horizontal col-md-12 col-sm-12 col-xs-12" >
-			@helper.CSRF.formField
-			<fieldset style=" color:#000; width:90%; background-color:#DDE7E9; border-radius:10px; font-size:14px;" >
-			
-					<h6 style="color:#000;">
-						<strong>
-							<i> <font style="color:blue;  font-size:14px;">Situations des dépassement Global par année :</font> </i>	
-						</strong>
-					</h6>
-					<center>
-						<div class="form-group row">
-						 
-						 
-						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Année</b></label>
-						  	<div class="col-sm-2">
-								<input type="number" id="annee"  name="annee" placeholder="AAAA" class="form-control" />
-							</div>
-
-						  	 
-						 <div class="col-sm-2">
-						  	<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider les informations" >	<i class="glyphicon glyphicon-print"></i> Imprimer</button> 
-						</div>
-						  </div>
-				</center>
-			
-			
-				</fieldset>
-			
-			</form>
-			
-			</center>
-			
-			<center>
-		
-		<form  method="POST" name="form" action="@controllers.routes.ReglementCtrl.rapportBetwenne()"  class="form-horizontal col-md-12 col-sm-12 col-xs-12" >
-			@helper.CSRF.formField
-			<fieldset style=" color:#000; width:90%; background-color:#DDE7E9; border-radius:10px; font-size:14px;" >
-			
-					<h6 style="color:#000;">
-						<strong>
-							<i> <font style="color:red;  font-size:14px;">Situations Global par Période :</font> </i>	
-						</strong>
-					</h6>
-					<center>
-						<div class="form-group row">
-						 
-						 
-						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Date début:</b></label>
-						  	<div class="col-sm-2">
-								<input type="date" id="tmpDate"  name="tmpDate" placeholder="JJ/MM/AAAA" class="form-control" />
-							</div>
-						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Date fin:</b></label>
-						  	<div class="col-sm-2">
-								<input type="date" id="tmpDate2"  name="tmpDate2" placeholder="JJ/MM/AAAA" class="form-control" />
-							</div>
-						  	
-						  	 
-						 <div class="col-sm-2">
-						  	<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider les informations" >	<i class="glyphicon glyphicon-print"></i> Imprimer</button> 
-						</div>
-						  </div>
-				</center>
-			
-			
-				</fieldset>
-			
-			</form>
-			
-			</center>
-			}
-
-			@if(request.session.get("droit").get() == "AGENT_CARD_ID" || request.session.get("droit").get() == "SuperAdmin" ||  request.session.get("droit").get() == "Admin" ){
-				
-		<form  method="POST" name="form" action="@controllers.routes.AdherentCtrl.impressionCarteMainsGlobal()"  class="form-horizontal col-md-12 col-sm-12 col-xs-12" >
-			@helper.CSRF.formField
-			<fieldset style=" color:#000; width:90%; background-color:#DDE7E9; border-radius:10px; font-size:14px;" >
-			<center>
-				<h6 style="color:#000;">
-						<strong>
-							<i> <font style="color:red;  font-size:14px;">Impression des cartes d'accès MAINS:</font> </i>	
-						</strong>
-					</h6>
-
-			</center>
-					
-					<center>
-						<div class="form-group row">
-						 
-						 
-						  	<label class="col-sm-2 col-form-label" for="nom" ><b>Type :</b></label>
-						  	<div class="col-sm-3">
-								 <select class="form-control" required="required" id="type"  name="libelleCarte">
-	                                    	<option value="">Selectionner le Type : </option>
-	                              
-	                               			 <option value="badge_principale">Cartes Globale Adhérents</option>
-	                             			 <option value="badge_principale_ay">Cartes Globale Ayant droits</option>
-                            </select>
-							</div>
-
-						  	 
-						 <div class="col-sm-2">
-						  	<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider les informations" >	<i class="glyphicon glyphicon-print"></i> Imprimer</button> 
-						</div>
-						  </div>
-				</center>
-			
-			
-				</fieldset>
-			
-			</form>
-
-			}
-
-				</div>
-</div>
-<hr>
-
- 
-}
-
