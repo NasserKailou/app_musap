@@ -69,7 +69,7 @@ public class DashboardService {
      */
     public BigDecimal getTotalRemboursements() {
         try {
-            Result<Record> result = con.connection()
+            org.jooq.Result<org.jooq.Record1<java.math.BigDecimal>> result = con.connection()
                 .select(DSL.sum(Tables.REGLEMENT_DETAIL.MONTANT))
                 .from(Tables.REGLEMENT_DETAIL)
                 .join(Tables.REGLEMENT).on(Tables.REGLEMENT.ID.eq(Tables.REGLEMENT_DETAIL.REGLEMENT))
