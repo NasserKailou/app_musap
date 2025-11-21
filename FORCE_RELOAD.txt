@@ -1,0 +1,4 @@
+This file is created to force Play Framework to reload and recompile.
+Timestamp: 2025-11-21 17:30:00
+
+The dashboard route /api/stats/reglements-structure should be working after reload.
