@@ -1,0 +1,333 @@
+@import java.time.LocalDateTime
+@import helper._
+@import java.util
+@(bonsNonConfirmes: List[models.tables.pojos.VReglement],
+  adherent: models.tables.pojos.Adherent,
+  structures: List[models.tables.pojos.StructurePartenaire],
+  request: Http.Request)
+
+@main("Confirmation Bon de Commande") {
+
+<!-- Content Header -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>
+          <i class="fas fa-check-circle text-success"></i>
+          Confirmation des Bons de Commande
+        </h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="@controllers.routes.HomeController.acceuil()">Accueil</a></li>
+          <li class="breadcrumb-item"><a href="#">Adhérents</a></li>
+          <li class="breadcrumb-item active">Confirmation Bons</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+
+    @* ================== INFORMATIONS ADHÉRENT ================== *@
+    @if(adherent != null) {
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-success card-outline">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-user"></i> Informations de l'adhérent
+            </h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.history.back();">
+                <i class="fas fa-arrow-left"></i> Retour
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-12 text-center">
+                <h5 class="text-success mb-3">
+                  <strong>Matricule n°@adherent.getMatricule()</strong> - 
+                  @adherent.getNomAd @adherent.getPrenomAd
+                  <br>
+                  <small class="text-muted">
+                    <i class="fas fa-phone"></i> @adherent.getTelephone()
+                  </small>
+                </h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    @* ================== LISTE DES BONS NON CONFIRMÉS ================== *@
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-success">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-list-ul"></i> 
+              Bons de Commande en Attente de Confirmation
+            </h3>
+          </div>
+          <div class="card-body">
+
+            @if(bonsNonConfirmes.isEmpty()) {
+              <div class="alert alert-info">
+                <h5><i class="icon fas fa-info"></i> Information</h5>
+                Aucun bon de commande en attente de confirmation pour cet adhérent.
+              </div>
+            } else {
+              <div class="alert alert-warning">
+                <h5><i class="icon fas fa-exclamation-triangle"></i> Important</h5>
+                Veuillez confirmer les bons de commande en ajoutant la référence de la facture.
+              </div>
+
+              <div class="table-responsive">
+                <table id="bonsTable" class="table table-bordered table-hover table-striped">
+                  <thead class="thead-light">
+                    <tr>
+                      <th>Bénéficiaire</th>
+                      <th>Type Prestation</th>
+                      <th>Structure</th>
+                      <th>Date Émission</th>
+                      <th>Date Expiration</th>
+                      <th>Montant Total</th>
+                      <th>Statut</th>
+                      <th class="text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for(bon <- bonsNonConfirmes) {
+                      <tr>
+                        <td>
+                          <strong>@bon.getNomAd() @bon.getPrenomAd()</strong>
+                          @if(bon.getNomAy() != null) {
+                            <br><small class="text-muted">Ayant droit: @bon.getNomAy()</small>
+                          }
+                        </td>
+                        <td>
+                          @bon.getPrestation()
+                          <br><small class="badge badge-info">@bon.getCouverture()% couvert</small>
+                        </td>
+                        <td>@bon.getStructure()</td>
+                        <td>
+                          <i class="far fa-calendar"></i>
+                          @bon.getDatePayement().format("dd/MM/yyyy")
+                        </td>
+                        <td>
+                          @if(bon.getDatePayement() != null) {
+                            @defining(new java.sql.Timestamp(bon.getDatePayement().getTime() + (30L * 24 * 60 * 60 * 1000))) { dateExp =>
+                              <i class="far fa-clock"></i>
+                              @dateExp.format("dd/MM/yyyy")
+                              @if(dateExp.before(new java.sql.Timestamp(System.currentTimeMillis()))) {
+                                <br><span class="badge badge-danger">Expiré</span>
+                              } else {
+                                <br><span class="badge badge-success">Valide</span>
+                              }
+                            }
+                          }
+                        </td>
+                        <td>
+                          <strong>@bon.getMontantTotal() F CFA</strong>
+                          <br>
+                          <small class="text-success">Couvert: @bon.getMontantReglement() F</small>
+                          <br>
+                          <small class="text-warning">À payer: @bon.getMontantPaye() F</small>
+                        </td>
+                        <td class="text-center">
+                          <span class="badge badge-warning badge-lg">
+                            <i class="fas fa-hourglass-half"></i> En attente
+                          </span>
+                        </td>
+                        <td class="text-center">
+                          <button type="button"
+                                  class="btn btn-success btn-sm"
+                                  data-toggle="modal"
+                                  data-target="#confirmModal@bon.getId()"
+                                  title="Confirmer ce bon">
+                            <i class="fas fa-check-circle"></i> Confirmer
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+@* ================== MODALES DE CONFIRMATION ================== *@
+@for(bon <- bonsNonConfirmes) {
+<div class="modal fade" id="confirmModal@bon.getId()" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <form method="POST" action='@controllers.routes.ReglementCtrl.save()'>
+        @helper.CSRF.formField
+
+        <input type="hidden" name="viewMode" value="CONFIRM_BON">
+        <input type="hidden" name="id" value="@bon.getId()">
+        <input type="hidden" name="adherent" value="@bon.getIdAdherent()">
+        <input type="hidden" name="structure" value="@bon.getIdStructure()">
+        <input type="hidden" name="typePrestation" value="@bon.getIdTypePrestation()">
+        @if(bon.getIdAyantDroit() != null) {
+          <input type="hidden" name="ayantDroit" value="@bon.getIdAyantDroit()">
+          <input type="hidden" name="benef" value="@bon.getIdAyantDroit()">
+        } else {
+          <input type="hidden" name="benef" value="@bon.getIdAdherent()">
+        }
+
+        <div class="modal-header bg-success">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-check-circle"></i> Confirmer le Bon de Commande
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          
+          <!-- Informations du bon -->
+          <div class="card card-secondary mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Informations du Bon</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong>Bénéficiaire:</strong> @bon.getNomAd() @bon.getPrenomAd()</p>
+                  @if(bon.getNomAy() != null) {
+                    <p><strong>Ayant droit:</strong> @bon.getNomAy()</p>
+                  }
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Prestation:</strong> @bon.getPrestation()</p>
+                  <p><strong>Structure:</strong> @bon.getStructure()</p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Montant Total:</strong> @bon.getMontantTotal() F CFA</p>
+                  <p><strong>Montant Couvert:</strong> <span class="text-success">@bon.getMontantReglement() F CFA</span></p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Date Émission:</strong> @bon.getDatePayement().format("dd/MM/yyyy")</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-warning">
+            <i class="icon fas fa-exclamation-triangle"></i>
+            <strong>Attention :</strong> Veuillez vérifier que l'adhérent a bien fourni les justificatifs avant de confirmer le bon.
+          </div>
+
+          <!-- Formulaire de confirmation -->
+          <div class="card card-success">
+            <div class="card-header">
+              <h3 class="card-title">Informations de Confirmation</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                
+                <!-- Ref Facture OBLIGATOIRE -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>
+                      <i class="fas fa-file-invoice"></i> Référence Facture 
+                      <span class="text-danger">*</span>
+                    </label>
+                    <input type="text"
+                           name="refFacture"
+                           class="form-control"
+                           placeholder="Ex: FAC-2024-001"
+                           required>
+                    <small class="form-text text-muted">
+                      Référence de la facture fournie par l'adhérent
+                    </small>
+                  </div>
+                </div>
+
+                <!-- Date de règlement -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>
+                      <i class="far fa-calendar-alt"></i> Date de Règlement 
+                      <span class="text-danger">*</span>
+                    </label>
+                    <input type="date" 
+                           name="tmpDate" 
+                           class="form-control"
+                           value="@java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"))"
+                           required>
+                    <small class="form-text text-muted">
+                      Date à laquelle le bon est confirmé
+                    </small>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fas fa-times"></i> Annuler
+          </button>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-check-circle"></i> Confirmer le Bon
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+}
+
+<style>
+.badge-lg {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+}
+
+#bonsTable thead th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  vertical-align: middle;
+}
+</style>
+
+<script>
+jQuery(document).ready(function($) {
+  // Initialize DataTable
+  if ($('#bonsTable').length > 0) {
+    $('#bonsTable').DataTable({
+      "language": {
+        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+      },
+      "responsive": true,
+      "lengthChange": true,
+      "autoWidth": false,
+      "pageLength": 10,
+      "order": [[3, 'desc']] // Tri par date d'émission
+    });
+  }
+});
+</script>
+
+}

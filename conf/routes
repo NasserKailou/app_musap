@@ -114,3 +114,4 @@ GET     /json-CompteBudget                    	 controllers.ServerJson.jsonCompt
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 ### fin stock Routes
+GET    /Reglement/confirm-bon/:subAction/    controllers.ReglementCtrl.showConfirmBon(subAction: String, idAdherent: Long, request:Request)
