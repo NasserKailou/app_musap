@@ -9,6 +9,7 @@ GET     /accueil                           controllers.HomeController.acceuil(re
 POST    /login                  	controllers.HomeController.authentification(request:Request)
 GET     /logout                 	controllers.HomeController.deconnecter(request:Request)
 GET     /acceuil                    controllers.HomeController.acceuil(request:Request)
+GET     /api/stats/reglements-structure    controllers.HomeController.getStatsReglementsByStructure(request:Request)
 
 
 
