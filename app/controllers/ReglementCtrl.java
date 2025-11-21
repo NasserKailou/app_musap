@@ -132,7 +132,7 @@ public class ReglementCtrl extends Controller {
 		} else if (action.equals(ViewMode.VIEW_MODE_DELETE)) {
 			detail = reDetailMainServices.findById(idDetails);
 			viewMode = ViewMode.VIEW_MODE_DELETE;
-		}
+		} 
 
 		Adherent ad = adherentService.getById(idAdherent);
 		List<ReglementDetail> rd = reDetailMainServices.getByReglement(idReglement);
