@@ -56,6 +56,7 @@ GET			/AyantDroit/profil-photo/    		controllers.AyantDroitCtrl.formProfil(reque
 GET			/impression-carte-ayantDroit/    	 controllers.AyantDroitCtrl.printCarte(request:Request,idAdherent: Long, fileName:String)
 #Reglement Ressources
 GET			/Reglement/show/:subAction/    		controllers.ReglementCtrl.show(subAction: String, idOrd: Long, idConsult: Long,request:Request)
+GET			/Reglement/confirm-bon/:subAction/    		controllers.ReglementCtrl.showConfirmBon(subAction: String, idAdherent: Long, request:Request)
 GET			/Reglement/restaure/    		controllers.ReglementCtrl.restaure(idOrd: Long,request:Request)
 POST    	/Reglement/save                        controllers.ReglementCtrl.save(request:Request)
 POST    	/Reglement-detail/save                        controllers.ReglementCtrl.reglementDetailsave(request:Request)
@@ -66,7 +67,7 @@ POST			/impression-global-situation-betewenne/    	 controllers.ReglementCtrl.ra
 POST			/alerte-email/    	 controllers.ReglementCtrl.infoViaMail(request:Request)
 GET			/Reglement/Eamil-alerte/    		controllers.ReglementCtrl.showAlerteView(request:Request)
 GET   /reglement/detail/json/:id     controllers.ReglementCtrl.detailJson(id: Long)
-GET   /reglement/json/:id /reglement/json/:id    controllers.ReglementCtrl.getReglementJson(id: Long)
+GET   /reglement/json/:id    controllers.ReglementCtrl.getReglementJson(id: Long)
 
 
 
