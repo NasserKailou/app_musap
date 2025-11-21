@@ -113,7 +113,7 @@ public class DashboardService {
         try {
             int currentYear = Year.now().getValue();
             
-            var result = con.connection()
+            Result<?> result = con.connection()
                 .select(
                     DSL.extract(Tables.REGLEMENT.DATE_PAYEMENT, DatePart.MONTH).as("mois"),
                     DSL.count().as("nombre"),
@@ -170,7 +170,7 @@ public class DashboardService {
      */
     public Map<String, Object> getRemboursementsParTypePrestation() {
         try {
-            var result = con.connection()
+            Result<?> result = con.connection()
                 .select(
                     Tables.TYPE_PRESTATION.PRESTATION,
                     DSL.count().as("nombre"),
@@ -250,7 +250,7 @@ public class DashboardService {
      */
     public List<Map<String, Object>> getDerniersRemboursements() {
         try {
-            var result = con.connection()
+            Result<?> result = con.connection()
                 .select(
                     Tables.REGLEMENT.ID,
                     Tables.REGLEMENT.REF_FACTURE,
