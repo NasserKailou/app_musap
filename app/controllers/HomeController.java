@@ -27,7 +27,9 @@ import models.tables.pojos.Reglement;
 import models.tables.pojos.StructurePartenaire;
 import models.tables.pojos.Adherent;
 import models.tables.pojos.AyantDroit;
+import models.tables.pojos.TypePrestation;
 import services.AyantDroitMainServices;
+import services.TypePrestationMainService;
 import play.libs.Json;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -45,11 +47,13 @@ public class HomeController extends Controller {
 	ReglementMainServices reglementServices;
 	StructureMainServices structureServices;
 	AyantDroitMainServices ayantDroitServices;
+	TypePrestationMainService typePrestationServices;
 	
 	@Inject
 	public HomeController(FormFactory formatFactory, AdherentMainServices consultationServices,
 			ParamsServices paramsService, ReglementMainServices reglementServices,
-			StructureMainServices structureServices, AyantDroitMainServices ayantDroitServices) {
+			StructureMainServices structureServices, AyantDroitMainServices ayantDroitServices,
+			TypePrestationMainService typePrestationServices) {
 
 		this.formatFactory = formatFactory;
 		this.consultationServices = consultationServices;
@@ -57,6 +61,7 @@ public class HomeController extends Controller {
 		this.reglementServices = reglementServices;
 		this.structureServices = structureServices;
 		this.ayantDroitServices = ayantDroitServices;
+		this.typePrestationServices = typePrestationServices;
 		
 
 	}
@@ -130,9 +135,20 @@ public class HomeController extends Controller {
 			List<Adherent> adherents = consultationServices.findAll();
 			List<AyantDroit> ayantsDroit = ayantDroitServices.findAll();
 			
+			// Récupérer tous les types de prestations
+			List<TypePrestation> typePrestations = typePrestationServices.getAllTypePrestation();
+			
 			// Map pour compter les bons de commande par structure
 			Map<Long, Integer> bonsConfirmesCount = new HashMap<>();
 			Map<Long, Integer> bonsNonConfirmesCount = new HashMap<>();
+			
+			// Map pour compter les bons par type de prestation
+			Map<Long, Integer> bonsByTypePrestation = new HashMap<>();
+			
+			// Initialiser les compteurs pour chaque type de prestation
+			for (TypePrestation tp : typePrestations) {
+				bonsByTypePrestation.put(tp.getId(), 0);
+			}
 			
 			// Initialiser les compteurs pour chaque structure
 			for (StructurePartenaire struct : structures) {
@@ -159,6 +175,12 @@ public class HomeController extends Controller {
 						totalBonsNonConfirmes++;
 					}
 				}
+				
+				// Compter par type de prestation
+				if (reg.getTypePrestation() != null) {
+					bonsByTypePrestation.put(reg.getTypePrestation(), 
+						bonsByTypePrestation.getOrDefault(reg.getTypePrestation(), 0) + 1);
+				}
 			}
 			
 			// Construire le JSON de réponse
@@ -172,6 +194,18 @@ public class HomeController extends Controller {
 				bonsNonConfirmesArray.add(bonsNonConfirmesCount.get(struct.getId()));
 			}
 			
+			// Construire les données par type de prestation
+			ArrayNode typePrestationsArray = Json.newArray();
+			ArrayNode bonsByTypePrestationArray = Json.newArray();
+			
+			for (TypePrestation tp : typePrestations) {
+				int count = bonsByTypePrestation.get(tp.getId());
+				if (count > 0) { // N'inclure que les prestations avec des bons
+					typePrestationsArray.add(tp.getPrestation() != null ? tp.getPrestation() : "Prestation #" + tp.getId());
+					bonsByTypePrestationArray.add(count);
+				}
+			}
+			
 			ObjectNode result = Json.newObject();
 			result.set("structures", structuresArray);
 			result.set("bonsConfirmes", bonsConfirmesArray);
@@ -181,6 +215,8 @@ public class HomeController extends Controller {
 			result.put("totalBonsConfirmes", totalBonsConfirmes);
 			result.put("totalBonsNonConfirmes", totalBonsNonConfirmes);
 			result.put("totalStructures", structures.size());
+			result.set("typePrestations", typePrestationsArray);
+			result.set("bonsByTypePrestation", bonsByTypePrestationArray);
 			
 			return ok(result);
 			
