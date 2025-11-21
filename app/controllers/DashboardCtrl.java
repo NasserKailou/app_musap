@@ -58,6 +58,7 @@ public class DashboardCtrl extends Controller {
                 nombreRemboursements,
                 croissance,
                 derniersRemboursements,
+                request,
                 request
             ));
         } catch (Exception e) {
