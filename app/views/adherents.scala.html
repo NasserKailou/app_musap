@@ -631,7 +631,7 @@
 
                           @if(
                             request.session.get("droit").isPresent &&
-                            request.session.get("droit").get() == "SuperAdmin"
+                            request.session.get("droit").get() == "SuperAdmin" || request.session.get("droit").get() == "Admin"
                           ) {
                             <a class="btn btn-primary btn-sm"
                                title="Modifier"
