@@ -7,8 +7,8 @@
   totalRemboursements: BigDecimal, 
   nombreRemboursements: Long,
   croissance: java.util.Map[String, Object],
-  derniersRemboursements: java.util.List[java.util.Map[String, Object]])(implicit request: Http.Request)
-
+  derniersRemboursements: java.util.List[java.util.Map[String, Object]],
+  request: Http.Request)(implicit r: Http.Request)
 
 @main("Dashboard Analytics") {
 
@@ -192,7 +192,7 @@
                                     </thead>
                                     <tbody>
                                     @if(derniersRemboursements != null && !derniersRemboursements.isEmpty) {
-                                        @for(remb <- scala.collection.JavaConverters.asScalaIterator(derniersRemboursements.iterator()).toSeq) {
+                                        @for(remb <- scala.jdk.CollectionConverters.IteratorHasAsScala(derniersRemboursements.iterator()).asScala.toSeq) {
                                             @defining(NumberFormat.getInstance(new Locale("fr", "FR"))) { nf =>
                                                 <tr>
                                                     <td>@remb.get("reference")</td>
@@ -415,6 +415,10 @@ $(document).ready(function() {
         }
     });
 
+});
+</script>
+
+}
 });
 </script>
 

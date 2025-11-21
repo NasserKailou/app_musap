@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
+import org.jooq.DatePart;
 
 import com.google.inject.Inject;
 
@@ -69,7 +70,7 @@ public class DashboardService {
     public BigDecimal getTotalRemboursements() {
         try {
             Result<Record> result = con.connection()
-                .select(DSL.sum(Tables.REGLEMENT_DETAIL.MONTANT_REMBOURSE))
+                .select(DSL.sum(Tables.REGLEMENT_DETAIL.MONTANT))
                 .from(Tables.REGLEMENT_DETAIL)
                 .join(Tables.REGLEMENT).on(Tables.REGLEMENT.ID.eq(Tables.REGLEMENT_DETAIL.REGLEMENT))
                 .where(Tables.REGLEMENT.ON_DELETED.isFalse())
@@ -114,16 +115,16 @@ public class DashboardService {
             
             Result<Record> result = con.connection()
                 .select(
-                    DSL.extract(Tables.REGLEMENT.DATE_PAYEMENT, DSL.DatePart.MONTH).as("mois"),
+                    DSL.extract(Tables.REGLEMENT.DATE_PAYEMENT, DatePart.MONTH).as("mois"),
                     DSL.count().as("nombre"),
-                    DSL.sum(Tables.REGLEMENT_DETAIL.MONTANT_REMBOURSE).as("montant")
+                    DSL.sum(Tables.REGLEMENT_DETAIL.MONTANT).as("montant")
                 )
                 .from(Tables.REGLEMENT)
                 .leftJoin(Tables.REGLEMENT_DETAIL).on(Tables.REGLEMENT_DETAIL.REGLEMENT.eq(Tables.REGLEMENT.ID))
                 .where(Tables.REGLEMENT.ON_DELETED.isFalse())
-                .and(DSL.extract(Tables.REGLEMENT.DATE_PAYEMENT, DSL.DatePart.YEAR).eq(currentYear))
-                .groupBy(DSL.extract(Tables.REGLEMENT.DATE_PAYEMENT, DSL.DatePart.MONTH))
-                .orderBy(DSL.extract(Tables.REGLEMENT.DATE_PAYEMENT, DSL.DatePart.MONTH))
+                .and(DSL.extract(Tables.REGLEMENT.DATE_PAYEMENT, DatePart.YEAR).eq(currentYear))
+                .groupBy(DSL.extract(Tables.REGLEMENT.DATE_PAYEMENT, DatePart.MONTH))
+                .orderBy(DSL.extract(Tables.REGLEMENT.DATE_PAYEMENT, DatePart.MONTH))
                 .fetch();
 
             List<String> mois = new ArrayList<>();
@@ -171,16 +172,16 @@ public class DashboardService {
         try {
             Result<Record> result = con.connection()
                 .select(
-                    Tables.TYPE_PRESTATION.LIBELLE,
+                    Tables.TYPE_PRESTATION.PRESTATION,
                     DSL.count().as("nombre"),
-                    DSL.sum(Tables.REGLEMENT_DETAIL.MONTANT_REMBOURSE).as("montant")
+                    DSL.sum(Tables.REGLEMENT_DETAIL.MONTANT).as("montant")
                 )
                 .from(Tables.REGLEMENT)
                 .join(Tables.TYPE_PRESTATION).on(Tables.TYPE_PRESTATION.ID.eq(Tables.REGLEMENT.TYPE_PRESTATION))
                 .leftJoin(Tables.REGLEMENT_DETAIL).on(Tables.REGLEMENT_DETAIL.REGLEMENT.eq(Tables.REGLEMENT.ID))
                 .where(Tables.REGLEMENT.ON_DELETED.isFalse())
-                .groupBy(Tables.TYPE_PRESTATION.LIBELLE)
-                .orderBy(DSL.sum(Tables.REGLEMENT_DETAIL.MONTANT_REMBOURSE).desc())
+                .groupBy(Tables.TYPE_PRESTATION.PRESTATION)
+                .orderBy(DSL.sum(Tables.REGLEMENT_DETAIL.MONTANT).desc())
                 .fetch();
 
             List<String> labels = new ArrayList<>();
@@ -188,7 +189,7 @@ public class DashboardService {
             List<BigDecimal> montants = new ArrayList<>();
 
             for (Record record : result) {
-                labels.add(record.get(Tables.TYPE_PRESTATION.LIBELLE, String.class));
+                labels.add(record.get(Tables.TYPE_PRESTATION.PRESTATION, String.class));
                 nombres.add(record.get("nombre", Integer.class));
                 Object montantObj = record.get("montant");
                 BigDecimal montant = montantObj != null ? 
@@ -212,7 +213,7 @@ public class DashboardService {
      */
     public Map<String, Object> getAdherentsParStructure() {
         try {
-            Result<Record> result = con.connection()
+            org.jooq.Result<org.jooq.Record2<String, Integer>> result = con.connection()
                 .select(
                     Tables.ADHERENT.STRUCTURE,
                     DSL.count().as("nombre")
@@ -256,8 +257,8 @@ public class DashboardService {
                     Tables.REGLEMENT.DATE_PAYEMENT,
                     Tables.ADHERENT.NOM_AD,
                     Tables.ADHERENT.PRENOM_AD,
-                    Tables.TYPE_PRESTATION.LIBELLE.as("prestation"),
-                    DSL.sum(Tables.REGLEMENT_DETAIL.MONTANT_REMBOURSE).as("montant")
+                    Tables.TYPE_PRESTATION.PRESTATION.as("prestation"),
+                    DSL.sum(Tables.REGLEMENT_DETAIL.MONTANT).as("montant")
                 )
                 .from(Tables.REGLEMENT)
                 .join(Tables.ADHERENT).on(Tables.ADHERENT.ID.eq(Tables.REGLEMENT.ADHERENT))
@@ -270,7 +271,7 @@ public class DashboardService {
                     Tables.REGLEMENT.DATE_PAYEMENT,
                     Tables.ADHERENT.NOM_AD,
                     Tables.ADHERENT.PRENOM_AD,
-                    Tables.TYPE_PRESTATION.LIBELLE
+                    Tables.TYPE_PRESTATION.PRESTATION
                 )
                 .orderBy(Tables.REGLEMENT.DATE_PAYEMENT.desc())
                 .limit(5)

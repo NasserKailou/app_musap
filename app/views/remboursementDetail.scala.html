@@ -31,7 +31,7 @@
             <i class="fas fa-arrow-left"></i> Retour à la liste
           </a>
           @if(
-            request.session.get("droit").isPresent &&
+            request.session.get("droit").isPresent &&git 
             (request.session.get("droit").get() == "Admin" ||
              request.session.get("droit").get() == "SuperAdmin" ||
              request.session.get("droit").get() == "Agent Saisie" ||
