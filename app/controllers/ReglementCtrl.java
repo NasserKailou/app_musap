@@ -17,6 +17,7 @@ import models.tables.pojos.ReglementDetail;
 import models.tables.pojos.TypePrestation;
 import models.tables.pojos.VAdherentAyantDroit;
 import models.tables.pojos.VReglementGlobalByAdherent;
+import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
 import play.libs.Json;
@@ -433,7 +434,10 @@ public class ReglementCtrl extends Controller {
 		c.setWhenDone(new Timestamp(System.currentTimeMillis()));
 		c.setOnDeleted(false);
 		c.setWhoDone(String.valueOf(request.session().get("login").get()));
-
+		//le bon expire trente(30) jours s'il n'est pas consomé apres qu'il soit délivré
+		long thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000;
+		Timestamp dateExpiration = new Timestamp(regServices.getDateT(dateReglement).getTime() + thirtyDaysInMillis);
+		c.setDateExpiration(dateExpiration);
 		// renseigner la date de paiement en fonction du reglement
 //		System.out.println(
 //				"LA gestion en fonction de la date paiement saisie : " + String.valueOf(dateReglement.substring(0, 4)));
@@ -600,6 +604,66 @@ public Result getReglementJson(Long id) {
 
     return ok(json);
 }
+
+// Route pour la confirmation
+public Result confirmerBon(Long bonId, Long adherentId) {
+    try {
+        // Récupérer le règlement
+        Reglement reglement = regServices.findById(bonId);
+        
+        if (reglement == null) {
+            return notFound("Bon de commande non trouvé");
+        }
+        
+        // Mettre à jour le statut
+        reglement.setIsConfirmedBon(true);
+        regServices.update(reglement);
+        
+        return ok("Bon confirmé avec succès");
+    } catch (Exception e) {
+        e.printStackTrace();
+        return internalServerError("Erreur lors de la confirmation");
+    }
+
+
+}
+
+/**
+ * Réactualiser un bon de commande (remettre isConfirmedBon à false)
+ * Réservé aux SuperAdmin uniquement
+ */
+public Result reactualiserBon(Long bonId, Long adherentId) {
+    try {
+        // Vérifier les droits d'accès
+       // String droit = session("droit");
+       
+        // Récupérer le règlement
+        Reglement reglement = regServices.findById(bonId);
+        
+        if (reglement == null) {
+            return notFound("Bon de commande non trouvé");
+        }
+        
+        // Vérifier que le bon est bien confirmé
+        if (!reglement.getIsConfirmedBon()) {
+            return badRequest("Le bon n'est pas confirmé");
+        }
+        
+        // Mettre à jour le statut - Réactualiser (remettre à false)
+        reglement.setIsConfirmedBon(false);
+        regServices.update(reglement);
+        
+        // Log de l'action
+        Logger.info("Bon de commande réactualisé - ID: " + bonId + " par SuperAdmin: ");
+        
+        return ok("Bon réactualisé avec succès");
+        
+    } catch (Exception e) {
+        Logger.error("Erreur lors de la réactualisation du bon: " + e.getMessage(), e);
+        return internalServerError("Erreur lors de la réactualisation");
+    }
+}
+
 
 
 }

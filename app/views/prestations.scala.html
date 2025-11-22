@@ -175,7 +175,7 @@
               </div>
             </div>
             <div class="card-body table-responsive p-0">
-              <table class="table table-head-fixed table-bordered table-hover text-nowrap">
+              <table class="example2 table-head-fixed table-bordered table-hover text-nowrap"> 
                 <thead>
                   <tr>
                     <th class="text-center" style="width: 80px;">#</th>
@@ -252,6 +252,30 @@
         }
       });
     });
+
+     // DataTable
+  $("#example2").DataTable({
+    "responsive": true,
+    "lengthChange": true,
+    "autoWidth": false,
+    "buttons": ["copy", "csv", "excel", "pdf", "print"],
+    "language": {
+      "sProcessing": "Traitement en cours...",
+      "sSearch": "Rechercher&nbsp;:",
+      "sLengthMenu": "Afficher _MENU_ éléments",
+      "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+      "sInfoEmpty": "Aucun élément",
+      "sZeroRecords": "Aucun élément à afficher",
+      "sEmptyTable": "Aucune donnée disponible",
+      "oPaginate": {
+        "sFirst": "Premier",
+        "sPrevious": "Précédent",
+        "sNext": "Suivant",
+        "sLast": "Dernier"
+      }
+    }
+  }).buttons().container().appendTo('#example2_wrapper .col-md-6:eq(0)');
+
   </script>
 
 }

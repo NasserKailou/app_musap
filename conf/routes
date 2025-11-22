@@ -70,7 +70,9 @@ GET			/Reglement/Eamil-alerte/    		controllers.ReglementCtrl.showAlerteView(req
 GET   /reglement/detail/json/:id     controllers.ReglementCtrl.detailJson(id: Long)
 GET   /reglement/json/:id    controllers.ReglementCtrl.getReglementJson(id: Long)
 
-
+POST    /reglement/confirmer/:bonId/:adherentId    controllers.ReglementCtrl.confirmerBon(bonId: Long, adherentId: Long)
+# Réactualiser un bon de commande
+POST    /reglement/reactualiser/:bonId/:adherentId    controllers.ReglementCtrl.reactualiserBon(bonId: Long, adherentId: Long)
 
 #Partenaire Ressources
 GET			/Partenaire-Str/show/:subAction/    		controllers.StructurePartenaireCtrl.show(request:Request,subAction: String, idPArtenaire: Long)

@@ -133,19 +133,18 @@
                     <th class="text-center">Actions</th>
                   </tr>
                 </thead>
-             <tbody>
+               <tbody>
   @for(c <- reglements) {
   @defining({
-    // Conversion de Timestamp vers LocalDateTime
-    val datePayement = c.getDatePayement().toLocalDateTime()
-    val dateExpiration = c.getDateExpiration().toLocalDateTime()
-    val now = LocalDateTime.now()
-    val joursRestants = ChronoUnit.DAYS.between(now, dateExpiration)
-    val isConfirmedValue = c.getIsConfirmedBon()
-    val isConfirmed: Boolean = (isConfirmedValue != null && isConfirmedValue == true)
-    val estExpire: Boolean = joursRestants <= 0
-    (datePayement, dateExpiration, joursRestants, isConfirmed, estExpire)
-  }) { case (datePayement, dateExpiration, joursRestants, isConfirmed, estExpire) =>
+  // Conversion de Timestamp vers LocalDateTime
+  val datePayement = c.getDatePayement().toLocalDateTime()
+  val dateExpiration = c.getDateExpiration().toLocalDateTime()
+  val now = LocalDateTime.now()
+  val joursRestants = ChronoUnit.DAYS.between(now, dateExpiration)
+  val isConfirmedValue = c.getIsConfirmedBon()
+  val isConfirmed: Boolean = (isConfirmedValue != null && isConfirmedValue == true)
+  (datePayement, dateExpiration, joursRestants, isConfirmed)
+}) { case (datePayement, dateExpiration, joursRestants, isConfirmed) =>
 
   <tr>
     <td>@c.getId()</td>
@@ -155,35 +154,25 @@
     <td>@c.getStructure()</td>
     <td>@datePayement.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</td>
     <td class="text-danger"><strong>@dateExpiration.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</strong></td>
-    
-    @* Colonne Temps Restant - Afficher "Consommé" si confirmé *@
-    <td data-order="@if(isConfirmed){-999}else{@joursRestants}">
-      @if(isConfirmed) {
-        <span class="badge badge-secondary">
-          <i class="fas fa-check-double"></i> Consommé
+    <td data-order="@joursRestants">
+      @if(joursRestants < 0) {
+        <span class="badge badge-danger">
+          <i class="fas fa-times-circle"></i> Expiré depuis @Math.abs(joursRestants) jour(s)
+        </span>
+      } else if(joursRestants == 0) {
+        <span class="badge badge-warning">
+          <i class="fas fa-exclamation-triangle"></i> Expire aujourd'hui
+        </span>
+      } else if(joursRestants <= 7) {
+        <span class="badge badge-warning">
+          <i class="fas fa-clock"></i> @joursRestants jour(s) restant(s)
         </span>
       } else {
-        @if(joursRestants < 0) {
-          <span class="badge badge-danger">
-            <i class="fas fa-times-circle"></i> Expiré depuis @Math.abs(joursRestants) jour(s)
-          </span>
-        } else if(joursRestants == 0) {
-          <span class="badge badge-warning">
-            <i class="fas fa-exclamation-triangle"></i> Expire aujourd'hui
-          </span>
-        } else if(joursRestants <= 7) {
-          <span class="badge badge-warning">
-            <i class="fas fa-clock"></i> @joursRestants jour(s) restant(s)
-          </span>
-        } else {
-          <span class="badge badge-success">
-            <i class="fas fa-check-circle"></i> @joursRestants jour(s) restant(s)
-          </span>
-        }
+        <span class="badge badge-success">
+          <i class="fas fa-check-circle"></i> @joursRestants jour(s) restant(s)
+        </span>
       }
     </td>
-    
-    @* Colonne Statut - Ne pas afficher le bouton si expiré ou expirant aujourd'hui *@
     <td class="text-center" data-order="@if(isConfirmed){1}else{0}">
       <div class="d-flex align-items-center justify-content-center">
         @if(isConfirmed) {
@@ -196,8 +185,7 @@
           </span>
         }
         
-        @* Afficher le bouton de confirmation uniquement si non confirmé, non expiré et droits suffisants *@
-        @if(!isConfirmed && !estExpire && request.session.get("droit").isPresent && (
+        @if(!isConfirmed && request.session.get("droit").isPresent && (
           request.session.get("droit").get() == "SuperAdmin" ||
           request.session.get("droit").get() == "Admin" ||
           request.session.get("droit").get() == "Comptable")
@@ -209,108 +197,63 @@
             <i class="fas fa-check"></i>
           </button>
         }
-        
-        @* Afficher un badge si expiré et non confirmé *@
-        @if(!isConfirmed && estExpire) {
-          <span class="badge badge-danger ml-2">
-            <i class="fas fa-ban"></i> Impossible de confirmer
-          </span>
-        }
       </div>
     </td>
-    
-    @* Colonne Actions - Désactiver "Modifier" si confirmé *@
-    @* Colonne Actions *@
-<td class="text-center">
-  <div class="btn-group" role="group">
-    <!-- Voir détails -->
-    <button type="button"
-            class="btn btn-info btn-sm"
-            data-toggle="modal"
-            data-target="#detailModal@c.getId()"
-            title="Voir détails">
-      <i class="fas fa-eye"></i>
-    </button>
-
-    @* Bouton Modifier - Désactivé si confirmé *@
-    @if(
-      request.session.get("droit").isPresent && (
-      request.session.get("droit").get() == "SuperAdmin" ||
-      request.session.get("droit").get() == "Comptable" ||
-      request.session.get("droit").get() == "Admin")
-    ) {
-      @if(isConfirmed) {
-        <!-- Modifier désactivé pour bon confirmé -->
+    <td class="text-center">
+      <div class="btn-group" role="group">
+        <!-- Voir détails -->
         <button type="button"
-                class="btn btn-warning btn-sm"
-                disabled
-                title="Modification impossible - Bon confirmé">
-          <i class="fas fa-lock"></i>
+                class="btn btn-info btn-sm"
+                data-toggle="modal"
+                data-target="#detailModal@c.getId()"
+                title="Voir détails">
+          <i class="fas fa-eye"></i>
         </button>
-      } else {
-        <!-- Modifier actif -->
+
+        @if(
+          request.session.get("droit").isPresent && (
+          request.session.get("droit").get() == "SuperAdmin" ||
+          request.session.get("droit").get() == "Comptable" ||
+          request.session.get("droit").get() == "Admin")
+        ) {
+        <!-- Modifier -->
         <a href='@controllers.routes.ReglementCtrl.show("EDIT", c.getId(), c.getIdAdherent())'
            class="btn btn-warning btn-sm"
            title="Modifier">
           <i class="fas fa-edit"></i>
         </a>
-      }
-    }
+        }
 
-    @if(
-      request.session.get("droit").isPresent && (
-      request.session.get("droit").get() == "SuperAdmin" ||
-      request.session.get("droit").get() == "Admin" ||
-      request.session.get("droit").get() == "Agent Saisie" ||
-      request.session.get("droit").get() == "Comptable")
-    ) {
-      @if(isConfirmed) {
-        <!-- Lignes désactivées pour bon confirmé -->
-        <button type="button"
-                class="btn btn-success btn-sm"
-                disabled
-                title="Ligne Bond impossible - Bon confirmé">
-          <i class="fas fa-lock"></i>
-        </button>
-      } else {
-        <!-- Lignes actif -->
+        @if(
+          request.session.get("droit").isPresent && (
+          request.session.get("droit").get() == "SuperAdmin" ||
+          request.session.get("droit").get() == "Admin" ||
+          request.session.get("droit").get() == "Agent Saisie" ||
+          request.session.get("droit").get() == "Comptable")
+        ) {
+        <!-- Lignes -->
         <a href='@controllers.routes.ReglementCtrl.reglementDetailForm("CREATE", c.getId(), c.getIdAdherent(), 0L)'
            class="btn btn-success btn-sm"
            title="Lignes de détail">
           <i class="fas fa-list"></i>
         </a>
-      }
-    }
+        }
 
-    @* Bouton Réactualiser - Uniquement pour SuperAdmin sur bon confirmé *@
-    @if(request.session.get("droit").isPresent && 
-        request.session.get("droit").get() == "SuperAdmin" && 
-        isConfirmed) {
-      <button type="button"
-              class="btn btn-secondary btn-sm"
-              onclick="reactualiserBon(@c.getId(), @c.getIdAdherent())"
-              title="Réactualiser le bon (remettre à non confirmé)">
-        <i class="fas fa-undo"></i>
-      </button>
-    }
-
-    @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "SuperAdmin") {
-      <!-- Supprimer -->
-      <a href='@controllers.routes.ReglementCtrl.show("DELETE", c.getId(), c.getIdAdherent())'
-         class="btn btn-danger btn-sm"
-         title="Supprimer"
-         onclick="return window.confirm('Voulez-vous vraiment supprimer ce règlement ?');">
-        <i class="fas fa-trash"></i>
-      </a>
-    }
-  </div>
-</td>
-
+        @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "SuperAdmin") {
+        <!-- Supprimer -->
+        <a href='@controllers.routes.ReglementCtrl.show("DELETE", c.getId(), c.getIdAdherent())'
+           class="btn btn-danger btn-sm"
+           title="Supprimer"
+           onclick="return window.confirm('Voulez-vous vraiment supprimer ce règlement ?');">
+          <i class="fas fa-trash"></i>
+        </a>
+        }
+      </div>
+    </td>
   </tr>
   }
   }
 </tbody>
-
 
               </table>
             </div>
@@ -660,68 +603,6 @@ function confirmerBon(bonId, adherentId) {
   }
 }
 
-// Fonction pour réactualiser un bon (remettre à non confirmé)
-function reactualiserBon(bonId, adherentId) {
-  if (confirm('⚠️ ATTENTION ⚠️\n\nVoulez-vous vraiment réactualiser ce bon de commande ?\n\nCette action va remettre le statut du bon à "Non confirmé" et permettra de nouveau sa modification.\n\nÊtes-vous sûr de vouloir continuer ?')) {
-    // Afficher le modal de chargement
-    $('#loadingModal').modal('show');
-    
-    // Appel AJAX pour réactualiser le bon
-    $.ajax({
-      url: '@controllers.routes.ReglementCtrl.reactualiserBon(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
-      type: 'POST',
-      headers: {
-        'Csrf-Token': $('input[name="csrfToken"]').val()
-      },
-      success: function(response) {
-        // Masquer le modal de chargement
-        $('#loadingModal').modal('hide');
-        
-        // Notification de succès
-        if (typeof toastr !== 'undefined') {
-          toastr.warning('Bon de commande réactualisé avec succès');
-        } else {
-          if (typeof Swal !== 'undefined') {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Réactualisé',
-              text: 'Le bon de commande a été réactualisé avec succès',
-              timer: 2000
-            });
-          } else {
-            alert('Bon de commande réactualisé avec succès');
-          }
-        }
-        
-        // Recharger la page après 1 seconde
-        setTimeout(function() {
-          location.reload();
-        }, 1000);
-      },
-      error: function(xhr, status, error) {
-        // Masquer le modal de chargement
-        $('#loadingModal').modal('hide');
-        
-        // Notification d'erreur
-        if (typeof toastr !== 'undefined') {
-          toastr.error('Erreur lors de la réactualisation du bon');
-        } else {
-          if (typeof Swal !== 'undefined') {
-            Swal.fire({
-              icon: 'error',
-              title: 'Erreur',
-              text: 'Erreur lors de la réactualisation du bon'
-            });
-          } else {
-            alert('Erreur lors de la réactualisation du bon');
-          }
-        }
-        console.error('Erreur:', error);
-      }
-    });
-  }
-}
-
 
 $(function () {
   // Initialisation de DataTable
@@ -931,56 +812,6 @@ $(function () {
     margin-bottom: 0.5rem !important;
   }
 }
-
-/* Bon consommé styling */
-.badge-secondary {
-  background-color: #6c757d !important;
-}
-
-/* Bouton désactivé styling */
-.btn-warning:disabled,
-.btn-warning.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: #ffc107;
-  border-color: #ffc107;
-}
-
-.btn-warning:disabled:hover,
-.btn-warning.disabled:hover {
-  background-color: #ffc107;
-  border-color: #ffc107;
-}
-
-/* Badge impossible de confirmer */
-.ml-2 {
-  margin-left: 0.5rem !important;
-}
-
-/* Ligne pour bon consommé - optionnel */
-#reglementTable tbody tr:has(td span.badge-secondary) {
-  background-color: #f8f9fa;
-  opacity: 0.9;
-}
-
-/* Bouton réactualiser styling */
-.btn-secondary {
-  background-color: #6c757d;
-  border-color: #6c757d;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-  border-color: #545b62;
-}
-
-/* Animation pour le bouton réactualiser */
-.btn-secondary:active {
-  transform: rotate(180deg);
-  transition: transform 0.3s ease;
-}
-
-
 </style>
 
 }
