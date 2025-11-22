@@ -13,7 +13,6 @@
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="@routes.Assets.versioned("dist/css/googleapis.css")">
-  
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="@routes.Assets.versioned("plugins/fontawesome-free/css/all.min.css")">
   
@@ -214,6 +213,14 @@
                     <p>Configurations</p>
                   </a>
                 </li>
+
+                <li class="nav-item">
+                    <a href="@controllers.routes.EtudeConsommationCtrl.showImportForm()" class="nav-link">
+                      <i class="fas fa-file-upload"></i>
+                      <p>Import Consommations</p>
+                    </a>
+                  </li>
+
               </ul>
             </li>
 

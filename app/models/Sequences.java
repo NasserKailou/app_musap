@@ -89,6 +89,11 @@ public class Sequences {
     public static final Sequence<Long> EMAIL_ID_SEQ = new SequenceImpl<Long>("email_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
 
     /**
+     * The sequence <code>public.etude_consommations_id_seq</code>
+     */
+    public static final Sequence<Long> ETUDE_CONSOMMATIONS_ID_SEQ = new SequenceImpl<Long>("etude_consommations_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
+
+    /**
      * The sequence <code>public.journal_ecriture_id_seq</code>
      */
     public static final Sequence<Long> JOURNAL_ECRITURE_ID_SEQ = new SequenceImpl<Long>("journal_ecriture_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));

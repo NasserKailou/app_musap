@@ -113,6 +113,10 @@ GET     /json-ayantDroit                        controllers.ServerJson.jsonAyant
 GET     /json-CompteComptable                     controllers.ServerJson.jsonCompte(query:String?="")
 GET     /json-CompteBudget                    	 controllers.ServerJson.jsonCompteB(query:String?="")
 
+# Import Étude Consommations
+GET     /etude-consommations/import        controllers.EtudeConsommationCtrl.showImportForm(request:Request)
+POST    /etude-consommations/import        controllers.EtudeConsommationCtrl.importExcel(request: Request)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 

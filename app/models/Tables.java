@@ -19,6 +19,7 @@ import models.tables.Direction;
 import models.tables.Division;
 import models.tables.Ecriture;
 import models.tables.Email;
+import models.tables.EtudeConsommations;
 import models.tables.JournalEcriture;
 import models.tables.Notification;
 import models.tables.Params;
@@ -139,6 +140,11 @@ public class Tables {
      * The table <code>public.email</code>.
      */
     public static final Email EMAIL = models.tables.Email.EMAIL;
+
+    /**
+     * Table stockant les données d'étude de consommations des bons de commande
+     */
+    public static final EtudeConsommations ETUDE_CONSOMMATIONS = models.tables.EtudeConsommations.ETUDE_CONSOMMATIONS;
 
     /**
      * The table <code>public.journal_ecriture</code>.

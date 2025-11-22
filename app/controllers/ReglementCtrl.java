@@ -362,11 +362,11 @@ public class ReglementCtrl extends Controller {
 			int nombre = 0;
 			String dest, subject, message;
 			
-			System.out.println("Evoi void mail");
-			
+			System.out.println("Evoi void mail PLAFOND ");
+			System.out.println("plafond :"+ request.session().get("plafond").get());
 			if(element.getTotalAnnuel() <= Long.valueOf(request.session().get("plafond").get())) {
 				System.out.println("Evoi void mail 350000");
-				subject = "MAINS: Alerte consomation";
+				subject = "MUSAP: Alerte consomation";
 				diff = Long.valueOf(request.session().get("plafond").get()) -   element.getTotalAnnuel();
 				
 				message = "Chèr(e) adhérent(e),\r\r La MAINS vous notifie que votre consomation au titre de l'année "+request.session().get("gestion").get()

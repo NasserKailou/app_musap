@@ -23,6 +23,7 @@ import models.tables.Direction;
 import models.tables.Division;
 import models.tables.Ecriture;
 import models.tables.Email;
+import models.tables.EtudeConsommations;
 import models.tables.JournalEcriture;
 import models.tables.Notification;
 import models.tables.Params;
@@ -84,7 +85,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -1047972142;
+    private static final long serialVersionUID = -1453476118;
 
     /**
      * The reference instance of <code>public</code>
@@ -155,6 +156,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.email</code>.
      */
     public final Email EMAIL = models.tables.Email.EMAIL;
+
+    /**
+     * Table stockant les données d'étude de consommations des bons de commande
+     */
+    public final EtudeConsommations ETUDE_CONSOMMATIONS = models.tables.EtudeConsommations.ETUDE_CONSOMMATIONS;
 
     /**
      * The table <code>public.journal_ecriture</code>.
@@ -399,6 +405,7 @@ public class Public extends SchemaImpl {
             Sequences.DIVISION_ID_SEQ,
             Sequences.ECRITURE_ID_SEQ,
             Sequences.EMAIL_ID_SEQ,
+            Sequences.ETUDE_CONSOMMATIONS_ID_SEQ,
             Sequences.JOURNAL_ECRITURE_ID_SEQ,
             Sequences.NOTIFICATION_ID_SEQ,
             Sequences.PARAMS_ID_SEQ,
@@ -435,6 +442,7 @@ public class Public extends SchemaImpl {
             Division.DIVISION,
             Ecriture.ECRITURE,
             Email.EMAIL,
+            EtudeConsommations.ETUDE_CONSOMMATIONS,
             JournalEcriture.JOURNAL_ECRITURE,
             Notification.NOTIFICATION,
             Params.PARAMS,
