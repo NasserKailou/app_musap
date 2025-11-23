@@ -169,4 +169,11 @@ public class ReglementDao extends DAOImpl<ReglementRecord, models.tables.pojos.R
     public List<models.tables.pojos.Reglement> fetchByDateExpiration(Timestamp... values) {
         return fetch(Reglement.REGLEMENT.DATE_EXPIRATION, values);
     }
+
+    /**
+     * Fetch records that have <code>type_reglement IN (values)</code>
+     */
+    public List<models.tables.pojos.Reglement> fetchByTypeReglement(String... values) {
+        return fetch(Reglement.REGLEMENT.TYPE_REGLEMENT, values);
+    }
 }

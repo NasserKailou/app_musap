@@ -106,4 +106,25 @@ public class StructurePartenaireDao extends DAOImpl<StructurePartenaireRecord, m
     public List<models.tables.pojos.StructurePartenaire> fetchByRegion(Long... values) {
         return fetch(StructurePartenaire.STRUCTURE_PARTENAIRE.REGION, values);
     }
+
+    /**
+     * Fetch records that have <code>type_structure IN (values)</code>
+     */
+    public List<models.tables.pojos.StructurePartenaire> fetchByTypeStructure(String... values) {
+        return fetch(StructurePartenaire.STRUCTURE_PARTENAIRE.TYPE_STRUCTURE, values);
+    }
+
+    /**
+     * Fetch records that have <code>statut_structure IN (values)</code>
+     */
+    public List<models.tables.pojos.StructurePartenaire> fetchByStatutStructure(String... values) {
+        return fetch(StructurePartenaire.STRUCTURE_PARTENAIRE.STATUT_STRUCTURE, values);
+    }
+
+    /**
+     * Fetch records that have <code>suspension IN (values)</code>
+     */
+    public List<models.tables.pojos.StructurePartenaire> fetchBySuspension(Boolean... values) {
+        return fetch(StructurePartenaire.STRUCTURE_PARTENAIRE.SUSPENSION, values);
+    }
 }

@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class StructurePartenaire implements Serializable {
 
-    private static final long serialVersionUID = -338516513;
+    private static final long serialVersionUID = 1275476679;
 
     private Long      id;
     private String    libelle;
@@ -32,6 +32,9 @@ public class StructurePartenaire implements Serializable {
     private Boolean   isDeleted;
     private String    telephone;
     private Long      region;
+    private String    typeStructure;
+    private String    statutStructure;
+    private Boolean   suspension;
 
     public StructurePartenaire() {}
 
@@ -43,6 +46,9 @@ public class StructurePartenaire implements Serializable {
         this.isDeleted = value.isDeleted;
         this.telephone = value.telephone;
         this.region = value.region;
+        this.typeStructure = value.typeStructure;
+        this.statutStructure = value.statutStructure;
+        this.suspension = value.suspension;
     }
 
     public StructurePartenaire(
@@ -52,7 +58,10 @@ public class StructurePartenaire implements Serializable {
         Timestamp whenDone,
         Boolean   isDeleted,
         String    telephone,
-        Long      region
+        Long      region,
+        String    typeStructure,
+        String    statutStructure,
+        Boolean   suspension
     ) {
         this.id = id;
         this.libelle = libelle;
@@ -61,6 +70,9 @@ public class StructurePartenaire implements Serializable {
         this.isDeleted = isDeleted;
         this.telephone = telephone;
         this.region = region;
+        this.typeStructure = typeStructure;
+        this.statutStructure = statutStructure;
+        this.suspension = suspension;
     }
 
     public Long getId() {
@@ -119,6 +131,30 @@ public class StructurePartenaire implements Serializable {
         this.region = region;
     }
 
+    public String getTypeStructure() {
+        return this.typeStructure;
+    }
+
+    public void setTypeStructure(String typeStructure) {
+        this.typeStructure = typeStructure;
+    }
+
+    public String getStatutStructure() {
+        return this.statutStructure;
+    }
+
+    public void setStatutStructure(String statutStructure) {
+        this.statutStructure = statutStructure;
+    }
+
+    public Boolean getSuspension() {
+        return this.suspension;
+    }
+
+    public void setSuspension(Boolean suspension) {
+        this.suspension = suspension;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("StructurePartenaire (");
@@ -130,6 +166,9 @@ public class StructurePartenaire implements Serializable {
         sb.append(", ").append(isDeleted);
         sb.append(", ").append(telephone);
         sb.append(", ").append(region);
+        sb.append(", ").append(typeStructure);
+        sb.append(", ").append(statutStructure);
+        sb.append(", ").append(suspension);
 
         sb.append(")");
         return sb.toString();

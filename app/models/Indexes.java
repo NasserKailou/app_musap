@@ -75,7 +75,6 @@ public class Indexes {
     public static final Index IDX_NUMERO_CARNET = Indexes0.IDX_NUMERO_CARNET;
     public static final Index IDX_STATUT_AVERTISSEMENT = Indexes0.IDX_STATUT_AVERTISSEMENT;
     public static final Index IDX_STATUT_SUSPENSION = Indexes0.IDX_STATUT_SUSPENSION;
-    public static final Index UK_CODE_AGENT = Indexes0.UK_CODE_AGENT;
     public static final Index JOURNAL_ECRITURE_PKEY = Indexes0.JOURNAL_ECRITURE_PKEY;
     public static final Index UNIK_JOURNAL_KEY = Indexes0.UNIK_JOURNAL_KEY;
     public static final Index PARAMS_PKEY = Indexes0.PARAMS_PKEY;
@@ -117,7 +116,6 @@ public class Indexes {
         public static Index IDX_NUMERO_CARNET = createIndex("idx_numero_carnet", EtudeConsommations.ETUDE_CONSOMMATIONS, new OrderField[] { EtudeConsommations.ETUDE_CONSOMMATIONS.NUMERO_CARNET }, false);
         public static Index IDX_STATUT_AVERTISSEMENT = createIndex("idx_statut_avertissement", EtudeConsommations.ETUDE_CONSOMMATIONS, new OrderField[] { EtudeConsommations.ETUDE_CONSOMMATIONS.STATUT_AVERTISSEMENT }, false);
         public static Index IDX_STATUT_SUSPENSION = createIndex("idx_statut_suspension", EtudeConsommations.ETUDE_CONSOMMATIONS, new OrderField[] { EtudeConsommations.ETUDE_CONSOMMATIONS.STATUT_SUSPENSION }, false);
-        public static Index UK_CODE_AGENT = createIndex("uk_code_agent", EtudeConsommations.ETUDE_CONSOMMATIONS, new OrderField[] { EtudeConsommations.ETUDE_CONSOMMATIONS.CODE_AGENT }, true);
         public static Index JOURNAL_ECRITURE_PKEY = createIndex("journal_ecriture_pkey", JournalEcriture.JOURNAL_ECRITURE, new OrderField[] { JournalEcriture.JOURNAL_ECRITURE.ID }, true);
         public static Index UNIK_JOURNAL_KEY = createIndex("unik_journal_key", JournalEcriture.JOURNAL_ECRITURE, new OrderField[] { JournalEcriture.JOURNAL_ECRITURE.NUM_JOURNAL }, true);
         public static Index PARAMS_PKEY = createIndex("params_pkey", Params.PARAMS, new OrderField[] { Params.PARAMS.ID }, true);

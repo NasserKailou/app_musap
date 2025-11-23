@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Reglement extends TableImpl<ReglementRecord> {
 
-    private static final long serialVersionUID = 1297493729;
+    private static final long serialVersionUID = -119350426;
 
     /**
      * The reference instance of <code>public.reglement</code>
@@ -135,6 +135,11 @@ public class Reglement extends TableImpl<ReglementRecord> {
      * The column <code>public.reglement.date_expiration</code>.
      */
     public final TableField<ReglementRecord, Timestamp> DATE_EXPIRATION = createField("date_expiration", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>public.reglement.type_reglement</code>.
+     */
+    public final TableField<ReglementRecord, String> TYPE_REGLEMENT = createField("type_reglement", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * Create a <code>public.reglement</code> table reference

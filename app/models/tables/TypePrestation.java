@@ -39,7 +39,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TypePrestation extends TableImpl<TypePrestationRecord> {
 
-    private static final long serialVersionUID = -828826235;
+    private static final long serialVersionUID = -632471262;
 
     /**
      * The reference instance of <code>public.type_prestation</code>
@@ -73,6 +73,16 @@ public class TypePrestation extends TableImpl<TypePrestationRecord> {
      * The column <code>public.type_prestation.on_deleted</code>.
      */
     public final TableField<TypePrestationRecord, Boolean> ON_DELETED = createField("on_deleted", org.jooq.impl.SQLDataType.BOOLEAN.defaultValue(org.jooq.impl.DSL.field("false", org.jooq.impl.SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>public.type_prestation.taux_public</code>.
+     */
+    public final TableField<TypePrestationRecord, String> TAUX_PUBLIC = createField("taux_public", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.type_prestation.taux_prive</code>.
+     */
+    public final TableField<TypePrestationRecord, String> TAUX_PRIVE = createField("taux_prive", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * Create a <code>public.type_prestation</code> table reference

@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class StructurePartenaire extends TableImpl<StructurePartenaireRecord> {
 
-    private static final long serialVersionUID = 1886139054;
+    private static final long serialVersionUID = -2085803496;
 
     /**
      * The reference instance of <code>public.structure_partenaire</code>
@@ -90,6 +90,21 @@ public class StructurePartenaire extends TableImpl<StructurePartenaireRecord> {
      * The column <code>public.structure_partenaire.region</code>.
      */
     public final TableField<StructurePartenaireRecord, Long> REGION = createField("region", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.structure_partenaire.type_structure</code>.
+     */
+    public final TableField<StructurePartenaireRecord, String> TYPE_STRUCTURE = createField("type_structure", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.structure_partenaire.statut_structure</code>.
+     */
+    public final TableField<StructurePartenaireRecord, String> STATUT_STRUCTURE = createField("statut_structure", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.structure_partenaire.suspension</code>.
+     */
+    public final TableField<StructurePartenaireRecord, Boolean> SUSPENSION = createField("suspension", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
 
     /**
      * Create a <code>public.structure_partenaire</code> table reference

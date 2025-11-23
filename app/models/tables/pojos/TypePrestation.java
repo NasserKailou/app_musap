@@ -22,12 +22,14 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TypePrestation implements Serializable {
 
-    private static final long serialVersionUID = -1805260960;
+    private static final long serialVersionUID = -142325121;
 
     private Long    id;
     private String  prestation;
     private String  couverture;
     private Boolean onDeleted;
+    private String  tauxPublic;
+    private String  tauxPrive;
 
     public TypePrestation() {}
 
@@ -36,18 +38,24 @@ public class TypePrestation implements Serializable {
         this.prestation = value.prestation;
         this.couverture = value.couverture;
         this.onDeleted = value.onDeleted;
+        this.tauxPublic = value.tauxPublic;
+        this.tauxPrive = value.tauxPrive;
     }
 
     public TypePrestation(
         Long    id,
         String  prestation,
         String  couverture,
-        Boolean onDeleted
+        Boolean onDeleted,
+        String  tauxPublic,
+        String  tauxPrive
     ) {
         this.id = id;
         this.prestation = prestation;
         this.couverture = couverture;
         this.onDeleted = onDeleted;
+        this.tauxPublic = tauxPublic;
+        this.tauxPrive = tauxPrive;
     }
 
     public Long getId() {
@@ -82,6 +90,22 @@ public class TypePrestation implements Serializable {
         this.onDeleted = onDeleted;
     }
 
+    public String getTauxPublic() {
+        return this.tauxPublic;
+    }
+
+    public void setTauxPublic(String tauxPublic) {
+        this.tauxPublic = tauxPublic;
+    }
+
+    public String getTauxPrive() {
+        return this.tauxPrive;
+    }
+
+    public void setTauxPrive(String tauxPrive) {
+        this.tauxPrive = tauxPrive;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("TypePrestation (");
@@ -90,6 +114,8 @@ public class TypePrestation implements Serializable {
         sb.append(", ").append(prestation);
         sb.append(", ").append(couverture);
         sb.append(", ").append(onDeleted);
+        sb.append(", ").append(tauxPublic);
+        sb.append(", ").append(tauxPrive);
 
         sb.append(")");
         return sb.toString();

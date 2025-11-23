@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VPartenaire implements Serializable {
 
-    private static final long serialVersionUID = 60922639;
+    private static final long serialVersionUID = 1643476171;
 
     private Long      id;
     private String    libelle;
@@ -31,6 +31,9 @@ public class VPartenaire implements Serializable {
     private Timestamp whenDone;
     private Boolean   isDeleted;
     private String    telephone;
+    private String    statutStructure;
+    private String    typeStructure;
+    private Boolean   suspension;
     private String    region;
 
     public VPartenaire() {}
@@ -42,6 +45,9 @@ public class VPartenaire implements Serializable {
         this.whenDone = value.whenDone;
         this.isDeleted = value.isDeleted;
         this.telephone = value.telephone;
+        this.statutStructure = value.statutStructure;
+        this.typeStructure = value.typeStructure;
+        this.suspension = value.suspension;
         this.region = value.region;
     }
 
@@ -52,6 +58,9 @@ public class VPartenaire implements Serializable {
         Timestamp whenDone,
         Boolean   isDeleted,
         String    telephone,
+        String    statutStructure,
+        String    typeStructure,
+        Boolean   suspension,
         String    region
     ) {
         this.id = id;
@@ -60,6 +69,9 @@ public class VPartenaire implements Serializable {
         this.whenDone = whenDone;
         this.isDeleted = isDeleted;
         this.telephone = telephone;
+        this.statutStructure = statutStructure;
+        this.typeStructure = typeStructure;
+        this.suspension = suspension;
         this.region = region;
     }
 
@@ -111,6 +123,30 @@ public class VPartenaire implements Serializable {
         this.telephone = telephone;
     }
 
+    public String getStatutStructure() {
+        return this.statutStructure;
+    }
+
+    public void setStatutStructure(String statutStructure) {
+        this.statutStructure = statutStructure;
+    }
+
+    public String getTypeStructure() {
+        return this.typeStructure;
+    }
+
+    public void setTypeStructure(String typeStructure) {
+        this.typeStructure = typeStructure;
+    }
+
+    public Boolean getSuspension() {
+        return this.suspension;
+    }
+
+    public void setSuspension(Boolean suspension) {
+        this.suspension = suspension;
+    }
+
     public String getRegion() {
         return this.region;
     }
@@ -129,6 +165,9 @@ public class VPartenaire implements Serializable {
         sb.append(", ").append(whenDone);
         sb.append(", ").append(isDeleted);
         sb.append(", ").append(telephone);
+        sb.append(", ").append(statutStructure);
+        sb.append(", ").append(typeStructure);
+        sb.append(", ").append(suspension);
         sb.append(", ").append(region);
 
         sb.append(")");

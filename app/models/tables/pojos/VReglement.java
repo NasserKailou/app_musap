@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglement implements Serializable {
 
-    private static final long serialVersionUID = -847732527;
+    private static final long serialVersionUID = 281584544;
 
     private Long      id;
     private String    nomAd;
@@ -38,15 +38,21 @@ public class VReglement implements Serializable {
     private Boolean   isConfirmedBon;
     private Timestamp whenConfirmedBon;
     private Timestamp dateExpiration;
+    private String    typeReglement;
     private String    annee;
     private Boolean   onDeleted;
     private String    prestation;
     private String    couverture;
+    private String    tauxPublic;
+    private String    tauxPrive;
+    private String    typeStructure;
+    private String    statutStructure;
     private String    nomAy;
     private String    lien;
     private String    genre;
     private Long      ayantDroit;
     private Long      montantTotal;
+    private String    tauxCouvertureEffectif;
     private Long      montantReglement;
     private Long      montantPaye;
     private Long      idStructure;
@@ -67,15 +73,21 @@ public class VReglement implements Serializable {
         this.isConfirmedBon = value.isConfirmedBon;
         this.whenConfirmedBon = value.whenConfirmedBon;
         this.dateExpiration = value.dateExpiration;
+        this.typeReglement = value.typeReglement;
         this.annee = value.annee;
         this.onDeleted = value.onDeleted;
         this.prestation = value.prestation;
         this.couverture = value.couverture;
+        this.tauxPublic = value.tauxPublic;
+        this.tauxPrive = value.tauxPrive;
+        this.typeStructure = value.typeStructure;
+        this.statutStructure = value.statutStructure;
         this.nomAy = value.nomAy;
         this.lien = value.lien;
         this.genre = value.genre;
         this.ayantDroit = value.ayantDroit;
         this.montantTotal = value.montantTotal;
+        this.tauxCouvertureEffectif = value.tauxCouvertureEffectif;
         this.montantReglement = value.montantReglement;
         this.montantPaye = value.montantPaye;
         this.idStructure = value.idStructure;
@@ -95,15 +107,21 @@ public class VReglement implements Serializable {
         Boolean   isConfirmedBon,
         Timestamp whenConfirmedBon,
         Timestamp dateExpiration,
+        String    typeReglement,
         String    annee,
         Boolean   onDeleted,
         String    prestation,
         String    couverture,
+        String    tauxPublic,
+        String    tauxPrive,
+        String    typeStructure,
+        String    statutStructure,
         String    nomAy,
         String    lien,
         String    genre,
         Long      ayantDroit,
         Long      montantTotal,
+        String    tauxCouvertureEffectif,
         Long      montantReglement,
         Long      montantPaye,
         Long      idStructure
@@ -121,15 +139,21 @@ public class VReglement implements Serializable {
         this.isConfirmedBon = isConfirmedBon;
         this.whenConfirmedBon = whenConfirmedBon;
         this.dateExpiration = dateExpiration;
+        this.typeReglement = typeReglement;
         this.annee = annee;
         this.onDeleted = onDeleted;
         this.prestation = prestation;
         this.couverture = couverture;
+        this.tauxPublic = tauxPublic;
+        this.tauxPrive = tauxPrive;
+        this.typeStructure = typeStructure;
+        this.statutStructure = statutStructure;
         this.nomAy = nomAy;
         this.lien = lien;
         this.genre = genre;
         this.ayantDroit = ayantDroit;
         this.montantTotal = montantTotal;
+        this.tauxCouvertureEffectif = tauxCouvertureEffectif;
         this.montantReglement = montantReglement;
         this.montantPaye = montantPaye;
         this.idStructure = idStructure;
@@ -239,6 +263,14 @@ public class VReglement implements Serializable {
         this.dateExpiration = dateExpiration;
     }
 
+    public String getTypeReglement() {
+        return this.typeReglement;
+    }
+
+    public void setTypeReglement(String typeReglement) {
+        this.typeReglement = typeReglement;
+    }
+
     public String getAnnee() {
         return this.annee;
     }
@@ -269,6 +301,38 @@ public class VReglement implements Serializable {
 
     public void setCouverture(String couverture) {
         this.couverture = couverture;
+    }
+
+    public String getTauxPublic() {
+        return this.tauxPublic;
+    }
+
+    public void setTauxPublic(String tauxPublic) {
+        this.tauxPublic = tauxPublic;
+    }
+
+    public String getTauxPrive() {
+        return this.tauxPrive;
+    }
+
+    public void setTauxPrive(String tauxPrive) {
+        this.tauxPrive = tauxPrive;
+    }
+
+    public String getTypeStructure() {
+        return this.typeStructure;
+    }
+
+    public void setTypeStructure(String typeStructure) {
+        this.typeStructure = typeStructure;
+    }
+
+    public String getStatutStructure() {
+        return this.statutStructure;
+    }
+
+    public void setStatutStructure(String statutStructure) {
+        this.statutStructure = statutStructure;
     }
 
     public String getNomAy() {
@@ -309,6 +373,14 @@ public class VReglement implements Serializable {
 
     public void setMontantTotal(Long montantTotal) {
         this.montantTotal = montantTotal;
+    }
+
+    public String getTauxCouvertureEffectif() {
+        return this.tauxCouvertureEffectif;
+    }
+
+    public void setTauxCouvertureEffectif(String tauxCouvertureEffectif) {
+        this.tauxCouvertureEffectif = tauxCouvertureEffectif;
     }
 
     public Long getMontantReglement() {
@@ -352,15 +424,21 @@ public class VReglement implements Serializable {
         sb.append(", ").append(isConfirmedBon);
         sb.append(", ").append(whenConfirmedBon);
         sb.append(", ").append(dateExpiration);
+        sb.append(", ").append(typeReglement);
         sb.append(", ").append(annee);
         sb.append(", ").append(onDeleted);
         sb.append(", ").append(prestation);
         sb.append(", ").append(couverture);
+        sb.append(", ").append(tauxPublic);
+        sb.append(", ").append(tauxPrive);
+        sb.append(", ").append(typeStructure);
+        sb.append(", ").append(statutStructure);
         sb.append(", ").append(nomAy);
         sb.append(", ").append(lien);
         sb.append(", ").append(genre);
         sb.append(", ").append(ayantDroit);
         sb.append(", ").append(montantTotal);
+        sb.append(", ").append(tauxCouvertureEffectif);
         sb.append(", ").append(montantReglement);
         sb.append(", ").append(montantPaye);
         sb.append(", ").append(idStructure);

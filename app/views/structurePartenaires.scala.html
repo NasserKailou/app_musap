@@ -8,6 +8,15 @@
 
 @main("Structures Partenaires") {
 
+  <style>
+    .badge-status {
+      font-size: 0.95rem !important;
+      padding: 0.5rem 1rem !important;
+      font-weight: 600 !important;
+      border-radius: 0.4rem !important;
+    }
+  </style>
+
   <!-- Content Header -->
   <div class="content-header">
     <div class="container-fluid">
@@ -63,7 +72,7 @@
                 <div class="form-row">
 
                   <!-- Libellé structure -->
-                  <div class="form-group col-md-4">
+                  <div class="form-group col-md-3">
                     <label for="libelle">
                       <i class="fas fa-building text-primary"></i>
                       Libellé Structure
@@ -83,8 +92,76 @@
                     </small>
                   </div>
 
+                  <!-- Type Structure -->
+                  <div class="form-group col-md-3">
+                    <label for="typeStructure">
+                      <i class="fas fa-building text-primary"></i>
+                      Type de Structure
+                      <span class="text-danger">*</span>
+                    </label>
+                    <select id="typeStructure"
+                            name="typeStructure"
+                            class="form-control @if(viewMode.equals("DELETE")) { is-invalid }"
+                            required
+                            @if(viewMode.equals("DELETE")) { disabled="disabled" }>
+                      <option value="">Sélectionner le type...</option>
+                      <option value="HOPITALE" @if(part.getTypeStructure() != null && part.getTypeStructure().equals("HOPITALE")) { selected="selected" }>HOPITALE</option>
+                      <option value="CLINIQUE" @if(part.getTypeStructure() != null && part.getTypeStructure().equals("CLINIQUE")) { selected="selected" }>CLINIQUE</option>
+                      <option value="PHARMACIE" @if(part.getTypeStructure() != null && part.getTypeStructure().equals("PHARMACIE")) { selected="selected" }>PHARMACIE</option>
+                      <option value="LABORATOIRE" @if(part.getTypeStructure() != null && part.getTypeStructure().equals("LABORATOIRE")) { selected="selected" }>LABORATOIRE</option>
+                    </select>
+                    <small class="form-text text-muted">
+                      Type de la structure partenaire
+                    </small>
+                  </div>
+
+                  <!-- Statut Structure -->
+                  <div class="form-group col-md-3">
+                    <label for="statutStructure">
+                      <i class="fas fa-info-circle text-warning"></i>
+                      Statut Structure
+                      <span class="text-danger">*</span>
+                    </label>
+                    <select id="statutStructure"
+                            name="statutStructure"
+                            class="form-control @if(viewMode.equals("DELETE")) { is-invalid }"
+                            required
+                            @if(viewMode.equals("DELETE")) { disabled="disabled" }>
+                      <option value="">Sélectionner le statut...</option>
+                      <option value="PUBLIC" @if(part.getStatutStructure() != null && part.getStatutStructure().equals("PUBLIC")) { selected="selected" }>PUBLIC</option>
+                      <option value="PRIVE" @if(part.getStatutStructure() != null && part.getStatutStructure().equals("PRIVE")) { selected="selected" }>PRIVE</option>
+                    </select>
+                    <small class="form-text text-muted">
+                      Statut juridique de la structure
+                    </small>
+                  </div>
+
+                  <!-- Suspension -->
+                  <div class="form-group col-md-3">
+                    <label for="suspension">
+                      <i class="fas fa-power-off text-danger"></i>
+                      État
+                      <span class="text-danger">*</span>
+                    </label>
+                    <select id="suspension"
+                            name="suspension"
+                            class="form-control @if(viewMode.equals("DELETE")) { is-invalid }"
+                            required
+                            @if(viewMode.equals("DELETE")) { disabled="disabled" }>
+                      <option value="false" @if(part.getSuspension() != null && !part.getSuspension()) { selected="selected" }>Actif</option>
+                      <option value="true" @if(part.getSuspension() != null && part.getSuspension()) { selected="selected" }>Suspendu</option>
+                    </select>
+                    <small class="form-text text-muted">
+                      État de la structure
+                    </small>
+                  </div>
+
+                </div>
+
+                <div class="form-row">
+
                   <!-- Région -->
-                  <div class="form-group col-md-4">
+                  <div class="form-group col-md-6">
                     <label for="region">
                       <i class="fas fa-map-marked-alt text-success"></i>
                       Région
@@ -109,7 +186,7 @@
                   </div>
 
                   <!-- Téléphone -->
-                  <div class="form-group col-md-4">
+                  <div class="form-group col-md-6">
                     <label for="telephone">
                       <i class="fas fa-phone text-info"></i>
                       N° Téléphone
@@ -203,31 +280,54 @@
               </div>
             </div>
             <div class="card-body table-responsive p-0">
-              <table class="table table-head-fixed table-bordered table-hover text-nowrap">
+              <table id="tableStructures" class="table table-head-fixed table-bordered table-hover text-nowrap">
                 <thead>
                   <tr>
                     <th class="text-center" style="width: 80px;">#</th>
                     <th><i class="fas fa-hospital mr-1"></i> Libellé</th>
+                    <th><i class="fas fa-building mr-1"></i> Type</th>
+                    <th><i class="fas fa-info-circle mr-1"></i> Statut</th>
                     <th><i class="fas fa-map-marker-alt mr-1"></i> Région</th>
                     <th class="text-center"><i class="fas fa-phone mr-1"></i> Téléphone</th>
+                    <th class="text-center" style="width: 120px;">
+                      <i class="fas fa-power-off mr-1"></i> État
+                    </th>
                     <th class="text-center" style="width: 150px;">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   @if(partenaires.isEmpty()) {
                     <tr>
-                      <td colspan="5" class="text-center text-muted">
+                      <td colspan="8" class="text-center text-muted">
                         <i class="fas fa-inbox fa-2x mb-2"></i>
                         <p>Aucune structure partenaire enregistrée</p>
                       </td>
                     </tr>
                   } else {
                     @for(c <- partenaires) {
-                      <tr>
+                      <tr @if(c.getSuspension() != null && c.getSuspension()) { class="table-secondary" }>
                         <td class="text-center"><strong>@c.getId()</strong></td>
                         <td>
                           <i class="fas fa-hospital-alt text-primary mr-2"></i>
                           <strong>@c.getLibelle()</strong>
+                        </td>
+                        <td>
+                          <span class="badge badge-primary">
+                            @if(c.getTypeStructure() != null) {
+                              @c.getTypeStructure()
+                            } else {
+                              -
+                            }
+                          </span>
+                        </td>
+                        <td>
+                          <span class="badge @if(c.getStatutStructure() != null && c.getStatutStructure().equals("PUBLIC")) { badge-success } else { badge-warning }">
+                            @if(c.getStatutStructure() != null) {
+                              @c.getStatutStructure()
+                            } else {
+                              -
+                            }
+                          </span>
                         </td>
                         <td>
                           <i class="fas fa-map-pin text-success mr-2"></i>
@@ -238,6 +338,19 @@
                             <i class="fas fa-phone-alt mr-1"></i>
                             @c.getTelephone()
                           </span>
+                        </td>
+                        <td class="text-center">
+                          @if(c.getSuspension() != null && c.getSuspension()) {
+                            <span class="badge badge-danger badge-status">
+                              <i class="fas fa-ban mr-1"></i>
+                              Suspendu
+                            </span>
+                          } else {
+                            <span class="badge badge-success badge-status">
+                              <i class="fas fa-check-circle mr-1"></i>
+                              Actif
+                            </span>
+                          }
                         </td>
                         <td class="text-center">
                           <div class="btn-group">
@@ -268,21 +381,62 @@
   </section>
 
   <script>
-    $(document).ready(function() {
-      // Initialize DataTable
-      $('.table').DataTable({
-        "paging": true,
-        "lengthChange": true,
-        "searching": true,
-        "ordering": true,
-        "info": true,
-        "autoWidth": false,
-        "responsive": true,
-        "language": {
-          "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+    // Protection contre l'absence de jQuery
+    (function() {
+      // Fonction d'initialisation DataTables
+      function initDataTable() {
+        if (typeof jQuery !== 'undefined' && jQuery.fn.DataTable) {
+          jQuery('#tableStructures').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "pageLength": 10,
+            "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Tout"]],
+            "language": {
+              "sProcessing": "Traitement en cours...",
+              "sSearch": "Rechercher&nbsp;:",
+              "sLengthMenu": "Afficher _MENU_ éléments",
+              "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+              "sInfoEmpty": "Affichage de 0 à 0 sur 0 éléments",
+              "sInfoFiltered": "(filtré de _MAX_ éléments au total)",
+              "sZeroRecords": "Aucun élément à afficher",
+              "sEmptyTable": "Aucune donnée disponible dans le tableau",
+              "oPaginate": {
+                "sFirst": "Premier",
+                "sPrevious": "Précédent",
+                "sNext": "Suivant",
+                "sLast": "Dernier"
+              },
+              "oAria": {
+                "sSortAscending": ": activer pour trier la colonne par ordre croissant",
+                "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
+              }
+            },
+            "columnDefs": [
+              { "orderable": false, "targets": 7 }  // Désactiver le tri sur la colonne Actions
+            ],
+            "order": [[0, "desc"]]  // Trier par ID décroissant par défaut
+          });
+        } else {
+          console.error('jQuery ou DataTables n\'est pas chargé. Vérifiez votre template main.scala.html');
         }
-      });
-    });
+      }
+
+      // Attendre le chargement complet du DOM
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          // Attendre encore un peu pour s'assurer que jQuery est bien chargé
+          setTimeout(initDataTable, 100);
+        });
+      } else {
+        // DOM déjà chargé
+        setTimeout(initDataTable, 100);
+      }
+    })();
   </script>
 
 }

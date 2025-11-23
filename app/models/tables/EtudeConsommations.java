@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EtudeConsommations extends TableImpl<EtudeConsommationsRecord> {
 
-    private static final long serialVersionUID = -1370914233;
+    private static final long serialVersionUID = -48014477;
 
     /**
      * The reference instance of <code>public.etude_consommations</code>
@@ -223,7 +223,7 @@ public class EtudeConsommations extends TableImpl<EtudeConsommationsRecord> {
      */
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.ETUDE_CONSOMMATIONS_PKEY, Indexes.IDX_DATE_IMPORT, Indexes.IDX_NOM_PRENOMS, Indexes.IDX_NUMERO_CARNET, Indexes.IDX_STATUT_AVERTISSEMENT, Indexes.IDX_STATUT_SUSPENSION, Indexes.UK_CODE_AGENT);
+        return Arrays.<Index>asList(Indexes.ETUDE_CONSOMMATIONS_PKEY, Indexes.IDX_DATE_IMPORT, Indexes.IDX_NOM_PRENOMS, Indexes.IDX_NUMERO_CARNET, Indexes.IDX_STATUT_AVERTISSEMENT, Indexes.IDX_STATUT_SUSPENSION);
     }
 
     /**
@@ -247,7 +247,7 @@ public class EtudeConsommations extends TableImpl<EtudeConsommationsRecord> {
      */
     @Override
     public List<UniqueKey<EtudeConsommationsRecord>> getKeys() {
-        return Arrays.<UniqueKey<EtudeConsommationsRecord>>asList(Keys.ETUDE_CONSOMMATIONS_PKEY, Keys.UK_CODE_AGENT);
+        return Arrays.<UniqueKey<EtudeConsommationsRecord>>asList(Keys.ETUDE_CONSOMMATIONS_PKEY);
     }
 
     /**

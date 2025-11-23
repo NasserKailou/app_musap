@@ -131,7 +131,6 @@ public class Keys {
     public static final UniqueKey<EcritureRecord> ECRITURE_PKEY = UniqueKeys0.ECRITURE_PKEY;
     public static final UniqueKey<EmailRecord> EMAIL_PKEY = UniqueKeys0.EMAIL_PKEY;
     public static final UniqueKey<EtudeConsommationsRecord> ETUDE_CONSOMMATIONS_PKEY = UniqueKeys0.ETUDE_CONSOMMATIONS_PKEY;
-    public static final UniqueKey<EtudeConsommationsRecord> UK_CODE_AGENT = UniqueKeys0.UK_CODE_AGENT;
     public static final UniqueKey<JournalEcritureRecord> JOURNAL_ECRITURE_PKEY = UniqueKeys0.JOURNAL_ECRITURE_PKEY;
     public static final UniqueKey<JournalEcritureRecord> UNIK_JOURNAL_KEY = UniqueKeys0.UNIK_JOURNAL_KEY;
     public static final UniqueKey<ParamsRecord> PARAMS_PKEY = UniqueKeys0.PARAMS_PKEY;
@@ -217,7 +216,6 @@ public class Keys {
         public static final UniqueKey<EcritureRecord> ECRITURE_PKEY = createUniqueKey(Ecriture.ECRITURE, "ecriture_pkey", Ecriture.ECRITURE.ID);
         public static final UniqueKey<EmailRecord> EMAIL_PKEY = createUniqueKey(Email.EMAIL, "email_pkey", Email.EMAIL.ID);
         public static final UniqueKey<EtudeConsommationsRecord> ETUDE_CONSOMMATIONS_PKEY = createUniqueKey(EtudeConsommations.ETUDE_CONSOMMATIONS, "etude_consommations_pkey", EtudeConsommations.ETUDE_CONSOMMATIONS.ID);
-        public static final UniqueKey<EtudeConsommationsRecord> UK_CODE_AGENT = createUniqueKey(EtudeConsommations.ETUDE_CONSOMMATIONS, "uk_code_agent", EtudeConsommations.ETUDE_CONSOMMATIONS.CODE_AGENT);
         public static final UniqueKey<JournalEcritureRecord> JOURNAL_ECRITURE_PKEY = createUniqueKey(JournalEcriture.JOURNAL_ECRITURE, "journal_ecriture_pkey", JournalEcriture.JOURNAL_ECRITURE.ID);
         public static final UniqueKey<JournalEcritureRecord> UNIK_JOURNAL_KEY = createUniqueKey(JournalEcriture.JOURNAL_ECRITURE, "unik_journal_key", JournalEcriture.JOURNAL_ECRITURE.NUM_JOURNAL);
         public static final UniqueKey<ParamsRecord> PARAMS_PKEY = createUniqueKey(Params.PARAMS, "params_pkey", Params.PARAMS.ID);

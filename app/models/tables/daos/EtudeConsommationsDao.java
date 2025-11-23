@@ -81,13 +81,6 @@ public class EtudeConsommationsDao extends DAOImpl<EtudeConsommationsRecord, mod
     }
 
     /**
-     * Fetch a unique record that has <code>code_agent = value</code>
-     */
-    public models.tables.pojos.EtudeConsommations fetchOneByCodeAgent(String value) {
-        return fetchOne(EtudeConsommations.ETUDE_CONSOMMATIONS.CODE_AGENT, value);
-    }
-
-    /**
      * Fetch records that have <code>nom_prenoms IN (values)</code>
      */
     public List<models.tables.pojos.EtudeConsommations> fetchByNomPrenoms(String... values) {
