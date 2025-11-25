@@ -4,6 +4,7 @@ import java.io.File;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import models.tables.pojos.AyantDroit;
 import models.tables.pojos.Email;
 import models.tables.pojos.Reglement;
 import models.tables.pojos.ReglementDetail;
+import models.tables.pojos.StructurePartenaire;
 import models.tables.pojos.TypePrestation;
 import models.tables.pojos.VAdherentAyantDroit;
 import models.tables.pojos.VReglementGlobalByAdherent;
@@ -74,15 +76,22 @@ public class ReglementCtrl extends Controller {
 		this.emailServices = emailServices;
 	}
 
-	public Result show(String subAction, Long idReglement, Long idAdherent, Request request) {
-
-//		if (!isAdmin()) {
-//			return redirect(routes.AuthenticationCtrl.logout());
-//		}
+	public Result show(String subAction, String typeOP, Long idReglement, Long idAdherent, Request request) {
 
 		String viewMode;
 		Reglement c;
-		List<TypePrestation> tps = regServices.getAllTypePrestation();
+		List<StructurePartenaire> listesPartenaires = new ArrayList<>();
+		List<TypePrestation> listeTypePrestation = new ArrayList<>();
+		
+		if(typeOP.equals("BC")){
+			listesPartenaires = structureService.findAllPharmacie();
+			listeTypePrestation = typePresta.findOrdonnance();
+		} else{
+			listesPartenaires = structureService.findAllHopitaux();
+			listeTypePrestation = typePresta.findOthers();
+		}
+			
+
 		List<VAdherentAyantDroit> vad = regServices.getAdherentAndAyantByAdherent(idAdherent);
 
 		if (0 == idReglement) {
@@ -102,10 +111,10 @@ public class ReglementCtrl extends Controller {
 			c = regServices.findById(idReglement);
 
 		}
-		return ok(views.html.rembourssement.render(viewMode,
+		return ok(views.html.rembourssement.render(viewMode,typeOP,
 				regServices.findReglementByAdherent(idAdherent, request.session().get("gestion").get()), c,
-				adherentService.findById(idAdherent), structureService.findAll(),
-				regServices.sommeRegler(idAdherent, request.session().get("gestion").get()),Long.valueOf(request.session().get("plafond").get()), tps, vad, request));
+				adherentService.findById(idAdherent), listesPartenaires,
+				regServices.sommeRegler(idAdherent, request.session().get("gestion").get()),Long.valueOf(request.session().get("plafond").get()), listeTypePrestation, vad, request));
 
 	}
 
@@ -149,10 +158,10 @@ public class ReglementCtrl extends Controller {
 		Reglement c = regServices.findById(idPart);
 		c.setOnDeleted(false);
 		regServices.update(c);
-		return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()));
+		return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,"", 0L, c.getAdherent()));
 	}
 
-	public Result reglementDetailForm(String action, Long idReglement, Long idAdherent, Long idDetails,
+	public Result reglementDetailForm(String action, String typeOP,  Long idReglement, Long idAdherent, Long idDetails,
 			Request request) {
 		String viewMode = ViewMode.VIEW_MODE_CREATE;
 		ReglementDetail detail = null;
@@ -170,7 +179,7 @@ public class ReglementCtrl extends Controller {
 		Adherent ad = adherentService.getById(idAdherent);
 		List<ReglementDetail> rd = reDetailMainServices.getByReglement(idReglement);
 
-		return ok(views.html.remboursementDetail.render(viewMode, idReglement, detail, ad, rd,
+		return ok(views.html.remboursementDetail.render(viewMode,typeOP, idReglement, detail, ad, rd,
 				regServices.sommeRegler(idAdherent, request.session().get("gestion").get()),Long.valueOf(request.session().get("plafond").get()), request));
 	}
 
@@ -184,6 +193,7 @@ public class ReglementCtrl extends Controller {
 		Form<ReglementDetail> uForm = formFactory.form(ReglementDetail.class).bindFromRequest(request);
 		Long ad = Long.parseLong(formFactory.form().bindFromRequest(request).get("adh"));
 		final String viewMode = formFactory.form().bindFromRequest(request).get("viewMode");
+		String typeOperation = formFactory.form().bindFromRequest(request).get("typeOP");
 		ReglementDetail rd = uForm.get();
 		rd.setWhenDone(new Timestamp(System.currentTimeMillis()));
 		rd.setWhoDone(String.valueOf(request.session().get("login").get()));
@@ -215,12 +225,12 @@ public class ReglementCtrl extends Controller {
 						
 					//}
 					
-					return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, rd.getReglement(),
+					return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,typeOperation, rd.getReglement(),
 							ad, 0L)).flashing("error",
 									" Reglement pris en charge!!!, Dépassement de plafond !!!!, le montant que vous voudriez ajouter à la comsomation actuel vous donne un total est de :"
 											+ total + " > " + Long.valueOf(request.session().get("plafond").get()));
 				} else {
-					return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,
+					return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,typeOperation,
 							rd.getReglement(), ad, rd.getId())).flashing("error", " Reglement détail non ajouté");
 				}
 				
@@ -233,10 +243,10 @@ public class ReglementCtrl extends Controller {
 					if(total >= Long.valueOf(request.session().get("seuilAlerte").get()))
 						envoiEmail(adherentService.getVAdherentReglGlobal(adherentService.getById(ad).getEmail(), request.session().get("gestion").get() ), request);
 					
-					return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,
+					return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,typeOperation,
 							rd.getReglement(), ad, rd.getId())).flashing("success", " Reglement détail ajouté");
 				} else {
-					return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,
+					return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,typeOperation,
 							rd.getReglement(), ad, rd.getId())).flashing("error", " Reglement détail non ajouté");
 				}
 			}
@@ -245,16 +255,16 @@ public class ReglementCtrl extends Controller {
 			rd.setLastUpdate(new Timestamp(System.currentTimeMillis()));
 			if (sommeReg > Long.valueOf(request.session().get("plafond").get())) {
 				System.out.println("ad :" + ad + " ,rd :" + rd.getId());
-				return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, rd.getReglement(),
+				return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,typeOperation, rd.getReglement(),
 						ad, 0L)).flashing("error",
 								" Reglement Non pris en charge!!!, Dépassement de plafond !!!!, le montant que vous voudriez ajouter +  la comsomation actuel est de :"
 										+ sommeReg + " > " + Long.valueOf(request.session().get("plafond").get()));
 			} else {
 				if (reDetailMainServices.saveLogical(rd, false).equals("ok")) {
-					redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, rd.getReglement(), ad,
+					redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,typeOperation, rd.getReglement(), ad,
 							rd.getId())).flashing("success", " Detail Reglement modifié avec succès !!! ");
 				} else {
-					redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, rd.getReglement(), ad,
+					redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,typeOperation, rd.getReglement(), ad,
 							rd.getId())).flashing("error", " Detail Reglement non modifié !!! ");
 				}
 			}
@@ -265,16 +275,16 @@ public class ReglementCtrl extends Controller {
 			rd.setMontant(0L);
 			rd.setLastUpdate(new Timestamp(System.currentTimeMillis()));
 			if (reDetailMainServices.saveLogical(rd, false).equals("ok")) {
-				redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, rd.getReglement(), ad,
+				redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,typeOperation, rd.getReglement(), ad,
 						rd.getId())).flashing("success", " Détail Reglement supprimer!!! ");
 			} else {
-				redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, rd.getReglement(), ad,
+				redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,typeOperation, rd.getReglement(), ad,
 						rd.getId())).flashing("error", " Detail Reglement non supprimé !!! ");
 			}
 		}
 
 		return redirect(
-				routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, rd.getReglement(), ad, rd.getId()));
+				routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE,typeOperation, rd.getReglement(), ad, rd.getId()));
 	}
 
 	public Result showAlerteView(Request request) {
@@ -426,6 +436,7 @@ public class ReglementCtrl extends Controller {
 
 		Form<Reglement> uForm = formFactory.form(Reglement.class).bindFromRequest(request);
 		String dateReglement = formFactory.form().bindFromRequest(request).get("tmpDate");
+		String typeOperation = formFactory.form().bindFromRequest(request).get("typeOP");
 		System.out.println("Date reglement :" + dateReglement + " #################");
 		Long benef = Long.parseLong(formFactory.form().bindFromRequest(request).get("benef"));
 
@@ -461,56 +472,56 @@ public class ReglementCtrl extends Controller {
 				String msg = "";
 				if (sommeReg >= Long.valueOf(request.session().get("plafond").get())) {
 					msg = "error";
-					return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent())).flashing(
+					return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOperation, 0L, c.getAdherent())).flashing(
 							msg,
 							" Reglement de la facture " + c.getRefFacture() + " avec depassement du plafond prévu!!!");
 				} else {
 					msg = "success";
-					return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+					return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOperation, 0L, c.getAdherent()))
 							.flashing(msg, " Reglement de la facture " + c.getRefFacture() + " ajouter avec success");
 				}
 
 			} else {
 				System.out.println("msg :" + regServices.saveLogical(c, true));
 				// flash("error", " AyantDroit " + c.getLibelle() + " non ajouter ");
-				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOperation, 0L, c.getAdherent()))
 						.flashing("error", " Reglement non ajouter ");
 			}
 		} else if (viewMode.equals(ViewMode.VIEW_MODE_EDIT)) {
 			// a.setLogin(login);
 			if (regServices.saveLogical(c, false).equals("ok")) {
 				// flash("success", " AyantDroit modifier avec success");
-				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOperation, 0L, c.getAdherent()))
 						.flashing("success", " Reglement  modifier avec success");
 			} else {
 				// flash("error", "AyantDroits non modifier");
-				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOperation, 0L, c.getAdherent()))
 						.flashing("error", "Reglement  non modifier");
 			}
 		} else if (viewMode.equals(ViewMode.VIEW_MODE_TRAITE)) {
 
 			if (regServices.saveLogical(c, false).equals("ok")) {
 
-				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOperation, 0L, c.getAdherent()))
 						.flashing("success", " Reglement  traiter avec success");
 			} else {
 				// flash("error", "Echec lors du traitement de l'AyantDroit");
-				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOperation, 0L, c.getAdherent()))
 						.flashing("error", "Echec lors du traitement du Reglement");
 			}
 		} else if (viewMode.equals(ViewMode.VIEW_MODE_DELETE)) {
 			c.setOnDeleted(true);
 			if (regServices.saveLogical(c, false).equals("ok")) {
 				// flash("success", " AyantDroit Supprimer avec success");
-				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOperation, 0L, c.getAdherent()))
 						.flashing("success", " Reglement  Supprimer avec success");
 			} else {
 
-				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOperation, 0L, c.getAdherent()))
 						.flashing("error", " Reglement  non supprimer");
 			}
 		}
-		return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()));
+		return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOperation, 0L, c.getAdherent()));
 	}
 
 	public Result rapportAnnuel(Request request, String fileName) {

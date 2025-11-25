@@ -239,4 +239,18 @@ public class AdherentDao extends DAOImpl<AdherentRecord, models.tables.pojos.Adh
     public List<models.tables.pojos.Adherent> fetchByCodeCarnet(String... values) {
         return fetch(Adherent.ADHERENT.CODE_CARNET, values);
     }
+
+    /**
+     * Fetch records that have <code>salaire_net IN (values)</code>
+     */
+    public List<models.tables.pojos.Adherent> fetchBySalaireNet(Long... values) {
+        return fetch(Adherent.ADHERENT.SALAIRE_NET, values);
+    }
+
+    /**
+     * Fetch records that have <code>pourcentage_total_retenue IN (values)</code>
+     */
+    public List<models.tables.pojos.Adherent> fetchByPourcentageTotalRetenue(Double... values) {
+        return fetch(Adherent.ADHERENT.POURCENTAGE_TOTAL_RETENUE, values);
+    }
 }

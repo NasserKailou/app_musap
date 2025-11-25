@@ -2,7 +2,7 @@
 @import helper._
 @import utils._
 @import java.util
-@(viewMode: String,
+@(viewMode: String, typeOP: String,
   idReglement: Long,
   details: models.tables.pojos.ReglementDetail,
   adherent: models.tables.pojos.Adherent,
@@ -20,14 +20,14 @@
         <h1>Détails du Bon de Commande</h1>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="#">Accueil</a></li>
-          <li class="breadcrumb-item"><a href="@controllers.routes.AdherentCtrl.addRembourssement(adherent.getId())">Bons de Commande</a></li>
+          <li class="breadcrumb-item"><a href="@controllers.routes.AdherentCtrl.addRembourssement(adherent.getId(), typeOP)">Bons de Commande</a></li>
           <li class="breadcrumb-item active">Détails</li>
         </ol>
       </div>
       <div class="col-sm-6">
         <div class="float-sm-right">
           <a class="btn btn-secondary"
-             href="@controllers.routes.AdherentCtrl.addRembourssement(adherent.getId())">
+             href="@controllers.routes.AdherentCtrl.addRembourssement(adherent.getId(),typeOP)">
             <i class="fas fa-arrow-left"></i> Retour à la liste
           </a>
           @if(
@@ -247,7 +247,7 @@
         <input type="hidden" name="reglement" value="@idReglement">
         <input type="hidden" name="adh" value="@adherent.getId()">
         <input type="hidden" name="id" id="formDetailId" value="">
-
+        <input type="hidden" id="typeOP" name="typeOP" value="@typeOP">
         <div class="modal-header bg-primary">
           <h5 class="modal-title" id="modalDetailLabel">
             <i class="fas fa-file-invoice"></i> <span id="modalTitle">Détail de règlement</span>

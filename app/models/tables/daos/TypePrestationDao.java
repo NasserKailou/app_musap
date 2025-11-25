@@ -98,4 +98,11 @@ public class TypePrestationDao extends DAOImpl<TypePrestationRecord, models.tabl
     public List<models.tables.pojos.TypePrestation> fetchByTauxPrive(String... values) {
         return fetch(TypePrestation.TYPE_PRESTATION.TAUX_PRIVE, values);
     }
+
+    /**
+     * Fetch records that have <code>type IN (values)</code>
+     */
+    public List<models.tables.pojos.TypePrestation> fetchByType(String... values) {
+        return fetch(TypePrestation.TYPE_PRESTATION.TYPE, values);
+    }
 }

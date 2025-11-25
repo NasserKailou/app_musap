@@ -39,7 +39,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TypePrestation extends TableImpl<TypePrestationRecord> {
 
-    private static final long serialVersionUID = -632471262;
+    private static final long serialVersionUID = -1299564948;
 
     /**
      * The reference instance of <code>public.type_prestation</code>
@@ -83,6 +83,11 @@ public class TypePrestation extends TableImpl<TypePrestationRecord> {
      * The column <code>public.type_prestation.taux_prive</code>.
      */
     public final TableField<TypePrestationRecord, String> TAUX_PRIVE = createField("taux_prive", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.type_prestation.type</code>.
+     */
+    public final TableField<TypePrestationRecord, String> TYPE = createField("type", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * Create a <code>public.type_prestation</code> table reference

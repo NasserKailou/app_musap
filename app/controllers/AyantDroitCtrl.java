@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 import javax.inject.Inject;
 
+import models.tables.pojos.Adherent;
 import models.tables.pojos.AyantDroit;
 import play.data.Form;
 import play.data.FormFactory;
@@ -100,6 +101,24 @@ public class AyantDroitCtrl extends Controller {
 		c.setOnDeleted(false);
 		c.setWhoDone(String.valueOf(request.session().get("login").get()));
 		c.setDateNaiss(ayantDroitService.getDateT(dateNaiss));
+
+		Adherent ad = adherentService.findById(c.getAdherent());
+
+		if(c.getLien().equals("ENFANT")){
+			c.setPourcentageRetenue(1.5);
+			ad.setPourcentageTotalRetenue(ad.getPourcentageTotalRetenue()+1.5);
+			adherentService.saveLogical(ad, false);
+		}
+			
+		if(c.getLien().equals("CONJOINT")){
+			ad.setPourcentageTotalRetenue(ad.getPourcentageTotalRetenue()+1.5);
+			adherentService.saveLogical(ad, false);
+		}
+			
+		if(c.getLien().equals("PARENT")){
+			ad.setPourcentageTotalRetenue(ad.getPourcentageTotalRetenue()+3.0);
+			adherentService.saveLogical(ad, false);
+		}
 
 		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE)) {
 			c.setPicture(new File("").getAbsolutePath() + "/public/images/ayantDroits//1.jpg");

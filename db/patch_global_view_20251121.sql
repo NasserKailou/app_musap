@@ -290,6 +290,7 @@ CREATE OR REPLACE VIEW public.v_partenaire
     sp.telephone,
 	sp.statut_structure,
 	sp.type_structure,
+	sp.suspension,
     r.libelle AS region
    FROM structure_partenaire sp,
     region r

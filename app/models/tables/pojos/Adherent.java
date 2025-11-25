@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Adherent implements Serializable {
 
-    private static final long serialVersionUID = -1927657486;
+    private static final long serialVersionUID = 1202508301;
 
     private Long      id;
     private String    nomAd;
@@ -51,6 +51,8 @@ public class Adherent implements Serializable {
     private Boolean   isOkForPrinting;
     private Timestamp dateRetraite;
     private String    codeCarnet;
+    private Long      salaireNet;
+    private Double    pourcentageTotalRetenue;
 
     public Adherent() {}
 
@@ -81,6 +83,8 @@ public class Adherent implements Serializable {
         this.isOkForPrinting = value.isOkForPrinting;
         this.dateRetraite = value.dateRetraite;
         this.codeCarnet = value.codeCarnet;
+        this.salaireNet = value.salaireNet;
+        this.pourcentageTotalRetenue = value.pourcentageTotalRetenue;
     }
 
     public Adherent(
@@ -109,7 +113,9 @@ public class Adherent implements Serializable {
         Boolean   isMember,
         Boolean   isOkForPrinting,
         Timestamp dateRetraite,
-        String    codeCarnet
+        String    codeCarnet,
+        Long      salaireNet,
+        Double    pourcentageTotalRetenue
     ) {
         this.id = id;
         this.nomAd = nomAd;
@@ -137,6 +143,8 @@ public class Adherent implements Serializable {
         this.isOkForPrinting = isOkForPrinting;
         this.dateRetraite = dateRetraite;
         this.codeCarnet = codeCarnet;
+        this.salaireNet = salaireNet;
+        this.pourcentageTotalRetenue = pourcentageTotalRetenue;
     }
 
     public Long getId() {
@@ -347,6 +355,22 @@ public class Adherent implements Serializable {
         this.codeCarnet = codeCarnet;
     }
 
+    public Long getSalaireNet() {
+        return this.salaireNet;
+    }
+
+    public void setSalaireNet(Long salaireNet) {
+        this.salaireNet = salaireNet;
+    }
+
+    public Double getPourcentageTotalRetenue() {
+        return this.pourcentageTotalRetenue;
+    }
+
+    public void setPourcentageTotalRetenue(Double pourcentageTotalRetenue) {
+        this.pourcentageTotalRetenue = pourcentageTotalRetenue;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Adherent (");
@@ -377,6 +401,8 @@ public class Adherent implements Serializable {
         sb.append(", ").append(isOkForPrinting);
         sb.append(", ").append(dateRetraite);
         sb.append(", ").append(codeCarnet);
+        sb.append(", ").append(salaireNet);
+        sb.append(", ").append(pourcentageTotalRetenue);
 
         sb.append(")");
         return sb.toString();

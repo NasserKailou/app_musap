@@ -49,9 +49,11 @@ import models.tables.VDepassement;
 import models.tables.VEcriture;
 import models.tables.VEffectifMains;
 import models.tables.VEffectifMainsAyantDroit;
+import models.tables.VHopitaux;
 import models.tables.VNbrBenefiaireParPrestation;
 import models.tables.VNbrPrestationParAdherent;
 import models.tables.VPartenaire;
+import models.tables.VPharmacie;
 import models.tables.VReglement;
 import models.tables.VReglementDetails;
 import models.tables.VReglementGlobal;
@@ -85,7 +87,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -1453476118;
+    private static final long serialVersionUID = 1393037708;
 
     /**
      * The reference instance of <code>public</code>
@@ -288,6 +290,11 @@ public class Public extends SchemaImpl {
     public final VEffectifMainsAyantDroit V_EFFECTIF_MAINS_AYANT_DROIT = models.tables.VEffectifMainsAyantDroit.V_EFFECTIF_MAINS_AYANT_DROIT;
 
     /**
+     * The table <code>public.v_hopitaux</code>.
+     */
+    public final VHopitaux V_HOPITAUX = models.tables.VHopitaux.V_HOPITAUX;
+
+    /**
      * The table <code>public.v_nbr_benefiaire_par_prestation</code>.
      */
     public final VNbrBenefiaireParPrestation V_NBR_BENEFIAIRE_PAR_PRESTATION = models.tables.VNbrBenefiaireParPrestation.V_NBR_BENEFIAIRE_PAR_PRESTATION;
@@ -301,6 +308,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.v_partenaire</code>.
      */
     public final VPartenaire V_PARTENAIRE = models.tables.VPartenaire.V_PARTENAIRE;
+
+    /**
+     * The table <code>public.v_pharmacie</code>.
+     */
+    public final VPharmacie V_PHARMACIE = models.tables.VPharmacie.V_PHARMACIE;
 
     /**
      * The table <code>public.v_reglement</code>.
@@ -468,9 +480,11 @@ public class Public extends SchemaImpl {
             VEcriture.V_ECRITURE,
             VEffectifMains.V_EFFECTIF_MAINS,
             VEffectifMainsAyantDroit.V_EFFECTIF_MAINS_AYANT_DROIT,
+            VHopitaux.V_HOPITAUX,
             VNbrBenefiaireParPrestation.V_NBR_BENEFIAIRE_PAR_PRESTATION,
             VNbrPrestationParAdherent.V_NBR_PRESTATION_PAR_ADHERENT,
             VPartenaire.V_PARTENAIRE,
+            VPharmacie.V_PHARMACIE,
             VReglement.V_REGLEMENT,
             VReglement_2.V_REGLEMENT_2,
             VReglementDetails.V_REGLEMENT_DETAILS,

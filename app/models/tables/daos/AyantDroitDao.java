@@ -134,4 +134,11 @@ public class AyantDroitDao extends DAOImpl<AyantDroitRecord, models.tables.pojos
     public List<models.tables.pojos.AyantDroit> fetchByIsOkForPrinting(Boolean... values) {
         return fetch(AyantDroit.AYANT_DROIT.IS_OK_FOR_PRINTING, values);
     }
+
+    /**
+     * Fetch records that have <code>pourcentage_retenue IN (values)</code>
+     */
+    public List<models.tables.pojos.AyantDroit> fetchByPourcentageRetenue(Double... values) {
+        return fetch(AyantDroit.AYANT_DROIT.POURCENTAGE_RETENUE, values);
+    }
 }

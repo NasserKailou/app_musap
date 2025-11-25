@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class AyantDroit implements Serializable {
 
-    private static final long serialVersionUID = -318972605;
+    private static final long serialVersionUID = 917445332;
 
     private Long      id;
     private String    nomAy;
@@ -36,6 +36,7 @@ public class AyantDroit implements Serializable {
     private String    lien;
     private String    genre;
     private Boolean   isOkForPrinting;
+    private Double    pourcentageRetenue;
 
     public AyantDroit() {}
 
@@ -51,6 +52,7 @@ public class AyantDroit implements Serializable {
         this.lien = value.lien;
         this.genre = value.genre;
         this.isOkForPrinting = value.isOkForPrinting;
+        this.pourcentageRetenue = value.pourcentageRetenue;
     }
 
     public AyantDroit(
@@ -64,7 +66,8 @@ public class AyantDroit implements Serializable {
         String    picture,
         String    lien,
         String    genre,
-        Boolean   isOkForPrinting
+        Boolean   isOkForPrinting,
+        Double    pourcentageRetenue
     ) {
         this.id = id;
         this.nomAy = nomAy;
@@ -77,6 +80,7 @@ public class AyantDroit implements Serializable {
         this.lien = lien;
         this.genre = genre;
         this.isOkForPrinting = isOkForPrinting;
+        this.pourcentageRetenue = pourcentageRetenue;
     }
 
     public Long getId() {
@@ -167,6 +171,14 @@ public class AyantDroit implements Serializable {
         this.isOkForPrinting = isOkForPrinting;
     }
 
+    public Double getPourcentageRetenue() {
+        return this.pourcentageRetenue;
+    }
+
+    public void setPourcentageRetenue(Double pourcentageRetenue) {
+        this.pourcentageRetenue = pourcentageRetenue;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("AyantDroit (");
@@ -182,6 +194,7 @@ public class AyantDroit implements Serializable {
         sb.append(", ").append(lien);
         sb.append(", ").append(genre);
         sb.append(", ").append(isOkForPrinting);
+        sb.append(", ").append(pourcentageRetenue);
 
         sb.append(")");
         return sb.toString();

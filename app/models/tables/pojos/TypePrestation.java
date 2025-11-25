@@ -22,7 +22,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TypePrestation implements Serializable {
 
-    private static final long serialVersionUID = -142325121;
+    private static final long serialVersionUID = -1928638219;
 
     private Long    id;
     private String  prestation;
@@ -30,6 +30,7 @@ public class TypePrestation implements Serializable {
     private Boolean onDeleted;
     private String  tauxPublic;
     private String  tauxPrive;
+    private String  type;
 
     public TypePrestation() {}
 
@@ -40,6 +41,7 @@ public class TypePrestation implements Serializable {
         this.onDeleted = value.onDeleted;
         this.tauxPublic = value.tauxPublic;
         this.tauxPrive = value.tauxPrive;
+        this.type = value.type;
     }
 
     public TypePrestation(
@@ -48,7 +50,8 @@ public class TypePrestation implements Serializable {
         String  couverture,
         Boolean onDeleted,
         String  tauxPublic,
-        String  tauxPrive
+        String  tauxPrive,
+        String  type
     ) {
         this.id = id;
         this.prestation = prestation;
@@ -56,6 +59,7 @@ public class TypePrestation implements Serializable {
         this.onDeleted = onDeleted;
         this.tauxPublic = tauxPublic;
         this.tauxPrive = tauxPrive;
+        this.type = type;
     }
 
     public Long getId() {
@@ -106,6 +110,14 @@ public class TypePrestation implements Serializable {
         this.tauxPrive = tauxPrive;
     }
 
+    public String getType() {
+        return this.type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("TypePrestation (");
@@ -116,6 +128,7 @@ public class TypePrestation implements Serializable {
         sb.append(", ").append(onDeleted);
         sb.append(", ").append(tauxPublic);
         sb.append(", ").append(tauxPrive);
+        sb.append(", ").append(type);
 
         sb.append(")");
         return sb.toString();

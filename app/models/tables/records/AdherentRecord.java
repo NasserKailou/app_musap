@@ -27,7 +27,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class AdherentRecord extends UpdatableRecordImpl<AdherentRecord> {
 
-    private static final long serialVersionUID = 487197943;
+    private static final long serialVersionUID = -1683654964;
 
     /**
      * Setter for <code>public.adherent.id</code>.
@@ -393,6 +393,34 @@ public class AdherentRecord extends UpdatableRecordImpl<AdherentRecord> {
         return (String) get(25);
     }
 
+    /**
+     * Setter for <code>public.adherent.salaire_net</code>.
+     */
+    public void setSalaireNet(Long value) {
+        set(26, value);
+    }
+
+    /**
+     * Getter for <code>public.adherent.salaire_net</code>.
+     */
+    public Long getSalaireNet() {
+        return (Long) get(26);
+    }
+
+    /**
+     * Setter for <code>public.adherent.pourcentage_total_retenue</code>.
+     */
+    public void setPourcentageTotalRetenue(Double value) {
+        set(27, value);
+    }
+
+    /**
+     * Getter for <code>public.adherent.pourcentage_total_retenue</code>.
+     */
+    public Double getPourcentageTotalRetenue() {
+        return (Double) get(27);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -419,7 +447,7 @@ public class AdherentRecord extends UpdatableRecordImpl<AdherentRecord> {
     /**
      * Create a detached, initialised AdherentRecord
      */
-    public AdherentRecord(Long id, String nomAd, String prenomAd, String fonction, Timestamp dateNaiss, Timestamp datePriseService, String picture, Timestamp whenDone, String whoDone, Boolean onDeleted, Long direction, Long division, Long service, String telephone, String matricule, String structure, String structureSigle, String codeProgramme, String categorie, String sexe, Long mat, String email, Boolean isMember, Boolean isOkForPrinting, Timestamp dateRetraite, String codeCarnet) {
+    public AdherentRecord(Long id, String nomAd, String prenomAd, String fonction, Timestamp dateNaiss, Timestamp datePriseService, String picture, Timestamp whenDone, String whoDone, Boolean onDeleted, Long direction, Long division, Long service, String telephone, String matricule, String structure, String structureSigle, String codeProgramme, String categorie, String sexe, Long mat, String email, Boolean isMember, Boolean isOkForPrinting, Timestamp dateRetraite, String codeCarnet, Long salaireNet, Double pourcentageTotalRetenue) {
         super(Adherent.ADHERENT);
 
         set(0, id);
@@ -448,5 +476,7 @@ public class AdherentRecord extends UpdatableRecordImpl<AdherentRecord> {
         set(23, isOkForPrinting);
         set(24, dateRetraite);
         set(25, codeCarnet);
+        set(26, salaireNet);
+        set(27, pourcentageTotalRetenue);
     }
 }

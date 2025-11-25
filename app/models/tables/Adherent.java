@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Adherent extends TableImpl<AdherentRecord> {
 
-    private static final long serialVersionUID = 908394481;
+    private static final long serialVersionUID = 1913900128;
 
     /**
      * The reference instance of <code>public.adherent</code>
@@ -185,6 +185,16 @@ public class Adherent extends TableImpl<AdherentRecord> {
      * The column <code>public.adherent.code_carnet</code>.
      */
     public final TableField<AdherentRecord, String> CODE_CARNET = createField("code_carnet", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.adherent.salaire_net</code>.
+     */
+    public final TableField<AdherentRecord, Long> SALAIRE_NET = createField("salaire_net", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.adherent.pourcentage_total_retenue</code>.
+     */
+    public final TableField<AdherentRecord, Double> POURCENTAGE_TOTAL_RETENUE = createField("pourcentage_total_retenue", org.jooq.impl.SQLDataType.DOUBLE, this, "");
 
     /**
      * Create a <code>public.adherent</code> table reference

@@ -96,4 +96,35 @@ public class StructureMainServices extends StructurePartenaireDao {
 		con.connection().close();
 		return structures;
 	}
+
+	public List<StructurePartenaire> findByType(String typeStructure){
+		List<StructurePartenaire> listes = con.connection().selectFrom(models.Tables.STRUCTURE_PARTENAIRE).where(models.Tables.STRUCTURE_PARTENAIRE.IS_DELETED.isFalse())
+		.and(models.Tables.STRUCTURE_PARTENAIRE.TYPE_STRUCTURE.eq(typeStructure)).fetchInto(StructurePartenaire.class);
+
+		con.connection().close();
+		return listes;
+	}
+
+	public List<StructurePartenaire> findAllPharmacie(){
+		List<StructurePartenaire> listes = con.connection().selectFrom(models.Tables.STRUCTURE_PARTENAIRE).where(models.Tables.STRUCTURE_PARTENAIRE.IS_DELETED.isFalse())
+		.and(models.Tables.STRUCTURE_PARTENAIRE.TYPE_STRUCTURE.in("PHARMACIE")).fetchInto(StructurePartenaire.class);
+
+		con.connection().close();
+		return listes;
+	}
+
+	public List<StructurePartenaire> findAllHopitaux(){
+		List<StructurePartenaire> listes = con.connection().selectFrom(models.Tables.STRUCTURE_PARTENAIRE).where(models.Tables.STRUCTURE_PARTENAIRE.IS_DELETED.isFalse())
+		.and(models.Tables.STRUCTURE_PARTENAIRE.TYPE_STRUCTURE.in("HOPITAL","CLINIQUE","LABORATOIRE")).fetchInto(StructurePartenaire.class);
+
+		con.connection().close();
+		return listes;
+	}
+
+	public List<StructurePartenaire> findByStatut(String statut){
+		List<StructurePartenaire> listes = con.connection().selectFrom(models.Tables.STRUCTURE_PARTENAIRE).where(models.Tables.STRUCTURE_PARTENAIRE.IS_DELETED.isFalse())
+		.and(models.Tables.STRUCTURE_PARTENAIRE.STATUT_STRUCTURE.eq(statut)).fetchInto(StructurePartenaire.class);
+		con.connection().close();
+		return listes;
+	}
 }

@@ -4,7 +4,7 @@
 @import helper._
 @import java.util
 @import utils._
-@(viewMode: String,
+@(viewMode: String, typeOP: String,
   reglements: List[models.tables.pojos.VReglement],
   reglement: models.tables.pojos.Reglement,
   adherent: models.tables.pojos.Adherent,
@@ -22,7 +22,12 @@
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1>Gestion des Bons de Commande</h1>
+        @if(typeOP.equals("BC")){
+          <h1>Gestion des Bons de Commande</h1>
+        } else{
+          <h1>Gestion des Prise en Charge</h1>
+        }
+        
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -249,7 +254,7 @@
         </button>
       } else {
         <!-- Modifier actif -->
-        <a href='@controllers.routes.ReglementCtrl.show("EDIT", c.getId(), c.getIdAdherent())'
+        <a href='@controllers.routes.ReglementCtrl.show("EDIT",typeOP, c.getId(), c.getIdAdherent())'
            class="btn btn-warning btn-sm"
            title="Modifier">
           <i class="fas fa-edit"></i>
@@ -274,7 +279,7 @@
         </button>
       } else {
         <!-- Lignes actif -->
-        <a href='@controllers.routes.ReglementCtrl.reglementDetailForm("CREATE", c.getId(), c.getIdAdherent(), 0L)'
+        <a href='@controllers.routes.ReglementCtrl.reglementDetailForm("CREATE", typeOP, c.getId(), c.getIdAdherent(), 0L)'
            class="btn btn-success btn-sm"
            title="Lignes de détail">
           <i class="fas fa-list"></i>
@@ -296,7 +301,7 @@
 
     @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "SuperAdmin") {
       <!-- Supprimer -->
-      <a href='@controllers.routes.ReglementCtrl.show("DELETE", c.getId(), c.getIdAdherent())'
+      <a href='@controllers.routes.ReglementCtrl.show("DELETE",typeOP, c.getId(), c.getIdAdherent())'
          class="btn btn-danger btn-sm"
          title="Supprimer"
          onclick="return window.confirm('Voulez-vous vraiment supprimer ce règlement ?');">
@@ -347,7 +352,7 @@
         <input type="hidden" id="formViewMode" name="viewMode" value="CREATE">
         <input type="hidden" name="adherent" value="@adherent.getId()">
         <input type="hidden" id="formReglementId" name="id" value="">
-
+          <input type="hidden" id="typeOP" name="typeOP" value="@typeOP">
         <div class="modal-header bg-primary">
           <h5 class="modal-title text-white">
             <i class="fas fa-file-invoice"></i> Nouveau Bon de Commande
@@ -393,7 +398,28 @@
                 </div>
 
                 <!-- Type de Prestation -->
-                <div class="col-md-3">
+               
+                <!-- Structure -->
+              <!-- Structure -->
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label>
+                          <i class="fas fa-hospital"></i> Structure 
+                          <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-control select2" required id="structure" name="structure">
+                          <option value="">Sélectionner la structure</option>
+                          @for(c <- structures) {
+                          <option value="@c.getId()" data-statut="@c.getStatutStructure()">
+                            @c.getLibelle()
+                          </option>
+                          }
+                        </select>
+                      </div>
+                    </div>
+
+
+                 <div class="col-md-3">
                   <div class="form-group">
                     <label>
                       <i class="fas fa-briefcase-medical"></i> Type de prestation 
@@ -402,31 +428,18 @@
                     <select class="form-control select2" required id="tprestation" name="typePrestation">
                       <option value="">Sélectionner le type</option>
                       @for(c <- typePrestations) {
-                      <option value="@c.getId()">
-                        @c.getPrestation() - @c.getCouverture()%
+                      <option value="@c.getId()" 
+                              data-taux-public="@c.getTauxPublic()" 
+                              data-taux-prive="@c.getTauxPrive()"
+                              data-prestation="@c.getPrestation()">
+                        @c.getPrestation()
                       </option>
                       }
                     </select>
                   </div>
                 </div>
 
-                <!-- Structure -->
-                <div class="col-md-3">
-                  <div class="form-group">
-                    <label>
-                      <i class="fas fa-hospital"></i> Structure 
-                      <span class="text-danger">*</span>
-                    </label>
-                    <select class="form-control select2" required id="structure" name="structure">
-                      <option value="">Sélectionner la structure</option>
-                      @for(c <- structures) {
-                      <option value="@c.getId()">
-                        @c.getLibelle()
-                      </option>
-                      }
-                    </select>
-                  </div>
-                </div>
+
 
                  <div class="col-md-3">
                   <div class="form-group">
@@ -442,7 +455,7 @@
             </div>
           </div>
 
-          <!-- Informations Complémentaires -->
+          <!-- Informations Complémentaires 
           <div class="card card-secondary">
             <div class="card-header">
               <h3 class="card-title">Informations Complémentaires (Si remboursement en espèces)</h3>
@@ -450,7 +463,7 @@
             <div class="card-body">
               <div class="row">
                 
-                <!-- Structure Émettrice -->
+                
                 <div class="col-md-6">
                   <div class="form-group">
                     <label>
@@ -464,7 +477,7 @@
                   </div>
                 </div>
 
-                <!-- Téléphone Structure -->
+              
                 <div class="col-md-6">
                   <div class="form-group">
                     <label>
@@ -481,7 +494,7 @@
               </div>
             </div>
           </div>
-
+          -->
         </div>
 
         <div class="modal-footer justify-content-between">
@@ -596,241 +609,240 @@
 }
 
 <script>
-// Fonction pour confirmer un bon
-// Fonction pour confirmer un bon
-function confirmerBon(bonId, adherentId) {
-  if (confirm('Voulez-vous vraiment confirmer ce bon de commande ?')) {
-    // Afficher le modal de chargement
-    $('#loadingModal').modal('show');
+document.addEventListener('DOMContentLoaded', function() {
+  
+  setTimeout(function() {
     
-    // Appel AJAX pour confirmer le bon
-    $.ajax({
-      url: '@controllers.routes.ReglementCtrl.confirmerBon(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
-      type: 'POST',
-      headers: {
-        'Csrf-Token': $('input[name="csrfToken"]').val()
-      },
-      success: function(response) {
-        // Masquer le modal de chargement
-        $('#loadingModal').modal('hide');
+    if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
+      console.error('jQuery n\'est pas chargé !');
+      return;
+    }
+
+    console.log('✅ jQuery version:', $.fn.jquery);
+
+    // Fonction pour confirmer un bon
+    window.confirmerBon = function(bonId, adherentId) {
+      if (confirm('Voulez-vous vraiment confirmer ce bon de commande ?')) {
+        $('#loadingModal').modal('show');
         
-        // Notification de succès
-        if (typeof toastr !== 'undefined') {
-          toastr.success('Bon de commande confirmé avec succès');
-        } else {
-          // Alternative avec SweetAlert si disponible
-          if (typeof Swal !== 'undefined') {
-            Swal.fire({
-              icon: 'success',
-              title: 'Succès',
-              text: 'Bon de commande confirmé avec succès',
-              timer: 2000
-            });
-          } else {
+        $.ajax({
+          url: '@controllers.routes.ReglementCtrl.confirmerBon(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
+          type: 'POST',
+          headers: {
+            'Csrf-Token': $('input[name="csrfToken"]').val()
+          },
+          success: function(response) {
+            $('#loadingModal').modal('hide');
             alert('Bon de commande confirmé avec succès');
-          }
-        }
-        
-        // Recharger la page après 1 seconde
-        setTimeout(function() {
-          location.reload();
-        }, 1000);
-      },
-      error: function(xhr, status, error) {
-        // Masquer le modal de chargement
-        $('#loadingModal').modal('hide');
-        
-        // Notification d'erreur
-        if (typeof toastr !== 'undefined') {
-          toastr.error('Erreur lors de la confirmation du bon');
-        } else {
-          if (typeof Swal !== 'undefined') {
-            Swal.fire({
-              icon: 'error',
-              title: 'Erreur',
-              text: 'Erreur lors de la confirmation du bon'
-            });
-          } else {
+            setTimeout(function() { location.reload(); }, 1000);
+          },
+          error: function(xhr, status, error) {
+            $('#loadingModal').modal('hide');
             alert('Erreur lors de la confirmation du bon');
+            console.error('Erreur:', error);
           }
-        }
-        console.error('Erreur:', error);
+        });
       }
-    });
-  }
-}
+    };
 
-// Fonction pour réactualiser un bon (remettre à non confirmé)
-function reactualiserBon(bonId, adherentId) {
-  if (confirm('⚠️ ATTENTION ⚠️\n\nVoulez-vous vraiment réactualiser ce bon de commande ?\n\nCette action va remettre le statut du bon à "Non confirmé" et permettra de nouveau sa modification.\n\nÊtes-vous sûr de vouloir continuer ?')) {
-    // Afficher le modal de chargement
-    $('#loadingModal').modal('show');
-    
-    // Appel AJAX pour réactualiser le bon
-    $.ajax({
-      url: '@controllers.routes.ReglementCtrl.reactualiserBon(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
-      type: 'POST',
-      headers: {
-        'Csrf-Token': $('input[name="csrfToken"]').val()
-      },
-      success: function(response) {
-        // Masquer le modal de chargement
-        $('#loadingModal').modal('hide');
+    // Fonction pour réactualiser un bon
+    window.reactualiserBon = function(bonId, adherentId) {
+      if (confirm('⚠️ ATTENTION ⚠️\n\nVoulez-vous vraiment réactualiser ce bon de commande ?\n\nCette action va remettre le statut du bon à "Non confirmé" et permettra de nouveau sa modification.\n\nÊtes-vous sûr de vouloir continuer ?')) {
+        $('#loadingModal').modal('show');
         
-        // Notification de succès
-        if (typeof toastr !== 'undefined') {
-          toastr.warning('Bon de commande réactualisé avec succès');
-        } else {
-          if (typeof Swal !== 'undefined') {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Réactualisé',
-              text: 'Le bon de commande a été réactualisé avec succès',
-              timer: 2000
-            });
-          } else {
+        $.ajax({
+          url: '@controllers.routes.ReglementCtrl.reactualiserBon(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
+          type: 'POST',
+          headers: {
+            'Csrf-Token': $('input[name="csrfToken"]').val()
+          },
+          success: function(response) {
+            $('#loadingModal').modal('hide');
             alert('Bon de commande réactualisé avec succès');
-          }
-        }
-        
-        // Recharger la page après 1 seconde
-        setTimeout(function() {
-          location.reload();
-        }, 1000);
-      },
-      error: function(xhr, status, error) {
-        // Masquer le modal de chargement
-        $('#loadingModal').modal('hide');
-        
-        // Notification d'erreur
-        if (typeof toastr !== 'undefined') {
-          toastr.error('Erreur lors de la réactualisation du bon');
-        } else {
-          if (typeof Swal !== 'undefined') {
-            Swal.fire({
-              icon: 'error',
-              title: 'Erreur',
-              text: 'Erreur lors de la réactualisation du bon'
-            });
-          } else {
+            setTimeout(function() { location.reload(); }, 1000);
+          },
+          error: function(xhr, status, error) {
+            $('#loadingModal').modal('hide');
             alert('Erreur lors de la réactualisation du bon');
+            console.error('Erreur:', error);
           }
-        }
-        console.error('Erreur:', error);
+        });
       }
-    });
-  }
-}
+    };
 
-
-$(function () {
-  // Initialisation de DataTable
-  var table = $("#reglementTable").DataTable({
-    "responsive": true,
-    "lengthChange": true,
-    "autoWidth": false,
-    "pageLength": 10,
-    "order": [[7, "asc"]], // Tri par défaut sur la colonne "Temps Restant"
-    "columnDefs": [
-      {
-        "targets": 6, // Colonne Date Expiration
-        "className": "text-danger font-weight-bold"
-      },
-      {
-        "targets": [8, 9], // Colonnes Statut et Actions
-        "orderable": true,
-        "searchable": false
-      }
-    ],
-    "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-           '<"row"<"col-sm-12 col-md-6"B>>' +
-           '<"row"<"col-sm-12"tr>>' +
-           '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-    "buttons": [
-      {
-        extend: 'copy',
-        text: '<i class="fas fa-copy"></i> Copier',
-        className: 'btn btn-sm btn-secondary',
-        exportOptions: {
-          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8] // Exclure la colonne Actions
-        }
-      },
-      {
-        extend: 'csv',
-        text: '<i class="fas fa-file-csv"></i> CSV',
-        className: 'btn btn-sm btn-secondary',
-        exportOptions: {
-          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        }
-      },
-      {
-        extend: 'excel',
-        text: '<i class="fas fa-file-excel"></i> Excel',
-        className: 'btn btn-sm btn-success',
-        exportOptions: {
-          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        }
-      },
-      {
-        extend: 'pdf',
-        text: '<i class="fas fa-file-pdf"></i> PDF',
-        className: 'btn btn-sm btn-danger',
-        exportOptions: {
-          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    // Configuration DataTable simplifiée
+    var dtConfig = {
+      "responsive": true,
+      "lengthChange": true,
+      "autoWidth": false,
+      "pageLength": 10,
+      "order": [[7, "asc"]],
+      "columnDefs": [
+        {
+          "targets": 6,
+          "className": "text-danger font-weight-bold"
         },
-        orientation: 'landscape',
-        pageSize: 'A4'
-      },
-      {
-        extend: 'print',
-        text: '<i class="fas fa-print"></i> Imprimer',
-        className: 'btn btn-sm btn-info',
-        exportOptions: {
-          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        {
+          "targets": [8, 9],
+          "orderable": true,
+          "searchable": false
+        }
+      ],
+      "language": {
+        "sProcessing": "Traitement en cours...",
+        "sSearch": "Rechercher&nbsp;:",
+        "sLengthMenu": "Afficher _MENU_ éléments",
+        "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+        "sInfoEmpty": "Affichage de 0 à 0 sur 0 élément",
+        "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
+        "sInfoPostFix": "",
+        "sLoadingRecords": "Chargement...",
+        "sZeroRecords": "Aucun élément correspondant trouvé",
+        "sEmptyTable": "Aucune donnée disponible dans le tableau",
+        "oPaginate": {
+          "sFirst": "Premier",
+          "sPrevious": "Précédent",
+          "sNext": "Suivant",
+          "sLast": "Dernier"
+        },
+        "oAria": {
+          "sSortAscending": ": activer pour trier la colonne par ordre croissant",
+          "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
         }
       }
-    ],
-    "language": {
-      "sProcessing": "Traitement en cours...",
-      "sSearch": "Rechercher&nbsp;:",
-      "sLengthMenu": "Afficher _MENU_ éléments",
-      "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-      "sInfoEmpty": "Affichage de 0 à 0 sur 0 élément",
-      "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
-      "sInfoPostFix": "",
-      "sLoadingRecords": "Chargement...",
-      "sZeroRecords": "Aucun élément correspondant trouvé",
-      "sEmptyTable": "Aucune donnée disponible dans le tableau",
-      "oPaginate": {
-        "sFirst": "Premier",
-        "sPrevious": "Précédent",
-        "sNext": "Suivant",
-        "sLast": "Dernier"
-      },
-      "oAria": {
-        "sSortAscending": ": activer pour trier la colonne par ordre croissant",
-        "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
+    };
+
+    // Initialiser DataTable
+    try {
+      var table = $("#reglementTable").DataTable(dtConfig);
+      console.log('✅ DataTable initialisé');
+    } catch(e) {
+      console.error('❌ Erreur DataTable:', e);
+    }
+
+    // Select2 - Initialiser seulement si disponible
+    if (typeof $.fn.select2 !== 'undefined') {
+      try {
+        $('.select2').select2({
+          theme: 'bootstrap4',
+          width: '100%',
+          dropdownParent: $('#reglementModal')
+        });
+        console.log('✅ Select2 initialisé');
+      } catch(e) {
+        console.warn('⚠️ Select2 non disponible, utilisation des selects standards');
+      }
+    } else {
+      console.warn('⚠️ Select2 non chargé, utilisation des selects standards');
+      // Retirer la classe select2 pour éviter les problèmes de style
+      $('.select2').removeClass('select2');
+    }
+
+    // ========== GESTION DYNAMIQUE DES TAUX PUBLIC/PRIVÉ ==========
+    
+    function normalizeStatut(statut) {
+      if (!statut) return '';
+      var statutUpper = String(statut).toUpperCase().trim();
+      if (statutUpper === 'PUBLIC' || statutUpper === 'PUBLIQUE') {
+        return 'PUBLIC';
+      } else if (statutUpper.indexOf('PRIV') !== -1) {
+        return 'PRIVE';
+      }
+      return statutUpper;
+    }
+    
+    function updatePrestationOptions(statutStructure) {
+      var prestationSelect = $('#tprestation');
+      var statut = normalizeStatut(statutStructure);
+      
+      console.log('📋 Mise à jour prestations - Statut structure:', statut);
+      
+      var compteur = 0;
+      prestationSelect.find('option').each(function() {
+        var $option = $(this);
+        
+        if ($option.val() === '') return; // Ignorer option par défaut
+        
+        var tauxPublic = $option.data('taux-public');
+        var tauxPrive = $option.data('taux-prive');
+        var prestation = $option.data('prestation');
+        
+        if (!tauxPublic || !tauxPrive || !prestation) {
+          console.warn('⚠️ Données manquantes pour option:', $option.val());
+          return;
+        }
+        
+        var tauxAffiche = (statut === 'PUBLIC') ? tauxPublic : tauxPrive;
+        $option.text(prestation + ' - ' + tauxAffiche + '%');
+        
+        console.log('  ✓', prestation, '→', tauxAffiche + '% (' + (statut === 'PUBLIC' ? 'Public' : 'Privé') + ')');
+        compteur++;
+      });
+      
+      console.log('✅', compteur, 'prestations mises à jour');
+      
+      // Rafraîchir Select2 si disponible
+      if (typeof $.fn.select2 !== 'undefined') {
+        prestationSelect.trigger('change.select2');
       }
     }
-  });
+    
+    // Écouter le changement de structure
+    $('#structure').on('change', function() {
+      var $selectedOption = $(this).find('option:selected');
+      var statutStructure = $selectedOption.data('statut');
+      
+      console.log('🏥 Structure changée:', $selectedOption.text());
+      console.log('   Statut:', statutStructure);
+      
+      // Réinitialiser le select des prestations
+      $('#tprestation').val('');
+      if (typeof $.fn.select2 !== 'undefined') {
+        $('#tprestation').trigger('change');
+      }
+      
+      // Mettre à jour les options si statut présent
+      if (statutStructure) {
+        updatePrestationOptions(statutStructure);
+      } else {
+        console.warn('⚠️ Pas de statut pour cette structure');
+      }
+    });
+    
+    // Initialiser au chargement si une structure est déjà sélectionnée
+    var initialStructure = $('#structure').val();
+    if (initialStructure) {
+      var initialStatut = $('#structure').find('option:selected').data('statut');
+      console.log('🔄 Initialisation avec structure:', initialStructure, 'Statut:', initialStatut);
+      if (initialStatut) {
+        updatePrestationOptions(initialStatut);
+      }
+    } else {
+      console.log('ℹ️ Aucune structure sélectionnée au chargement');
+    }
+    
+    console.log('✅ Gestion dynamique des taux initialisée');
+    
+    // ========== FIN GESTION DYNAMIQUE ==========
 
-  // Select2
-  $('.select2').select2({
-    theme: 'bootstrap4',
-    width: '100%',
-    dropdownParent: $('#reglementModal')
-  });
+    // Réinitialiser le formulaire à la fermeture du modal
+    $('#reglementModal').on('hidden.bs.modal', function () {
+      $('#reglementForm')[0].reset();
+      if (typeof $.fn.select2 !== 'undefined') {
+        $('.select2').val(null).trigger('change');
+      }
+    });
 
-  // Réinitialiser le formulaire à la fermeture du modal
-  $('#reglementModal').on('hidden.bs.modal', function () {
-    $('#reglementForm')[0].reset();
-    $('.select2').val(null).trigger('change');
-  });
+    // Ouvrir automatiquement le modal si viewMode = CREATE
+    //@if(viewMode.equals("CREATE")) {
+    //  $('#reglementModal').modal('show');
+    //  console.log('📝 Modal ouvert en mode CREATE');
+    //}
 
-  // Ouvrir automatiquement le modal si viewMode = CREATE
-  @if(viewMode.equals("CREATE")) {
-    $('#reglementModal').modal('show');
-  }
+    console.log('✅ Initialisation complète terminée');
+
+  }, 200); // Augmenter le délai à 200ms
+  
 });
 </script>
 

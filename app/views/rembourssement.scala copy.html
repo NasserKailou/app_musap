@@ -217,7 +217,7 @@
           request.session.get("droit").get() == "Admin")
         ) {
         <!-- Modifier -->
-        <a href='@controllers.routes.ReglementCtrl.show("EDIT", c.getId(), c.getIdAdherent())'
+        <a href='@controllers.routes.ReglementCtrl.show("EDIT","BC", c.getId(), c.getIdAdherent())'
            class="btn btn-warning btn-sm"
            title="Modifier">
           <i class="fas fa-edit"></i>
@@ -241,7 +241,7 @@
 
         @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "SuperAdmin") {
         <!-- Supprimer -->
-        <a href='@controllers.routes.ReglementCtrl.show("DELETE", c.getId(), c.getIdAdherent())'
+        <a href='@controllers.routes.ReglementCtrl.show("DELETE","BC", c.getId(), c.getIdAdherent())'
            class="btn btn-danger btn-sm"
            title="Supprimer"
            onclick="return window.confirm('Voulez-vous vraiment supprimer ce règlement ?');">
