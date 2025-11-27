@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VAdherent implements Serializable {
 
-    private static final long serialVersionUID = -146281575;
+    private static final long serialVersionUID = -1669687691;
 
     private Long      id;
     private String    nomAd;
@@ -34,9 +34,14 @@ public class VAdherent implements Serializable {
     private String    fonction;
     private String    structureSigle;
     private Timestamp dateNaiss;
-    private Double    age;
+    private Integer   age;
     private Timestamp datePriseService;
-    private Double    anciennete;
+    private Integer   anciennete;
+    private Long      salaireNet;
+    private Double    pourcentageTotalRetenue;
+    private Double    totalCotisationAgent;
+    private Double    totalCreditAnnuelle;
+    private Double    totalCreditAConsomer;
     private String    picture;
     private Timestamp whenDone;
     private String    whoDone;
@@ -61,6 +66,11 @@ public class VAdherent implements Serializable {
         this.age = value.age;
         this.datePriseService = value.datePriseService;
         this.anciennete = value.anciennete;
+        this.salaireNet = value.salaireNet;
+        this.pourcentageTotalRetenue = value.pourcentageTotalRetenue;
+        this.totalCotisationAgent = value.totalCotisationAgent;
+        this.totalCreditAnnuelle = value.totalCreditAnnuelle;
+        this.totalCreditAConsomer = value.totalCreditAConsomer;
         this.picture = value.picture;
         this.whenDone = value.whenDone;
         this.whoDone = value.whoDone;
@@ -81,9 +91,14 @@ public class VAdherent implements Serializable {
         String    fonction,
         String    structureSigle,
         Timestamp dateNaiss,
-        Double    age,
+        Integer   age,
         Timestamp datePriseService,
-        Double    anciennete,
+        Integer   anciennete,
+        Long      salaireNet,
+        Double    pourcentageTotalRetenue,
+        Double    totalCotisationAgent,
+        Double    totalCreditAnnuelle,
+        Double    totalCreditAConsomer,
         String    picture,
         Timestamp whenDone,
         String    whoDone,
@@ -105,6 +120,11 @@ public class VAdherent implements Serializable {
         this.age = age;
         this.datePriseService = datePriseService;
         this.anciennete = anciennete;
+        this.salaireNet = salaireNet;
+        this.pourcentageTotalRetenue = pourcentageTotalRetenue;
+        this.totalCotisationAgent = totalCotisationAgent;
+        this.totalCreditAnnuelle = totalCreditAnnuelle;
+        this.totalCreditAConsomer = totalCreditAConsomer;
         this.picture = picture;
         this.whenDone = whenDone;
         this.whoDone = whoDone;
@@ -187,11 +207,11 @@ public class VAdherent implements Serializable {
         this.dateNaiss = dateNaiss;
     }
 
-    public Double getAge() {
+    public Integer getAge() {
         return this.age;
     }
 
-    public void setAge(Double age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
@@ -203,12 +223,52 @@ public class VAdherent implements Serializable {
         this.datePriseService = datePriseService;
     }
 
-    public Double getAnciennete() {
+    public Integer getAnciennete() {
         return this.anciennete;
     }
 
-    public void setAnciennete(Double anciennete) {
+    public void setAnciennete(Integer anciennete) {
         this.anciennete = anciennete;
+    }
+
+    public Long getSalaireNet() {
+        return this.salaireNet;
+    }
+
+    public void setSalaireNet(Long salaireNet) {
+        this.salaireNet = salaireNet;
+    }
+
+    public Double getPourcentageTotalRetenue() {
+        return this.pourcentageTotalRetenue;
+    }
+
+    public void setPourcentageTotalRetenue(Double pourcentageTotalRetenue) {
+        this.pourcentageTotalRetenue = pourcentageTotalRetenue;
+    }
+
+    public Double getTotalCotisationAgent() {
+        return this.totalCotisationAgent;
+    }
+
+    public void setTotalCotisationAgent(Double totalCotisationAgent) {
+        this.totalCotisationAgent = totalCotisationAgent;
+    }
+
+    public Double getTotalCreditAnnuelle() {
+        return this.totalCreditAnnuelle;
+    }
+
+    public void setTotalCreditAnnuelle(Double totalCreditAnnuelle) {
+        this.totalCreditAnnuelle = totalCreditAnnuelle;
+    }
+
+    public Double getTotalCreditAConsomer() {
+        return this.totalCreditAConsomer;
+    }
+
+    public void setTotalCreditAConsomer(Double totalCreditAConsomer) {
+        this.totalCreditAConsomer = totalCreditAConsomer;
     }
 
     public String getPicture() {
@@ -291,6 +351,11 @@ public class VAdherent implements Serializable {
         sb.append(", ").append(age);
         sb.append(", ").append(datePriseService);
         sb.append(", ").append(anciennete);
+        sb.append(", ").append(salaireNet);
+        sb.append(", ").append(pourcentageTotalRetenue);
+        sb.append(", ").append(totalCotisationAgent);
+        sb.append(", ").append(totalCreditAnnuelle);
+        sb.append(", ").append(totalCreditAConsomer);
         sb.append(", ").append(picture);
         sb.append(", ").append(whenDone);
         sb.append(", ").append(whoDone);

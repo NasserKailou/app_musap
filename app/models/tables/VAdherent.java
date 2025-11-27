@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VAdherent extends TableImpl<VAdherentRecord> {
 
-    private static final long serialVersionUID = 2129435840;
+    private static final long serialVersionUID = 965983293;
 
     /**
      * The reference instance of <code>public.v_adherent</code>
@@ -96,7 +96,7 @@ public class VAdherent extends TableImpl<VAdherentRecord> {
     /**
      * The column <code>public.v_adherent.age</code>.
      */
-    public final TableField<VAdherentRecord, Double> AGE = createField("age", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<VAdherentRecord, Integer> AGE = createField("age", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>public.v_adherent.date_prise_service</code>.
@@ -106,7 +106,32 @@ public class VAdherent extends TableImpl<VAdherentRecord> {
     /**
      * The column <code>public.v_adherent.anciennete</code>.
      */
-    public final TableField<VAdherentRecord, Double> ANCIENNETE = createField("anciennete", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<VAdherentRecord, Integer> ANCIENNETE = createField("anciennete", org.jooq.impl.SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>public.v_adherent.salaire_net</code>.
+     */
+    public final TableField<VAdherentRecord, Long> SALAIRE_NET = createField("salaire_net", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.v_adherent.pourcentage_total_retenue</code>.
+     */
+    public final TableField<VAdherentRecord, Double> POURCENTAGE_TOTAL_RETENUE = createField("pourcentage_total_retenue", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>public.v_adherent.total_cotisation_agent</code>.
+     */
+    public final TableField<VAdherentRecord, Double> TOTAL_COTISATION_AGENT = createField("total_cotisation_agent", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>public.v_adherent.total_credit_annuelle</code>.
+     */
+    public final TableField<VAdherentRecord, Double> TOTAL_CREDIT_ANNUELLE = createField("total_credit_annuelle", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>public.v_adherent.total_credit_a_consomer</code>.
+     */
+    public final TableField<VAdherentRecord, Double> TOTAL_CREDIT_A_CONSOMER = createField("total_credit_a_consomer", org.jooq.impl.SQLDataType.DOUBLE, this, "");
 
     /**
      * The column <code>public.v_adherent.picture</code>.

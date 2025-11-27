@@ -70,6 +70,8 @@ public class AdherentMainServices extends AdherentDao {
 		return c;
 	}
 
+
+
 		public Adherent getByMatricule(String mat) {
 		Adherent c = con.connection().selectFrom(models.Tables.ADHERENT)
 				.where(models.Tables.ADHERENT.MATRICULE.eq(mat))
@@ -154,5 +156,14 @@ public class AdherentMainServices extends AdherentDao {
 				.fetchInto(Adherent.class);
 		con.connection().close();
 		return adherents;
+	}
+
+
+	public VAdherent getVAdherentById(Long id) {
+		VAdherent c = con.connection().selectFrom(models.Tables.V_ADHERENT)
+				.where(models.Tables.V_ADHERENT.ON_DELETED.isFalse()).and(models.Tables.V_ADHERENT.ID.eq(id))
+				.fetchOneInto(VAdherent.class);
+		con.connection().close();
+		return c;
 	}
 }

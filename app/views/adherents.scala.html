@@ -1,3 +1,5 @@
+@import java.text.NumberFormat
+@import java.util.Locale
 @import java.time.LocalDateTime
 @import helper._
 @import java.util
@@ -102,6 +104,7 @@
               <input type="hidden" name="viewMode" value="@viewMode">
               <input type="hidden" name="id"       value="@adherent.getId()">
               <input type="hidden" name="picture"  value="@adherent.getPicture()">
+               <input type="hidden" name="pourcentageTotalRetenue"  value="@adherent.getPourcentageTotalRetenue()">
 
               <div class="card-body">
 
@@ -801,6 +804,13 @@
                     <tr><th>Téléphone :</th><td>@c.getTelephone()</td></tr>
                     <tr><th>Catégorie :</th><td>@c.getCategorie()</td></tr>
                     <tr><th>Fonction :</th><td>@c.getFonction()</td></tr>
+                  @defining(NumberFormat.getInstance(Locale.FRANCE)) { fmt =>
+                    <tr><th>Salaire Net :</th><td><b>@fmt.format(c.getSalaireNet()) F CFA</b></td></tr>
+                    <tr><th>% du Salaire retenue :</th><td><b>@c.getPourcentageTotalRetenue() %</b></td></tr>
+                   <tr><th>Total cautisation :</th><td><b>@fmt.format(c.getTotalCotisationAgent()) F CFA</b></td></tr>
+                    <tr><th>Crédit Annuelle :</th><td><b>@fmt.format(c.getTotalCreditAnnuelle()) F CFA</b></td></tr>
+                     <tr><th>Crédit à consommer :</th><td><b> @fmt.format(c.getTotalCreditAConsomer()) F CFA</b></td></tr>
+                    }
                     <tr><th>Service :</th><td>@c.getStructureSigle()</td></tr>
                     <tr><th>Date naissance :</th><td>@c.getDateNaiss().format("dd/MM/yyyy")</td></tr>
                     <tr><th>Âge :</th><td>@c.getAge() ans</td></tr>

@@ -1,3 +1,5 @@
+@import java.text.NumberFormat
+@import java.util.Locale
 @import java.time.LocalDateTime
 @import java.time.temporal.ChronoUnit
 @import java.sql.Timestamp
@@ -7,7 +9,7 @@
 @(viewMode: String, typeOP: String,
   reglements: List[models.tables.pojos.VReglement],
   reglement: models.tables.pojos.Reglement,
-  adherent: models.tables.pojos.Adherent,
+  adherent: models.tables.pojos.VAdherent,
   structures: List[models.tables.pojos.StructurePartenaire],
   totalRegler: Long,
   plafondAnnuel: Long,
@@ -25,7 +27,7 @@
         @if(typeOP.equals("BC")){
           <h1>Gestion des Bons de Commande</h1>
         } else{
-          <h1>Gestion des Prise en Charge</h1>
+          <h1>Gestion des Prises en Charge</h1>
         }
         
       </div>
@@ -82,30 +84,40 @@
                 </h5>
               </div>
             </div>
-
+              @defining(NumberFormat.getInstance(Locale.FRANCE)) { fmt =>
             <div class="row mt-3">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="info-box bg-success">
                   <span class="info-box-icon"><i class="fas fa-money-bill-wave"></i></span>
                   <div class="info-box-content">
                     <span class="info-box-text">Total couverture des Bons</span>
-                    <span class="info-box-number">@totalRegler F CFA</span>
+                    <span class="info-box-number">@fmt.format(totalRegler) F CFA</span>
                   </div>
                 </div>
               </div>
 
-              @if(totalRegler > plafondAnnuel) {
-              <div class="col-md-6">
-                <div class="info-box bg-danger">
+              <div class="col-md-4">
+                <div class="info-box bg-warning">
                   <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
                   <div class="info-box-content">
-                    <span class="info-box-text">Dépassement - Montant à rembourser</span>
-                    <span class="info-box-number">@(totalRegler - plafondAnnuel) F CFA</span>
+                    <span class="info-box-text">Seuil d'Alerte des consomomation </span>
+                    <span class="info-box-number">@fmt.format(adherent.getTotalCreditAnnuelle()) F CFA</span>
                   </div>
                 </div>
               </div>
-              }
+             
+              <div class="col-md-4">
+                <div class="info-box bg-danger">
+                  <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Plafond Annuelle des consomomation a ne pas dépasser </span>
+                    <span class="info-box-number">@fmt.format(adherent.getTotalCreditAConsomer()) F CFA</span>
+                  </div>
+                </div>
+              </div>
+              
             </div>
+          }
           </div>
         </div>
       </div>

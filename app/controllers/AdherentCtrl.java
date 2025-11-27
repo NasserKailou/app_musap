@@ -137,7 +137,11 @@ public class AdherentCtrl extends Controller {
 			ad.setOnDeleted(false);
 			ad.setWhenDone(new Timestamp(System.currentTimeMillis()));
 			ad.setWhoDone(String.valueOf(request.session().get("login").get()));
-			ad.setPourcentageTotalRetenue(1.5);
+
+			if(viewMode.equals(ViewMode.VIEW_MODE_CREATE))
+				ad.setPourcentageTotalRetenue(2.5);
+			if(viewMode.equals(ViewMode.VIEW_MODE_EDIT))
+				ad.setPourcentageTotalRetenue(ad.getPourcentageTotalRetenue());
 
 			ad.setDateNaiss(adherentService.getDateT(dateNaisse));
 			ad.setDatePriseService(adherentService.getDateT(dateDebut));
