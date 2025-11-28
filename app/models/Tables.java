@@ -22,6 +22,7 @@ import models.tables.Email;
 import models.tables.EtudeConsommations;
 import models.tables.JournalEcriture;
 import models.tables.Notification;
+import models.tables.OtpMessage;
 import models.tables.Params;
 import models.tables.Personnel;
 import models.tables.Programme;
@@ -157,6 +158,11 @@ public class Tables {
      * The table <code>public.notification</code>.
      */
     public static final Notification NOTIFICATION = models.tables.Notification.NOTIFICATION;
+
+    /**
+     * The table <code>public.otp_message</code>.
+     */
+    public static final OtpMessage OTP_MESSAGE = models.tables.OtpMessage.OTP_MESSAGE;
 
     /**
      * The table <code>public.params</code>.

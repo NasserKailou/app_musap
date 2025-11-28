@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetails implements Serializable {
 
-    private static final long serialVersionUID = 1801018578;
+    private static final long serialVersionUID = 1738337196;
 
     private Long      id;
     private Long      reglement;
@@ -41,7 +41,7 @@ public class VReglementDetails implements Serializable {
     private String    prenomAd;
     private String    matricule;
     private String    structure;
-    private String    couverture;
+    private Long      tauxEffectif;
     private Timestamp datePayement;
     private String    prestation;
     private String    lien;
@@ -70,7 +70,7 @@ public class VReglementDetails implements Serializable {
         this.prenomAd = value.prenomAd;
         this.matricule = value.matricule;
         this.structure = value.structure;
-        this.couverture = value.couverture;
+        this.tauxEffectif = value.tauxEffectif;
         this.datePayement = value.datePayement;
         this.prestation = value.prestation;
         this.lien = value.lien;
@@ -98,7 +98,7 @@ public class VReglementDetails implements Serializable {
         String    prenomAd,
         String    matricule,
         String    structure,
-        String    couverture,
+        Long      tauxEffectif,
         Timestamp datePayement,
         String    prestation,
         String    lien,
@@ -124,7 +124,7 @@ public class VReglementDetails implements Serializable {
         this.prenomAd = prenomAd;
         this.matricule = matricule;
         this.structure = structure;
-        this.couverture = couverture;
+        this.tauxEffectif = tauxEffectif;
         this.datePayement = datePayement;
         this.prestation = prestation;
         this.lien = lien;
@@ -263,12 +263,12 @@ public class VReglementDetails implements Serializable {
         this.structure = structure;
     }
 
-    public String getCouverture() {
-        return this.couverture;
+    public Long getTauxEffectif() {
+        return this.tauxEffectif;
     }
 
-    public void setCouverture(String couverture) {
-        this.couverture = couverture;
+    public void setTauxEffectif(Long tauxEffectif) {
+        this.tauxEffectif = tauxEffectif;
     }
 
     public Timestamp getDatePayement() {
@@ -355,7 +355,7 @@ public class VReglementDetails implements Serializable {
         sb.append(", ").append(prenomAd);
         sb.append(", ").append(matricule);
         sb.append(", ").append(structure);
-        sb.append(", ").append(couverture);
+        sb.append(", ").append(tauxEffectif);
         sb.append(", ").append(datePayement);
         sb.append(", ").append(prestation);
         sb.append(", ").append(lien);

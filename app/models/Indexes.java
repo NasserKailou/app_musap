@@ -20,6 +20,7 @@ import models.tables.Ecriture;
 import models.tables.Email;
 import models.tables.EtudeConsommations;
 import models.tables.JournalEcriture;
+import models.tables.OtpMessage;
 import models.tables.Params;
 import models.tables.Programme;
 import models.tables.Region;
@@ -77,6 +78,7 @@ public class Indexes {
     public static final Index IDX_STATUT_SUSPENSION = Indexes0.IDX_STATUT_SUSPENSION;
     public static final Index JOURNAL_ECRITURE_PKEY = Indexes0.JOURNAL_ECRITURE_PKEY;
     public static final Index UNIK_JOURNAL_KEY = Indexes0.UNIK_JOURNAL_KEY;
+    public static final Index OTP_MESSAGE_PKEY = Indexes0.OTP_MESSAGE_PKEY;
     public static final Index PARAMS_PKEY = Indexes0.PARAMS_PKEY;
     public static final Index CODE_PRGM = Indexes0.CODE_PRGM;
     public static final Index PROGRAMME_PKEY = Indexes0.PROGRAMME_PKEY;
@@ -118,6 +120,7 @@ public class Indexes {
         public static Index IDX_STATUT_SUSPENSION = createIndex("idx_statut_suspension", EtudeConsommations.ETUDE_CONSOMMATIONS, new OrderField[] { EtudeConsommations.ETUDE_CONSOMMATIONS.STATUT_SUSPENSION }, false);
         public static Index JOURNAL_ECRITURE_PKEY = createIndex("journal_ecriture_pkey", JournalEcriture.JOURNAL_ECRITURE, new OrderField[] { JournalEcriture.JOURNAL_ECRITURE.ID }, true);
         public static Index UNIK_JOURNAL_KEY = createIndex("unik_journal_key", JournalEcriture.JOURNAL_ECRITURE, new OrderField[] { JournalEcriture.JOURNAL_ECRITURE.NUM_JOURNAL }, true);
+        public static Index OTP_MESSAGE_PKEY = createIndex("otp_message_pkey", OtpMessage.OTP_MESSAGE, new OrderField[] { OtpMessage.OTP_MESSAGE.ID }, true);
         public static Index PARAMS_PKEY = createIndex("params_pkey", Params.PARAMS, new OrderField[] { Params.PARAMS.ID }, true);
         public static Index CODE_PRGM = createIndex("code_prgm", Programme.PROGRAMME, new OrderField[] { Programme.PROGRAMME.CODE }, true);
         public static Index PROGRAMME_PKEY = createIndex("programme_pkey", Programme.PROGRAMME, new OrderField[] { Programme.PROGRAMME.ID }, true);

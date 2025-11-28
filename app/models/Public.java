@@ -26,6 +26,7 @@ import models.tables.Email;
 import models.tables.EtudeConsommations;
 import models.tables.JournalEcriture;
 import models.tables.Notification;
+import models.tables.OtpMessage;
 import models.tables.Params;
 import models.tables.Personnel;
 import models.tables.Programme;
@@ -87,7 +88,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 1393037708;
+    private static final long serialVersionUID = 1085328969;
 
     /**
      * The reference instance of <code>public</code>
@@ -173,6 +174,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.notification</code>.
      */
     public final Notification NOTIFICATION = models.tables.Notification.NOTIFICATION;
+
+    /**
+     * The table <code>public.otp_message</code>.
+     */
+    public final OtpMessage OTP_MESSAGE = models.tables.OtpMessage.OTP_MESSAGE;
 
     /**
      * The table <code>public.params</code>.
@@ -420,6 +426,7 @@ public class Public extends SchemaImpl {
             Sequences.ETUDE_CONSOMMATIONS_ID_SEQ,
             Sequences.JOURNAL_ECRITURE_ID_SEQ,
             Sequences.NOTIFICATION_ID_SEQ,
+            Sequences.OTP_MESSAGE_ID_SEQ,
             Sequences.PARAMS_ID_SEQ,
             Sequences.PROGRAMME_ID_SEQ,
             Sequences.REGION_ID_SEQ,
@@ -457,6 +464,7 @@ public class Public extends SchemaImpl {
             EtudeConsommations.ETUDE_CONSOMMATIONS,
             JournalEcriture.JOURNAL_ECRITURE,
             Notification.NOTIFICATION,
+            OtpMessage.OTP_MESSAGE,
             Params.PARAMS,
             Personnel.PERSONNEL,
             Programme.PROGRAMME,

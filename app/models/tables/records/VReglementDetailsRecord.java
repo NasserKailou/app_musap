@@ -26,7 +26,7 @@ import org.jooq.impl.TableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRecord> {
 
-    private static final long serialVersionUID = -425737594;
+    private static final long serialVersionUID = 1298678656;
 
     /**
      * Setter for <code>public.v_reglement_details.id</code>.
@@ -253,17 +253,17 @@ public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRe
     }
 
     /**
-     * Setter for <code>public.v_reglement_details.couverture</code>.
+     * Setter for <code>public.v_reglement_details.taux_effectif</code>.
      */
-    public void setCouverture(String value) {
+    public void setTauxEffectif(Long value) {
         set(16, value);
     }
 
     /**
-     * Getter for <code>public.v_reglement_details.couverture</code>.
+     * Getter for <code>public.v_reglement_details.taux_effectif</code>.
      */
-    public String getCouverture() {
-        return (String) get(16);
+    public Long getTauxEffectif() {
+        return (Long) get(16);
     }
 
     /**
@@ -392,7 +392,7 @@ public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRe
     /**
      * Create a detached, initialised VReglementDetailsRecord
      */
-    public VReglementDetailsRecord(Long id, Long reglement, String intitule, Long montant, Long quantite, Long prixUnitaire, String whoDone, Timestamp whenDone, Boolean onDeleted, Timestamp lastUpdate, String refFacture, Long idBon, String nomAd, String prenomAd, String matricule, String structure, String couverture, Timestamp datePayement, String prestation, String lien, Boolean isConfirmedBon, Timestamp whenConfirmedBon, Timestamp dateExpiration, Long totalCouvert, Long totalRestant) {
+    public VReglementDetailsRecord(Long id, Long reglement, String intitule, Long montant, Long quantite, Long prixUnitaire, String whoDone, Timestamp whenDone, Boolean onDeleted, Timestamp lastUpdate, String refFacture, Long idBon, String nomAd, String prenomAd, String matricule, String structure, Long tauxEffectif, Timestamp datePayement, String prestation, String lien, Boolean isConfirmedBon, Timestamp whenConfirmedBon, Timestamp dateExpiration, Long totalCouvert, Long totalRestant) {
         super(VReglementDetails.V_REGLEMENT_DETAILS);
 
         set(0, id);
@@ -411,7 +411,7 @@ public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRe
         set(13, prenomAd);
         set(14, matricule);
         set(15, structure);
-        set(16, couverture);
+        set(16, tauxEffectif);
         set(17, datePayement);
         set(18, prestation);
         set(19, lien);

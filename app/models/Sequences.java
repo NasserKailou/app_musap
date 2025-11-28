@@ -104,6 +104,11 @@ public class Sequences {
     public static final Sequence<Long> NOTIFICATION_ID_SEQ = new SequenceImpl<Long>("notification_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
 
     /**
+     * The sequence <code>public.otp_message_id_seq</code>
+     */
+    public static final Sequence<Long> OTP_MESSAGE_ID_SEQ = new SequenceImpl<Long>("otp_message_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
+
+    /**
      * The sequence <code>public.params_id_seq</code>
      */
     public static final Sequence<Long> PARAMS_ID_SEQ = new SequenceImpl<Long>("params_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));

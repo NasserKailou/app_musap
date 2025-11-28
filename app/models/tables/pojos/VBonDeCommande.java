@@ -23,12 +23,11 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VBonDeCommande implements Serializable {
 
-    private static final long serialVersionUID = 1820298111;
+    private static final long serialVersionUID = -541528975;
 
     private Long      id;
     private String    nomAd;
     private String    prenomAd;
-    private String    codeCarnet;
     private Long      idAdherent;
     private String    matricule;
     private String    refFacture;
@@ -39,10 +38,13 @@ public class VBonDeCommande implements Serializable {
     private Boolean   isConfirmedBon;
     private Timestamp whenConfirmedBon;
     private Timestamp dateExpiration;
+    private String    typeReglement;
     private String    annee;
     private Boolean   onDeleted;
     private String    prestation;
-    private String    couverture;
+    private Long      tauxEffectif;
+    private String    typeStructure;
+    private String    statutStructure;
     private String    nomAy;
     private String    lien;
     private String    genre;
@@ -58,7 +60,6 @@ public class VBonDeCommande implements Serializable {
         this.id = value.id;
         this.nomAd = value.nomAd;
         this.prenomAd = value.prenomAd;
-        this.codeCarnet = value.codeCarnet;
         this.idAdherent = value.idAdherent;
         this.matricule = value.matricule;
         this.refFacture = value.refFacture;
@@ -69,10 +70,13 @@ public class VBonDeCommande implements Serializable {
         this.isConfirmedBon = value.isConfirmedBon;
         this.whenConfirmedBon = value.whenConfirmedBon;
         this.dateExpiration = value.dateExpiration;
+        this.typeReglement = value.typeReglement;
         this.annee = value.annee;
         this.onDeleted = value.onDeleted;
         this.prestation = value.prestation;
-        this.couverture = value.couverture;
+        this.tauxEffectif = value.tauxEffectif;
+        this.typeStructure = value.typeStructure;
+        this.statutStructure = value.statutStructure;
         this.nomAy = value.nomAy;
         this.lien = value.lien;
         this.genre = value.genre;
@@ -87,7 +91,6 @@ public class VBonDeCommande implements Serializable {
         Long      id,
         String    nomAd,
         String    prenomAd,
-        String    codeCarnet,
         Long      idAdherent,
         String    matricule,
         String    refFacture,
@@ -98,10 +101,13 @@ public class VBonDeCommande implements Serializable {
         Boolean   isConfirmedBon,
         Timestamp whenConfirmedBon,
         Timestamp dateExpiration,
+        String    typeReglement,
         String    annee,
         Boolean   onDeleted,
         String    prestation,
-        String    couverture,
+        Long      tauxEffectif,
+        String    typeStructure,
+        String    statutStructure,
         String    nomAy,
         String    lien,
         String    genre,
@@ -114,7 +120,6 @@ public class VBonDeCommande implements Serializable {
         this.id = id;
         this.nomAd = nomAd;
         this.prenomAd = prenomAd;
-        this.codeCarnet = codeCarnet;
         this.idAdherent = idAdherent;
         this.matricule = matricule;
         this.refFacture = refFacture;
@@ -125,10 +130,13 @@ public class VBonDeCommande implements Serializable {
         this.isConfirmedBon = isConfirmedBon;
         this.whenConfirmedBon = whenConfirmedBon;
         this.dateExpiration = dateExpiration;
+        this.typeReglement = typeReglement;
         this.annee = annee;
         this.onDeleted = onDeleted;
         this.prestation = prestation;
-        this.couverture = couverture;
+        this.tauxEffectif = tauxEffectif;
+        this.typeStructure = typeStructure;
+        this.statutStructure = statutStructure;
         this.nomAy = nomAy;
         this.lien = lien;
         this.genre = genre;
@@ -161,14 +169,6 @@ public class VBonDeCommande implements Serializable {
 
     public void setPrenomAd(String prenomAd) {
         this.prenomAd = prenomAd;
-    }
-
-    public String getCodeCarnet() {
-        return this.codeCarnet;
-    }
-
-    public void setCodeCarnet(String codeCarnet) {
-        this.codeCarnet = codeCarnet;
     }
 
     public Long getIdAdherent() {
@@ -251,6 +251,14 @@ public class VBonDeCommande implements Serializable {
         this.dateExpiration = dateExpiration;
     }
 
+    public String getTypeReglement() {
+        return this.typeReglement;
+    }
+
+    public void setTypeReglement(String typeReglement) {
+        this.typeReglement = typeReglement;
+    }
+
     public String getAnnee() {
         return this.annee;
     }
@@ -275,12 +283,28 @@ public class VBonDeCommande implements Serializable {
         this.prestation = prestation;
     }
 
-    public String getCouverture() {
-        return this.couverture;
+    public Long getTauxEffectif() {
+        return this.tauxEffectif;
     }
 
-    public void setCouverture(String couverture) {
-        this.couverture = couverture;
+    public void setTauxEffectif(Long tauxEffectif) {
+        this.tauxEffectif = tauxEffectif;
+    }
+
+    public String getTypeStructure() {
+        return this.typeStructure;
+    }
+
+    public void setTypeStructure(String typeStructure) {
+        this.typeStructure = typeStructure;
+    }
+
+    public String getStatutStructure() {
+        return this.statutStructure;
+    }
+
+    public void setStatutStructure(String statutStructure) {
+        this.statutStructure = statutStructure;
     }
 
     public String getNomAy() {
@@ -354,7 +378,6 @@ public class VBonDeCommande implements Serializable {
         sb.append(id);
         sb.append(", ").append(nomAd);
         sb.append(", ").append(prenomAd);
-        sb.append(", ").append(codeCarnet);
         sb.append(", ").append(idAdherent);
         sb.append(", ").append(matricule);
         sb.append(", ").append(refFacture);
@@ -365,10 +388,13 @@ public class VBonDeCommande implements Serializable {
         sb.append(", ").append(isConfirmedBon);
         sb.append(", ").append(whenConfirmedBon);
         sb.append(", ").append(dateExpiration);
+        sb.append(", ").append(typeReglement);
         sb.append(", ").append(annee);
         sb.append(", ").append(onDeleted);
         sb.append(", ").append(prestation);
-        sb.append(", ").append(couverture);
+        sb.append(", ").append(tauxEffectif);
+        sb.append(", ").append(typeStructure);
+        sb.append(", ").append(statutStructure);
         sb.append(", ").append(nomAy);
         sb.append(", ").append(lien);
         sb.append(", ").append(genre);

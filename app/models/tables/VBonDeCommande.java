@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VBonDeCommande extends TableImpl<VBonDeCommandeRecord> {
 
-    private static final long serialVersionUID = 1845285120;
+    private static final long serialVersionUID = 1639009151;
 
     /**
      * The reference instance of <code>public.v_bon_de_commande</code>
@@ -62,11 +62,6 @@ public class VBonDeCommande extends TableImpl<VBonDeCommandeRecord> {
      * The column <code>public.v_bon_de_commande.prenom_ad</code>.
      */
     public final TableField<VBonDeCommandeRecord, String> PRENOM_AD = createField("prenom_ad", org.jooq.impl.SQLDataType.VARCHAR, this, "");
-
-    /**
-     * The column <code>public.v_bon_de_commande.code_carnet</code>.
-     */
-    public final TableField<VBonDeCommandeRecord, String> CODE_CARNET = createField("code_carnet", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * The column <code>public.v_bon_de_commande.id_adherent</code>.
@@ -119,6 +114,11 @@ public class VBonDeCommande extends TableImpl<VBonDeCommandeRecord> {
     public final TableField<VBonDeCommandeRecord, Timestamp> DATE_EXPIRATION = createField("date_expiration", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
     /**
+     * The column <code>public.v_bon_de_commande.type_reglement</code>.
+     */
+    public final TableField<VBonDeCommandeRecord, String> TYPE_REGLEMENT = createField("type_reglement", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
      * The column <code>public.v_bon_de_commande.annee</code>.
      */
     public final TableField<VBonDeCommandeRecord, String> ANNEE = createField("annee", org.jooq.impl.SQLDataType.VARCHAR, this, "");
@@ -134,9 +134,19 @@ public class VBonDeCommande extends TableImpl<VBonDeCommandeRecord> {
     public final TableField<VBonDeCommandeRecord, String> PRESTATION = createField("prestation", org.jooq.impl.SQLDataType.VARCHAR(255), this, "");
 
     /**
-     * The column <code>public.v_bon_de_commande.couverture</code>.
+     * The column <code>public.v_bon_de_commande.taux_effectif</code>.
      */
-    public final TableField<VBonDeCommandeRecord, String> COUVERTURE = createField("couverture", org.jooq.impl.SQLDataType.VARCHAR(255), this, "");
+    public final TableField<VBonDeCommandeRecord, Long> TAUX_EFFECTIF = createField("taux_effectif", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.v_bon_de_commande.type_structure</code>.
+     */
+    public final TableField<VBonDeCommandeRecord, String> TYPE_STRUCTURE = createField("type_structure", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_bon_de_commande.statut_structure</code>.
+     */
+    public final TableField<VBonDeCommandeRecord, String> STATUT_STRUCTURE = createField("statut_structure", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * The column <code>public.v_bon_de_commande.nom_ay</code>.

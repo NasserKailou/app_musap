@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetails extends TableImpl<VReglementDetailsRecord> {
 
-    private static final long serialVersionUID = 110070592;
+    private static final long serialVersionUID = -1147665067;
 
     /**
      * The reference instance of <code>public.v_reglement_details</code>
@@ -129,9 +129,9 @@ public class VReglementDetails extends TableImpl<VReglementDetailsRecord> {
     public final TableField<VReglementDetailsRecord, String> STRUCTURE = createField("structure", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
-     * The column <code>public.v_reglement_details.couverture</code>.
+     * The column <code>public.v_reglement_details.taux_effectif</code>.
      */
-    public final TableField<VReglementDetailsRecord, String> COUVERTURE = createField("couverture", org.jooq.impl.SQLDataType.VARCHAR(255), this, "");
+    public final TableField<VReglementDetailsRecord, Long> TAUX_EFFECTIF = createField("taux_effectif", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.v_reglement_details.date_payement</code>.

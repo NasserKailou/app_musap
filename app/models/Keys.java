@@ -22,6 +22,7 @@ import models.tables.Email;
 import models.tables.EtudeConsommations;
 import models.tables.JournalEcriture;
 import models.tables.Notification;
+import models.tables.OtpMessage;
 import models.tables.Params;
 import models.tables.Programme;
 import models.tables.Region;
@@ -48,6 +49,7 @@ import models.tables.records.EmailRecord;
 import models.tables.records.EtudeConsommationsRecord;
 import models.tables.records.JournalEcritureRecord;
 import models.tables.records.NotificationRecord;
+import models.tables.records.OtpMessageRecord;
 import models.tables.records.ParamsRecord;
 import models.tables.records.ProgrammeRecord;
 import models.tables.records.RegionRecord;
@@ -99,6 +101,7 @@ public class Keys {
     public static final Identity<EtudeConsommationsRecord, Long> IDENTITY_ETUDE_CONSOMMATIONS = Identities0.IDENTITY_ETUDE_CONSOMMATIONS;
     public static final Identity<JournalEcritureRecord, Long> IDENTITY_JOURNAL_ECRITURE = Identities0.IDENTITY_JOURNAL_ECRITURE;
     public static final Identity<NotificationRecord, Long> IDENTITY_NOTIFICATION = Identities0.IDENTITY_NOTIFICATION;
+    public static final Identity<OtpMessageRecord, Long> IDENTITY_OTP_MESSAGE = Identities0.IDENTITY_OTP_MESSAGE;
     public static final Identity<ParamsRecord, Long> IDENTITY_PARAMS = Identities0.IDENTITY_PARAMS;
     public static final Identity<ProgrammeRecord, Long> IDENTITY_PROGRAMME = Identities0.IDENTITY_PROGRAMME;
     public static final Identity<RegionRecord, Long> IDENTITY_REGION = Identities0.IDENTITY_REGION;
@@ -133,6 +136,7 @@ public class Keys {
     public static final UniqueKey<EtudeConsommationsRecord> ETUDE_CONSOMMATIONS_PKEY = UniqueKeys0.ETUDE_CONSOMMATIONS_PKEY;
     public static final UniqueKey<JournalEcritureRecord> JOURNAL_ECRITURE_PKEY = UniqueKeys0.JOURNAL_ECRITURE_PKEY;
     public static final UniqueKey<JournalEcritureRecord> UNIK_JOURNAL_KEY = UniqueKeys0.UNIK_JOURNAL_KEY;
+    public static final UniqueKey<OtpMessageRecord> OTP_MESSAGE_PKEY = UniqueKeys0.OTP_MESSAGE_PKEY;
     public static final UniqueKey<ParamsRecord> PARAMS_PKEY = UniqueKeys0.PARAMS_PKEY;
     public static final UniqueKey<ProgrammeRecord> PROGRAMME_PKEY = UniqueKeys0.PROGRAMME_PKEY;
     public static final UniqueKey<ProgrammeRecord> CODE_PRGM = UniqueKeys0.CODE_PRGM;
@@ -186,6 +190,7 @@ public class Keys {
         public static Identity<EtudeConsommationsRecord, Long> IDENTITY_ETUDE_CONSOMMATIONS = createIdentity(EtudeConsommations.ETUDE_CONSOMMATIONS, EtudeConsommations.ETUDE_CONSOMMATIONS.ID);
         public static Identity<JournalEcritureRecord, Long> IDENTITY_JOURNAL_ECRITURE = createIdentity(JournalEcriture.JOURNAL_ECRITURE, JournalEcriture.JOURNAL_ECRITURE.ID);
         public static Identity<NotificationRecord, Long> IDENTITY_NOTIFICATION = createIdentity(Notification.NOTIFICATION, Notification.NOTIFICATION.ID);
+        public static Identity<OtpMessageRecord, Long> IDENTITY_OTP_MESSAGE = createIdentity(OtpMessage.OTP_MESSAGE, OtpMessage.OTP_MESSAGE.ID);
         public static Identity<ParamsRecord, Long> IDENTITY_PARAMS = createIdentity(Params.PARAMS, Params.PARAMS.ID);
         public static Identity<ProgrammeRecord, Long> IDENTITY_PROGRAMME = createIdentity(Programme.PROGRAMME, Programme.PROGRAMME.ID);
         public static Identity<RegionRecord, Long> IDENTITY_REGION = createIdentity(Region.REGION, Region.REGION.ID);
@@ -218,6 +223,7 @@ public class Keys {
         public static final UniqueKey<EtudeConsommationsRecord> ETUDE_CONSOMMATIONS_PKEY = createUniqueKey(EtudeConsommations.ETUDE_CONSOMMATIONS, "etude_consommations_pkey", EtudeConsommations.ETUDE_CONSOMMATIONS.ID);
         public static final UniqueKey<JournalEcritureRecord> JOURNAL_ECRITURE_PKEY = createUniqueKey(JournalEcriture.JOURNAL_ECRITURE, "journal_ecriture_pkey", JournalEcriture.JOURNAL_ECRITURE.ID);
         public static final UniqueKey<JournalEcritureRecord> UNIK_JOURNAL_KEY = createUniqueKey(JournalEcriture.JOURNAL_ECRITURE, "unik_journal_key", JournalEcriture.JOURNAL_ECRITURE.NUM_JOURNAL);
+        public static final UniqueKey<OtpMessageRecord> OTP_MESSAGE_PKEY = createUniqueKey(OtpMessage.OTP_MESSAGE, "otp_message_pkey", OtpMessage.OTP_MESSAGE.ID);
         public static final UniqueKey<ParamsRecord> PARAMS_PKEY = createUniqueKey(Params.PARAMS, "params_pkey", Params.PARAMS.ID);
         public static final UniqueKey<ProgrammeRecord> PROGRAMME_PKEY = createUniqueKey(Programme.PROGRAMME, "programme_pkey", Programme.PROGRAMME.ID);
         public static final UniqueKey<ProgrammeRecord> CODE_PRGM = createUniqueKey(Programme.PROGRAMME, "code_prgm", Programme.PROGRAMME.CODE);

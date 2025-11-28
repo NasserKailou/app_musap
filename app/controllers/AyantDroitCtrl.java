@@ -105,8 +105,8 @@ public class AyantDroitCtrl extends Controller {
 		Adherent ad = adherentService.findById(c.getAdherent());
 
 		if(c.getLien().equals("ENFANT")){
-			c.setPourcentageRetenue(1.5);
-			ad.setPourcentageTotalRetenue(ad.getPourcentageTotalRetenue()+1.5);
+			c.setPourcentageRetenue(1.0);
+			ad.setPourcentageTotalRetenue(ad.getPourcentageTotalRetenue()+1.0);
 			adherentService.saveLogical(ad, false);
 		}
 			

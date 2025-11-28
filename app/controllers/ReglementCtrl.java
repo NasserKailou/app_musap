@@ -33,6 +33,7 @@ import services.AdherentMainServices;
 import services.AyantDroitMainServices;
 import services.EmailManagerServices;
 import services.Mail;
+import services.OtpService;
 import services.ReglementDetailMainServices;
 import services.ReglementMainServices;
 import services.StructureMainServices;
@@ -61,6 +62,8 @@ public class ReglementCtrl extends Controller {
 	CallJasperReport jasper;
 	Mail email;
 	EmailManagerServices emailServices;
+	OtpService otpService;
+
 
 	@Inject
 	public ReglementCtrl(
@@ -72,7 +75,8 @@ public class ReglementCtrl extends Controller {
 			TypePrestationMainService typePresta,
 			CallJasperReport jasper,
 			Mail email,
-			EmailManagerServices emailServices) {
+			EmailManagerServices emailServices,
+			OtpService otpService) {
 
 		super();
 		this.formFactory = formFactory;
@@ -84,7 +88,29 @@ public class ReglementCtrl extends Controller {
 		this.jasper = jasper;
 		this.email = email;
 		this.emailServices = emailServices;
+		this.otpService = otpService;
 	}
+
+	 // 1. Demander un OTP
+    public Result requestOtp(Http.Request request) {
+        String phone = request.getQueryString("phone"); // ex: 2279XXXXXXX
+        otpService.sendOtp(phone);
+        return ok("OTP envoyé");
+    }
+
+    // 2. Vérifier un OTP
+    public Result verifyOtp(Http.Request request) {
+        String phone = request.getQueryString("phone");
+        String code  = request.getQueryString("code");
+
+        boolean ok = otpService.verifyOtp(phone, code);
+        if (ok) {
+            // ici tu connectes l’utilisateur / valides l’action
+            return ok("OTP valide");
+        } else {
+            return badRequest("OTP invalide ou expiré");
+        }
+    }
 
 	public Result show(String subAction, String typeOP, Long idReglement, Long idAdherent, Request request) {
 
@@ -241,6 +267,14 @@ public class ReglementCtrl extends Controller {
 
 		montanTotal = rd.getPrixUnitaire() * rd.getQuantite();
 		rd.setMontant(montanTotal);
+		System.out.println("envoi SMS............." ); 
+		//otpService.sendOtp("22796283209");
+				/*envoi sms membre musapost
+				otpService.sendOtp("22796014709");
+				otpService.sendOtp("22781090237");
+				otpService.sendOtp("22799913737");
+				otpService.sendOtp("22798347127");
+				otpService.sendOtp("22798484951");*/
 
 		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE) || viewMode.equals(ViewMode.VIEW_MODE_EDIT)) {
 			sommeReg = regServices.sommeRegler(
@@ -574,7 +608,7 @@ public class ReglementCtrl extends Controller {
 		long thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000;
 		Timestamp dateExpiration = new Timestamp(regServices.getDateT(dateReglement).getTime() + thirtyDaysInMillis);
 		c.setDateExpiration(dateExpiration);
-
+	
 		if (!String.valueOf(dateReglement.substring(0, 4))
 				.equals(String.valueOf(request.session().get("gestion").get()))) {
 			c.setDatePayement(regServices.getDateT(request.session().get("gestion").get() + "-12-31"));
