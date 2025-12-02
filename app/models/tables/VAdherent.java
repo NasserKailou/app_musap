@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VAdherent extends TableImpl<VAdherentRecord> {
 
-    private static final long serialVersionUID = 965983293;
+    private static final long serialVersionUID = -1140006288;
 
     /**
      * The reference instance of <code>public.v_adherent</code>
@@ -72,6 +72,11 @@ public class VAdherent extends TableImpl<VAdherentRecord> {
      * The column <code>public.v_adherent.matricule</code>.
      */
     public final TableField<VAdherentRecord, String> MATRICULE = createField("matricule", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_adherent.code_carnet</code>.
+     */
+    public final TableField<VAdherentRecord, String> CODE_CARNET = createField("code_carnet", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * The column <code>public.v_adherent.categorie</code>.

@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VBonDeCommande extends TableImpl<VBonDeCommandeRecord> {
 
-    private static final long serialVersionUID = 1639009151;
+    private static final long serialVersionUID = -639264666;
 
     /**
      * The reference instance of <code>public.v_bon_de_commande</code>
@@ -72,6 +72,11 @@ public class VBonDeCommande extends TableImpl<VBonDeCommandeRecord> {
      * The column <code>public.v_bon_de_commande.matricule</code>.
      */
     public final TableField<VBonDeCommandeRecord, String> MATRICULE = createField("matricule", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_bon_de_commande.code_carnet</code>.
+     */
+    public final TableField<VBonDeCommandeRecord, String> CODE_CARNET = createField("code_carnet", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * The column <code>public.v_bon_de_commande.ref_facture</code>.

@@ -73,7 +73,8 @@ GET   /reglement/json/:id    controllers.ReglementCtrl.getReglementJson(id: Long
 POST    /reglement/confirmer/:bonId/:adherentId    controllers.ReglementCtrl.confirmerBon(bonId: Long, adherentId: Long)
 # Réactualiser un bon de commande
 POST    /reglement/reactualiser/:bonId/:adherentId    controllers.ReglementCtrl.reactualiserBon(bonId: Long, adherentId: Long)
-
+#imprime un bon commande
+GET			/impression-BonPriseEnC/    	 controllers.ReglementCtrl.print(request:Request,numBon: Long, fileName:String)
 #Partenaire Ressources
 GET			/Partenaire-Str/show/:subAction/    		controllers.StructurePartenaireCtrl.show(request:Request,subAction: String, idPArtenaire: Long)
 #GET			/Partenaire-Str/restaure/    		controllers.StructurePartenaireCtrl.restaure(idOrd: Long,request:Request)

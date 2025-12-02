@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import models.tables.pojos.VReglement;
 import models.tables.pojos.Adherent;
 import models.tables.pojos.AyantDroit;
 import models.tables.pojos.Email;
@@ -118,13 +119,16 @@ public class ReglementCtrl extends Controller {
 		Reglement c;
 		List<StructurePartenaire> listesPartenaires = new ArrayList<>();
 		List<TypePrestation> listeTypePrestation = new ArrayList<>();
+		List<VReglement> listeReg = new ArrayList<>();
 
 		if (typeOP.equals("BC")) {
 			listesPartenaires = structureService.findAllPharmacie();
 			listeTypePrestation = typePresta.findOrdonnance();
+			listeReg = regServices.findReglementBCByAdherent(idAdherent, request.session().get("gestion").get());
 		} else {
 			listesPartenaires = structureService.findAllHopitaux();
 			listeTypePrestation = typePresta.findOthers();
+				listeReg = regServices.findReglementPCByAdherent(idAdherent, request.session().get("gestion").get());
 		}
 
 		List<VAdherentAyantDroit> vad = regServices.getAdherentAndAyantByAdherent(idAdherent);
@@ -149,11 +153,13 @@ public class ReglementCtrl extends Controller {
 		return ok(views.html.rembourssement.render(
 				viewMode,
 				typeOP,
-				regServices.findReglementByAdherent(idAdherent, request.session().get("gestion").get()),
+				listeReg,
 				c,
 				adherentService.getVAdherentById(idAdherent),
 				listesPartenaires,
 				regServices.sommeRegler(idAdherent, request.session().get("gestion").get()),
+				regServices.sommeReglerBC(idAdherent, request.session().get("gestion").get()),
+				regServices.sommeReglerPC(idAdherent, request.session().get("gestion").get()),
 				Long.valueOf(request.session().get("plafond").get()),
 				listeTypePrestation,
 				vad,
@@ -604,17 +610,17 @@ public class ReglementCtrl extends Controller {
 		c.setWhenDone(new Timestamp(System.currentTimeMillis()));
 		c.setOnDeleted(false);
 		c.setWhoDone(String.valueOf(request.session().get("login").get()));
-
+		c.setDatePayement(new Timestamp(System.currentTimeMillis()));
 		long thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000;
-		Timestamp dateExpiration = new Timestamp(regServices.getDateT(dateReglement).getTime() + thirtyDaysInMillis);
+		Timestamp dateExpiration = new Timestamp((new Timestamp(System.currentTimeMillis())).getTime() + thirtyDaysInMillis);
 		c.setDateExpiration(dateExpiration);
 	
-		if (!String.valueOf(dateReglement.substring(0, 4))
+	 /** 	if (!String.valueOf(dateReglement.substring(0, 4))
 				.equals(String.valueOf(request.session().get("gestion").get()))) {
 			c.setDatePayement(regServices.getDateT(request.session().get("gestion").get() + "-12-31"));
 		} else {
-			c.setDatePayement(regServices.getDateT(dateReglement));
-		}
+		//	c.setDatePayement(regServices.getDateT(dateReglement));
+		} */
 
 		System.out.println("total regler :" + sommeReg + " F CFA");
 
@@ -874,4 +880,26 @@ public class ReglementCtrl extends Controller {
 		}
 	}
 
+
+	public Result print(Request request, Long numBon, String fileName) {
+
+		// String fileName = "recu";
+		LocalDateTime now = LocalDateTime.now();
+		String now_string = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm"));
+		String templateDir = new File("").getAbsolutePath() + "/reports/spool/";
+		try {
+			// flash("success", "impression ok");
+			System.out.println("num bon a imprimer :"+ numBon);
+			jasper.generateReport(fileName, String.valueOf(numBon));
+
+			return ok(new java.io.File(templateDir + fileName + "_" + now_string + "_" + numBon + ".pdf"))
+					.flashing("success", "impression ok");
+
+		} catch (Exception e) {
+			// flash("error", "erreur impression");
+			// System.out.println(e.getMessage() + "+++++++--**///////++++++++");
+			return redirect(routes.AdherentCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L)).flashing("error",
+					"Erreur d'impression");
+		}
+	}
 }

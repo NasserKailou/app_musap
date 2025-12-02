@@ -105,7 +105,7 @@
                             required
                             @if(viewMode.equals("DELETE")) { disabled="disabled" }>
                       <option value="">Sélectionner le type...</option>
-                      <option value="HOPITALE" @if(part.getTypeStructure() != null && part.getTypeStructure().equals("HOPITALE")) { selected="selected" }>HOPITALE</option>
+                      <option value="HOPITAL" @if(part.getTypeStructure() != null && part.getTypeStructure().equals("HOPITAL")) { selected="selected" }>HOPITAL</option>
                       <option value="CLINIQUE" @if(part.getTypeStructure() != null && part.getTypeStructure().equals("CLINIQUE")) { selected="selected" }>CLINIQUE</option>
                       <option value="PHARMACIE" @if(part.getTypeStructure() != null && part.getTypeStructure().equals("PHARMACIE")) { selected="selected" }>PHARMACIE</option>
                       <option value="LABORATOIRE" @if(part.getTypeStructure() != null && part.getTypeStructure().equals("LABORATOIRE")) { selected="selected" }>LABORATOIRE</option>

@@ -14,6 +14,8 @@ SELECT
     ad.prenom_ad,
     ad.sexe,
     ad.matricule,
+	ad.code_carnet,
+	
 
     (cat.code || '-' || cat.libelle) AS categorie,
 

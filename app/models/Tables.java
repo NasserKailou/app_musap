@@ -51,6 +51,8 @@ import models.tables.VNbrBenefiaireParPrestation;
 import models.tables.VNbrPrestationParAdherent;
 import models.tables.VPartenaire;
 import models.tables.VPharmacie;
+import models.tables.VRegBonCommande;
+import models.tables.VRegPriseEnCharge;
 import models.tables.VReglement;
 import models.tables.VReglementDetails;
 import models.tables.VReglementGlobal;
@@ -303,6 +305,16 @@ public class Tables {
      * The table <code>public.v_pharmacie</code>.
      */
     public static final VPharmacie V_PHARMACIE = models.tables.VPharmacie.V_PHARMACIE;
+
+    /**
+     * The table <code>public.v_reg_bon_commande</code>.
+     */
+    public static final VRegBonCommande V_REG_BON_COMMANDE = models.tables.VRegBonCommande.V_REG_BON_COMMANDE;
+
+    /**
+     * The table <code>public.v_reg_prise_en_charge</code>.
+     */
+    public static final VRegPriseEnCharge V_REG_PRISE_EN_CHARGE = models.tables.VRegPriseEnCharge.V_REG_PRISE_EN_CHARGE;
 
     /**
      * The table <code>public.v_reglement</code>.

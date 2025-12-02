@@ -26,7 +26,7 @@ import org.jooq.impl.TableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementRecord extends TableRecordImpl<VReglementRecord> {
 
-    private static final long serialVersionUID = 2107768932;
+    private static final long serialVersionUID = -1250746414;
 
     /**
      * Setter for <code>public.v_reglement.id</code>.
@@ -99,367 +99,409 @@ public class VReglementRecord extends TableRecordImpl<VReglementRecord> {
     }
 
     /**
+     * Setter for <code>public.v_reglement.salaire_net</code>.
+     */
+    public void setSalaireNet(Long value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>public.v_reglement.salaire_net</code>.
+     */
+    public Long getSalaireNet() {
+        return (Long) get(5);
+    }
+
+    /**
+     * Setter for <code>public.v_reglement.code_carnet</code>.
+     */
+    public void setCodeCarnet(String value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>public.v_reglement.code_carnet</code>.
+     */
+    public String getCodeCarnet() {
+        return (String) get(6);
+    }
+
+    /**
+     * Setter for <code>public.v_reglement.pourcentage_total_retenue</code>.
+     */
+    public void setPourcentageTotalRetenue(Double value) {
+        set(7, value);
+    }
+
+    /**
+     * Getter for <code>public.v_reglement.pourcentage_total_retenue</code>.
+     */
+    public Double getPourcentageTotalRetenue() {
+        return (Double) get(7);
+    }
+
+    /**
      * Setter for <code>public.v_reglement.ref_facture</code>.
      */
     public void setRefFacture(String value) {
-        set(5, value);
+        set(8, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.ref_facture</code>.
      */
     public String getRefFacture() {
-        return (String) get(5);
+        return (String) get(8);
     }
 
     /**
      * Setter for <code>public.v_reglement.structure</code>.
      */
     public void setStructure(String value) {
-        set(6, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.structure</code>.
      */
     public String getStructure() {
-        return (String) get(6);
+        return (String) get(9);
     }
 
     /**
      * Setter for <code>public.v_reglement.date_payement</code>.
      */
     public void setDatePayement(Timestamp value) {
-        set(7, value);
+        set(10, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.date_payement</code>.
      */
     public Timestamp getDatePayement() {
-        return (Timestamp) get(7);
+        return (Timestamp) get(10);
     }
 
     /**
      * Setter for <code>public.v_reglement.who_done</code>.
      */
     public void setWhoDone(String value) {
-        set(8, value);
+        set(11, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.who_done</code>.
      */
     public String getWhoDone() {
-        return (String) get(8);
+        return (String) get(11);
     }
 
     /**
      * Setter for <code>public.v_reglement.when_done</code>.
      */
     public void setWhenDone(Timestamp value) {
-        set(9, value);
+        set(12, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.when_done</code>.
      */
     public Timestamp getWhenDone() {
-        return (Timestamp) get(9);
+        return (Timestamp) get(12);
     }
 
     /**
      * Setter for <code>public.v_reglement.is_confirmed_bon</code>.
      */
     public void setIsConfirmedBon(Boolean value) {
-        set(10, value);
+        set(13, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.is_confirmed_bon</code>.
      */
     public Boolean getIsConfirmedBon() {
-        return (Boolean) get(10);
+        return (Boolean) get(13);
     }
 
     /**
      * Setter for <code>public.v_reglement.when_confirmed_bon</code>.
      */
     public void setWhenConfirmedBon(Timestamp value) {
-        set(11, value);
+        set(14, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.when_confirmed_bon</code>.
      */
     public Timestamp getWhenConfirmedBon() {
-        return (Timestamp) get(11);
+        return (Timestamp) get(14);
     }
 
     /**
      * Setter for <code>public.v_reglement.date_expiration</code>.
      */
     public void setDateExpiration(Timestamp value) {
-        set(12, value);
+        set(15, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.date_expiration</code>.
      */
     public Timestamp getDateExpiration() {
-        return (Timestamp) get(12);
+        return (Timestamp) get(15);
     }
 
     /**
      * Setter for <code>public.v_reglement.type_reglement</code>.
      */
     public void setTypeReglement(String value) {
-        set(13, value);
+        set(16, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.type_reglement</code>.
      */
     public String getTypeReglement() {
-        return (String) get(13);
+        return (String) get(16);
     }
 
     /**
      * Setter for <code>public.v_reglement.annee</code>.
      */
     public void setAnnee(String value) {
-        set(14, value);
+        set(17, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.annee</code>.
      */
     public String getAnnee() {
-        return (String) get(14);
+        return (String) get(17);
     }
 
     /**
      * Setter for <code>public.v_reglement.on_deleted</code>.
      */
     public void setOnDeleted(Boolean value) {
-        set(15, value);
+        set(18, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.on_deleted</code>.
      */
     public Boolean getOnDeleted() {
-        return (Boolean) get(15);
+        return (Boolean) get(18);
     }
 
     /**
      * Setter for <code>public.v_reglement.prestation</code>.
      */
     public void setPrestation(String value) {
-        set(16, value);
+        set(19, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.prestation</code>.
      */
     public String getPrestation() {
-        return (String) get(16);
+        return (String) get(19);
     }
 
     /**
      * Setter for <code>public.v_reglement.couverture</code>.
      */
     public void setCouverture(String value) {
-        set(17, value);
+        set(20, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.couverture</code>.
      */
     public String getCouverture() {
-        return (String) get(17);
+        return (String) get(20);
     }
 
     /**
      * Setter for <code>public.v_reglement.taux_public</code>.
      */
     public void setTauxPublic(String value) {
-        set(18, value);
+        set(21, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.taux_public</code>.
      */
     public String getTauxPublic() {
-        return (String) get(18);
+        return (String) get(21);
     }
 
     /**
      * Setter for <code>public.v_reglement.taux_prive</code>.
      */
     public void setTauxPrive(String value) {
-        set(19, value);
+        set(22, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.taux_prive</code>.
      */
     public String getTauxPrive() {
-        return (String) get(19);
+        return (String) get(22);
     }
 
     /**
      * Setter for <code>public.v_reglement.type_structure</code>.
      */
     public void setTypeStructure(String value) {
-        set(20, value);
+        set(23, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.type_structure</code>.
      */
     public String getTypeStructure() {
-        return (String) get(20);
+        return (String) get(23);
     }
 
     /**
      * Setter for <code>public.v_reglement.statut_structure</code>.
      */
     public void setStatutStructure(String value) {
-        set(21, value);
+        set(24, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.statut_structure</code>.
      */
     public String getStatutStructure() {
-        return (String) get(21);
+        return (String) get(24);
     }
 
     /**
      * Setter for <code>public.v_reglement.nom_ay</code>.
      */
     public void setNomAy(String value) {
-        set(22, value);
+        set(25, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.nom_ay</code>.
      */
     public String getNomAy() {
-        return (String) get(22);
+        return (String) get(25);
     }
 
     /**
      * Setter for <code>public.v_reglement.lien</code>.
      */
     public void setLien(String value) {
-        set(23, value);
+        set(26, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.lien</code>.
      */
     public String getLien() {
-        return (String) get(23);
+        return (String) get(26);
     }
 
     /**
      * Setter for <code>public.v_reglement.genre</code>.
      */
     public void setGenre(String value) {
-        set(24, value);
+        set(27, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.genre</code>.
      */
     public String getGenre() {
-        return (String) get(24);
+        return (String) get(27);
     }
 
     /**
      * Setter for <code>public.v_reglement.ayant_droit</code>.
      */
     public void setAyantDroit(Long value) {
-        set(25, value);
+        set(28, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.ayant_droit</code>.
      */
     public Long getAyantDroit() {
-        return (Long) get(25);
+        return (Long) get(28);
     }
 
     /**
      * Setter for <code>public.v_reglement.montant_total</code>.
      */
     public void setMontantTotal(Long value) {
-        set(26, value);
+        set(29, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.montant_total</code>.
      */
     public Long getMontantTotal() {
-        return (Long) get(26);
+        return (Long) get(29);
     }
 
     /**
      * Setter for <code>public.v_reglement.taux_couverture_effectif</code>.
      */
     public void setTauxCouvertureEffectif(String value) {
-        set(27, value);
+        set(30, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.taux_couverture_effectif</code>.
      */
     public String getTauxCouvertureEffectif() {
-        return (String) get(27);
+        return (String) get(30);
     }
 
     /**
      * Setter for <code>public.v_reglement.montant_reglement</code>.
      */
     public void setMontantReglement(Long value) {
-        set(28, value);
+        set(31, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.montant_reglement</code>.
      */
     public Long getMontantReglement() {
-        return (Long) get(28);
+        return (Long) get(31);
     }
 
     /**
      * Setter for <code>public.v_reglement.montant_paye</code>.
      */
     public void setMontantPaye(Long value) {
-        set(29, value);
+        set(32, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.montant_paye</code>.
      */
     public Long getMontantPaye() {
-        return (Long) get(29);
+        return (Long) get(32);
     }
 
     /**
      * Setter for <code>public.v_reglement.id_structure</code>.
      */
     public void setIdStructure(Long value) {
-        set(30, value);
+        set(33, value);
     }
 
     /**
      * Getter for <code>public.v_reglement.id_structure</code>.
      */
     public Long getIdStructure() {
-        return (Long) get(30);
+        return (Long) get(33);
     }
 
     // -------------------------------------------------------------------------
@@ -476,7 +518,7 @@ public class VReglementRecord extends TableRecordImpl<VReglementRecord> {
     /**
      * Create a detached, initialised VReglementRecord
      */
-    public VReglementRecord(Long id, String nomAd, String prenomAd, Long idAdherent, String matricule, String refFacture, String structure, Timestamp datePayement, String whoDone, Timestamp whenDone, Boolean isConfirmedBon, Timestamp whenConfirmedBon, Timestamp dateExpiration, String typeReglement, String annee, Boolean onDeleted, String prestation, String couverture, String tauxPublic, String tauxPrive, String typeStructure, String statutStructure, String nomAy, String lien, String genre, Long ayantDroit, Long montantTotal, String tauxCouvertureEffectif, Long montantReglement, Long montantPaye, Long idStructure) {
+    public VReglementRecord(Long id, String nomAd, String prenomAd, Long idAdherent, String matricule, Long salaireNet, String codeCarnet, Double pourcentageTotalRetenue, String refFacture, String structure, Timestamp datePayement, String whoDone, Timestamp whenDone, Boolean isConfirmedBon, Timestamp whenConfirmedBon, Timestamp dateExpiration, String typeReglement, String annee, Boolean onDeleted, String prestation, String couverture, String tauxPublic, String tauxPrive, String typeStructure, String statutStructure, String nomAy, String lien, String genre, Long ayantDroit, Long montantTotal, String tauxCouvertureEffectif, Long montantReglement, Long montantPaye, Long idStructure) {
         super(VReglement.V_REGLEMENT);
 
         set(0, id);
@@ -484,31 +526,34 @@ public class VReglementRecord extends TableRecordImpl<VReglementRecord> {
         set(2, prenomAd);
         set(3, idAdherent);
         set(4, matricule);
-        set(5, refFacture);
-        set(6, structure);
-        set(7, datePayement);
-        set(8, whoDone);
-        set(9, whenDone);
-        set(10, isConfirmedBon);
-        set(11, whenConfirmedBon);
-        set(12, dateExpiration);
-        set(13, typeReglement);
-        set(14, annee);
-        set(15, onDeleted);
-        set(16, prestation);
-        set(17, couverture);
-        set(18, tauxPublic);
-        set(19, tauxPrive);
-        set(20, typeStructure);
-        set(21, statutStructure);
-        set(22, nomAy);
-        set(23, lien);
-        set(24, genre);
-        set(25, ayantDroit);
-        set(26, montantTotal);
-        set(27, tauxCouvertureEffectif);
-        set(28, montantReglement);
-        set(29, montantPaye);
-        set(30, idStructure);
+        set(5, salaireNet);
+        set(6, codeCarnet);
+        set(7, pourcentageTotalRetenue);
+        set(8, refFacture);
+        set(9, structure);
+        set(10, datePayement);
+        set(11, whoDone);
+        set(12, whenDone);
+        set(13, isConfirmedBon);
+        set(14, whenConfirmedBon);
+        set(15, dateExpiration);
+        set(16, typeReglement);
+        set(17, annee);
+        set(18, onDeleted);
+        set(19, prestation);
+        set(20, couverture);
+        set(21, tauxPublic);
+        set(22, tauxPrive);
+        set(23, typeStructure);
+        set(24, statutStructure);
+        set(25, nomAy);
+        set(26, lien);
+        set(27, genre);
+        set(28, ayantDroit);
+        set(29, montantTotal);
+        set(30, tauxCouvertureEffectif);
+        set(31, montantReglement);
+        set(32, montantPaye);
+        set(33, idStructure);
     }
 }

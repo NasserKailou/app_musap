@@ -112,7 +112,7 @@ public class CallJasperReport {
 			System.out.println("impression en cours...." + id);
 			// Parameters for report
 			Map<String, Object> parameters = new HashMap<String, Object>();
-			parameters.put("matricule", id);
+			parameters.put("id", id);
 			
 			JasperPrint print = JasperFillManager.fillReport(compileFile, parameters, conn);
 			System.out.println("impression en cours....###");

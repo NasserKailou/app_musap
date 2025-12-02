@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglement extends TableImpl<VReglementRecord> {
 
-    private static final long serialVersionUID = -1864136875;
+    private static final long serialVersionUID = 1304270887;
 
     /**
      * The reference instance of <code>public.v_reglement</code>
@@ -72,6 +72,21 @@ public class VReglement extends TableImpl<VReglementRecord> {
      * The column <code>public.v_reglement.matricule</code>.
      */
     public final TableField<VReglementRecord, String> MATRICULE = createField("matricule", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement.salaire_net</code>.
+     */
+    public final TableField<VReglementRecord, Long> SALAIRE_NET = createField("salaire_net", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.v_reglement.code_carnet</code>.
+     */
+    public final TableField<VReglementRecord, String> CODE_CARNET = createField("code_carnet", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement.pourcentage_total_retenue</code>.
+     */
+    public final TableField<VReglementRecord, Double> POURCENTAGE_TOTAL_RETENUE = createField("pourcentage_total_retenue", org.jooq.impl.SQLDataType.DOUBLE, this, "");
 
     /**
      * The column <code>public.v_reglement.ref_facture</code>.

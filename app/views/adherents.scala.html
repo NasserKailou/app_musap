@@ -218,7 +218,7 @@
                     <div class="form-group">
                       <label>
                     
-                  <i class="fas fa-hand-holding-usd"></i> Salaire Net
+                  <i class="fas fa-hand-holding-usd"></i> Salaire de base
                         <span class="text-danger">*</span>
                       </label>
                       <input type="numeric"
@@ -227,7 +227,7 @@
                              class="form-control"
                              autocomplete="off"
                              value="@adherent.getSalaireNet()"
-                             placeholder="Salaire Net de l'agent"
+                             placeholder="Salaire de base de l'agent"
                              required
                              @if(viewMode.equals("DELETE")) { readonly="readonly" }>
                     </div>
@@ -558,6 +558,7 @@
                   <tr>
                     <th>Photo</th>
                     <th>Matricule</th>
+                     <th>Code carnet</th>
                     <th>Nom & Prénom</th>
                     <th>Téléphone</th>
 
@@ -597,6 +598,7 @@
                       </td>
 
                       <td>@c.getMatricule()</td>
+                      <td>@c.getCodeCarnet()</td>
                       <td>@c.getNomAd() @c.getPrenomAd()</td>
                       <td>@c.getTelephone()</td>
 
@@ -738,6 +740,7 @@
                   <tr>
                     <th>Photo</th>
                     <th>Matricule</th>
+                    <th>Code carnet</th>
                     <th>Nom & Prénom</th>
                     <th>Téléphone</th>
                     @if(

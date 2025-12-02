@@ -23,13 +23,14 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VAdherent implements Serializable {
 
-    private static final long serialVersionUID = -1669687691;
+    private static final long serialVersionUID = -1858937829;
 
     private Long      id;
     private String    nomAd;
     private String    prenomAd;
     private String    sexe;
     private String    matricule;
+    private String    codeCarnet;
     private String    categorie;
     private String    fonction;
     private String    structureSigle;
@@ -59,6 +60,7 @@ public class VAdherent implements Serializable {
         this.prenomAd = value.prenomAd;
         this.sexe = value.sexe;
         this.matricule = value.matricule;
+        this.codeCarnet = value.codeCarnet;
         this.categorie = value.categorie;
         this.fonction = value.fonction;
         this.structureSigle = value.structureSigle;
@@ -87,6 +89,7 @@ public class VAdherent implements Serializable {
         String    prenomAd,
         String    sexe,
         String    matricule,
+        String    codeCarnet,
         String    categorie,
         String    fonction,
         String    structureSigle,
@@ -113,6 +116,7 @@ public class VAdherent implements Serializable {
         this.prenomAd = prenomAd;
         this.sexe = sexe;
         this.matricule = matricule;
+        this.codeCarnet = codeCarnet;
         this.categorie = categorie;
         this.fonction = fonction;
         this.structureSigle = structureSigle;
@@ -173,6 +177,14 @@ public class VAdherent implements Serializable {
 
     public void setMatricule(String matricule) {
         this.matricule = matricule;
+    }
+
+    public String getCodeCarnet() {
+        return this.codeCarnet;
+    }
+
+    public void setCodeCarnet(String codeCarnet) {
+        this.codeCarnet = codeCarnet;
     }
 
     public String getCategorie() {
@@ -344,6 +356,7 @@ public class VAdherent implements Serializable {
         sb.append(", ").append(prenomAd);
         sb.append(", ").append(sexe);
         sb.append(", ").append(matricule);
+        sb.append(", ").append(codeCarnet);
         sb.append(", ").append(categorie);
         sb.append(", ").append(fonction);
         sb.append(", ").append(structureSigle);

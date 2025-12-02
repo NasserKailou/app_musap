@@ -12,6 +12,8 @@
   adherent: models.tables.pojos.VAdherent,
   structures: List[models.tables.pojos.StructurePartenaire],
   totalRegler: Long,
+  totalReglerBC: Long,
+  totalReglerPC: Long,
   plafondAnnuel: Long,
   typePrestations: List[models.tables.pojos.TypePrestation],
   ayantDroits: List[models.tables.pojos.VAdherentAyantDroit]
@@ -86,12 +88,24 @@
             </div>
               @defining(NumberFormat.getInstance(Locale.FRANCE)) { fmt =>
             <div class="row mt-3">
+              <div class="col-md-12">
+                <div class="info-box bg-primary info-box bg-primary text-center" style="display:flex; align-items:center; justify-content:center;">
+                  <span class="info-box-icon"><i class="fas fa-money-bill-wave"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Total des consommations (Bon de Commandes & Prise en charge)</span>
+                    <span class="info-box-number">@fmt.format(totalRegler) F CFA</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mt-3">
               <div class="col-md-4">
                 <div class="info-box bg-success">
                   <span class="info-box-icon"><i class="fas fa-money-bill-wave"></i></span>
                   <div class="info-box-content">
-                    <span class="info-box-text">Total couverture des Bons</span>
-                    <span class="info-box-number">@fmt.format(totalRegler) F CFA</span>
+                    <span class="info-box-text">Total consommations @if(typeOP.equals("BC")){des Bons}else{Prise en charge}</span>
+                    <span class="info-box-number">@if(typeOP.equals("BC")){ @fmt.format(totalReglerBC)}else{@fmt.format(totalReglerPC)} F CFA</span>
                   </div>
                 </div>
               </div>
@@ -100,7 +114,7 @@
                 <div class="info-box bg-warning">
                   <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
                   <div class="info-box-content">
-                    <span class="info-box-text">Seuil d'Alerte des consomomation </span>
+                    <span class="info-box-text">Seuil d'Alerte des consommations </span>
                     <span class="info-box-number">@fmt.format(adherent.getTotalCreditAnnuelle()) F CFA</span>
                   </div>
                 </div>
@@ -110,7 +124,7 @@
                 <div class="info-box bg-danger">
                   <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
                   <div class="info-box-content">
-                    <span class="info-box-text">Plafond Annuelle des consomomation a ne pas dépasser </span>
+                    <span class="info-box-text">Plafond Annuelle des consommations a ne pas dépasser </span>
                     <span class="info-box-number">@fmt.format(adherent.getTotalCreditAConsomer()) F CFA</span>
                   </div>
                 </div>
@@ -151,18 +165,18 @@
                   </tr>
                 </thead>
              <tbody>
-  @for(c <- reglements) {
-  @defining({
-    // Conversion de Timestamp vers LocalDateTime
-    val datePayement = c.getDatePayement().toLocalDateTime()
-    val dateExpiration = c.getDateExpiration().toLocalDateTime()
-    val now = LocalDateTime.now()
-    val joursRestants = ChronoUnit.DAYS.between(now, dateExpiration)
-    val isConfirmedValue = c.getIsConfirmedBon()
-    val isConfirmed: Boolean = (isConfirmedValue != null && isConfirmedValue == true)
-    val estExpire: Boolean = joursRestants <= 0
-    (datePayement, dateExpiration, joursRestants, isConfirmed, estExpire)
-  }) { case (datePayement, dateExpiration, joursRestants, isConfirmed, estExpire) =>
+        @for(c <- reglements) {
+        @defining({
+          // Conversion de Timestamp vers LocalDateTime
+          val datePayement = c.getDatePayement().toLocalDateTime()
+          val dateExpiration = c.getDateExpiration().toLocalDateTime()
+          val now = LocalDateTime.now()
+          val joursRestants = ChronoUnit.DAYS.between(now, dateExpiration)
+          val isConfirmedValue = c.getIsConfirmedBon()
+          val isConfirmed: Boolean = (isConfirmedValue != null && isConfirmedValue == true)
+          val estExpire: Boolean = joursRestants <= 0
+          (datePayement, dateExpiration, joursRestants, isConfirmed, estExpire)
+        }) { case (datePayement, dateExpiration, joursRestants, isConfirmed, estExpire) =>
 
   <tr>
     <td>@c.getId()</td>
@@ -319,7 +333,12 @@
          onclick="return window.confirm('Voulez-vous vraiment supprimer ce règlement ?');">
         <i class="fas fa-trash"></i>
       </a>
-    }
+    } <a class="btn btn-secondary btn-sm"
+                               title="Imprimer @if(typeOP.equals("BC")){ le Bon de commande}else{La prise en charge} "
+                               href='@controllers.routes.ReglementCtrl.print(c.getId(), if(typeOP.equals("BC")){"bon_commande"}else{"prise_en_charge"})'
+                               onclick="return(openPopup(this.href, 600, 600, 600, 600));">
+                              <i class="fas fa-print"></i>
+                            </a>
   </div>
 </td>
 
@@ -388,8 +407,8 @@
             <div class="card-body">
               <div class="row">
                 
-                <!-- Bénéficiaire -->
-                <div class="col-md-3">
+                <!-- Bénéficiaire 
+                <div class="col-md-4">
                   <div class="form-group">
                     <label>
                       <i class="fas fa-user-check"></i> Bénéficiaire 
@@ -407,13 +426,50 @@
                       }
                     </select>
                   </div>
+                </div>-->
+                <!-- Bénéficiaire -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>
+                    <i class="fas fa-user-check"></i> Bénéficiaire 
+                    <span class="text-danger">*</span>
+                  </label>
+                  <select class="form-control select2" required id="benef" name="benef">
+                    <option value="">Sélectionner le bénéficiaire</option>
+
+                    <!-- L’adhérent -->
+                    <option value="@adherent.getId()">
+                      @adherent.getNomAd @adherent.getPrenomAd (Adhérent)
+                    </option>
+
+                    <!-- Ayants droit filtrés -->
+                   @for(c <- ayantDroits) {
+
+                            @defining(
+                              java.time.Period.between(
+                                c.getDateNaissAyantDroit().toLocalDateTime().toLocalDate(),
+                                java.time.LocalDate.now()
+                              ).getYears()
+                            ) { age =>
+
+                              @if(!(c.getLien() == "ENFANT" && age >= 25)) {
+                                <option value="@c.getIdAyantDroit()">
+                                  @c.getNomAy (Ayant droit - @c.getLien() - @age ans)
+                                </option>
+                              }
+
+                            }
+
+                          }
+                  </select>
                 </div>
+              </div>
 
                 <!-- Type de Prestation -->
                
                 <!-- Structure -->
               <!-- Structure -->
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                       <div class="form-group">
                         <label>
                           <i class="fas fa-hospital"></i> Structure 
@@ -431,7 +487,7 @@
                     </div>
 
 
-                 <div class="col-md-3">
+                 <div class="col-md-4">
                   <div class="form-group">
                     <label>
                       <i class="fas fa-briefcase-medical"></i> Type de prestation 
@@ -453,7 +509,7 @@
 
 
 
-                 <div class="col-md-3">
+               <!--   <div class="col-md-3">
                   <div class="form-group">
                     <label>
                       <i class="far fa-calendar-alt"></i> Date d'établissement du Bon 
@@ -461,7 +517,7 @@
                     </label>
                     <input type="date" class="form-control" id="tmpDate" name="tmpDate" required>
                   </div>
-                </div>
+                </div> -->
 
               </div>
             </div>

@@ -26,7 +26,7 @@ import org.jooq.impl.TableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRecord> {
 
-    private static final long serialVersionUID = 1298678656;
+    private static final long serialVersionUID = -1949892394;
 
     /**
      * Setter for <code>public.v_reglement_details.id</code>.
@@ -113,269 +113,283 @@ public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRe
     }
 
     /**
+     * Setter for <code>public.v_reglement_details.code_carnet</code>.
+     */
+    public void setCodeCarnet(String value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>public.v_reglement_details.code_carnet</code>.
+     */
+    public String getCodeCarnet() {
+        return (String) get(6);
+    }
+
+    /**
      * Setter for <code>public.v_reglement_details.who_done</code>.
      */
     public void setWhoDone(String value) {
-        set(6, value);
+        set(7, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.who_done</code>.
      */
     public String getWhoDone() {
-        return (String) get(6);
+        return (String) get(7);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.when_done</code>.
      */
     public void setWhenDone(Timestamp value) {
-        set(7, value);
+        set(8, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.when_done</code>.
      */
     public Timestamp getWhenDone() {
-        return (Timestamp) get(7);
+        return (Timestamp) get(8);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.on_deleted</code>.
      */
     public void setOnDeleted(Boolean value) {
-        set(8, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.on_deleted</code>.
      */
     public Boolean getOnDeleted() {
-        return (Boolean) get(8);
+        return (Boolean) get(9);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.last_update</code>.
      */
     public void setLastUpdate(Timestamp value) {
-        set(9, value);
+        set(10, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.last_update</code>.
      */
     public Timestamp getLastUpdate() {
-        return (Timestamp) get(9);
+        return (Timestamp) get(10);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.ref_facture</code>.
      */
     public void setRefFacture(String value) {
-        set(10, value);
+        set(11, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.ref_facture</code>.
      */
     public String getRefFacture() {
-        return (String) get(10);
+        return (String) get(11);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.id_bon</code>.
      */
     public void setIdBon(Long value) {
-        set(11, value);
+        set(12, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.id_bon</code>.
      */
     public Long getIdBon() {
-        return (Long) get(11);
+        return (Long) get(12);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.nom_ad</code>.
      */
     public void setNomAd(String value) {
-        set(12, value);
+        set(13, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.nom_ad</code>.
      */
     public String getNomAd() {
-        return (String) get(12);
+        return (String) get(13);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.prenom_ad</code>.
      */
     public void setPrenomAd(String value) {
-        set(13, value);
+        set(14, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.prenom_ad</code>.
      */
     public String getPrenomAd() {
-        return (String) get(13);
+        return (String) get(14);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.matricule</code>.
      */
     public void setMatricule(String value) {
-        set(14, value);
+        set(15, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.matricule</code>.
      */
     public String getMatricule() {
-        return (String) get(14);
+        return (String) get(15);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.structure</code>.
      */
     public void setStructure(String value) {
-        set(15, value);
+        set(16, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.structure</code>.
      */
     public String getStructure() {
-        return (String) get(15);
+        return (String) get(16);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.taux_effectif</code>.
      */
     public void setTauxEffectif(Long value) {
-        set(16, value);
+        set(17, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.taux_effectif</code>.
      */
     public Long getTauxEffectif() {
-        return (Long) get(16);
+        return (Long) get(17);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.date_payement</code>.
      */
     public void setDatePayement(Timestamp value) {
-        set(17, value);
+        set(18, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.date_payement</code>.
      */
     public Timestamp getDatePayement() {
-        return (Timestamp) get(17);
+        return (Timestamp) get(18);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.prestation</code>.
      */
     public void setPrestation(String value) {
-        set(18, value);
+        set(19, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.prestation</code>.
      */
     public String getPrestation() {
-        return (String) get(18);
+        return (String) get(19);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.lien</code>.
      */
     public void setLien(String value) {
-        set(19, value);
+        set(20, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.lien</code>.
      */
     public String getLien() {
-        return (String) get(19);
+        return (String) get(20);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.is_confirmed_bon</code>.
      */
     public void setIsConfirmedBon(Boolean value) {
-        set(20, value);
+        set(21, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.is_confirmed_bon</code>.
      */
     public Boolean getIsConfirmedBon() {
-        return (Boolean) get(20);
+        return (Boolean) get(21);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.when_confirmed_bon</code>.
      */
     public void setWhenConfirmedBon(Timestamp value) {
-        set(21, value);
+        set(22, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.when_confirmed_bon</code>.
      */
     public Timestamp getWhenConfirmedBon() {
-        return (Timestamp) get(21);
+        return (Timestamp) get(22);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.date_expiration</code>.
      */
     public void setDateExpiration(Timestamp value) {
-        set(22, value);
+        set(23, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.date_expiration</code>.
      */
     public Timestamp getDateExpiration() {
-        return (Timestamp) get(22);
+        return (Timestamp) get(23);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.total_couvert</code>.
      */
     public void setTotalCouvert(Long value) {
-        set(23, value);
+        set(24, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.total_couvert</code>.
      */
     public Long getTotalCouvert() {
-        return (Long) get(23);
+        return (Long) get(24);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.total_restant</code>.
      */
     public void setTotalRestant(Long value) {
-        set(24, value);
+        set(25, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.total_restant</code>.
      */
     public Long getTotalRestant() {
-        return (Long) get(24);
+        return (Long) get(25);
     }
 
     // -------------------------------------------------------------------------
@@ -392,7 +406,7 @@ public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRe
     /**
      * Create a detached, initialised VReglementDetailsRecord
      */
-    public VReglementDetailsRecord(Long id, Long reglement, String intitule, Long montant, Long quantite, Long prixUnitaire, String whoDone, Timestamp whenDone, Boolean onDeleted, Timestamp lastUpdate, String refFacture, Long idBon, String nomAd, String prenomAd, String matricule, String structure, Long tauxEffectif, Timestamp datePayement, String prestation, String lien, Boolean isConfirmedBon, Timestamp whenConfirmedBon, Timestamp dateExpiration, Long totalCouvert, Long totalRestant) {
+    public VReglementDetailsRecord(Long id, Long reglement, String intitule, Long montant, Long quantite, Long prixUnitaire, String codeCarnet, String whoDone, Timestamp whenDone, Boolean onDeleted, Timestamp lastUpdate, String refFacture, Long idBon, String nomAd, String prenomAd, String matricule, String structure, Long tauxEffectif, Timestamp datePayement, String prestation, String lien, Boolean isConfirmedBon, Timestamp whenConfirmedBon, Timestamp dateExpiration, Long totalCouvert, Long totalRestant) {
         super(VReglementDetails.V_REGLEMENT_DETAILS);
 
         set(0, id);
@@ -401,24 +415,25 @@ public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRe
         set(3, montant);
         set(4, quantite);
         set(5, prixUnitaire);
-        set(6, whoDone);
-        set(7, whenDone);
-        set(8, onDeleted);
-        set(9, lastUpdate);
-        set(10, refFacture);
-        set(11, idBon);
-        set(12, nomAd);
-        set(13, prenomAd);
-        set(14, matricule);
-        set(15, structure);
-        set(16, tauxEffectif);
-        set(17, datePayement);
-        set(18, prestation);
-        set(19, lien);
-        set(20, isConfirmedBon);
-        set(21, whenConfirmedBon);
-        set(22, dateExpiration);
-        set(23, totalCouvert);
-        set(24, totalRestant);
+        set(6, codeCarnet);
+        set(7, whoDone);
+        set(8, whenDone);
+        set(9, onDeleted);
+        set(10, lastUpdate);
+        set(11, refFacture);
+        set(12, idBon);
+        set(13, nomAd);
+        set(14, prenomAd);
+        set(15, matricule);
+        set(16, structure);
+        set(17, tauxEffectif);
+        set(18, datePayement);
+        set(19, prestation);
+        set(20, lien);
+        set(21, isConfirmedBon);
+        set(22, whenConfirmedBon);
+        set(23, dateExpiration);
+        set(24, totalCouvert);
+        set(25, totalRestant);
     }
 }

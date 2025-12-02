@@ -74,6 +74,49 @@ public class ReglementMainServices extends ReglementDao {
 		return c;
 	}
 
+
+		public List<VReglement> findReglementBCByAdherent(Long idAdherent, String gestion) {
+		Timestamp d = new Timestamp(System.currentTimeMillis());
+
+		// String gestion = String.valueOf(d).substring(0, 4);
+		//System.out.println("la date est :" + d + " gestion :" + gestion);
+
+		List<VReglement> c = con.connection().selectFrom(V_REGLEMENT).where(V_REGLEMENT.ON_DELETED.isFalse())
+				.and(V_REGLEMENT.ID_ADHERENT.eq(idAdherent)).and(V_REGLEMENT.ANNEE.eq(gestion)).and(V_REGLEMENT.TYPE_STRUCTURE.eq("PHARMACIE"))//
+				.fetchInto(VReglement.class);
+		con.connection().close();
+		return c;
+	}
+
+	public List<VReglement> findReglementPCByAdherent(Long idAdherent, String gestion) {
+		Timestamp d = new Timestamp(System.currentTimeMillis());
+
+		// String gestion = String.valueOf(d).substring(0, 4);
+		//System.out.println("la date est :" + d + " gestion :" + gestion);
+
+		List<VReglement> c = con.connection().selectFrom(V_REGLEMENT).where(V_REGLEMENT.ON_DELETED.isFalse())
+				.and(V_REGLEMENT.ID_ADHERENT.eq(idAdherent)).and(V_REGLEMENT.ANNEE.eq(gestion))
+				.and(V_REGLEMENT.TYPE_STRUCTURE.eq("HOPITAL").or(V_REGLEMENT.TYPE_STRUCTURE.eq("CLINIQUE")).or(V_REGLEMENT.TYPE_STRUCTURE.eq("LABORATOIRE")))//
+				.fetchInto(VReglement.class);
+		con.connection().close();
+		return c;
+	}
+
+/** public List<VRegBonCommande> findReglementBCByAdherent(Long idAdherent, String gestion) {
+		List<VRegBonCommande> c = con.connection().selectFrom(V_REG_BON_COMMANDE).where(V_REG_BON_COMMANDE.ON_DELETED.isFalse())
+				.and(V_REG_BON_COMMANDE.ID_ADHERENT.eq(idAdherent)).and(V_REG_BON_COMMANDE.ANNEE.eq(gestion))//
+				.fetchInto(VRegBonCommande.class);
+		con.connection().close();
+		return c;
+	}
+
+	public List<VRegPriseEnCharge> findReglementPCByAdherent(Long idAdherent, String gestion) {
+		List<VRegPriseEnCharge> c = con.connection().selectFrom(V_REG_PRISE_EN_CHARGE).where(V_REG_PRISE_EN_CHARGE.ON_DELETED.isFalse())
+				.and(V_REGLEMENT.ID_ADHERENT.eq(idAdherent)).and(V_REGLEMENT.ANNEE.eq(gestion)).fetchInto(VRegPriseEnCharge.class);
+					con.connection().close();
+		return c;
+	} */
+
 	/**
 	 * decommenté la gestion apres mise a jour des montant
 	 * 
@@ -90,6 +133,8 @@ public class ReglementMainServices extends ReglementDao {
 		con.connection().close();
 		return c;
 	}
+
+		
 
 //	public Boolean isPlafond(Long idAdherent) {
 //		List<Reglement> listes = con.connection()
@@ -108,6 +153,41 @@ public class ReglementMainServices extends ReglementDao {
 
 		// List<VReglement> c = this.findReglementByAdherent(idAdherent);
 		List<VReglement> c = this.findReglementByAdherentByAnnee(idAdherent, gestion);
+		Long totalRegler = 0L;
+		for (VReglement element : c) {
+			// totalRegler += element.getMontantTotal();
+			totalRegler += element.getMontantReglement();
+		}
+		System.out.println("Le total Solder est :" + totalRegler + " F CFA");
+
+		return totalRegler;
+	}
+
+	public Long sommeReglerBC(Long idAdherent, String gestion) {
+		Timestamp d = new Timestamp(System.currentTimeMillis());
+
+		String gestionsss = String.valueOf(d).substring(0, 4);
+
+		// List<VReglement> c = this.findReglementByAdherent(idAdherent);
+		List<VReglement> c = this.findReglementBCByAdherent(idAdherent, gestion);
+		Long totalRegler = 0L;
+		for (VReglement element : c) {
+			// totalRegler += element.getMontantTotal();
+			totalRegler += element.getMontantReglement();
+		}
+		System.out.println("Le total Solder est :" + totalRegler + " F CFA");
+
+		return totalRegler;
+	}
+
+
+	public Long sommeReglerPC(Long idAdherent, String gestion) {
+		Timestamp d = new Timestamp(System.currentTimeMillis());
+
+		String gestionsss = String.valueOf(d).substring(0, 4);
+
+		// List<VReglement> c = this.findReglementByAdherent(idAdherent);
+		List<VReglement> c = this.findReglementPCByAdherent(idAdherent, gestion);
 		Long totalRegler = 0L;
 		for (VReglement element : c) {
 			// totalRegler += element.getMontantTotal();

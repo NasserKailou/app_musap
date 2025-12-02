@@ -55,6 +55,8 @@ import models.tables.VNbrBenefiaireParPrestation;
 import models.tables.VNbrPrestationParAdherent;
 import models.tables.VPartenaire;
 import models.tables.VPharmacie;
+import models.tables.VRegBonCommande;
+import models.tables.VRegPriseEnCharge;
 import models.tables.VReglement;
 import models.tables.VReglementDetails;
 import models.tables.VReglementGlobal;
@@ -88,7 +90,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 1085328969;
+    private static final long serialVersionUID = -1363852353;
 
     /**
      * The reference instance of <code>public</code>
@@ -321,6 +323,16 @@ public class Public extends SchemaImpl {
     public final VPharmacie V_PHARMACIE = models.tables.VPharmacie.V_PHARMACIE;
 
     /**
+     * The table <code>public.v_reg_bon_commande</code>.
+     */
+    public final VRegBonCommande V_REG_BON_COMMANDE = models.tables.VRegBonCommande.V_REG_BON_COMMANDE;
+
+    /**
+     * The table <code>public.v_reg_prise_en_charge</code>.
+     */
+    public final VRegPriseEnCharge V_REG_PRISE_EN_CHARGE = models.tables.VRegPriseEnCharge.V_REG_PRISE_EN_CHARGE;
+
+    /**
      * The table <code>public.v_reglement</code>.
      */
     public final VReglement V_REGLEMENT = models.tables.VReglement.V_REGLEMENT;
@@ -493,6 +505,8 @@ public class Public extends SchemaImpl {
             VNbrPrestationParAdherent.V_NBR_PRESTATION_PAR_ADHERENT,
             VPartenaire.V_PARTENAIRE,
             VPharmacie.V_PHARMACIE,
+            VRegBonCommande.V_REG_BON_COMMANDE,
+            VRegPriseEnCharge.V_REG_PRISE_EN_CHARGE,
             VReglement.V_REGLEMENT,
             VReglement_2.V_REGLEMENT_2,
             VReglementDetails.V_REGLEMENT_DETAILS,

@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetails implements Serializable {
 
-    private static final long serialVersionUID = 1738337196;
+    private static final long serialVersionUID = 1504218402;
 
     private Long      id;
     private Long      reglement;
@@ -31,6 +31,7 @@ public class VReglementDetails implements Serializable {
     private Long      montant;
     private Long      quantite;
     private Long      prixUnitaire;
+    private String    codeCarnet;
     private String    whoDone;
     private Timestamp whenDone;
     private Boolean   onDeleted;
@@ -60,6 +61,7 @@ public class VReglementDetails implements Serializable {
         this.montant = value.montant;
         this.quantite = value.quantite;
         this.prixUnitaire = value.prixUnitaire;
+        this.codeCarnet = value.codeCarnet;
         this.whoDone = value.whoDone;
         this.whenDone = value.whenDone;
         this.onDeleted = value.onDeleted;
@@ -88,6 +90,7 @@ public class VReglementDetails implements Serializable {
         Long      montant,
         Long      quantite,
         Long      prixUnitaire,
+        String    codeCarnet,
         String    whoDone,
         Timestamp whenDone,
         Boolean   onDeleted,
@@ -114,6 +117,7 @@ public class VReglementDetails implements Serializable {
         this.montant = montant;
         this.quantite = quantite;
         this.prixUnitaire = prixUnitaire;
+        this.codeCarnet = codeCarnet;
         this.whoDone = whoDone;
         this.whenDone = whenDone;
         this.onDeleted = onDeleted;
@@ -181,6 +185,14 @@ public class VReglementDetails implements Serializable {
 
     public void setPrixUnitaire(Long prixUnitaire) {
         this.prixUnitaire = prixUnitaire;
+    }
+
+    public String getCodeCarnet() {
+        return this.codeCarnet;
+    }
+
+    public void setCodeCarnet(String codeCarnet) {
+        this.codeCarnet = codeCarnet;
     }
 
     public String getWhoDone() {
@@ -345,6 +357,7 @@ public class VReglementDetails implements Serializable {
         sb.append(", ").append(montant);
         sb.append(", ").append(quantite);
         sb.append(", ").append(prixUnitaire);
+        sb.append(", ").append(codeCarnet);
         sb.append(", ").append(whoDone);
         sb.append(", ").append(whenDone);
         sb.append(", ").append(onDeleted);

@@ -23,13 +23,14 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VBonDeCommande implements Serializable {
 
-    private static final long serialVersionUID = -541528975;
+    private static final long serialVersionUID = -1536680051;
 
     private Long      id;
     private String    nomAd;
     private String    prenomAd;
     private Long      idAdherent;
     private String    matricule;
+    private String    codeCarnet;
     private String    refFacture;
     private String    structure;
     private Timestamp datePayement;
@@ -62,6 +63,7 @@ public class VBonDeCommande implements Serializable {
         this.prenomAd = value.prenomAd;
         this.idAdherent = value.idAdherent;
         this.matricule = value.matricule;
+        this.codeCarnet = value.codeCarnet;
         this.refFacture = value.refFacture;
         this.structure = value.structure;
         this.datePayement = value.datePayement;
@@ -93,6 +95,7 @@ public class VBonDeCommande implements Serializable {
         String    prenomAd,
         Long      idAdherent,
         String    matricule,
+        String    codeCarnet,
         String    refFacture,
         String    structure,
         Timestamp datePayement,
@@ -122,6 +125,7 @@ public class VBonDeCommande implements Serializable {
         this.prenomAd = prenomAd;
         this.idAdherent = idAdherent;
         this.matricule = matricule;
+        this.codeCarnet = codeCarnet;
         this.refFacture = refFacture;
         this.structure = structure;
         this.datePayement = datePayement;
@@ -185,6 +189,14 @@ public class VBonDeCommande implements Serializable {
 
     public void setMatricule(String matricule) {
         this.matricule = matricule;
+    }
+
+    public String getCodeCarnet() {
+        return this.codeCarnet;
+    }
+
+    public void setCodeCarnet(String codeCarnet) {
+        this.codeCarnet = codeCarnet;
     }
 
     public String getRefFacture() {
@@ -380,6 +392,7 @@ public class VBonDeCommande implements Serializable {
         sb.append(", ").append(prenomAd);
         sb.append(", ").append(idAdherent);
         sb.append(", ").append(matricule);
+        sb.append(", ").append(codeCarnet);
         sb.append(", ").append(refFacture);
         sb.append(", ").append(structure);
         sb.append(", ").append(datePayement);

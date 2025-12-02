@@ -26,7 +26,7 @@ import org.jooq.impl.TableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VAdherentRecord extends TableRecordImpl<VAdherentRecord> {
 
-    private static final long serialVersionUID = 1275457724;
+    private static final long serialVersionUID = 721019484;
 
     /**
      * Setter for <code>public.v_adherent.id</code>.
@@ -99,283 +99,297 @@ public class VAdherentRecord extends TableRecordImpl<VAdherentRecord> {
     }
 
     /**
+     * Setter for <code>public.v_adherent.code_carnet</code>.
+     */
+    public void setCodeCarnet(String value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>public.v_adherent.code_carnet</code>.
+     */
+    public String getCodeCarnet() {
+        return (String) get(5);
+    }
+
+    /**
      * Setter for <code>public.v_adherent.categorie</code>.
      */
     public void setCategorie(String value) {
-        set(5, value);
+        set(6, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.categorie</code>.
      */
     public String getCategorie() {
-        return (String) get(5);
+        return (String) get(6);
     }
 
     /**
      * Setter for <code>public.v_adherent.fonction</code>.
      */
     public void setFonction(String value) {
-        set(6, value);
+        set(7, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.fonction</code>.
      */
     public String getFonction() {
-        return (String) get(6);
+        return (String) get(7);
     }
 
     /**
      * Setter for <code>public.v_adherent.structure_sigle</code>.
      */
     public void setStructureSigle(String value) {
-        set(7, value);
+        set(8, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.structure_sigle</code>.
      */
     public String getStructureSigle() {
-        return (String) get(7);
+        return (String) get(8);
     }
 
     /**
      * Setter for <code>public.v_adherent.date_naiss</code>.
      */
     public void setDateNaiss(Timestamp value) {
-        set(8, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.date_naiss</code>.
      */
     public Timestamp getDateNaiss() {
-        return (Timestamp) get(8);
+        return (Timestamp) get(9);
     }
 
     /**
      * Setter for <code>public.v_adherent.age</code>.
      */
     public void setAge(Integer value) {
-        set(9, value);
+        set(10, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.age</code>.
      */
     public Integer getAge() {
-        return (Integer) get(9);
+        return (Integer) get(10);
     }
 
     /**
      * Setter for <code>public.v_adherent.date_prise_service</code>.
      */
     public void setDatePriseService(Timestamp value) {
-        set(10, value);
+        set(11, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.date_prise_service</code>.
      */
     public Timestamp getDatePriseService() {
-        return (Timestamp) get(10);
+        return (Timestamp) get(11);
     }
 
     /**
      * Setter for <code>public.v_adherent.anciennete</code>.
      */
     public void setAnciennete(Integer value) {
-        set(11, value);
+        set(12, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.anciennete</code>.
      */
     public Integer getAnciennete() {
-        return (Integer) get(11);
+        return (Integer) get(12);
     }
 
     /**
      * Setter for <code>public.v_adherent.salaire_net</code>.
      */
     public void setSalaireNet(Long value) {
-        set(12, value);
+        set(13, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.salaire_net</code>.
      */
     public Long getSalaireNet() {
-        return (Long) get(12);
+        return (Long) get(13);
     }
 
     /**
      * Setter for <code>public.v_adherent.pourcentage_total_retenue</code>.
      */
     public void setPourcentageTotalRetenue(Double value) {
-        set(13, value);
+        set(14, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.pourcentage_total_retenue</code>.
      */
     public Double getPourcentageTotalRetenue() {
-        return (Double) get(13);
+        return (Double) get(14);
     }
 
     /**
      * Setter for <code>public.v_adherent.total_cotisation_agent</code>.
      */
     public void setTotalCotisationAgent(Double value) {
-        set(14, value);
+        set(15, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.total_cotisation_agent</code>.
      */
     public Double getTotalCotisationAgent() {
-        return (Double) get(14);
+        return (Double) get(15);
     }
 
     /**
      * Setter for <code>public.v_adherent.total_credit_annuelle</code>.
      */
     public void setTotalCreditAnnuelle(Double value) {
-        set(15, value);
+        set(16, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.total_credit_annuelle</code>.
      */
     public Double getTotalCreditAnnuelle() {
-        return (Double) get(15);
+        return (Double) get(16);
     }
 
     /**
      * Setter for <code>public.v_adherent.total_credit_a_consomer</code>.
      */
     public void setTotalCreditAConsomer(Double value) {
-        set(16, value);
+        set(17, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.total_credit_a_consomer</code>.
      */
     public Double getTotalCreditAConsomer() {
-        return (Double) get(16);
+        return (Double) get(17);
     }
 
     /**
      * Setter for <code>public.v_adherent.picture</code>.
      */
     public void setPicture(String value) {
-        set(17, value);
+        set(18, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.picture</code>.
      */
     public String getPicture() {
-        return (String) get(17);
+        return (String) get(18);
     }
 
     /**
      * Setter for <code>public.v_adherent.when_done</code>.
      */
     public void setWhenDone(Timestamp value) {
-        set(18, value);
+        set(19, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.when_done</code>.
      */
     public Timestamp getWhenDone() {
-        return (Timestamp) get(18);
+        return (Timestamp) get(19);
     }
 
     /**
      * Setter for <code>public.v_adherent.who_done</code>.
      */
     public void setWhoDone(String value) {
-        set(19, value);
+        set(20, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.who_done</code>.
      */
     public String getWhoDone() {
-        return (String) get(19);
+        return (String) get(20);
     }
 
     /**
      * Setter for <code>public.v_adherent.on_deleted</code>.
      */
     public void setOnDeleted(Boolean value) {
-        set(20, value);
+        set(21, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.on_deleted</code>.
      */
     public Boolean getOnDeleted() {
-        return (Boolean) get(20);
+        return (Boolean) get(21);
     }
 
     /**
      * Setter for <code>public.v_adherent.direction</code>.
      */
     public void setDirection(String value) {
-        set(21, value);
+        set(22, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.direction</code>.
      */
     public String getDirection() {
-        return (String) get(21);
+        return (String) get(22);
     }
 
     /**
      * Setter for <code>public.v_adherent.division</code>.
      */
     public void setDivision(String value) {
-        set(22, value);
+        set(23, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.division</code>.
      */
     public String getDivision() {
-        return (String) get(22);
+        return (String) get(23);
     }
 
     /**
      * Setter for <code>public.v_adherent.service</code>.
      */
     public void setService(String value) {
-        set(23, value);
+        set(24, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.service</code>.
      */
     public String getService() {
-        return (String) get(23);
+        return (String) get(24);
     }
 
     /**
      * Setter for <code>public.v_adherent.telephone</code>.
      */
     public void setTelephone(String value) {
-        set(24, value);
+        set(25, value);
     }
 
     /**
      * Getter for <code>public.v_adherent.telephone</code>.
      */
     public String getTelephone() {
-        return (String) get(24);
+        return (String) get(25);
     }
 
     // -------------------------------------------------------------------------
@@ -392,7 +406,7 @@ public class VAdherentRecord extends TableRecordImpl<VAdherentRecord> {
     /**
      * Create a detached, initialised VAdherentRecord
      */
-    public VAdherentRecord(Long id, String nomAd, String prenomAd, String sexe, String matricule, String categorie, String fonction, String structureSigle, Timestamp dateNaiss, Integer age, Timestamp datePriseService, Integer anciennete, Long salaireNet, Double pourcentageTotalRetenue, Double totalCotisationAgent, Double totalCreditAnnuelle, Double totalCreditAConsomer, String picture, Timestamp whenDone, String whoDone, Boolean onDeleted, String direction, String division, String service, String telephone) {
+    public VAdherentRecord(Long id, String nomAd, String prenomAd, String sexe, String matricule, String codeCarnet, String categorie, String fonction, String structureSigle, Timestamp dateNaiss, Integer age, Timestamp datePriseService, Integer anciennete, Long salaireNet, Double pourcentageTotalRetenue, Double totalCotisationAgent, Double totalCreditAnnuelle, Double totalCreditAConsomer, String picture, Timestamp whenDone, String whoDone, Boolean onDeleted, String direction, String division, String service, String telephone) {
         super(VAdherent.V_ADHERENT);
 
         set(0, id);
@@ -400,25 +414,26 @@ public class VAdherentRecord extends TableRecordImpl<VAdherentRecord> {
         set(2, prenomAd);
         set(3, sexe);
         set(4, matricule);
-        set(5, categorie);
-        set(6, fonction);
-        set(7, structureSigle);
-        set(8, dateNaiss);
-        set(9, age);
-        set(10, datePriseService);
-        set(11, anciennete);
-        set(12, salaireNet);
-        set(13, pourcentageTotalRetenue);
-        set(14, totalCotisationAgent);
-        set(15, totalCreditAnnuelle);
-        set(16, totalCreditAConsomer);
-        set(17, picture);
-        set(18, whenDone);
-        set(19, whoDone);
-        set(20, onDeleted);
-        set(21, direction);
-        set(22, division);
-        set(23, service);
-        set(24, telephone);
+        set(5, codeCarnet);
+        set(6, categorie);
+        set(7, fonction);
+        set(8, structureSigle);
+        set(9, dateNaiss);
+        set(10, age);
+        set(11, datePriseService);
+        set(12, anciennete);
+        set(13, salaireNet);
+        set(14, pourcentageTotalRetenue);
+        set(15, totalCotisationAgent);
+        set(16, totalCreditAnnuelle);
+        set(17, totalCreditAConsomer);
+        set(18, picture);
+        set(19, whenDone);
+        set(20, whoDone);
+        set(21, onDeleted);
+        set(22, direction);
+        set(23, division);
+        set(24, service);
+        set(25, telephone);
     }
 }
