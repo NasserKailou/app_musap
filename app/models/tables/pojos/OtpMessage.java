@@ -23,12 +23,12 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class OtpMessage implements Serializable {
 
-    private static final long serialVersionUID = -1410641055;
+    private static final long serialVersionUID = -161891917;
 
     private Long      id;
     private String    phone;
     private String    code;
-    private String    message;
+    private String    messageTexte;
     private Long      bonCommande;
     private Timestamp createdAt;
     private Timestamp expiresAt;
@@ -44,7 +44,7 @@ public class OtpMessage implements Serializable {
         this.id = value.id;
         this.phone = value.phone;
         this.code = value.code;
-        this.message = value.message;
+        this.messageTexte = value.messageTexte;
         this.bonCommande = value.bonCommande;
         this.createdAt = value.createdAt;
         this.expiresAt = value.expiresAt;
@@ -59,7 +59,7 @@ public class OtpMessage implements Serializable {
         Long      id,
         String    phone,
         String    code,
-        String    message,
+        String    messageTexte,
         Long      bonCommande,
         Timestamp createdAt,
         Timestamp expiresAt,
@@ -72,7 +72,7 @@ public class OtpMessage implements Serializable {
         this.id = id;
         this.phone = phone;
         this.code = code;
-        this.message = message;
+        this.messageTexte = messageTexte;
         this.bonCommande = bonCommande;
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
@@ -107,12 +107,12 @@ public class OtpMessage implements Serializable {
         this.code = code;
     }
 
-    public String getMessage() {
-        return this.message;
+    public String getMessageTexte() {
+        return this.messageTexte;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setMessageTexte(String messageTexte) {
+        this.messageTexte = messageTexte;
     }
 
     public Long getBonCommande() {
@@ -186,7 +186,7 @@ public class OtpMessage implements Serializable {
         sb.append(id);
         sb.append(", ").append(phone);
         sb.append(", ").append(code);
-        sb.append(", ").append(message);
+        sb.append(", ").append(messageTexte);
         sb.append(", ").append(bonCommande);
         sb.append(", ").append(createdAt);
         sb.append(", ").append(expiresAt);

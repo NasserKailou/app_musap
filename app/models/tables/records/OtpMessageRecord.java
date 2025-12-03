@@ -30,7 +30,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class OtpMessageRecord extends UpdatableRecordImpl<OtpMessageRecord> implements Record12<Long, String, String, String, Long, Timestamp, Timestamp, Boolean, Boolean, String, Integer, String> {
 
-    private static final long serialVersionUID = 393013402;
+    private static final long serialVersionUID = 1742580913;
 
     /**
      * Setter for <code>public.otp_message.id</code>.
@@ -75,16 +75,16 @@ public class OtpMessageRecord extends UpdatableRecordImpl<OtpMessageRecord> impl
     }
 
     /**
-     * Setter for <code>public.otp_message.message</code>.
+     * Setter for <code>public.otp_message.message_texte</code>.
      */
-    public void setMessage(String value) {
+    public void setMessageTexte(String value) {
         set(3, value);
     }
 
     /**
-     * Getter for <code>public.otp_message.message</code>.
+     * Getter for <code>public.otp_message.message_texte</code>.
      */
-    public String getMessage() {
+    public String getMessageTexte() {
         return (String) get(3);
     }
 
@@ -261,7 +261,7 @@ public class OtpMessageRecord extends UpdatableRecordImpl<OtpMessageRecord> impl
      */
     @Override
     public Field<String> field4() {
-        return OtpMessage.OTP_MESSAGE.MESSAGE;
+        return OtpMessage.OTP_MESSAGE.MESSAGE_TEXTE;
     }
 
     /**
@@ -357,7 +357,7 @@ public class OtpMessageRecord extends UpdatableRecordImpl<OtpMessageRecord> impl
      */
     @Override
     public String component4() {
-        return getMessage();
+        return getMessageTexte();
     }
 
     /**
@@ -453,7 +453,7 @@ public class OtpMessageRecord extends UpdatableRecordImpl<OtpMessageRecord> impl
      */
     @Override
     public String value4() {
-        return getMessage();
+        return getMessageTexte();
     }
 
     /**
@@ -552,7 +552,7 @@ public class OtpMessageRecord extends UpdatableRecordImpl<OtpMessageRecord> impl
      */
     @Override
     public OtpMessageRecord value4(String value) {
-        setMessage(value);
+        setMessageTexte(value);
         return this;
     }
 
@@ -662,13 +662,13 @@ public class OtpMessageRecord extends UpdatableRecordImpl<OtpMessageRecord> impl
     /**
      * Create a detached, initialised OtpMessageRecord
      */
-    public OtpMessageRecord(Long id, String phone, String code, String message, Long bonCommande, Timestamp createdAt, Timestamp expiresAt, Boolean isUsed, Boolean isSent, String sentResponse, Integer attemptCount, String context) {
+    public OtpMessageRecord(Long id, String phone, String code, String messageTexte, Long bonCommande, Timestamp createdAt, Timestamp expiresAt, Boolean isUsed, Boolean isSent, String sentResponse, Integer attemptCount, String context) {
         super(OtpMessage.OTP_MESSAGE);
 
         set(0, id);
         set(1, phone);
         set(2, code);
-        set(3, message);
+        set(3, messageTexte);
         set(4, bonCommande);
         set(5, createdAt);
         set(6, expiresAt);

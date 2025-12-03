@@ -80,10 +80,10 @@ public class OtpMessageDao extends DAOImpl<OtpMessageRecord, models.tables.pojos
     }
 
     /**
-     * Fetch records that have <code>message IN (values)</code>
+     * Fetch records that have <code>message_texte IN (values)</code>
      */
-    public List<models.tables.pojos.OtpMessage> fetchByMessage(String... values) {
-        return fetch(OtpMessage.OTP_MESSAGE.MESSAGE, values);
+    public List<models.tables.pojos.OtpMessage> fetchByMessageTexte(String... values) {
+        return fetch(OtpMessage.OTP_MESSAGE.MESSAGE_TEXTE, values);
     }
 
     /**

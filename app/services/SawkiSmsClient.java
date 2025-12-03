@@ -5,11 +5,10 @@ import play.libs.Json;
 import play.libs.ws.*;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.inject.Singleton;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.concurrent.CompletionStage;
-
 @Singleton
 public class SawkiSmsClient {
 

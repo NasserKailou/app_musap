@@ -77,7 +77,7 @@ public class ReglementCtrl extends Controller {
 			CallJasperReport jasper,
 			Mail email,
 			EmailManagerServices emailServices,
-			OtpService otpService) {
+		OtpService otpService) {
 
 		super();
 		this.formFactory = formFactory;
@@ -890,6 +890,18 @@ public class ReglementCtrl extends Controller {
 		try {
 			// flash("success", "impression ok");
 			System.out.println("num bon a imprimer :"+ numBon);
+			try{
+
+				otpService.sendSMSBC(regServices.findVRegById(numBon));
+			} catch(Exception e){
+				e.printStackTrace();
+           		 System.out.println("Erreur envoi SMS : " + e.getMessage());
+			}
+			
+		// otpService.sendOtp("22796283209") ;	
+		 System.out.println("Coordonné"+ regServices.findVRegById(numBon).getTelephone()+ regServices.findVRegById(numBon).getId()+ regServices.findVRegById(numBon).getMontantReglement());
+		 // otpService.sendOtp2(regServices.findVRegById(numBon).getTelephone(), regServices.findVRegById(numBon).getId(), regServices.findVRegById(numBon).getMontantReglement());
+
 			jasper.generateReport(fileName, String.valueOf(numBon));
 
 			return ok(new java.io.File(templateDir + fileName + "_" + now_string + "_" + numBon + ".pdf"))

@@ -1,14 +1,18 @@
 package services;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import com.google.inject.Inject;
 
 import models.tables.daos.OtpMessageDao;
 import models.tables.pojos.OtpMessage;
-import models.tables.pojos.Params;
+import models.tables.pojos.VReglement;
+import play.libs.ws.WSResponse;
 import utils.IConnectionHelper;
 
 import java.security.SecureRandom;
+import java.sql.Timestamp;
+import java.util.concurrent.CompletionStage;
 
 @Singleton
 public class OtpService extends OtpMessageDao {
@@ -46,15 +50,48 @@ public class OtpService extends OtpMessageDao {
     public void sendOtp(String phoneE164) {
         String code = generateCode();
 
-        // TODO: sauvegarder dans la base (table otp_codes) avec phone + code + expiry
-        // ex: expiry = now + 5 minutes
-        // OTP_TABLE.insert(phoneE164, code, Instant.now().plus(5, ChronoUnit.MINUTES));
-
-        //String message = "MUSAP : votre code OTP est " + code + ". Il est valable 5 minutes.";
-      //String message=  "MUSAP : Un bon/prise en charge a été émis à votre nom. Votre code OTP est :"+code +" Présentez-le à la structure de soins pour validation";
       String message = "Alerte avertissement !!! Cher(e) adherent, vous avez dépassé votre credit annuel de: 999999F Moderez votre consommation afin d'eviter la suspension. Merci";
         smsClient.sendSms(phoneE164, message);
     }
+
+    public void sendSMSBC(VReglement reglement) {
+    
+    OtpMessage sms = new OtpMessage();
+    
+     String messageCourt = "Cher(e) adherent, votre bon " + reglement.getId() + " d'un montant de " + reglement.getMontantReglement() + " F CFA a ete emis avec succes. Si vous netes pas l'auteur, contactez la MUSAPOSTE. Merci.";
+    
+     try {
+            CompletionStage<WSResponse> future = smsClient.sendSms(reglement.getTelephone(), messageCourt);
+
+            WSResponse response = future.toCompletableFuture().get();
+
+            System.out.println("Retour API : " + response.getBody());
+
+            sms.setIsSent(true);
+            sms.setIsUsed(true);
+            sms.setSentResponse(response.getBody());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Erreur envoi SMS : " + e.getMessage());
+
+            sms.setIsSent(false);
+            sms.setIsUsed(false);
+            sms.setSentResponse("ERROR: " + e.getMessage());
+        }
+
+
+    sms.setBonCommande(reglement.getId());
+    sms.setPhone(reglement.getTelephone());
+    sms.setMessageTexte(messageCourt);
+    sms.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+       try{
+        //messageService.insert(sms);
+       } catch(Exception e){
+        System.out.println("Save error"+ e.getMessage());
+       }
+   //System.out.println("Save retour :"+ this.saveLogical(sms, false)); 
+}
 
     public boolean verifyOtp(String phoneE164, String codeSaisi) {
         // TODO: aller chercher dans la base le dernier OTP pour ce téléphone
@@ -75,4 +112,6 @@ public class OtpService extends OtpMessageDao {
 
         return false; // à remplacer par la vraie logique
     }
+
+
 }

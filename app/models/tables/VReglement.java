@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglement extends TableImpl<VReglementRecord> {
 
-    private static final long serialVersionUID = 1304270887;
+    private static final long serialVersionUID = -2034936969;
 
     /**
      * The reference instance of <code>public.v_reglement</code>
@@ -84,6 +84,11 @@ public class VReglement extends TableImpl<VReglementRecord> {
     public final TableField<VReglementRecord, String> CODE_CARNET = createField("code_carnet", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
+     * The column <code>public.v_reglement.telephone</code>.
+     */
+    public final TableField<VReglementRecord, String> TELEPHONE = createField("telephone", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
      * The column <code>public.v_reglement.pourcentage_total_retenue</code>.
      */
     public final TableField<VReglementRecord, Double> POURCENTAGE_TOTAL_RETENUE = createField("pourcentage_total_retenue", org.jooq.impl.SQLDataType.DOUBLE, this, "");
@@ -92,6 +97,11 @@ public class VReglement extends TableImpl<VReglementRecord> {
      * The column <code>public.v_reglement.ref_facture</code>.
      */
     public final TableField<VReglementRecord, String> REF_FACTURE = createField("ref_facture", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement.id_struc</code>.
+     */
+    public final TableField<VReglementRecord, Long> ID_STRUC = createField("id_struc", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.v_reglement.structure</code>.
@@ -142,6 +152,11 @@ public class VReglement extends TableImpl<VReglementRecord> {
      * The column <code>public.v_reglement.on_deleted</code>.
      */
     public final TableField<VReglementRecord, Boolean> ON_DELETED = createField("on_deleted", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>public.v_reglement.id_prestation</code>.
+     */
+    public final TableField<VReglementRecord, Long> ID_PRESTATION = createField("id_prestation", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.v_reglement.prestation</code>.

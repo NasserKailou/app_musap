@@ -241,6 +241,12 @@ public class ReglementMainServices extends ReglementDao {
 		return super.findById(id);
 	}
 
+	public VReglement findVRegById(Long id) {
+		 VReglement c = con.connection().selectFrom(V_REGLEMENT).where(V_REGLEMENT.ID.eq(id)).fetchSingleInto(VReglement.class);
+		con.connection().close();
+		return c;
+	}
+
 	public List<VAdherentAyantDroit> getAdherentAndAyantByAdherent(Long idAdherent) {
 		List<VAdherentAyantDroit> vad = con.connection().selectFrom(V_ADHERENT_AYANT_DROIT)
 				.where(V_ADHERENT_AYANT_DROIT.ID_ADHERENT.eq(idAdherent)).fetchInto(VAdherentAyantDroit.class);
@@ -296,5 +302,24 @@ public class ReglementMainServices extends ReglementDao {
 		System.out.println(">>> Nombre de bons non confirmés trouvés: " + bons.size());
 		return bons;
 	}
+
+	public  String normaliserNumeroNiger(String telephone) {
+
+    if (telephone == null || telephone.trim().isEmpty()) {
+				throw new IllegalArgumentException("Le numéro de téléphone est vide ou null");
+			}
+
+			// Nettoyage : suppression des espaces, tirets, etc.
+			telephone = telephone.replaceAll("[^0-9]", "");
+
+			// Si le numéro commence déjà par 227 → on laisse
+			if (telephone.startsWith("227")) {
+				return telephone;
+			}
+
+			// Sinon on ajoute 227
+			return "227" + telephone;
+		}
+
 
 }

@@ -39,6 +39,7 @@ AS SELECT
     ad.matricule,
 	ad.salaire_net,
 	ad.code_carnet,
+	ad.telephone,
 	ad.pourcentage_total_retenue,
     reg.ref_facture,
 	struc.id as id_struc,

@@ -137,6 +137,7 @@ public class AdherentCtrl extends Controller {
 			ad.setOnDeleted(false);
 			ad.setWhenDone(new Timestamp(System.currentTimeMillis()));
 			ad.setWhoDone(String.valueOf(request.session().get("login").get()));
+			ad.setTelephone(adherentService.normaliserNumeroNiger(ad.getTelephone()));
 
 			if(viewMode.equals(ViewMode.VIEW_MODE_CREATE))
 				ad.setPourcentageTotalRetenue(2.5);

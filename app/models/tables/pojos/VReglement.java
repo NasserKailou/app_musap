@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglement implements Serializable {
 
-    private static final long serialVersionUID = 1203824993;
+    private static final long serialVersionUID = -800537007;
 
     private Long      id;
     private String    nomAd;
@@ -32,8 +32,10 @@ public class VReglement implements Serializable {
     private String    matricule;
     private Long      salaireNet;
     private String    codeCarnet;
+    private String    telephone;
     private Double    pourcentageTotalRetenue;
     private String    refFacture;
+    private Long      idStruc;
     private String    structure;
     private Timestamp datePayement;
     private String    whoDone;
@@ -44,6 +46,7 @@ public class VReglement implements Serializable {
     private String    typeReglement;
     private String    annee;
     private Boolean   onDeleted;
+    private Long      idPrestation;
     private String    prestation;
     private String    couverture;
     private String    tauxPublic;
@@ -70,8 +73,10 @@ public class VReglement implements Serializable {
         this.matricule = value.matricule;
         this.salaireNet = value.salaireNet;
         this.codeCarnet = value.codeCarnet;
+        this.telephone = value.telephone;
         this.pourcentageTotalRetenue = value.pourcentageTotalRetenue;
         this.refFacture = value.refFacture;
+        this.idStruc = value.idStruc;
         this.structure = value.structure;
         this.datePayement = value.datePayement;
         this.whoDone = value.whoDone;
@@ -82,6 +87,7 @@ public class VReglement implements Serializable {
         this.typeReglement = value.typeReglement;
         this.annee = value.annee;
         this.onDeleted = value.onDeleted;
+        this.idPrestation = value.idPrestation;
         this.prestation = value.prestation;
         this.couverture = value.couverture;
         this.tauxPublic = value.tauxPublic;
@@ -107,8 +113,10 @@ public class VReglement implements Serializable {
         String    matricule,
         Long      salaireNet,
         String    codeCarnet,
+        String    telephone,
         Double    pourcentageTotalRetenue,
         String    refFacture,
+        Long      idStruc,
         String    structure,
         Timestamp datePayement,
         String    whoDone,
@@ -119,6 +127,7 @@ public class VReglement implements Serializable {
         String    typeReglement,
         String    annee,
         Boolean   onDeleted,
+        Long      idPrestation,
         String    prestation,
         String    couverture,
         String    tauxPublic,
@@ -142,8 +151,10 @@ public class VReglement implements Serializable {
         this.matricule = matricule;
         this.salaireNet = salaireNet;
         this.codeCarnet = codeCarnet;
+        this.telephone = telephone;
         this.pourcentageTotalRetenue = pourcentageTotalRetenue;
         this.refFacture = refFacture;
+        this.idStruc = idStruc;
         this.structure = structure;
         this.datePayement = datePayement;
         this.whoDone = whoDone;
@@ -154,6 +165,7 @@ public class VReglement implements Serializable {
         this.typeReglement = typeReglement;
         this.annee = annee;
         this.onDeleted = onDeleted;
+        this.idPrestation = idPrestation;
         this.prestation = prestation;
         this.couverture = couverture;
         this.tauxPublic = tauxPublic;
@@ -227,6 +239,14 @@ public class VReglement implements Serializable {
         this.codeCarnet = codeCarnet;
     }
 
+    public String getTelephone() {
+        return this.telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
     public Double getPourcentageTotalRetenue() {
         return this.pourcentageTotalRetenue;
     }
@@ -241,6 +261,14 @@ public class VReglement implements Serializable {
 
     public void setRefFacture(String refFacture) {
         this.refFacture = refFacture;
+    }
+
+    public Long getIdStruc() {
+        return this.idStruc;
+    }
+
+    public void setIdStruc(Long idStruc) {
+        this.idStruc = idStruc;
     }
 
     public String getStructure() {
@@ -321,6 +349,14 @@ public class VReglement implements Serializable {
 
     public void setOnDeleted(Boolean onDeleted) {
         this.onDeleted = onDeleted;
+    }
+
+    public Long getIdPrestation() {
+        return this.idPrestation;
+    }
+
+    public void setIdPrestation(Long idPrestation) {
+        this.idPrestation = idPrestation;
     }
 
     public String getPrestation() {
@@ -454,8 +490,10 @@ public class VReglement implements Serializable {
         sb.append(", ").append(matricule);
         sb.append(", ").append(salaireNet);
         sb.append(", ").append(codeCarnet);
+        sb.append(", ").append(telephone);
         sb.append(", ").append(pourcentageTotalRetenue);
         sb.append(", ").append(refFacture);
+        sb.append(", ").append(idStruc);
         sb.append(", ").append(structure);
         sb.append(", ").append(datePayement);
         sb.append(", ").append(whoDone);
@@ -466,6 +504,7 @@ public class VReglement implements Serializable {
         sb.append(", ").append(typeReglement);
         sb.append(", ").append(annee);
         sb.append(", ").append(onDeleted);
+        sb.append(", ").append(idPrestation);
         sb.append(", ").append(prestation);
         sb.append(", ").append(couverture);
         sb.append(", ").append(tauxPublic);

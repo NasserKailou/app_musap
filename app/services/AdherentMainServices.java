@@ -166,4 +166,23 @@ public class AdherentMainServices extends AdherentDao {
 		con.connection().close();
 		return c;
 	}
+
+	public  String normaliserNumeroNiger(String telephone) {
+
+				if (telephone == null || telephone.trim().isEmpty()) {
+					throw new IllegalArgumentException("Le numéro de téléphone est vide ou null");
+				}
+
+				// Nettoyage : suppression des espaces, tirets, etc.
+				telephone = telephone.replaceAll("[^0-9]", "");
+
+				// Si le numéro commence déjà par 227 → on laisse
+				if (telephone.startsWith("227")) {
+					return telephone;
+				}
+
+				// Sinon on ajoute 227
+				return "227" + telephone;
+			}
+
 }
