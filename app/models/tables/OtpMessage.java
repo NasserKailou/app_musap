@@ -40,7 +40,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class OtpMessage extends TableImpl<OtpMessageRecord> {
 
-    private static final long serialVersionUID = -10655713;
+    private static final long serialVersionUID = -485728409;
 
     /**
      * The reference instance of <code>public.otp_message</code>
@@ -114,6 +114,11 @@ public class OtpMessage extends TableImpl<OtpMessageRecord> {
      * The column <code>public.otp_message.context</code>.
      */
     public final TableField<OtpMessageRecord, String> CONTEXT = createField("context", org.jooq.impl.SQLDataType.VARCHAR(50), this, "");
+
+    /**
+     * The column <code>public.otp_message.montant_bon</code>.
+     */
+    public final TableField<OtpMessageRecord, Long> MONTANT_BON = createField("montant_bon", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * Create a <code>public.otp_message</code> table reference

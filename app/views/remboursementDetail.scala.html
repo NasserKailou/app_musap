@@ -17,10 +17,14 @@
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1>Détails du Bon de Commande</h1>
+        @if(typeOP.equals("BC")){
+          <h1>Gestion des Bons de Commande</h1>
+        } else{
+          <h1>Gestion des Prises en Charge</h1>
+        }
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="#">Accueil</a></li>
-          <li class="breadcrumb-item"><a href="@controllers.routes.AdherentCtrl.addRembourssement(adherent.getId(), typeOP)">Bons de Commande</a></li>
+          <li class="breadcrumb-item"><a href="@controllers.routes.AdherentCtrl.addRembourssement(adherent.getId(), typeOP)">@if(typeOP.equals("BC")){Bons de Commande}else{Gestion des Prises en Charge}</a></li>
           <li class="breadcrumb-item active">Détails</li>
         </ol>
       </div>

@@ -54,43 +54,50 @@ public class OtpService extends OtpMessageDao {
         smsClient.sendSms(phoneE164, message);
     }
 
-    public void sendSMSBC(VReglement reglement) {
-    
-    OtpMessage sms = new OtpMessage();
-    
+    public String sendSMSBC(VReglement reglement) {
+ 
+    String retour="";
      String messageCourt = "Cher(e) adherent, votre bon " + reglement.getId() + " d'un montant de " + reglement.getMontantReglement() + " F CFA a ete emis avec succes. Si vous netes pas l'auteur, contactez la MUSAPOSTE. Merci.";
     
      try {
             CompletionStage<WSResponse> future = smsClient.sendSms(reglement.getTelephone(), messageCourt);
 
             WSResponse response = future.toCompletableFuture().get();
+         retour  = response.getBody();
 
             System.out.println("Retour API : " + response.getBody());
 
-            sms.setIsSent(true);
-            sms.setIsUsed(true);
-            sms.setSentResponse(response.getBody());
 
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Erreur envoi SMS : " + e.getMessage());
-
-            sms.setIsSent(false);
-            sms.setIsUsed(false);
-            sms.setSentResponse("ERROR: " + e.getMessage());
+            retour = e.getMessage();
         }
 
+return retour; 
+}
 
-    sms.setBonCommande(reglement.getId());
-    sms.setPhone(reglement.getTelephone());
-    sms.setMessageTexte(messageCourt);
-    sms.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-       try{
-        //messageService.insert(sms);
-       } catch(Exception e){
-        System.out.println("Save error"+ e.getMessage());
-       }
-   //System.out.println("Save retour :"+ this.saveLogical(sms, false)); 
+
+   public String sendSMSBC(String telNumber, String messages) {
+ 
+    String retour="";
+     
+     try {
+            CompletionStage<WSResponse> future = smsClient.sendSms(telNumber, messages);
+
+            WSResponse response = future.toCompletableFuture().get();
+         retour  = response.getBody();
+
+            System.out.println("Retour API : " + response.getBody());
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Erreur envoi SMS : " + e.getMessage());
+            retour = e.getMessage();
+        }
+
+return retour; 
 }
 
     public boolean verifyOtp(String phoneE164, String codeSaisi) {

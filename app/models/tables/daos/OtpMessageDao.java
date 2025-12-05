@@ -141,4 +141,11 @@ public class OtpMessageDao extends DAOImpl<OtpMessageRecord, models.tables.pojos
     public List<models.tables.pojos.OtpMessage> fetchByContext(String... values) {
         return fetch(OtpMessage.OTP_MESSAGE.CONTEXT, values);
     }
+
+    /**
+     * Fetch records that have <code>montant_bon IN (values)</code>
+     */
+    public List<models.tables.pojos.OtpMessage> fetchByMontantBon(Long... values) {
+        return fetch(OtpMessage.OTP_MESSAGE.MONTANT_BON, values);
+    }
 }

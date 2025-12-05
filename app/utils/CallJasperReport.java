@@ -111,10 +111,17 @@ public class CallJasperReport {
 			Connection conn = ConnectionUtils.getConnection();
 			System.out.println("impression en cours...." + id);
 			// Parameters for report
+		
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("id", id);
+			JasperPrint print = new JasperPrint();
+			try{
+				 print = JasperFillManager.fillReport(compileFile, parameters, conn);
+			}catch (Exception e) {
+						System.out.println("Erreur : " + e.getMessage());
+						e.printStackTrace(); // Affiche toute la trace de l’erreur
+					}
 			
-			JasperPrint print = JasperFillManager.fillReport(compileFile, parameters, conn);
 			System.out.println("impression en cours....###");
 			// Parameters for report
 			// Make sure the output directory exists.

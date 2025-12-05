@@ -335,7 +335,7 @@
       </a>
     } <a class="btn btn-secondary btn-sm"
                                title="Imprimer @if(typeOP.equals("BC")){ le Bon de commande}else{La prise en charge} "
-                               href='@controllers.routes.ReglementCtrl.print(c.getId(), if(typeOP.equals("BC")){"bon_commande"}else{"prise_en_charge"})'
+                               href='@controllers.routes.ReglementCtrl.print(c.getId(), if(typeOP.equals("BC")){"bon_commande"}else{"sr_pc"})'
                                onclick="return(openPopup(this.href, 600, 600, 600, 600));">
                               <i class="fas fa-print"></i>
                             </a>

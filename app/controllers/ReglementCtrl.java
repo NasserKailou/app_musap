@@ -15,6 +15,7 @@ import models.tables.pojos.VReglement;
 import models.tables.pojos.Adherent;
 import models.tables.pojos.AyantDroit;
 import models.tables.pojos.Email;
+import models.tables.pojos.OtpMessage;
 import models.tables.pojos.Reglement;
 import models.tables.pojos.ReglementDetail;
 import models.tables.pojos.StructurePartenaire;
@@ -34,6 +35,7 @@ import services.AdherentMainServices;
 import services.AyantDroitMainServices;
 import services.EmailManagerServices;
 import services.Mail;
+import services.MessageServiceImpl;
 import services.OtpService;
 import services.ReglementDetailMainServices;
 import services.ReglementMainServices;
@@ -64,6 +66,7 @@ public class ReglementCtrl extends Controller {
 	Mail email;
 	EmailManagerServices emailServices;
 	OtpService otpService;
+	MessageServiceImpl messagesServices;
 
 
 	@Inject
@@ -77,7 +80,7 @@ public class ReglementCtrl extends Controller {
 			CallJasperReport jasper,
 			Mail email,
 			EmailManagerServices emailServices,
-		OtpService otpService) {
+		OtpService otpService, MessageServiceImpl messagesServices) {
 
 		super();
 		this.formFactory = formFactory;
@@ -90,6 +93,7 @@ public class ReglementCtrl extends Controller {
 		this.email = email;
 		this.emailServices = emailServices;
 		this.otpService = otpService;
+		this.messagesServices = messagesServices;
 	}
 
 	 // 1. Demander un OTP
@@ -887,21 +891,38 @@ public class ReglementCtrl extends Controller {
 		LocalDateTime now = LocalDateTime.now();
 		String now_string = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm"));
 		String templateDir = new File("").getAbsolutePath() + "/reports/spool/";
+
+		String messageCourt = "Cher(e) adherent, votre bon " + regServices.findVRegById(numBon).getId() + " d'un montant de " +  regServices.findVRegById(numBon).getMontantReglement()+ " F CFA a ete emis avec succes. Si vous netes pas l'auteur, contactez la MUSAPOSTE. Merci.";
+    
 		try {
+			 OtpMessage sms = new OtpMessage();
 			// flash("success", "impression ok");
 			System.out.println("num bon a imprimer :"+ numBon);
 			try{
-
-				otpService.sendSMSBC(regServices.findVRegById(numBon));
+				
+				sms.setIsSent(true);
+				sms.setIsUsed(true);
+				if(!messagesServices.getMessageByNumBonMontant(regServices.findVRegById(numBon).getId(),regServices.findVRegById(numBon).getMontantReglement()))
+					sms.setSentResponse(otpService.sendSMSBC(regServices.findVRegById(numBon).getTelephone(), messageCourt));
+				else
+					sms.setSentResponse("message deja envoyé");
+				
 			} catch(Exception e){
+				    sms.setIsSent(false);
+					sms.setIsUsed(false);
+					sms.setSentResponse("ERROR: " + e.getMessage());
+
 				e.printStackTrace();
            		 System.out.println("Erreur envoi SMS : " + e.getMessage());
 			}
-			
-		// otpService.sendOtp("22796283209") ;	
-		 System.out.println("Coordonné"+ regServices.findVRegById(numBon).getTelephone()+ regServices.findVRegById(numBon).getId()+ regServices.findVRegById(numBon).getMontantReglement());
-		 // otpService.sendOtp2(regServices.findVRegById(numBon).getTelephone(), regServices.findVRegById(numBon).getId(), regServices.findVRegById(numBon).getMontantReglement());
+			sms.setBonCommande(regServices.findVRegById(numBon).getId() );
+			sms.setMontantBon(regServices.findVRegById(numBon).getMontantReglement());
+			sms.setPhone(regServices.findVRegById(numBon).getTelephone());
+			sms.setMessageTexte(messageCourt);
+			sms.setCreatedAt(new Timestamp(System.currentTimeMillis()));	
 
+			messagesServices.saveLogical(sms, true);
+		
 			jasper.generateReport(fileName, String.valueOf(numBon));
 
 			return ok(new java.io.File(templateDir + fileName + "_" + now_string + "_" + numBon + ".pdf"))

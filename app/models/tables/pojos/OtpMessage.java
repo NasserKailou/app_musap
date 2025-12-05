@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class OtpMessage implements Serializable {
 
-    private static final long serialVersionUID = -161891917;
+    private static final long serialVersionUID = -1213376629;
 
     private Long      id;
     private String    phone;
@@ -37,6 +37,7 @@ public class OtpMessage implements Serializable {
     private String    sentResponse;
     private Integer   attemptCount;
     private String    context;
+    private Long      montantBon;
 
     public OtpMessage() {}
 
@@ -53,6 +54,7 @@ public class OtpMessage implements Serializable {
         this.sentResponse = value.sentResponse;
         this.attemptCount = value.attemptCount;
         this.context = value.context;
+        this.montantBon = value.montantBon;
     }
 
     public OtpMessage(
@@ -67,7 +69,8 @@ public class OtpMessage implements Serializable {
         Boolean   isSent,
         String    sentResponse,
         Integer   attemptCount,
-        String    context
+        String    context,
+        Long      montantBon
     ) {
         this.id = id;
         this.phone = phone;
@@ -81,6 +84,7 @@ public class OtpMessage implements Serializable {
         this.sentResponse = sentResponse;
         this.attemptCount = attemptCount;
         this.context = context;
+        this.montantBon = montantBon;
     }
 
     public Long getId() {
@@ -179,6 +183,14 @@ public class OtpMessage implements Serializable {
         this.context = context;
     }
 
+    public Long getMontantBon() {
+        return this.montantBon;
+    }
+
+    public void setMontantBon(Long montantBon) {
+        this.montantBon = montantBon;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("OtpMessage (");
@@ -195,6 +207,7 @@ public class OtpMessage implements Serializable {
         sb.append(", ").append(sentResponse);
         sb.append(", ").append(attemptCount);
         sb.append(", ").append(context);
+        sb.append(", ").append(montantBon);
 
         sb.append(")");
         return sb.toString();
