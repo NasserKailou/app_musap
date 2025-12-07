@@ -286,93 +286,53 @@ public class ReglementCtrl extends Controller {
 				otpService.sendOtp("22798347127");
 				otpService.sendOtp("22798484951");*/
 
-		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE) || viewMode.equals(ViewMode.VIEW_MODE_EDIT)) {
-			sommeReg = regServices.sommeRegler(
-					regServices.findById(rd.getReglement()).getAdherent(),
-					request.session().get("gestion").get());
-		}
-
+	
 		System.out.println("la somme total des rembourssement est de : " + sommeReg + " F CFLA");
-
+		Double totalCreditAnnuelle = adherentService.getVAdherentById(regServices.findById(rd.getReglement()).getAdherent()).getTotalCreditAnnuelle();
+		Double totalCreditAConsomer =  adherentService.getVAdherentById(regServices.findById(rd.getReglement()).getAdherent()).getTotalCreditAConsomer();
+		Long totalConsommation = regServices.sommeRegler(regServices.findById(rd.getReglement()).getAdherent(),request.session().get("gestion").get());
+		Long totalAVailider = totalConsommation + montanTotal;
 		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE)) {
 
-			// plafond atteint
-			if (sommeReg >= adherentService
-					.getVAdherentById(regServices.findById(rd.getReglement()).getAdherent())
-					.getTotalCreditAnnuelle()) {
-
-				total = regServices.sommeRegler(
-						regServices.findById(rd.getReglement()).getAdherent(),
-						request.session().get("gestion").get());
-
-				return redirect(routes.ReglementCtrl.reglementDetailForm(
-						ViewMode.VIEW_MODE_CREATE,
-						typeOperation,
-						rd.getReglement(),
-						ad,
-						0L)).flashing(
-								"error",
-								" Reglement non pris en charge!!!, Dépassement de plafond !!!!, le montant que vous voudriez ajouter à la comsomation actuel vous donne un total est de :"
-										+ total + " > " + Long.valueOf(request.session().get("plafond").get())
-										+ " superieur au plafonds");
-
-			} else {
-
-				if (sommeReg > adherentService
-						.getVAdherentById(regServices.findById(rd.getReglement()).getAdherent())
-						.getTotalCreditAConsomer()) {
-
-					if (reDetailMainServices.saveLogical(rd, true).equals("ok")) {
-						Double totale = adherentService
-								.getVAdherentById(regServices.findById(rd.getReglement()).getAdherent())
-								.getTotalCreditAConsomer();
-
+			if (totalAVailider >= totalCreditAConsomer) {
+				otpService.sendSuspension(regServices.findVRegById(rd.getReglement()).getTelephone());
+					System.out.println("Seuil Plafond des dépenses");
 						return redirect(routes.ReglementCtrl.reglementDetailForm(
 								ViewMode.VIEW_MODE_CREATE,
 								typeOperation,
 								rd.getReglement(),
 								ad,
 								0L)).flashing(
-										"warnning",
-										" Reglement pris en charge!!!,Mais Seuil d'avertissement!!!!, le montant que vous voudriez ajouter à la comsomation actuel vous donne un total est de :"
-												+ totale + " > "
-												+ Long.valueOf(request.session().get("plafond").get())
-												+ " superieur au plafonds");
-					} else {
-						return redirect(routes.ReglementCtrl.reglementDetailForm(
-								ViewMode.VIEW_MODE_CREATE,
-								typeOperation,
-								rd.getReglement(),
-								ad,
-								rd.getId())).flashing(
 										"error",
-										" Reglement détail non ajouté");
-					}
+										" Bon non pris en charge !!!,Cette nouvelle Ligne ajouter a vos commosmation précedente donne :"+totalAVailider+
+										" > "+totalCreditAConsomer+" Vous avez atteint le plafond des consomations annuel qui vous sont autorisé!!!!");
+					
 
 			}  else {
 
-					if (reDetailMainServices.saveLogical(rd, true).equals("ok")) {
+				// seuil des alerte atteint( avertissement)
+			if (totalAVailider >= totalCreditAnnuelle) {
+			Long diff2 = totalAVailider - totalCreditAnnuelle.longValue();
+			otpService.sendAlerteSeuil(regServices.findVRegById(rd.getReglement()).getTelephone(), diff2);
 
-						System.out.println("Le seuil est de :"
-								+ Long.valueOf(request.session().get("seuilAlerte").get()));
-						total = sommeReg + rd.getMontant();
+				System.out.println("Seuil Allerte");
+				total = regServices.sommeRegler(
+						regServices.findById(rd.getReglement()).getAdherent(),
+						request.session().get("gestion").get());
 
-						if (total >= Long.valueOf(request.session().get("seuilAlerte").get())) {
-							envoiEmail(
-									adherentService.getVAdherentReglGlobal(
-											adherentService.getById(ad).getEmail(),
-											request.session().get("gestion").get()),
-									request);
-						}
-
+	        		if (reDetailMainServices.saveLogical(rd, true).equals("ok")) {
+					System.out.println("Seuil Allerte : Enregistrement");
 						return redirect(routes.ReglementCtrl.reglementDetailForm(
 								ViewMode.VIEW_MODE_CREATE,
 								typeOperation,
 								rd.getReglement(),
 								ad,
-								rd.getId())).flashing(
-										"success",
-										" Reglement détail ajouté");
+								0L)).flashing(
+										"error",
+										" Reglement pris en charge!!!,Mais Seuil d'avertissement!!!!, le montant que vous voudriez ajouter à la comsomation actuel vous donne un total est de :"
+												+ totalConsommation + " > "
+												+ adherentService.getVAdherentById(regServices.findById(rd.getReglement()).getAdherent()).getTotalCreditAnnuelle()
+												+ " superieur au SEUIL d'alerte");
 					} else {
 						return redirect(routes.ReglementCtrl.reglementDetailForm(
 								ViewMode.VIEW_MODE_CREATE,
@@ -383,24 +343,40 @@ public class ReglementCtrl extends Controller {
 										"error",
 										" Reglement détail non ajouté");
 					}
-				}
+				
+
 			}
+
+					if (reDetailMainServices.saveLogical(rd, true).equals("ok")) {
+						System.out.println("Cycle Normale");
+								return redirect(routes.ReglementCtrl.reglementDetailForm(
+								ViewMode.VIEW_MODE_CREATE,
+								typeOperation,
+								rd.getReglement(),
+								ad,
+								rd.getId())).flashing("success"," Ligne ajouté avec succès");
+					} else {
+						return redirect(routes.ReglementCtrl.reglementDetailForm(
+								ViewMode.VIEW_MODE_CREATE,
+								typeOperation,
+								rd.getReglement(),
+								ad,
+								rd.getId())).flashing("error"," Reglement détail non ajouté");
+					}
+				}
 		}
 
 		if (viewMode.equals(ViewMode.VIEW_MODE_EDIT)) {
 			rd.setLastUpdate(new Timestamp(System.currentTimeMillis()));
-			if (sommeReg > Long.valueOf(request.session().get("plafond").get())) {
+			if (totalAVailider >= totalCreditAConsomer) {
 				System.out.println("ad :" + ad + " ,rd :" + rd.getId());
 				return redirect(routes.ReglementCtrl.reglementDetailForm(
 						ViewMode.VIEW_MODE_CREATE,
 						typeOperation,
 						rd.getReglement(),
 						ad,
-						0L)).flashing(
-								"error",
-								" Reglement Non pris en charge!!!, Dépassement de plafond !!!!, le montant que vous voudriez ajouter +  la comsomation actuel est de :"
-										+ sommeReg + " > "
-										+ Long.valueOf(request.session().get("plafond").get()));
+						0L)).flashing("error"," Reglement Non pris en charge!!!, Dépassement de plafond !!!!, le montant que vous voudriez ajouter +  la comsomation actuel est de :"
+										+ totalAVailider + " > "+ totalCreditAConsomer);
 			} else {
 				if (reDetailMainServices.saveLogical(rd, false).equals("ok")) {
 					return redirect(routes.ReglementCtrl.reglementDetailForm(
@@ -408,18 +384,14 @@ public class ReglementCtrl extends Controller {
 							typeOperation,
 							rd.getReglement(),
 							ad,
-							rd.getId())).flashing(
-									"success",
-									" Detail Reglement modifié avec succès !!! ");
+							rd.getId())).flashing("success"," Detail Reglement modifié avec succès !!! ");
 				} else {
 					return redirect(routes.ReglementCtrl.reglementDetailForm(
 							ViewMode.VIEW_MODE_CREATE,
 							typeOperation,
 							rd.getReglement(),
 							ad,
-							rd.getId())).flashing(
-									"error",
-									" Detail Reglement non modifié !!! ");
+							rd.getId())).flashing("error"," Detail Reglement non modifié !!! ");
 				}
 			}
 		}
@@ -628,35 +600,61 @@ public class ReglementCtrl extends Controller {
 
 		System.out.println("total regler :" + sommeReg + " F CFA");
 
+		Double totalCreditAnnuelle = adherentService.getVAdherentById(c.getAdherent()).getTotalCreditAnnuelle();
+		Double totalCreditAConsomer =  adherentService.getVAdherentById(c.getAdherent()).getTotalCreditAConsomer();
+		Long totalConsommation = regServices.sommeRegler(c.getAdherent(),request.session().get("gestion").get());
+		
+
 		if (!benef.equals(c.getAdherent())) {
 			c.setAyantDroit(benef);
 		}
 
 		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE)) {
+			//en cas de seuil atteint
 
+			if(totalConsommation >= totalCreditAnnuelle ){
+			Long diff = totalConsommation - totalCreditAnnuelle.longValue();
+			otpService.sendAlerteSeuil(adherentService.findById(c.getAdherent()).getTelephone(), diff);
+				if (regServices.saveLogical(c, true).equals("ok")) {
+				
+					
+					return redirect(routes.ReglementCtrl.show(
+							ViewMode.VIEW_MODE_CREATE,
+							typeOperation,
+							0L,
+							c.getAdherent())).flashing("warning"," Bon ajouter avec succèss, seuil d'alerte Atteint, penser a moderer votre consommation");
+				
+
+			} else {
+				System.out.println("msg :" + regServices.saveLogical(c, true));
+				return redirect(routes.ReglementCtrl.show(
+						ViewMode.VIEW_MODE_CREATE,
+						typeOperation,
+						0L,
+						c.getAdherent())).flashing(
+								"error",
+								" Reglement non ajouter ");
+			}
+
+
+			}
+
+			//plafond des dépense atteint, impossible d'ajouter un nouveau Bon
+			if(totalConsommation >= totalCreditAConsomer ){
+				otpService.sendSuspension(adherentService.findById(c.getAdherent()).getTelephone());
+				return redirect(routes.ReglementCtrl.show(
+							ViewMode.VIEW_MODE_CREATE,
+							typeOperation,
+							0L,
+							c.getAdherent())).flashing(
+									"error",
+									" Impossible d'jouter un nouveau bon, vous avez déja atteint le plafond de vos crédits annuelle !!!!");
+			}
 			if (regServices.saveLogical(c, true).equals("ok")) {
-				String msg = "";
-				if (sommeReg >= Long.valueOf(request.session().get("plafond").get())) {
-					msg = "error";
-					return redirect(routes.ReglementCtrl.show(
-							ViewMode.VIEW_MODE_CREATE,
-							typeOperation,
-							0L,
-							c.getAdherent())).flashing(
-									msg,
-									" Reglement de la facture " + c.getRefFacture()
-											+ " avec depassement du plafond prévu!!!");
-				} else {
-					msg = "success";
-					return redirect(routes.ReglementCtrl.show(
-							ViewMode.VIEW_MODE_CREATE,
-							typeOperation,
-							0L,
-							c.getAdherent())).flashing(
-									msg,
-									" Reglement de la facture " + c.getRefFacture()
-											+ " ajouter avec success");
-				}
+				
+					
+					return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOperation,0L,c.getAdherent())).flashing("success"," Opération effectuée avec succès  ");
+				
 
 			} else {
 				System.out.println("msg :" + regServices.saveLogical(c, true));

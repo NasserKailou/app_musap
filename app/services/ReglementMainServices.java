@@ -242,7 +242,7 @@ public class ReglementMainServices extends ReglementDao {
 	}
 
 	public VReglement findVRegById(Long id) {
-		 VReglement c = con.connection().selectFrom(V_REGLEMENT).where(V_REGLEMENT.ID.eq(id)).fetchSingleInto(VReglement.class);
+		 VReglement c = con.connection().selectFrom(V_REGLEMENT).where(V_REGLEMENT.ID.eq(id)).fetchOneInto(VReglement.class);
 		con.connection().close();
 		return c;
 	}

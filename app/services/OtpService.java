@@ -100,6 +100,52 @@ return retour;
 return retour; 
 }
 
+public String sendSuspension(String telNumber){
+    String message = "Suspension ! Cher(e) adhérent, vous avez dépassé le double de votre crédit annuel. Votre compte est suspendu pour six (06) mois à compter de ce jour. Merci.";//
+     String retour="";
+     
+     try {
+            CompletionStage<WSResponse> future = smsClient.sendSms(telNumber, message);
+
+            WSResponse response = future.toCompletableFuture().get();
+         retour  = response.getBody();
+
+            System.out.println("Retour API : " + response.getBody());
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Erreur envoi SMS : " + e.getMessage());
+            retour = e.getMessage();
+        }
+
+    return retour;        
+}
+
+public String sendAlerteSeuil(String telNumber, Long montant){
+    String message = "Alerte ! Cher(e) adhérent, vous avez dépassé votre crédit annuel de "+montant+" F. Veuillez modérer votre consommation pour éviter une suspension. Merci.";
+
+    String retour="";
+     
+     try {
+            CompletionStage<WSResponse> future = smsClient.sendSms(telNumber, message);
+
+            WSResponse response = future.toCompletableFuture().get();
+         retour  = response.getBody();
+
+            System.out.println("Retour API : " + response.getBody());
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Erreur envoi SMS : " + e.getMessage());
+            retour = e.getMessage();
+        }
+
+    return retour;        
+
+}
+
     public boolean verifyOtp(String phoneE164, String codeSaisi) {
         // TODO: aller chercher dans la base le dernier OTP pour ce téléphone
         // OTP otp = OTP_TABLE.findByPhone(phoneE164);
