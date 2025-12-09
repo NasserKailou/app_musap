@@ -108,8 +108,8 @@
 
       <option value="">Sélectionner un rôle...</option>
 
-      <option value="Agent Saisie"
-        @if(user.getDroit() != null && user.getDroit().equals("Agent Saisie")) { selected="selected" }>
+      <option value="saisie"
+        @if(user.getDroit() != null && user.getDroit().equals("saisie")) { selected="selected" }>
         Agent Saisie
       </option>
 
@@ -118,28 +118,17 @@
         Adhérent
       </option>
 
-      <option value="AGENT_CARD_ID"
-        @if(user.getDroit() != null && user.getDroit().equals("AGENT_CARD_ID")) { selected="selected" }>
-        AGENT CARD ID
-      </option>
+     
 
       @* --- Rôles visibles seulement par SuperAdmin --- *@
-      @if(request.session.get("droit").get() == "SuperAdmin") {
+      @if(request.session.get("droit").get() == "Admin") {
 
         <option value="Admin"
           @if(user.getDroit() != null && user.getDroit().equals("Admin")) { selected="selected" }>
           Admin
         </option>
 
-        <option value="SuperAdmin"
-          @if(user.getDroit() != null && user.getDroit().equals("SuperAdmin")) { selected="selected" }>
-          Super Admin
-        </option>
-
-        <option value="Comptable"
-          @if(user.getDroit() != null && user.getDroit().equals("Comptable")) { selected="selected" }>
-          Comptable
-        </option>
+        
 
       }
     </select>

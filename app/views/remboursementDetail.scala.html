@@ -34,13 +34,7 @@
              href="@controllers.routes.AdherentCtrl.addRembourssement(adherent.getId(),typeOP)">
             <i class="fas fa-arrow-left"></i> Retour à la liste
           </a>
-          @if(
-            request.session.get("droit").isPresent &&
-            (request.session.get("droit").get() == "Admin" ||
-             request.session.get("droit").get() == "SuperAdmin" ||
-             request.session.get("droit").get() == "Agent Saisie" ||
-             request.session.get("droit").get() == "Comptable")
-          ) {
+          @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie" ) ) {
           <button type="button"
                   class="btn btn-success"
                   onclick="openDetailModal('CREATE', null)">
@@ -143,12 +137,7 @@
                   <th style="width: 10%">Quantité</th>
                   <th style="width: 15%">Prix Unitaire</th>
                   <th style="width: 15%">Montant (F CFA)</th>
-                  @if(
-                    request.session.get("droit").isPresent &&
-                    (request.session.get("droit").get() == "SuperAdmin" ||
-                     request.session.get("droit").get() == "Comptable" ||
-                     request.session.get("droit").get() == "Admin")
-                  ) {
+                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" ) ) {
                   <th class="text-center" style="width: 15%">Actions</th>
                   }
                 </tr>
@@ -181,12 +170,7 @@
                     </span>
                   </td>
 
-                  @if(
-                    request.session.get("droit").isPresent &&
-                    (request.session.get("droit").get() == "SuperAdmin" ||
-                     request.session.get("droit").get() == "Comptable" ||
-                     request.session.get("droit").get() == "Admin")
-                  ) {
+                  @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
                   <td class="text-center">
                     <div class="btn-group">
                       <button type="button"
@@ -196,7 +180,7 @@
                         <i class="fas fa-edit"></i>
                       </button>
 
-                      @if(request.session.get("droit").get() == "SuperAdmin" || request.session.get("droit").get() == "Admin") {
+                      @if(request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Admin") {
                       <button type="button"
                               class="btn btn-danger btn-sm"
                               onclick="deleteDetail('@c.getId()')"
@@ -220,12 +204,7 @@
                       @reglementDetails.foldLeft(0L)((sum, detail) => sum + detail.getMontant()) F CFA
                     </span>
                   </th>
-                  @if(
-                    request.session.get("droit").isPresent &&
-                    (request.session.get("droit").get() == "SuperAdmin" ||
-                     request.session.get("droit").get() == "Comptable" ||
-                     request.session.get("droit").get() == "Admin")
-                  ) {
+                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" )) {
                   <th></th>
                   }
                 </tr>
@@ -520,7 +499,7 @@ window.deleteDetail = function(detailId) {
         "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
       },
       "columnDefs": [
-        { "orderable": false, "targets": @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "SuperAdmin" || request.session.get("droit").get() == "Comptable" || request.session.get("droit").get() == "Admin")){5}else{-1} }
+        { "orderable": false, "targets": @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Comptable" || request.session.get("droit").get() == "Admin")){5}else{-1} }
       ]
     }).buttons().container().appendTo('#reglementDetailsTable_wrapper .col-md-6:eq(0)');
 

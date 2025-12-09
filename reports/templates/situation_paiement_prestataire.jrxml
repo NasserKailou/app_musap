@@ -163,7 +163,7 @@
 			</staticText>
 			<image>
 				<reportElement x="0" y="0" width="160" height="86" uuid="367dcd66-9061-473f-8dcf-04fc44b3a44b"/>
-				<imageExpression><![CDATA["muaposte/poste2.png"]]></imageExpression>
+				<imageExpression><![CDATA["poste2.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>
@@ -299,7 +299,7 @@
 					<pen lineWidth="0.3"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA["Carnet N° " + $F{code_carnet} +" - " +  $F{nom_ad} + " "+$F{prenom_ad} ]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Carnet N° " + $F{code_carnet} +" - " +  $F{nom_ad} + " "+$F{prenom_ad}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="680" y="0" width="120" height="30" uuid="75fd4a9c-f4d6-4dc6-9d05-092810cba272">

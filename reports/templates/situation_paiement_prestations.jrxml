@@ -163,7 +163,7 @@
 			</staticText>
 			<image>
 				<reportElement x="0" y="0" width="160" height="86" uuid="367dcd66-9061-473f-8dcf-04fc44b3a44b"/>
-				<imageExpression><![CDATA["muaposte/poste2.png"]]></imageExpression>
+				<imageExpression><![CDATA["poste2.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>

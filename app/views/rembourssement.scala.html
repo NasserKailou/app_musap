@@ -60,7 +60,7 @@
               @if(
                 request.session.get("droit").isPresent &&
                 (request.session.get("droit").get() == "Admin" ||
-                 request.session.get("droit").get() == "SuperAdmin" ||
+                 request.session.get("droit").get() == "Admin" ||
                  request.session.get("droit").get() == "Agent Saisie" ||
                  request.session.get("droit").get() == "Comptable")
               ) {
@@ -228,11 +228,7 @@
         }
         
         @* Afficher le bouton de confirmation uniquement si non confirmé, non expiré et droits suffisants *@
-        @if(!isConfirmed && !estExpire && request.session.get("droit").isPresent && (
-          request.session.get("droit").get() == "SuperAdmin" ||
-          request.session.get("droit").get() == "Admin" ||
-          request.session.get("droit").get() == "Comptable")
-        ) {
+        @if(!isConfirmed && !estExpire && request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin")) {
           <button type="button"
                   class="btn btn-sm btn-primary"
                   onclick="confirmerBon(@c.getId(), @c.getIdAdherent())"
@@ -264,12 +260,7 @@
     </button>
 
     @* Bouton Modifier - Désactivé si confirmé *@
-    @if(
-      request.session.get("droit").isPresent && (
-      request.session.get("droit").get() == "SuperAdmin" ||
-      request.session.get("droit").get() == "Comptable" ||
-      request.session.get("droit").get() == "Admin")
-    ) {
+    @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin") ) {
       @if(isConfirmed) {
         <!-- Modifier désactivé pour bon confirmé -->
         <button type="button"
@@ -288,13 +279,7 @@
       }
     }
 
-    @if(
-      request.session.get("droit").isPresent && (
-      request.session.get("droit").get() == "SuperAdmin" ||
-      request.session.get("droit").get() == "Admin" ||
-      request.session.get("droit").get() == "Agent Saisie" ||
-      request.session.get("droit").get() == "Comptable")
-    ) {
+    @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie")) {
       @if(isConfirmed) {
         <!-- Lignes désactivées pour bon confirmé -->
         <button type="button"
@@ -313,9 +298,9 @@
       }
     }
 
-    @* Bouton Réactualiser - Uniquement pour SuperAdmin sur bon confirmé *@
+    @* Bouton Réactualiser - Uniquement pour Admin sur bon confirmé *@
     @if(request.session.get("droit").isPresent && 
-        request.session.get("droit").get() == "SuperAdmin" && 
+        request.session.get("droit").get() == "Admin" && 
         isConfirmed) {
       <button type="button"
               class="btn btn-secondary btn-sm"
@@ -325,7 +310,7 @@
       </button>
     }
 
-    @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "SuperAdmin") {
+    @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "Admin") {
       <!-- Supprimer -->
       <a href='@controllers.routes.ReglementCtrl.show("DELETE",typeOP, c.getId(), c.getIdAdherent())'
          class="btn btn-danger btn-sm"

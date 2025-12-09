@@ -4,6 +4,7 @@
 package models.tables;
 
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import javax.annotation.Generated;
@@ -33,7 +34,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VAdherent extends TableImpl<VAdherentRecord> {
 
-    private static final long serialVersionUID = -1140006288;
+    private static final long serialVersionUID = 1798998111;
 
     /**
      * The reference instance of <code>public.v_adherent</code>
@@ -137,6 +138,21 @@ public class VAdherent extends TableImpl<VAdherentRecord> {
      * The column <code>public.v_adherent.total_credit_a_consomer</code>.
      */
     public final TableField<VAdherentRecord, Double> TOTAL_CREDIT_A_CONSOMER = createField("total_credit_a_consomer", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>public.v_adherent.montant_total_brute</code>.
+     */
+    public final TableField<VAdherentRecord, BigDecimal> MONTANT_TOTAL_BRUTE = createField("montant_total_brute", org.jooq.impl.SQLDataType.NUMERIC, this, "");
+
+    /**
+     * The column <code>public.v_adherent.montant_reglement_couvert</code>.
+     */
+    public final TableField<VAdherentRecord, BigDecimal> MONTANT_REGLEMENT_COUVERT = createField("montant_reglement_couvert", org.jooq.impl.SQLDataType.NUMERIC, this, "");
+
+    /**
+     * The column <code>public.v_adherent.montant_payer</code>.
+     */
+    public final TableField<VAdherentRecord, BigDecimal> MONTANT_PAYER = createField("montant_payer", org.jooq.impl.SQLDataType.NUMERIC, this, "");
 
     /**
      * The column <code>public.v_adherent.picture</code>.

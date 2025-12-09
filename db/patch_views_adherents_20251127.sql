@@ -4,7 +4,7 @@ DROP VIEW public.v_effectif_mains_ayant_droit;
 DROP VIEW public.v_total_adherents;
 --DROP VIEW public.v_effectif_mains_ayant_droit;
 DROP VIEW public.v_effectif_mains;
-DROP VIEW public.v_adherent;
+DROP VIEW public.v_adherent; 
 
 
 CREATE OR REPLACE VIEW public.v_adherent AS
@@ -14,49 +14,62 @@ SELECT
     ad.prenom_ad,
     ad.sexe,
     ad.matricule,
-	ad.code_carnet,
-	
-
-    (cat.code || '-' || cat.libelle) AS categorie,
-
+    ad.code_carnet,
+    (cat.code::text || '-'::text) || cat.libelle::text AS categorie,
     ad.fonction,
     ad.structure_sigle,
-
     ad.date_naiss,
-    date_part('year', age(current_date, ad.date_naiss::date))::int AS age,
-
+    date_part('year', age(CURRENT_DATE::timestamp with time zone,
+                         ad.date_naiss::date::timestamp with time zone))::integer AS age,
     ad.date_prise_service,
-    date_part('year', age(current_date, ad.date_prise_service::date))::int AS anciennete,
-
+    date_part('year', age(CURRENT_DATE::timestamp with time zone,
+                         ad.date_prise_service::date::timestamp with time zone))::integer AS anciennete,
     ad.salaire_net,
-	ad.pourcentage_total_retenue,
-    -- 0.15 = 15 %, donc calcul correct
-    (ad.salaire_net * ad.pourcentage_total_retenue/100) AS total_cotisation_agent,
-
-    ((ad.salaire_net * ad.pourcentage_total_retenue/100) * 3)*10 AS total_credit_annuelle,
-
-     ((ad.salaire_net * ad.pourcentage_total_retenue/100) * 3)*10 * 2 AS total_credit_a_consomer,
-
+    ad.pourcentage_total_retenue,
+    ad.salaire_net::double precision * ad.pourcentage_total_retenue / 100::double precision AS total_cotisation_agent,
+    ad.salaire_net::double precision * ad.pourcentage_total_retenue / 100::double precision * 3::double precision * 10::double precision AS total_credit_annuelle,
+    ad.salaire_net::double precision * ad.pourcentage_total_retenue / 100::double precision * 3::double precision * 10::double precision * 2::double precision AS total_credit_a_consomer,
+  COALESCE(SUM(reg.montant_total), 0)      AS montant_total_brute,
+COALESCE(SUM(reg.montant_reglement), 0)  AS montant_reglement_couvert,
+COALESCE(SUM(reg.montant_paye), 0)       AS montant_payer,
+  ad.picture,
+    ad.when_done,
+    ad.who_done,
+    ad.on_deleted,
+    dir.libelle  AS direction,
+    dvi.libelle  AS division,
+    serv.libelle AS service,
+    ad.telephone
+FROM adherent ad
+JOIN categorie cat ON cat.code::text = ad.categorie::text
+JOIN direction dir ON dir.id = ad.direction
+JOIN division dvi ON dvi.id = ad.division
+JOIN service serv ON serv.id = ad.service
+left JOIN v_reglement reg ON reg.id_adherent = ad.id
+GROUP BY
+    ad.id,
+    ad.nom_ad,
+    ad.prenom_ad,
+    ad.sexe,
+    ad.matricule,
+    ad.code_carnet,
+    cat.code,
+    cat.libelle,
+    ad.fonction,
+    ad.structure_sigle,
+    ad.date_naiss,
+    ad.date_prise_service,
+    ad.salaire_net,
+    ad.pourcentage_total_retenue,
     ad.picture,
     ad.when_done,
     ad.who_done,
     ad.on_deleted,
+    dir.libelle,
+    dvi.libelle,
+    serv.libelle,
+    ad.telephone;
 
-    dir.libelle  AS direction,
-    dvi.libelle  AS division,
-    serv.libelle AS service,
-
-    ad.telephone
-
-FROM public.adherent ad
-JOIN public.categorie cat
-       ON cat.code = ad.categorie
-JOIN public.direction dir
-       ON dir.id = ad.direction
-JOIN public.division dvi
-       ON dvi.id = ad.division
-JOIN public.service serv
-       ON serv.id = ad.service;
 
 
 CREATE OR REPLACE VIEW public.v_effectif_mains

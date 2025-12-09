@@ -3,10 +3,10 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="situation_paiement_adherrent" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="bed89f79-ec78-4c08-8492-a2b3538704ed">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="muaposte\MSAP.xml"/>
-	<parameter name="matricule" class="java.lang.String"/>
+	<parameter name="id" class="java.lang.String"/>
 	<queryString language="SQL">
 		<![CDATA[SELECT * FROM public.v_reglement
-	where matricule = $P{matricule}  ;]]>
+	where matricule = $P{id}  ;]]>
 	</queryString>
 	<field name="id" class="java.lang.Long">
 		<property name="com.jaspersoft.studio.field.label" value="id"/>
@@ -28,6 +28,9 @@
 	</field>
 	<field name="code_carnet" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="code_carnet"/>
+	</field>
+	<field name="telephone" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="telephone"/>
 	</field>
 	<field name="pourcentage_total_retenue" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="pourcentage_total_retenue"/>
@@ -126,43 +129,47 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="78" splitType="Stretch">
+		<band height="96" splitType="Stretch">
 			<image>
-				<reportElement x="0" y="0" width="91" height="78" uuid="bfdaccb7-d68f-49c1-8f8b-5b3143a93d11"/>
+				<reportElement x="479" y="0" width="91" height="78" uuid="bfdaccb7-d68f-49c1-8f8b-5b3143a93d11"/>
 				<imageExpression><![CDATA["logo.png"]]></imageExpression>
 			</image>
 			<componentElement>
-				<reportElement x="476" y="30" width="77" height="34" uuid="4e1afff2-33c3-49ed-ac74-da7a4786d58d"/>
+				<reportElement x="394" y="62" width="77" height="34" uuid="4e1afff2-33c3-49ed-ac74-da7a4786d58d"/>
 				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="2of7" drawText="false" checksumRequired="false">
 					<jr:codeExpression><![CDATA[$F{matricule}]]></jr:codeExpression>
 				</jr:barbecue>
 			</componentElement>
 			<textField>
-				<reportElement x="462" y="20" width="14" height="44" uuid="b9bc584b-3400-4066-b93e-da310635fd93"/>
+				<reportElement x="380" y="52" width="14" height="44" uuid="b9bc584b-3400-4066-b93e-da310635fd93"/>
 				<textElement textAlignment="Center" rotation="Left"/>
 				<textFieldExpression><![CDATA[$F{matricule}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="196" y="0" width="180" height="20" uuid="54940240-008d-4213-bd88-ad7a4fe8dd88"/>
+				<reportElement x="196" y="-3" width="180" height="20" uuid="54940240-008d-4213-bd88-ad7a4fe8dd88"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Republique du Niger]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="194" y="18" width="180" height="20" uuid="1fbc20f9-fad6-4333-b7f2-5120b8d0dc5f"/>
+				<reportElement x="194" y="15" width="180" height="20" uuid="1fbc20f9-fad6-4333-b7f2-5120b8d0dc5f"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[NIGER POSTE]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="141" y="36" width="300" height="36" uuid="20c0eb45-d863-4f7d-9d94-51678e05a301"/>
+				<reportElement x="141" y="33" width="300" height="36" uuid="20c0eb45-d863-4f7d-9d94-51678e05a301"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Mutuelle de Santé des Agents de la Poste et Filiales, BP: 742, Tel: 20 72 38 09]]></text>
 			</staticText>
+			<image>
+				<reportElement x="2" y="0" width="160" height="86" uuid="feb9dd63-c73e-42f4-837e-b20bd4713173"/>
+				<imageExpression><![CDATA["poste2.png"]]></imageExpression>
+			</image>
 		</band>
 	</title>
 	<pageHeader>

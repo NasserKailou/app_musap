@@ -177,7 +177,7 @@
             </a>
           </li>
 
-          @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "SuperAdmin")) {
+          @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "Admin" )) {
             
             <!-- Paramètrages -->
             <li class="nav-item">
@@ -241,7 +241,8 @@
                   </a>
                 </li>
               </ul>
-          <ul class="nav nav-treeview">
+
+              <ul class="nav nav-treeview">
                 <li class="nav-item">
                   <a href="@routes.AdherentCtrl.showSituationView()" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
@@ -252,64 +253,31 @@
               
 					
             </li>
+          }
 
-            <!-- Règlements 
+          @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "saisie" )){
+               <!-- Adhérents -->
             <li class="nav-item">
               <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-file-invoice-dollar"></i>
+                <i class="nav-icon fas fa-users"></i>
                 <p>
-                  Règlements
+                  Adhérents
                   <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a href="@routes.ReglementCtrl.showRegementGlobal()" class="nav-link">
+                  <a href="@routes.AdherentCtrl.show("CREATE",0L)" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
-                    <p>Vue Globale</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="@routes.ReglementCtrl.showAlerteView()" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Alertes Email</p>
+                    <p>Liste des Adhérents</p>
                   </a>
                 </li>
               </ul>
-            </li>-->
 
-            <!-- Comptabilité 
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-calculator"></i>
-                <p>
-                  Comptabilité
-                  <i class="right fas fa-angle-left"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="@routes.BudgetCtrl.show("CREATE", 0L, "")" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Budgets</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="@routes.CategorieCompteCtrl.show("CREATE", "CATEGORIE", 0L)" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Catégories Compte</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="@routes.OperationComptableCtrl.showDepense("CREATE", 0L)" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Dépenses</p>
-                  </a>
-                </li>
-              </ul>
-            </li>-->
-
-          
+             
+              
+					
+            </li>
 
           }
 

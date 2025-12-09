@@ -5,6 +5,7 @@ package models.tables.pojos;
 
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import javax.annotation.Generated;
@@ -23,34 +24,37 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VAdherent implements Serializable {
 
-    private static final long serialVersionUID = -1858937829;
+    private static final long serialVersionUID = 1801677549;
 
-    private Long      id;
-    private String    nomAd;
-    private String    prenomAd;
-    private String    sexe;
-    private String    matricule;
-    private String    codeCarnet;
-    private String    categorie;
-    private String    fonction;
-    private String    structureSigle;
-    private Timestamp dateNaiss;
-    private Integer   age;
-    private Timestamp datePriseService;
-    private Integer   anciennete;
-    private Long      salaireNet;
-    private Double    pourcentageTotalRetenue;
-    private Double    totalCotisationAgent;
-    private Double    totalCreditAnnuelle;
-    private Double    totalCreditAConsomer;
-    private String    picture;
-    private Timestamp whenDone;
-    private String    whoDone;
-    private Boolean   onDeleted;
-    private String    direction;
-    private String    division;
-    private String    service;
-    private String    telephone;
+    private Long       id;
+    private String     nomAd;
+    private String     prenomAd;
+    private String     sexe;
+    private String     matricule;
+    private String     codeCarnet;
+    private String     categorie;
+    private String     fonction;
+    private String     structureSigle;
+    private Timestamp  dateNaiss;
+    private Integer    age;
+    private Timestamp  datePriseService;
+    private Integer    anciennete;
+    private Long       salaireNet;
+    private Double     pourcentageTotalRetenue;
+    private Double     totalCotisationAgent;
+    private Double     totalCreditAnnuelle;
+    private Double     totalCreditAConsomer;
+    private BigDecimal montantTotalBrute;
+    private BigDecimal montantReglementCouvert;
+    private BigDecimal montantPayer;
+    private String     picture;
+    private Timestamp  whenDone;
+    private String     whoDone;
+    private Boolean    onDeleted;
+    private String     direction;
+    private String     division;
+    private String     service;
+    private String     telephone;
 
     public VAdherent() {}
 
@@ -73,6 +77,9 @@ public class VAdherent implements Serializable {
         this.totalCotisationAgent = value.totalCotisationAgent;
         this.totalCreditAnnuelle = value.totalCreditAnnuelle;
         this.totalCreditAConsomer = value.totalCreditAConsomer;
+        this.montantTotalBrute = value.montantTotalBrute;
+        this.montantReglementCouvert = value.montantReglementCouvert;
+        this.montantPayer = value.montantPayer;
         this.picture = value.picture;
         this.whenDone = value.whenDone;
         this.whoDone = value.whoDone;
@@ -84,32 +91,35 @@ public class VAdherent implements Serializable {
     }
 
     public VAdherent(
-        Long      id,
-        String    nomAd,
-        String    prenomAd,
-        String    sexe,
-        String    matricule,
-        String    codeCarnet,
-        String    categorie,
-        String    fonction,
-        String    structureSigle,
-        Timestamp dateNaiss,
-        Integer   age,
-        Timestamp datePriseService,
-        Integer   anciennete,
-        Long      salaireNet,
-        Double    pourcentageTotalRetenue,
-        Double    totalCotisationAgent,
-        Double    totalCreditAnnuelle,
-        Double    totalCreditAConsomer,
-        String    picture,
-        Timestamp whenDone,
-        String    whoDone,
-        Boolean   onDeleted,
-        String    direction,
-        String    division,
-        String    service,
-        String    telephone
+        Long       id,
+        String     nomAd,
+        String     prenomAd,
+        String     sexe,
+        String     matricule,
+        String     codeCarnet,
+        String     categorie,
+        String     fonction,
+        String     structureSigle,
+        Timestamp  dateNaiss,
+        Integer    age,
+        Timestamp  datePriseService,
+        Integer    anciennete,
+        Long       salaireNet,
+        Double     pourcentageTotalRetenue,
+        Double     totalCotisationAgent,
+        Double     totalCreditAnnuelle,
+        Double     totalCreditAConsomer,
+        BigDecimal montantTotalBrute,
+        BigDecimal montantReglementCouvert,
+        BigDecimal montantPayer,
+        String     picture,
+        Timestamp  whenDone,
+        String     whoDone,
+        Boolean    onDeleted,
+        String     direction,
+        String     division,
+        String     service,
+        String     telephone
     ) {
         this.id = id;
         this.nomAd = nomAd;
@@ -129,6 +139,9 @@ public class VAdherent implements Serializable {
         this.totalCotisationAgent = totalCotisationAgent;
         this.totalCreditAnnuelle = totalCreditAnnuelle;
         this.totalCreditAConsomer = totalCreditAConsomer;
+        this.montantTotalBrute = montantTotalBrute;
+        this.montantReglementCouvert = montantReglementCouvert;
+        this.montantPayer = montantPayer;
         this.picture = picture;
         this.whenDone = whenDone;
         this.whoDone = whoDone;
@@ -283,6 +296,30 @@ public class VAdherent implements Serializable {
         this.totalCreditAConsomer = totalCreditAConsomer;
     }
 
+    public BigDecimal getMontantTotalBrute() {
+        return this.montantTotalBrute;
+    }
+
+    public void setMontantTotalBrute(BigDecimal montantTotalBrute) {
+        this.montantTotalBrute = montantTotalBrute;
+    }
+
+    public BigDecimal getMontantReglementCouvert() {
+        return this.montantReglementCouvert;
+    }
+
+    public void setMontantReglementCouvert(BigDecimal montantReglementCouvert) {
+        this.montantReglementCouvert = montantReglementCouvert;
+    }
+
+    public BigDecimal getMontantPayer() {
+        return this.montantPayer;
+    }
+
+    public void setMontantPayer(BigDecimal montantPayer) {
+        this.montantPayer = montantPayer;
+    }
+
     public String getPicture() {
         return this.picture;
     }
@@ -369,6 +406,9 @@ public class VAdherent implements Serializable {
         sb.append(", ").append(totalCotisationAgent);
         sb.append(", ").append(totalCreditAnnuelle);
         sb.append(", ").append(totalCreditAConsomer);
+        sb.append(", ").append(montantTotalBrute);
+        sb.append(", ").append(montantReglementCouvert);
+        sb.append(", ").append(montantPayer);
         sb.append(", ").append(picture);
         sb.append(", ").append(whenDone);
         sb.append(", ").append(whoDone);

@@ -19,6 +19,17 @@
     win.window.focus();
     return false;
   }
+  
+  // Fonction pour déterminer le status
+  function getStatus(montantReglement, totalCreditAnnuelle, totalCreditAConsomer) {
+    if (montantReglement >= totalCreditAConsomer) {
+      return { label: 'Suspendu', class: 'badge-danger' };
+    } else if (montantReglement >= totalCreditAnnuelle) {
+      return { label: 'Avertissement', class: 'badge-warning' };
+    } else {
+      return { label: 'Normal', class: 'badge-success' };
+    }
+  }
 </script>
 
 <style>
@@ -48,6 +59,13 @@
     font-weight: 600;
     vertical-align: middle;
   }
+  
+  /* Styles pour les badges de status */
+  .badge-status {
+    font-size: 0.85em;
+    padding: 0.35em 0.65em;
+    font-weight: 600;
+  }
 </style>
 
 <!-- Content Header -->
@@ -72,14 +90,7 @@
   <div class="container-fluid">
 
     @* ================== FORMULAIRE ADHERENT ================== *@
-    @if(
-      request.session.get("droit").isPresent &&
-      (request.session.get("droit").get() == "Admin"
-        || request.session.get("droit").get() == "Agent Saisie"
-        || request.session.get("droit").get() == "AGENT_CARD_ID"
-        || request.session.get("droit").get() == "SuperAdmin"
-        || request.session.get("droit").get() == "Adherent")
-    ) {
+    @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
 
       <div class="row">
         <div class="col-12">
@@ -454,7 +465,7 @@
                     <i class="fas fa-trash"></i> Supprimer
                   </button>
                 }
-              </div><!-- /.card-footer -->
+              </div>
 
             </form>
           </div>
@@ -464,13 +475,8 @@
 
     @* ================== FILTRE ================== *@
     @if(
-      request.session.get("droit").isPresent &&
-      (request.session.get("droit").get() == "Admin"
-        || request.session.get("droit").get() == "AGENT_CARD_ID"
-        || request.session.get("droit").get() == "Agent Saisie"
-        || request.session.get("droit").get() == "SuperAdmin")
-    ) {
-
+      request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
+<!-- 
       <div class="row">
         <div class="col-12">
           <div class="card card-secondary collapsed-card">
@@ -531,6 +537,7 @@
           </div>
         </div>
       </div>
+      /.card-footer -->
     }
 
     @* ================== LISTE DES ADHERENTS ================== *@
@@ -543,7 +550,7 @@
               @if(
                 request.session.get("droit").isPresent &&
                 (request.session.get("droit").get() == "Admin"
-                  || request.session.get("droit").get() == "Agent Saisie")
+                  || request.session.get("droit").get() == "saisie")
               ) {
                 Liste des adhérents
               } else {
@@ -561,25 +568,16 @@
                      <th>Code carnet</th>
                     <th>Nom & Prénom</th>
                     <th>Téléphone</th>
+                    <th>Status</th>
 
-                    @if(
-                      request.session.get("droit").isPresent &&
-                      (request.session.get("droit").get() == "SuperAdmin"
-                        || request.session.get("droit").get() == "Admin"
-                        || request.session.get("droit").get() == "Agent Saisie"
-                        || request.session.get("droit").get() == "Comptable")
-                    ) {
+                    @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie")) {
                       <th>Bon de Commande</th>
                       <th>Prise en Charge</th>
                       <th>Ayant droit</th>
                       <th>Photo</th>
                     }
 
-                    @if(
-                      request.session.get("droit").isPresent &&
-                      (request.session.get("droit").get() == "AGENT_CARD_ID"
-                        || request.session.get("droit").get() == "Adherent")
-                    ) {
+                    @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Adherent")) {
                       <th>Ayant droit</th>
                       <th>Photo</th>
                     }
@@ -589,6 +587,19 @@
                 </thead>
                 <tbody>
                   @for(c <- adherents) {
+                    @defining({
+                      val montantReglement = if(c.getMontantReglementCouvert() != null) c.getMontantReglementCouvert().doubleValue() else 0.0
+                      val creditAnnuelle = if(c.getTotalCreditAnnuelle() != null) c.getTotalCreditAnnuelle().doubleValue() else 0.0
+                      val creditAConsomer = if(c.getTotalCreditAConsomer() != null) c.getTotalCreditAConsomer().doubleValue() else 0.0
+                      
+                      if (montantReglement >= creditAConsomer) {
+                        ("Suspendu", "badge-danger")
+                      } else if (montantReglement >= creditAnnuelle) {
+                        ("Avertissement", "badge-warning")
+                      } else {
+                        ("Normal", "badge-success")
+                      }
+                    }) { case (statusLabel, statusClass) =>
                     <tr>
                       
                       <td class="img-cell">
@@ -601,15 +612,14 @@
                       <td>@c.getCodeCarnet()</td>
                       <td>@c.getNomAd() @c.getPrenomAd()</td>
                       <td>@c.getTelephone()</td>
+                      <td>
+                        <span class="badge @statusClass badge-status">
+                          @statusLabel
+                        </span>
+                      </td>
 
-                      @if(
-                        request.session.get("droit").isPresent &&
-                        (request.session.get("droit").get() == "SuperAdmin"
-                          || request.session.get("droit").get() == "Admin"
-                          || request.session.get("droit").get() == "Agent Saisie"
-                          || request.session.get("droit").get() == "Comptable")
-                      ) {
-                        <td class="text-center">
+                      @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie")) {
+                      <td class="text-center">
                           <a class="btn btn-primary btn-sm"
                              title="Ajouter un Bon de commande"
                              href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId(),"BC")'>
@@ -639,11 +649,7 @@
                         </td>
                       }
 
-                      @if(
-                        request.session.get("droit").isPresent &&
-                        (request.session.get("droit").get() == "AGENT_CARD_ID"
-                          || request.session.get("droit").get() == "Adherent")
-                      ) {
+                      @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Adherent") ) {
                         <td class="text-center">
                           <a class="btn btn-warning btn-sm"
                              title="Ajouter des ayants droit"
@@ -673,7 +679,7 @@
 
                           @if(
                             request.session.get("droit").isPresent &&
-                            request.session.get("droit").get() == "SuperAdmin"
+                            request.session.get("droit").get() == "Admin"
                           ) {
                             <a class="btn btn-primary btn-sm"
                                title="Modifier"
@@ -689,11 +695,7 @@
                             </a>
                           }
 
-                          @if(
-                            request.session.get("droit").isPresent &&
-                            (request.session.get("droit").get() == "AGENT_CARD_ID"
-                              || request.session.get("droit").get() == "Adherent")
-                          ) {
+                          @if(request.session.get("droit").isPresent &&(request.session.get("droit").get() == "Adherent")) {
                             <a class="btn btn-primary btn-sm"
                                title="Modifier"
                                href='@controllers.routes.AdherentCtrl.show("EDIT", c.getId())'>
@@ -701,14 +703,7 @@
                             </a>
                           }
 
-                          @if(
-                            request.session.get("droit").isPresent &&
-                            (request.session.get("droit").get() == "SuperAdmin"
-                              || request.session.get("droit").get() == "Adherent"
-                              || request.session.get("droit").get() == "Admin"
-                              || request.session.get("droit").get() == "Agent Saisie"
-                              || request.session.get("droit").get() == "Comptable")
-                          ) {
+                          @if( request.session.get("droit").isPresent &&(request.session.get("droit").get() == "Admin")) {
                             <a class="btn btn-secondary btn-sm"
                                title="Imprimer la situation des paiements"
                                href='@controllers.routes.AdherentCtrl.print(c.getMatricule(), "situation_paiement_adherrent")'
@@ -717,23 +712,18 @@
                             </a>
                           }
 
-                          @if(
-                            request.session.get("droit").isPresent &&
-                            (request.session.get("droit").get() == "SuperAdmin"
-                              || request.session.get("droit").get() == "Admin"
-                              || request.session.get("droit").get() == "Agent Saisie"
-                              || request.session.get("droit").get() == "AGENT_CARD_ID")
-                          ) {
-                            <a class="btn btn-info btn-sm"
+                          @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
+                         <!--   <a class="btn btn-info btn-sm"
                                title="Imprimer la carte d'adhérent"
                                href='@controllers.routes.AdherentCtrl.printCarte(c.getId(), "badge_adherent")'
                                onclick="return(openPopup(this.href, 600, 600, 600, 600));">
                               <i class="fas fa-id-card"></i>
-                            </a>
+                            </a> /.container-fluid --> 
                           }
                         </div>
                       </td>
                     </tr>
+                    }
                   }
                 </tbody>
                 <tfoot>
@@ -743,23 +733,15 @@
                     <th>Code carnet</th>
                     <th>Nom & Prénom</th>
                     <th>Téléphone</th>
-                    @if(
-                      request.session.get("droit").isPresent &&
-                      (request.session.get("droit").get() == "SuperAdmin"
-                        || request.session.get("droit").get() == "Admin"
-                        || request.session.get("droit").get() == "Agent Saisie"
-                        || request.session.get("droit").get() == "Comptable")
-                    ) {
+                    <th>Status</th>
+                      @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie")) {
                       <th>Bon de Commande</th>
-                      <th>Règlement</th>
+                      <th>Prise en Charge</th>
                       <th>Ayant droit</th>
                       <th>Photo</th>
                     }
-                    @if(
-                      request.session.get("droit").isPresent &&
-                      (request.session.get("droit").get() == "AGENT_CARD_ID"
-                        || request.session.get("droit").get() == "Adherent")
-                    ) {
+
+                    @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Adherent")) {
                       <th>Ayant droit</th>
                       <th>Photo</th>
                     }
@@ -775,6 +757,19 @@
 
     @* ================== MODALES DETAILS ADHERENT ================== *@
     @for(c <- adherents) {
+      @defining({
+        val montantReglement = if(c.getMontantReglementCouvert() != null) c.getMontantReglementCouvert().doubleValue() else 0.0
+        val creditAnnuelle = if(c.getTotalCreditAnnuelle() != null) c.getTotalCreditAnnuelle().doubleValue() else 0.0
+        val creditAConsomer = if(c.getTotalCreditAConsomer() != null) c.getTotalCreditAConsomer().doubleValue() else 0.0
+        
+        if (montantReglement >= creditAConsomer) {
+          ("Suspendu", "badge-danger")
+        } else if (montantReglement >= creditAnnuelle) {
+          ("Avertissement", "badge-warning")
+        } else {
+          ("Normal", "badge-success")
+        }
+      }) { case (statusLabel, statusClass) =>
       <div class="modal fade" id="detailModal@c.getId()" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
@@ -813,6 +808,19 @@
                    <tr><th>Total cautisation :</th><td><b>@fmt.format(c.getTotalCotisationAgent()) F CFA</b></td></tr>
                     <tr><th>Crédit Annuelle :</th><td><b>@fmt.format(c.getTotalCreditAnnuelle()) F CFA</b></td></tr>
                      <tr><th>Crédit à consommer :</th><td><b> @fmt.format(c.getTotalCreditAConsomer()) F CFA</b></td></tr>
+                     <tr>
+                      <th>Montant règlement couvert :</th>
+                      <td><b>@fmt.format(if(c.getMontantReglementCouvert() != null) c.getMontantReglementCouvert() else 0) F CFA</b></td>
+                    </tr>
+                    <tr>
+                      <th>Status :</th>
+                      <td>
+                        <span class="badge @statusClass badge-status">
+                          <i class="fas fa-@if(statusLabel == "Normal") {check-circle} else if(statusLabel == "Avertissement") {exclamation-triangle} else {ban}"></i>
+                          @statusLabel
+                        </span>
+                      </td>
+                    </tr>
                     }
                     <tr><th>Service :</th><td>@c.getStructureSigle()</td></tr>
                     <tr><th>Date naissance :</th><td>@c.getDateNaiss().format("dd/MM/yyyy")</td></tr>
@@ -831,6 +839,7 @@
           </div>
         </div>
       </div>
+      }
     }
 
   </div><!-- /.container-fluid -->
