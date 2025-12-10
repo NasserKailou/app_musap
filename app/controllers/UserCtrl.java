@@ -139,7 +139,7 @@ public class UserCtrl extends Controller {
 	}
 
 	private boolean isSuperAdmin(Request request) {
-		return String.valueOf(request.session().get("droit").get()).equals("SuperAdmin");
+		return String.valueOf(request.session().get("droit").get()).equals("Admin");
 	}
 
 }

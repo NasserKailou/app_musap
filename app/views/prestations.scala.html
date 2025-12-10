@@ -282,6 +282,13 @@
                                onclick="return window.confirm('Êtes-vous sûr de vouloir supprimer cette prestation ?');">
                               <i class="fas fa-trash-alt"></i>
                             </a>
+
+                            <a class="btn btn-secondary btn-sm"
+                               title="Imprimer la situation des dépenses liées à c.getLibelle()"
+                               href='@controllers.routes.PrestationCtrl.print(c.getId(), "situation_paiement_prestations")'
+                               onclick="return(openPopup(this.href, 600, 600, 600, 600));">
+                              <i class="fas fa-print"></i>
+                            </a>
                           </div>
                         </td>
                       </tr>

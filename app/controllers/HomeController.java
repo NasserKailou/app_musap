@@ -23,6 +23,7 @@ import services.ParamsServices;
 import services.ReglementMainServices;
 import services.StructureMainServices;
 import utils.Login;
+import utils.ViewMode;
 import models.tables.pojos.Reglement;
 import models.tables.pojos.StructurePartenaire;
 import models.tables.pojos.Adherent;
@@ -83,9 +84,15 @@ public class HomeController extends Controller {
 		if (request.session().get("login") == null) {
 			return ok(views.html.index.render(paramsService.listesParams(),request));
 		} else {
+			System.out.println("Droit apres connexion :"+ request.session().get("droit").get());
+			 if(request.session().get("droit").get().equals("Admin")) {
+			 // System.out.println("les elemensts sont :" + element);
+				return ok(views.html.acceuil.render(request));
+			} else{
+				return redirect(routes.AdherentCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L));
+			}
+                     
 			
-			// System.out.println("les elemensts sont :" + element);
-			return ok(views.html.acceuil.render(request));
 		}
 	}
 	/**

@@ -248,10 +248,10 @@ public class ReglementCtrl extends Controller {
 
 		return ok(views.html.remboursementDetail.render(
 				viewMode,
+				adherentService.getVAdherentById(idAdherent),
 				typeOP,
 				idReglement,
 				detail,
-				ad,
 				rd,
 				regServices.sommeRegler(idAdherent, request.session().get("gestion").get()),
 				Long.valueOf(request.session().get("plafond").get()),

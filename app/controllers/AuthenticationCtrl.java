@@ -139,7 +139,6 @@ public class AuthenticationCtrl extends Controller {
 		Users a = uForm.get();
 		if (a.getPasse().equals(confirm)) {
 			a.setConnectFirst(false);
-			a.setWhoDone("Admin_mutuel");
 			a.setWhenDone(new Timestamp(System.currentTimeMillis()));
 			if (userService.saveLogical(a, false).equals("ok")) {
 				return redirect(controllers.routes.AuthenticationCtrl.login()).withNewSession().flashing("success",

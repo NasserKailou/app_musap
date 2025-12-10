@@ -79,12 +79,13 @@ GET			/impression-BonPriseEnC/    	 controllers.ReglementCtrl.print(request:Requ
 GET			/Partenaire-Str/show/:subAction/    		controllers.StructurePartenaireCtrl.show(request:Request,subAction: String, idPArtenaire: Long)
 #GET			/Partenaire-Str/restaure/    		controllers.StructurePartenaireCtrl.restaure(idOrd: Long,request:Request)
 POST    	/Partenaire-Str/save                        controllers.StructurePartenaireCtrl.save(request:Request)
-
+GET			/impression-situation-partenaire/    	 controllers.StructurePartenaireCtrl.print(request:Request,idStruc: Long, fileName:String)
 
 #Prestation Ressources
 GET			/Prestation-Str/show/:subAction/    		controllers.PrestationCtrl.show(request:Request,subAction: String, idPrestations: Long)
 #GET			/Prestation-Str/restaure/    		controllers.PrestationCtrl.restaure(idOrd: Long,request:Request)
 POST    	/Prestation-Str/save                        controllers.PrestationCtrl.save(request:Request)
+GET			/impression-situation-prestations/    	 controllers.PrestationCtrl.print(request:Request,idPrestation: Long, fileName:String)
 
 
 #Budget Ressources

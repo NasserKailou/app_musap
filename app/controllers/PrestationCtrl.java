@@ -2,7 +2,10 @@ package controllers;
 
 import services.TypePrestationMainService;
 
+import java.io.File;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +19,7 @@ import play.data.FormFactory;
 import play.filters.csrf.AddCSRFToken;
 import play.mvc.*;
 import play.mvc.Http.Request;
+import utils.CallJasperReport;
 import utils.Secured;
 import utils.ViewMode;
 
@@ -28,11 +32,13 @@ import utils.ViewMode;
 public class PrestationCtrl extends Controller {
 
     TypePrestationMainService prestaService;
+	CallJasperReport jasper;
     private final FormFactory formFactory;
 
     @Inject
-    public PrestationCtrl(TypePrestationMainService prestaService, FormFactory formFactory) {
+    public PrestationCtrl(TypePrestationMainService prestaService,CallJasperReport jasper, FormFactory formFactory) {
         this.prestaService = prestaService;
+		this.jasper = jasper;
         this.formFactory = formFactory;
     }
 
@@ -115,6 +121,28 @@ public class PrestationCtrl extends Controller {
 
 		}
 		return redirect(routes.PrestationCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L));
+	
+	}
+	public Result print(Request request, Long idPrestation, String fileName) {
+
+		// String fileName = "recu";
+		LocalDateTime now = LocalDateTime.now();
+		String now_string = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm"));
+		String templateDir = new File("").getAbsolutePath() + "/reports/spool/";
+		try {
+			// flash("success", "impression ok");
+
+			jasper.generateReport(fileName,String.valueOf(idPrestation));
+
+			return ok(new java.io.File(templateDir + fileName + "_" + now_string + "_" + idPrestation + ".pdf"))
+					.flashing("success", "impression ok");
+
+		} catch (Exception e) {
+			// flash("error", "erreur impression");
+			// System.out.println(e.getMessage() + "+++++++--**///////++++++++");
+			return redirect(routes.PrestationCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L)).flashing("error",
+					"Erreur d'impression");
+		}
 	}
 
 }

@@ -1,11 +1,16 @@
+@import java.text.NumberFormat
+@import java.util.Locale
 @import java.time.LocalDateTime
+@import java.time.temporal.ChronoUnit
+@import java.sql.Timestamp
 @import helper._
-@import utils._
 @import java.util
-@(viewMode: String, typeOP: String,
+@import utils._
+@(viewMode: String,
+adherent: models.tables.pojos.VAdherent,
+ typeOP: String,
   idReglement: Long,
   details: models.tables.pojos.ReglementDetail,
-  adherent: models.tables.pojos.Adherent,
   reglementDetails: List[models.tables.pojos.ReglementDetail],
   totalRegler: Long,
   plafondAnnuel: Long
@@ -80,20 +85,30 @@
               </div>
             </div>
 
+            @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "Admin" )) { 
+              @defining(NumberFormat.getInstance(Locale.FRANCE)) { fmt =>
             <div class="row">
-              <div class="col-md-6">
-                <div class="info-box bg-success">
-                  <span class="info-box-icon">
-                    <i class="fas fa-money-bill-wave"></i>
-                  </span>
+              <div class="col-md-4">
+                <div class="info-box bg-warning">
+                  <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
                   <div class="info-box-content">
-                    <span class="info-box-text">Total des paiements</span>
-                    <span class="info-box-number">@totalRegler F CFA</span>
+                    <span class="info-box-text">Seuil d'Alerte des consommations </span>
+                    <span class="info-box-number">@fmt.format(adherent.getTotalCreditAnnuelle()) F CFA</span>
+                  </div>
+                </div>
+              </div>
+             
+              <div class="col-md-4">
+                <div class="info-box bg-danger">
+                  <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Plafond Annuelle des consommations a ne pas dépasser </span>
+                    <span class="info-box-number">@fmt.format(adherent.getTotalCreditAConsomer()) F CFA</span>
                   </div>
                 </div>
               </div>
 
-              @if(totalRegler > plafondAnnuel) {
+              @if(totalRegler > adherent.getTotalCreditAConsomer()) {
               <div class="col-md-6">
                 <div class="info-box bg-danger">
                   <span class="info-box-icon">
@@ -101,12 +116,14 @@
                   </span>
                   <div class="info-box-content">
                     <span class="info-box-text">Dépassement - À rembourser</span>
-                    <span class="info-box-number">@(totalRegler - plafondAnnuel) F CFA</span>
+                    <span class="info-box-number">@(totalRegler - adherent.getTotalCreditAConsomer()) F CFA</span>
                   </div>
                 </div>
               </div>
               }
+            }
             </div>
+          }
           </div>
         </div>
       </div>
@@ -137,7 +154,7 @@
                   <th style="width: 10%">Quantité</th>
                   <th style="width: 15%">Prix Unitaire</th>
                   <th style="width: 15%">Montant (F CFA)</th>
-                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" ) ) {
+                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie") ) {
                   <th class="text-center" style="width: 15%">Actions</th>
                   }
                 </tr>
@@ -170,7 +187,7 @@
                     </span>
                   </td>
 
-                  @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
+                
                   <td class="text-center">
                     <div class="btn-group">
                       <button type="button"
@@ -190,7 +207,7 @@
                       }
                     </div>
                   </td>
-                  }
+                
                 </tr>
                 }
                 }

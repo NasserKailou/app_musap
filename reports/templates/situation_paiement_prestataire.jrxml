@@ -12,10 +12,10 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<parameter name="matricule" class="java.lang.String"/>
+	<parameter name="id" class="java.lang.String"/>
 	<queryString language="SQL">
 		<![CDATA[SELECT * FROM public.v_reglement
-	where id_struc = $P{matricule}::bigint  ;]]>
+	where id_struc = $P{id}::bigint  ;]]>
 	</queryString>
 	<field name="id" class="java.lang.Long">
 		<property name="com.jaspersoft.studio.field.label" value="id"/>
@@ -396,7 +396,7 @@
 		</band>
 	</pageFooter>
 	<summary>
-		<band height="174" splitType="Stretch">
+		<band height="176" splitType="Stretch">
 			<textField>
 				<reportElement x="1" y="0" width="566" height="30" uuid="b9b527e9-b49a-4cdf-8fee-29b08e82585a"/>
 				<box>
@@ -408,13 +408,13 @@
 				<textFieldExpression><![CDATA["Total :"]]></textFieldExpression>
 			</textField>
 			<componentElement>
-				<reportElement x="430" y="77" width="121" height="97" uuid="5aa44513-b6f6-472c-b48e-5b20182b39e5"/>
+				<reportElement x="677" y="76" width="120" height="96" uuid="5aa44513-b6f6-472c-b48e-5b20182b39e5"/>
 				<jr:QRCode xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<jr:codeExpression><![CDATA["MUSAPOSTE, Adherent matricule n° "+$F{matricule}+" - " +$F{nom_ad} +"  "+$F{prenom_ad} +", N° Carnet :"+$F{code_carnet}]]></jr:codeExpression>
+					<jr:codeExpression><![CDATA["MUSAPOSTE, Récapitulatif des Opérations liées à "+$F{structure}]]></jr:codeExpression>
 				</jr:QRCode>
 			</componentElement>
 			<textField>
-				<reportElement x="680" y="0" width="124" height="30" uuid="44f524e5-aa57-41c0-a6e6-821d31191b1c"/>
+				<reportElement x="680" y="0" width="120" height="30" uuid="44f524e5-aa57-41c0-a6e6-821d31191b1c"/>
 				<box rightPadding="3">
 					<pen lineWidth="0.4"/>
 				</box>

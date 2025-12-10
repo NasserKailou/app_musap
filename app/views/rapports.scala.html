@@ -113,7 +113,7 @@
 
       }
 
-      @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "SuperAdmin" || request.session.get("droit").get() == "Comptable")){
+      @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Comptable")){
         
         <!-- État de Paiement par Période -->
         <div class="row">
@@ -310,7 +310,7 @@
 
       }
 
-      @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "AGENT_CARD_ID" || request.session.get("droit").get() == "SuperAdmin" || request.session.get("droit").get() == "Admin")){
+      @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "AGENT_CARD_ID" || request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Admin")){
         
         <!-- Impression des Cartes d'Accès -->
         <div class="row">

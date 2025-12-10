@@ -60,9 +60,7 @@
               @if(
                 request.session.get("droit").isPresent &&
                 (request.session.get("droit").get() == "Admin" ||
-                 request.session.get("droit").get() == "Admin" ||
-                 request.session.get("droit").get() == "Agent Saisie" ||
-                 request.session.get("droit").get() == "Comptable")
+                 request.session.get("droit").get() == "saisie" )
               ) {
               <button type="button" 
                       class="btn btn-success btn-sm" 
@@ -86,6 +84,8 @@
                 </h5>
               </div>
             </div>
+       @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "Admin" )) {
+           
               @defining(NumberFormat.getInstance(Locale.FRANCE)) { fmt =>
             <div class="row mt-3">
               <div class="col-md-12">
@@ -132,6 +132,7 @@
               
             </div>
           }
+        }
           </div>
         </div>
       </div>

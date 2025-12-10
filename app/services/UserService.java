@@ -31,8 +31,8 @@ public class UserService extends UsersDao implements IUser {
 	}
 
 	@Override
-	public String saveLogical(Users u, boolean b) {
-		
+	public String saveLogical(Users user, boolean b) {
+	/* 	
 		Users user = new Users();
 		user.setNomPrenom(u.getNomPrenom());
 		user.setLogin(u.getLogin());
@@ -42,7 +42,8 @@ public class UserService extends UsersDao implements IUser {
 		user.setPasse(BCryptHash.hashPassword(u.getPasse()));
 		user.setWhenDone(u.getWhenDone());
 		user.setWhoDone(u.getWhoDone());
-		
+		*/
+		user.setPasse(BCryptHash.hashPassword(user.getPasse()));
 		try {
 			if (b)
 				super.insert(user);
