@@ -587,6 +587,7 @@ public class ReglementCtrl extends Controller {
 		c.setOnDeleted(false);
 		c.setWhoDone(String.valueOf(request.session().get("login").get()));
 		c.setDatePayement(new Timestamp(System.currentTimeMillis()));
+		c.setTypeReglement(typeOperation);
 		long thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000;
 		Timestamp dateExpiration = new Timestamp((new Timestamp(System.currentTimeMillis())).getTime() + thirtyDaysInMillis);
 		c.setDateExpiration(dateExpiration);
@@ -891,7 +892,13 @@ public class ReglementCtrl extends Controller {
 		String templateDir = new File("").getAbsolutePath() + "/reports/spool/";
 
 		String messageCourt = "Cher(e) adherent, votre bon " + regServices.findVRegById(numBon).getId() + " d'un montant de " +  regServices.findVRegById(numBon).getMontantReglement()+ " F CFA a ete emis avec succes. Si vous netes pas l'auteur, contactez la MUSAPOSTE. Merci.";
-    
+    	String messageCourtPC = "Cher(e) adherent, votre prise en charge numero " + regServices.findVRegById(numBon).getId() + " a ete emis avec succes. Si vous netes pas l'auteur, contactez la MUSAPOSTE. Merci.";
+    String smsText = "";
+	if(regServices.findVRegById(numBon).getTypeReglement().equals("BC"))
+		smsText = messageCourt;
+	else
+		smsText = messageCourtPC;
+
 		try {
 			 OtpMessage sms = new OtpMessage();
 			// flash("success", "impression ok");
@@ -901,7 +908,7 @@ public class ReglementCtrl extends Controller {
 				sms.setIsSent(true);
 				sms.setIsUsed(true);
 				if(!messagesServices.getMessageByNumBonMontant(regServices.findVRegById(numBon).getId(),regServices.findVRegById(numBon).getMontantReglement()))
-					sms.setSentResponse(otpService.sendSMSBC(regServices.findVRegById(numBon).getTelephone(), messageCourt));
+					sms.setSentResponse(otpService.sendSMSBC(regServices.findVRegById(numBon).getTelephone(), smsText));
 				else
 					sms.setSentResponse("message deja envoyé");
 				
