@@ -127,4 +127,11 @@ public class UsersDao extends DAOImpl<UsersRecord, models.tables.pojos.Users, Lo
     public List<models.tables.pojos.Users> fetchByWhenDone(Timestamp... values) {
         return fetch(Users.USERS.WHEN_DONE, values);
     }
+
+    /**
+     * Fetch records that have <code>region_code IN (values)</code>
+     */
+    public List<models.tables.pojos.Users> fetchByRegionCode(Long... values) {
+        return fetch(Users.USERS.REGION_CODE, values);
+    }
 }

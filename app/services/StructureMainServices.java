@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -121,10 +122,43 @@ public class StructureMainServices extends StructurePartenaireDao {
 		return listes;
 	}
 
+	public List<StructurePartenaire> findAllPharmacieByRegion(Long region){
+		List<StructurePartenaire> listes = new ArrayList<>();
+		if(region == 9)
+			listes = con.connection().selectFrom(models.Tables.STRUCTURE_PARTENAIRE).where(models.Tables.STRUCTURE_PARTENAIRE.IS_DELETED.isFalse())
+		.and(models.Tables.STRUCTURE_PARTENAIRE.TYPE_STRUCTURE.in("PHARMACIE")).fetchInto(StructurePartenaire.class);
+		else
+			listes = con.connection().selectFrom(models.Tables.STRUCTURE_PARTENAIRE).where(models.Tables.STRUCTURE_PARTENAIRE.IS_DELETED.isFalse())
+		.and(models.Tables.STRUCTURE_PARTENAIRE.TYPE_STRUCTURE.in("PHARMACIE")).and(models.Tables.STRUCTURE_PARTENAIRE.REGION.eq(region)).fetchInto(StructurePartenaire.class);
+		
+
+		con.connection().close();
+		return listes;
+	}
+
+	public List<StructurePartenaire> findAllHopitauxByRegion(Long region){
+		List<StructurePartenaire> listes = new ArrayList<>();
+		if(region == 9)
+			listes = con.connection().selectFrom(models.Tables.STRUCTURE_PARTENAIRE).where(models.Tables.STRUCTURE_PARTENAIRE.IS_DELETED.isFalse())
+		.and(models.Tables.STRUCTURE_PARTENAIRE.TYPE_STRUCTURE.in("HOPITAL","CLINIQUE","LABORATOIRE"))
+		.fetchInto(StructurePartenaire.class);
+		else
+			listes = con.connection().selectFrom(models.Tables.STRUCTURE_PARTENAIRE).where(models.Tables.STRUCTURE_PARTENAIRE.IS_DELETED.isFalse())
+		.and(models.Tables.STRUCTURE_PARTENAIRE.TYPE_STRUCTURE.in("HOPITAL","CLINIQUE","LABORATOIRE")).and(models.Tables.STRUCTURE_PARTENAIRE.REGION.eq(region))
+		.fetchInto(StructurePartenaire.class);
+		
+
+		con.connection().close();
+		return listes;
+	}
+
 	public List<StructurePartenaire> findByStatut(String statut){
 		List<StructurePartenaire> listes = con.connection().selectFrom(models.Tables.STRUCTURE_PARTENAIRE).where(models.Tables.STRUCTURE_PARTENAIRE.IS_DELETED.isFalse())
 		.and(models.Tables.STRUCTURE_PARTENAIRE.STATUT_STRUCTURE.eq(statut)).fetchInto(StructurePartenaire.class);
 		con.connection().close();
 		return listes;
 	}
+
+		
+
 }

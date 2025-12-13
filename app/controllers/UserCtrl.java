@@ -75,7 +75,7 @@ public class UserCtrl extends Controller {
 			a = userService.getUserByLogin(login);
 
 		}
-		return ok(views.html.users.render(viewMode, users, a,request));
+		return ok(views.html.users.render(viewMode, users,userService.listRegion(), a,request));
 
 	}
 

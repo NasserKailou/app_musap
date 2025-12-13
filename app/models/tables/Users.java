@@ -40,7 +40,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Users extends TableImpl<UsersRecord> {
 
-    private static final long serialVersionUID = -552275907;
+    private static final long serialVersionUID = 328753055;
 
     /**
      * The reference instance of <code>public.users</code>
@@ -104,6 +104,11 @@ public class Users extends TableImpl<UsersRecord> {
      * The column <code>public.users.when_done</code>.
      */
     public final TableField<UsersRecord, Timestamp> WHEN_DONE = createField("when_done", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>public.users.region_code</code>.
+     */
+    public final TableField<UsersRecord, Long> REGION_CODE = createField("region_code", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * Create a <code>public.users</code> table reference

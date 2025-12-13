@@ -114,6 +114,8 @@ public class AuthenticationCtrl extends Controller {
 								.addingToSession(request, "login", us.getLogin())
 								.removingFromSession(request, "nomUser")
 								.addingToSession(request, "nomUser", us.getNomPrenom())
+								.removingFromSession(request, "region")
+								.addingToSession(request, "region", String.valueOf(us.getRegionCode()))
 								.removingFromSession(request, "gestion").addingToSession(request, "gestion", gestion)
 								.removingFromSession(request, "plafond").addingToSession(request, "plafond",
 										String.valueOf(paramsService.paramsByGestion(gestion).getPlafond()))

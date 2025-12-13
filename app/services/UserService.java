@@ -10,6 +10,7 @@ import java.util.List;
 
 import models.Tables;
 import models.tables.daos.UsersDao;
+import models.tables.pojos.Region;
 import models.tables.pojos.Users;
 import utils.BCryptHash;
 import utils.IConnectionHelper;
@@ -100,6 +101,13 @@ public class UserService extends UsersDao implements IUser {
 	public boolean isUserExist(String libelle) {
 		List<Users> users = super.fetchByLogin(libelle);
 		return users.size() > 0;
+	}
+
+	public List<Region> listRegion() {
+
+		//return con.connection().selectFrom(models.Tables.REGION).where(Tables.REGION.IS_DELETED.isFalse())
+		return con.connection().selectFrom(models.Tables.REGION)
+				.fetchInto(Region.class);
 	}
 
 }

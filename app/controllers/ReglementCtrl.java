@@ -126,11 +126,11 @@ public class ReglementCtrl extends Controller {
 		List<VReglement> listeReg = new ArrayList<>();
 
 		if (typeOP.equals("BC")) {
-			listesPartenaires = structureService.findAllPharmacie();
+			listesPartenaires = structureService.findAllPharmacieByRegion(Long.valueOf(request.session().get("region").get()));
 			listeTypePrestation = typePresta.findOrdonnance();
 			listeReg = regServices.findReglementBCByAdherent(idAdherent, request.session().get("gestion").get());
 		} else {
-			listesPartenaires = structureService.findAllHopitaux();
+			listesPartenaires = structureService.findAllHopitauxByRegion(Long.valueOf(request.session().get("region").get()));
 			listeTypePrestation = typePresta.findOthers();
 				listeReg = regServices.findReglementPCByAdherent(idAdherent, request.session().get("gestion").get());
 		}

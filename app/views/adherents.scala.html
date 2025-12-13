@@ -570,19 +570,27 @@
                     <th>Téléphone</th>
                     <th>Status</th>
 
-                    @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie")) {
+                    @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
                       <th>Bon de Commande</th>
                       <th>Prise en Charge</th>
                       <th>Ayant droit</th>
                       <th>Photo</th>
                     }
 
+                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "saisie")) {
+                      <th>Bon de Commande</th>
+                      <th>Prise en Charge</th>
+                      
+                    }
+
                     @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Adherent")) {
                       <th>Ayant droit</th>
                       <th>Photo</th>
                     }
-
+                @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
+                    
                     <th>Actions</th>
+                  }
                   </tr>
                 </thead>
                 <tbody>
@@ -618,7 +626,7 @@
                         </span>
                       </td>
 
-                      @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie")) {
+                      @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
                       <td class="text-center">
                           <a class="btn btn-primary btn-sm"
                              title="Ajouter un Bon de commande"
@@ -649,6 +657,24 @@
                         </td>
                       }
 
+                          @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "saisie")) {
+                      <td class="text-center">
+                          <a class="btn btn-primary btn-sm"
+                             title="Ajouter un Bon de commande"
+                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId(),"BC")'>
+                            <i class="fas fa-file-invoice"></i>
+                          </a>
+                        </td>
+                        <td class="text-center">
+                          <a class="btn btn-success btn-sm"
+                             title="Prise En charge"
+                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId(),"PC")'>
+                            <i class="fas fa-money-bill-wave"></i>
+                          </a>
+                        </td>
+                    
+                      }
+
                       @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Adherent") ) {
                         <td class="text-center">
                           <a class="btn btn-warning btn-sm"
@@ -665,10 +691,12 @@
                           </a>
                         </td>
                       }
-
+                   @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Adherent") ) {
+                
                       <td class="text-center">
                         <div class="btn-group">
                           <!-- Voir détails (modale) -->
+                   
                           <button type="button"
                                   class="btn btn-success btn-sm"
                                   data-toggle="modal"
@@ -676,7 +704,7 @@
                                   title="Voir les détails">
                             <i class="fas fa-eye"></i>
                           </button>
-
+                    
                           @if(
                             request.session.get("droit").isPresent &&
                             request.session.get("droit").get() == "Admin"
@@ -722,6 +750,7 @@
                           }
                         </div>
                       </td>
+                    }
                     </tr>
                     }
                   }
