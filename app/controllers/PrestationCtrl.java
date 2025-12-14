@@ -79,6 +79,9 @@ public class PrestationCtrl extends Controller {
 
 		Form<TypePrestation> uForm = formFactory.form(TypePrestation.class).bindFromRequest(request);
 		TypePrestation prestation = uForm.get();
+		prestation.setType("PC");
+		prestation.setOnDeleted(false);
+		prestation.setCouverture("100");
 
 		// ne renseigner ses variables que dans les cas ou il s'agit des deux operation
 		// suivante
