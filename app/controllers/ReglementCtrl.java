@@ -265,11 +265,131 @@ public class ReglementCtrl extends Controller {
 		Long montanTotal = 0L;
 		Long diff = 0L;
 
-		Form<ReglementDetail> uForm = formFactory.form(ReglementDetail.class).bindFromRequest(request);
 		Long ad = Long.parseLong(formFactory.form().bindFromRequest(request).get("adh"));
 		final String viewMode = formFactory.form().bindFromRequest(request).get("viewMode");
 		String typeOperation = formFactory.form().bindFromRequest(request).get("typeOP");
+		Long idReglement = Long.parseLong(formFactory.form().bindFromRequest(request).get("reglement"));
 
+		// Vérifier si c'est une saisie multiple (mode CREATE avec plusieurs lignes)
+		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE)) {
+			// Récupérer les données du formulaire multiple
+			java.util.Map<String, String[]> formData = request.body().asFormUrlEncoded();
+			
+			// Vérifier s'il y a des données de saisie multiple
+			boolean isSaisieMultiple = formData.containsKey("intitules[1]");
+			
+			if (isSaisieMultiple) {
+				// Mode saisie multiple
+				int nombreLignesSaisies = 0;
+				int nombreLignesEnregistrees = 0;
+				int nombreLignesRejetees = 0;
+				List<String> messagesErreurs = new ArrayList<>();
+				
+				for (int i = 1; i <= 10; i++) {
+					String intituleKey = "intitules[" + i + "]";
+					String quantiteKey = "quantites[" + i + "]";
+					String prixKey = "prixUnitaires[" + i + "]";
+					
+					String[] intituleArray = formData.get(intituleKey);
+					String[] quantiteArray = formData.get(quantiteKey);
+					String[] prixArray = formData.get(prixKey);
+					
+					// Vérifier si la ligne a un intitulé (critère de validation)
+					if (intituleArray != null && intituleArray.length > 0 && !intituleArray[0].trim().isEmpty()) {
+						nombreLignesSaisies++;
+						
+						try {
+							String intitule = intituleArray[0].trim();
+							Long quantite = (quantiteArray != null && quantiteArray.length > 0) ? 
+								Long.parseLong(quantiteArray[0]) : 1L;
+							Long prixUnitaire = (prixArray != null && prixArray.length > 0) ? 
+								Long.parseLong(prixArray[0]) : 0L;
+							
+							// Créer une nouvelle ligne de détail
+							ReglementDetail rd = new ReglementDetail();
+							rd.setReglement(idReglement);
+							rd.setIntitule(intitule);
+							rd.setQuantite(quantite);
+							rd.setPrixUnitaire(prixUnitaire);
+							rd.setMontant(quantite * prixUnitaire);
+							rd.setWhenDone(new Timestamp(System.currentTimeMillis()));
+							rd.setWhoDone(String.valueOf(request.session().get("login").get()));
+							rd.setOnDeleted(false);
+							
+							// Vérifier les plafonds
+							Double totalCreditAnnuelle = adherentService.getVAdherentById(
+								regServices.findById(idReglement).getAdherent()).getTotalCreditAnnuelle();
+							Double totalCreditAConsomer = adherentService.getVAdherentById(
+								regServices.findById(idReglement).getAdherent()).getTotalCreditAConsomer();
+							Long totalConsommation = regServices.sommeRegler(
+								regServices.findById(idReglement).getAdherent(),
+								request.session().get("gestion").get());
+							Long totalAVailider = totalConsommation + rd.getMontant();
+							
+							// Vérifier si le plafond est dépassé
+							if (totalAVailider >= totalCreditAConsomer) {
+								messagesErreurs.add("Ligne " + i + " (" + intitule + "): Plafond dépassé");
+								nombreLignesRejetees++;
+								continue;
+							}
+							
+							// Enregistrer la ligne
+							if (reDetailMainServices.saveLogical(rd, true).equals("ok")) {
+								nombreLignesEnregistrees++;
+								
+								// Vérifier si le seuil d'alerte est atteint
+								if (totalAVailider >= totalCreditAnnuelle) {
+									Long diff2 = totalAVailider - totalCreditAnnuelle.longValue();
+									otpService.sendAlerteSeuil(
+										regServices.findVRegById(idReglement).getTelephone(), 
+										diff2);
+								}
+							} else {
+								messagesErreurs.add("Ligne " + i + " (" + intitule + "): Erreur d'enregistrement");
+								nombreLignesRejetees++;
+							}
+							
+						} catch (Exception e) {
+							messagesErreurs.add("Ligne " + i + ": Erreur - " + e.getMessage());
+							nombreLignesRejetees++;
+							e.printStackTrace();
+						}
+					}
+				}
+				
+				// Message de retour
+				String message;
+				String flashType;
+				
+				if (nombreLignesSaisies == 0) {
+					message = "Aucune ligne n'a été saisie";
+					flashType = "warning";
+				} else if (nombreLignesEnregistrees == nombreLignesSaisies) {
+					message = nombreLignesEnregistrees + " ligne(s) enregistrée(s) avec succès";
+					flashType = "success";
+				} else if (nombreLignesEnregistrees > 0) {
+					message = nombreLignesEnregistrees + " ligne(s) enregistrée(s), " + 
+						nombreLignesRejetees + " ligne(s) rejetée(s)";
+					if (!messagesErreurs.isEmpty()) {
+						message += ". Détails: " + String.join(", ", messagesErreurs);
+					}
+					flashType = "warning";
+				} else {
+					message = "Aucune ligne enregistrée. " + String.join(", ", messagesErreurs);
+					flashType = "error";
+				}
+				
+				return redirect(routes.ReglementCtrl.reglementDetailForm(
+					ViewMode.VIEW_MODE_CREATE,
+					typeOperation,
+					idReglement,
+					ad,
+					0L)).flashing(flashType, message);
+			}
+		}
+
+		// Mode EDIT/DELETE ou saisie simple : traitement classique d'une seule ligne
+		Form<ReglementDetail> uForm = formFactory.form(ReglementDetail.class).bindFromRequest(request);
 		ReglementDetail rd = uForm.get();
 		rd.setWhenDone(new Timestamp(System.currentTimeMillis()));
 		rd.setWhoDone(String.valueOf(request.session().get("login").get()));
@@ -278,15 +398,7 @@ public class ReglementCtrl extends Controller {
 		montanTotal = rd.getPrixUnitaire() * rd.getQuantite();
 		rd.setMontant(montanTotal);
 		System.out.println("envoi SMS............." ); 
-		//otpService.sendOtp("22796283209");
-				/*envoi sms membre musapost
-				otpService.sendOtp("22796014709");
-				otpService.sendOtp("22781090237");
-				otpService.sendOtp("22799913737");
-				otpService.sendOtp("22798347127");
-				otpService.sendOtp("22798484951");*/
 
-	
 		System.out.println("la somme total des rembourssement est de : " + sommeReg + " F CFLA");
 		Double totalCreditAnnuelle = adherentService.getVAdherentById(regServices.findById(rd.getReglement()).getAdherent()).getTotalCreditAnnuelle();
 		Double totalCreditAConsomer =  adherentService.getVAdherentById(regServices.findById(rd.getReglement()).getAdherent()).getTotalCreditAConsomer();

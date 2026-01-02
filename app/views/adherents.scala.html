@@ -116,18 +116,7 @@
               </button>
             </div>
 
-      <div class="row" style="display: none;">
-        <div class="col-12">
-          <div class="card card-primary">
-            <div class="card-header">
-              <h3 class="card-title">
-                <i class="fas fa-user-plus"></i> 
-                @if(viewMode.equals("CREATE")) { Nouvel adhérent }
-                @if(viewMode.equals("EDIT")) { Modifier adhérent }
-                @if(viewMode.equals("DELETE")) { Désactiver adhérent }
-              </h3>
-            </div>
-
+            <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
             <form method="POST"
                   name="form"
                   action='@controllers.routes.AdherentCtrl.save()'
@@ -141,7 +130,7 @@
               <input type="hidden" name="picture"  value="@adherent.getPicture()">
                <input type="hidden" name="pourcentageTotalRetenue"  value="@adherent.getPourcentageTotalRetenue()">
 
-              <div class="card-body">
+              <div class="card-body" style="padding: 20px;">
 
                 <div class="alert alert-info">
                   <i class="icon fas fa-info"></i>
@@ -448,13 +437,11 @@
 
               </div><!-- /.card-body -->
 
-              <div class="card-footer text-center">
+              <div class="modal-footer justify-content-between">
                 <button class="btn btn-secondary"
                         type="button"
-                        name="Annuler"
-                        value="Retour"
-                        onclick="history.go(-1)">
-                  <i class="fas fa-arrow-left"></i> Retour
+                        data-dismiss="modal">
+                  <i class="fas fa-times"></i> Fermer
                 </button>
 
                 @if(viewMode.equals("CREATE")) {
@@ -488,12 +475,10 @@
               </div>
 
             </form>
-          </div>
-        </div>
-      </div>
-          </div>
-        </div>
-      </div>
+            </div><!-- /.modal-body -->
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
     }
 
     @* ================== FILTRE ================== *@
