@@ -24,7 +24,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VAdherent implements Serializable {
 
-    private static final long serialVersionUID = 1801677549;
+    private static final long serialVersionUID = 1503783835;
 
     private Long       id;
     private String     nomAd;
@@ -41,6 +41,8 @@ public class VAdherent implements Serializable {
     private Integer    anciennete;
     private Long       salaireNet;
     private Double     pourcentageTotalRetenue;
+    private Boolean    isMember;
+    private String     email;
     private Double     totalCotisationAgent;
     private Double     totalCreditAnnuelle;
     private Double     totalCreditAConsomer;
@@ -74,6 +76,8 @@ public class VAdherent implements Serializable {
         this.anciennete = value.anciennete;
         this.salaireNet = value.salaireNet;
         this.pourcentageTotalRetenue = value.pourcentageTotalRetenue;
+        this.isMember = value.isMember;
+        this.email = value.email;
         this.totalCotisationAgent = value.totalCotisationAgent;
         this.totalCreditAnnuelle = value.totalCreditAnnuelle;
         this.totalCreditAConsomer = value.totalCreditAConsomer;
@@ -106,6 +110,8 @@ public class VAdherent implements Serializable {
         Integer    anciennete,
         Long       salaireNet,
         Double     pourcentageTotalRetenue,
+        Boolean    isMember,
+        String     email,
         Double     totalCotisationAgent,
         Double     totalCreditAnnuelle,
         Double     totalCreditAConsomer,
@@ -136,6 +142,8 @@ public class VAdherent implements Serializable {
         this.anciennete = anciennete;
         this.salaireNet = salaireNet;
         this.pourcentageTotalRetenue = pourcentageTotalRetenue;
+        this.isMember = isMember;
+        this.email = email;
         this.totalCotisationAgent = totalCotisationAgent;
         this.totalCreditAnnuelle = totalCreditAnnuelle;
         this.totalCreditAConsomer = totalCreditAConsomer;
@@ -272,6 +280,22 @@ public class VAdherent implements Serializable {
         this.pourcentageTotalRetenue = pourcentageTotalRetenue;
     }
 
+    public Boolean getIsMember() {
+        return this.isMember;
+    }
+
+    public void setIsMember(Boolean isMember) {
+        this.isMember = isMember;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public Double getTotalCotisationAgent() {
         return this.totalCotisationAgent;
     }
@@ -403,6 +427,8 @@ public class VAdherent implements Serializable {
         sb.append(", ").append(anciennete);
         sb.append(", ").append(salaireNet);
         sb.append(", ").append(pourcentageTotalRetenue);
+        sb.append(", ").append(isMember);
+        sb.append(", ").append(email);
         sb.append(", ").append(totalCotisationAgent);
         sb.append(", ").append(totalCreditAnnuelle);
         sb.append(", ").append(totalCreditAConsomer);

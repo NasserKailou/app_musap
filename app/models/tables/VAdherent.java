@@ -34,7 +34,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VAdherent extends TableImpl<VAdherentRecord> {
 
-    private static final long serialVersionUID = 1798998111;
+    private static final long serialVersionUID = 1942656762;
 
     /**
      * The reference instance of <code>public.v_adherent</code>
@@ -123,6 +123,16 @@ public class VAdherent extends TableImpl<VAdherentRecord> {
      * The column <code>public.v_adherent.pourcentage_total_retenue</code>.
      */
     public final TableField<VAdherentRecord, Double> POURCENTAGE_TOTAL_RETENUE = createField("pourcentage_total_retenue", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>public.v_adherent.is_member</code>.
+     */
+    public final TableField<VAdherentRecord, Boolean> IS_MEMBER = createField("is_member", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>public.v_adherent.email</code>.
+     */
+    public final TableField<VAdherentRecord, String> EMAIL = createField("email", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * The column <code>public.v_adherent.total_cotisation_agent</code>.
