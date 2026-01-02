@@ -927,63 +927,111 @@ const adherentsData = {};
  * Ouvre le modal en mode édition avec les données de l'adhérent
  */
 window.openEditModal = function(adherentId) {
-  console.log('Opening edit modal for adherent:', adherentId);
+  console.log('🔍 Opening edit modal for adherent ID:', adherentId);
+  console.log('📊 Available adherents:', Object.keys(adherentsData));
   
-  const data = adherentsData[adherentId];
+  // Convertir l'ID en string pour la recherche
+  const idStr = String(adherentId);
+  const data = adherentsData[idStr];
+  
   if (!data) {
-    console.error('Adhérent non trouvé:', adherentId);
-    alert('Erreur : Adhérent non trouvé');
+    console.error('❌ Adhérent non trouvé:', idStr);
+    console.error('📋 Données disponibles:', adherentsData);
+    alert('Erreur : Adhérent non trouvé (ID: ' + idStr + ')');
     return;
   }
   
-  // Remplir les champs cachés
-  document.querySelector('input[name="viewMode"]').value = 'EDIT';
-  document.querySelector('input[name="id"]').value = data.id;
-  document.querySelector('input[name="picture"]').value = data.picture;
-  document.querySelector('input[name="pourcentageTotalRetenue"]').value = data.pourcentageTotalRetenue;
+  console.log('✅ Données trouvées:', data);
   
-  // Remplir les champs du formulaire
-  document.getElementById('matricule').value = data.matricule;
-  document.querySelector('input[name="nomAd"]').value = data.nomAd;
-  document.querySelector('input[name="prenomAd"]').value = data.prenomAd;
-  document.getElementById('sexe').value = data.sexe;
-  document.getElementById('codeCarnet').value = data.codeCarnet;
-  document.getElementById('salaireNet').value = data.salaireNet;
-  document.getElementById('email').value = data.email;
-  document.getElementById('telPatient').value = data.telephone;
-  document.getElementById('typeConsultation').value = data.categorie;
-  document.querySelector('input[name="tmpDate"]').value = data.dateNaiss;
-  document.querySelector('input[name="tmpDate2"]').value = data.datePriseService;
-  document.querySelector('input[name="fonction"]').value = data.fonction;
-  document.querySelector('input[name="structureSigle"]').value = data.structureSigle;
-  
-  // Radio buttons pour membre actif
-  if (data.isMember) {
-    document.getElementById('membre_actif_oui').checked = true;
-  } else {
-    document.getElementById('membre_actif_non').checked = true;
+  try {
+    // Réinitialiser le formulaire d'abord
+    document.getElementById('form-adherent').reset();
+    
+    // Remplir les champs cachés
+    const viewModeInput = document.querySelector('input[name="viewMode"]');
+    const idInput = document.querySelector('input[name="id"]');
+    const pictureInput = document.querySelector('input[name="picture"]');
+    const retenueInput = document.querySelector('input[name="pourcentageTotalRetenue"]');
+    
+    if (viewModeInput) viewModeInput.value = 'EDIT';
+    if (idInput) idInput.value = data.id;
+    if (pictureInput) pictureInput.value = data.picture || '';
+    if (retenueInput) retenueInput.value = data.pourcentageTotalRetenue || '0';
+    
+    // Remplir les champs du formulaire avec vérification
+    const setFieldValue = (selector, value, isId = false) => {
+      const field = isId ? document.getElementById(selector) : document.querySelector(selector);
+      if (field) {
+        field.value = value || '';
+        console.log(`✓ ${selector}: ${value}`);
+      } else {
+        console.warn(`⚠️ Champ non trouvé: ${selector}`);
+      }
+    };
+    
+    setFieldValue('matricule', data.matricule, true);
+    setFieldValue('input[name="nomAd"]', data.nomAd);
+    setFieldValue('input[name="prenomAd"]', data.prenomAd);
+    setFieldValue('sexe', data.sexe, true);
+    setFieldValue('codeCarnet', data.codeCarnet, true);
+    setFieldValue('salaireNet', data.salaireNet, true);
+    setFieldValue('email', data.email, true);
+    setFieldValue('telPatient', data.telephone, true);
+    setFieldValue('typeConsultation', data.categorie, true);
+    setFieldValue('input[name="tmpDate"]', data.dateNaiss);
+    setFieldValue('input[name="tmpDate2"]', data.datePriseService);
+    setFieldValue('input[name="fonction"]', data.fonction);
+    setFieldValue('input[name="structureSigle"]', data.structureSigle);
+    
+    // Radio buttons pour membre actif
+    const membreOui = document.getElementById('membre_actif_oui');
+    const membreNon = document.getElementById('membre_actif_non');
+    
+    if (membreOui && membreNon) {
+      if (data.isMember) {
+        membreOui.checked = true;
+        membreNon.checked = false;
+      } else {
+        membreOui.checked = false;
+        membreNon.checked = true;
+      }
+      console.log('✓ Membre actif:', data.isMember);
+    }
+    
+    // Mettre à jour le titre du modal
+    const modalLabel = document.getElementById('modalAdherentLabel');
+    if (modalLabel) {
+      modalLabel.innerHTML = '<i class="fas fa-edit"></i> Modifier adhérent';
+    }
+    
+    // Mettre à jour les boutons du footer
+    const submitBtnContainer = document.querySelector('#modal-adherent-form .modal-footer');
+    if (submitBtnContainer) {
+      const submitButtons = submitBtnContainer.querySelectorAll('button[type="submit"]');
+      
+      // Cacher tous les boutons submit
+      submitButtons.forEach(btn => {
+        btn.style.display = 'none';
+      });
+      
+      // Afficher uniquement le bouton Modifier
+      const editBtn = submitBtnContainer.querySelector('button[form="form-adherent"][title*="Modifier"]');
+      if (editBtn) {
+        editBtn.style.display = 'inline-block';
+        console.log('✓ Bouton Modifier affiché');
+      } else {
+        console.warn('⚠️ Bouton Modifier non trouvé');
+      }
+    }
+    
+    // Ouvrir le modal
+    console.log('🚀 Ouverture du modal...');
+    $('#modal-adherent-form').modal('show');
+    
+  } catch (error) {
+    console.error('❌ Erreur lors du remplissage du formulaire:', error);
+    alert('Erreur : ' + error.message);
   }
-  
-  // Mettre à jour le titre du modal
-  document.getElementById('modalAdherentLabel').innerHTML = '<i class="fas fa-edit"></i> Modifier adhérent';
-  
-  // Mettre à jour les boutons du footer
-  const submitBtnContainer = document.querySelector('.modal-footer');
-  const submitButtons = submitBtnContainer.querySelectorAll('button[type="submit"]');
-  
-  // Cacher tous les boutons submit
-  submitButtons.forEach(btn => {
-    btn.style.display = 'none';
-  });
-  
-  // Afficher uniquement le bouton Modifier
-  const editBtn = submitBtnContainer.querySelector('button[form="form-adherent"][title*="Modifier"]');
-  if (editBtn) {
-    editBtn.style.display = 'inline-block';
-  }
-  
-  // Ouvrir le modal
-  $('#modal-adherent-form').modal('show');
 }
 
 /**
