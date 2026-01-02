@@ -85,7 +85,7 @@
     @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin") && !viewMode.equals("EDIT") && !viewMode.equals("DELETE")) {
     <div class="row mt-3">
       <div class="col-12">
-        <button type="button" class="btn btn-primary btn-lg" onclick="openCreateModal()">
+        <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modal-adherent-form">
           <i class="fas fa-user-plus"></i> Nouvel Adhérent
         </button>
       </div>
@@ -1095,34 +1095,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Auto-open modal selon viewMode
   var viewMode = '@viewMode';
-  var adherentId = '@adherent.getId()';
   
-  if (viewMode && viewMode.trim() !== '') {
-    console.log('Ouverture du modal pour viewMode:', viewMode, 'adherentId:', adherentId);
+  console.log('ViewMode:', viewMode);
+  
+  if (viewMode && viewMode.trim() !== '' && viewMode !== 'VIEW') {
+    console.log('Ouverture automatique du modal Bootstrap pour viewMode:', viewMode);
+    
+    // Attendre que le DOM soit complètement chargé
     setTimeout(function () {
-      if (viewMode === 'CREATE') {
-        openCreateModal();
-      } else if (viewMode === 'EDIT' && adherentId && adherentId !== 'null' && adherentId !== '0') {
-        openEditModal(adherentId);
-      } else if (viewMode === 'DELETE' && adherentId && adherentId !== 'null' && adherentId !== '0') {
-        // Pour le mode DELETE, on peut aussi utiliser openEditModal
-        // mais mettre à jour le titre et les boutons
-        openEditModal(adherentId);
-        setTimeout(function() {
-          document.getElementById('modalAdherentLabel').innerHTML = '<i class="fas fa-trash"></i> Désactiver adhérent';
-          
-          // Afficher uniquement le bouton Supprimer
-          const submitBtnContainer = document.querySelector('.modal-footer');
-          const submitButtons = submitBtnContainer.querySelectorAll('button[type="submit"]');
-          submitButtons.forEach(btn => btn.style.display = 'none');
-          
-          const deleteBtn = submitBtnContainer.querySelector('button[form="form-adherent"][title*="Désactiver"]');
-          if (deleteBtn) {
-            deleteBtn.style.display = 'inline-block';
-          }
-        }, 200);
+      // Ouvrir le modal avec Bootstrap
+      $('#modal-adherent-form').modal('show');
+      
+      // Mettre à jour le titre du modal selon le mode
+      var modalTitle = document.getElementById('modalAdherentLabel');
+      if (modalTitle) {
+        if (viewMode === 'CREATE') {
+          modalTitle.innerHTML = '<i class="fas fa-user-plus"></i> Nouvel adhérent';
+        } else if (viewMode === 'EDIT') {
+          modalTitle.innerHTML = '<i class="fas fa-edit"></i> Modifier adhérent';
+        } else if (viewMode === 'DELETE') {
+          modalTitle.innerHTML = '<i class="fas fa-trash"></i> Désactiver adhérent';
+        }
       }
-    }, 100);
+    }, 500);
   }
 });
 </script>
