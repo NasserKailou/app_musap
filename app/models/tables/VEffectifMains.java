@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VEffectifMains extends TableImpl<VEffectifMainsRecord> {
 
-    private static final long serialVersionUID = -764820454;
+    private static final long serialVersionUID = 76585054;
 
     /**
      * The reference instance of <code>public.v_effectif_mains</code>
@@ -96,7 +96,7 @@ public class VEffectifMains extends TableImpl<VEffectifMainsRecord> {
     /**
      * The column <code>public.v_effectif_mains.age</code>.
      */
-    public final TableField<VEffectifMainsRecord, Double> AGE = createField("age", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<VEffectifMainsRecord, Integer> AGE = createField("age", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>public.v_effectif_mains.date_prise_service</code>.
@@ -106,7 +106,7 @@ public class VEffectifMains extends TableImpl<VEffectifMainsRecord> {
     /**
      * The column <code>public.v_effectif_mains.anciennete</code>.
      */
-    public final TableField<VEffectifMainsRecord, Double> ANCIENNETE = createField("anciennete", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<VEffectifMainsRecord, Integer> ANCIENNETE = createField("anciennete", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>public.v_effectif_mains.picture</code>.

@@ -1,6 +1,9 @@
 package controllers;
 
+import java.io.File;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +19,7 @@ import play.mvc.Result;
 import play.mvc.Security;
 import play.mvc.Http.Request;
 import services.StructureMainServices;
+import utils.CallJasperReport;
 import utils.Secured;
 import utils.ViewMode;
 
@@ -28,12 +32,14 @@ import utils.ViewMode;
 public class StructurePartenaireCtrl extends Controller {
 
 	StructureMainServices structureService;
+	CallJasperReport jasper;
 	private final FormFactory formFactory;
 
 	@Inject
-	public StructurePartenaireCtrl(StructureMainServices structureService, FormFactory formFactory) {
+	public StructurePartenaireCtrl(StructureMainServices structureService,CallJasperReport jasper, FormFactory formFactory) {
 		super();
 		this.structureService = structureService;
+		this.jasper = jasper;
 		this.formFactory = formFactory;
 	}
 
@@ -116,5 +122,29 @@ public class StructurePartenaireCtrl extends Controller {
 		}
 		return redirect(routes.StructurePartenaireCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L));
 	}
+
+	public Result print(Request request, Long idStruc, String fileName) {
+
+		// String fileName = "recu";
+		LocalDateTime now = LocalDateTime.now();
+		String now_string = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm"));
+		String templateDir = new File("").getAbsolutePath() + "/reports/spool/";
+		try {
+			// flash("success", "impression ok");
+
+			jasper.generateReport(fileName,String.valueOf(idStruc));
+
+			return ok(new java.io.File(templateDir + fileName + "_" + now_string + "_" + idStruc + ".pdf"))
+					.flashing("success", "impression ok");
+
+		} catch (Exception e) {
+			// flash("error", "erreur impression");
+			// System.out.println(e.getMessage() + "+++++++--**///////++++++++");
+			return redirect(routes.StructurePartenaireCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L)).flashing("error",
+					"Erreur d'impression");
+		}
+	}
+
+
 
 }

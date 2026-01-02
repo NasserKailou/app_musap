@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VPartenaire extends TableImpl<VPartenaireRecord> {
 
-    private static final long serialVersionUID = -1144728627;
+    private static final long serialVersionUID = 1114335285;
 
     /**
      * The reference instance of <code>public.v_partenaire</code>
@@ -77,6 +77,21 @@ public class VPartenaire extends TableImpl<VPartenaireRecord> {
      * The column <code>public.v_partenaire.telephone</code>.
      */
     public final TableField<VPartenaireRecord, String> TELEPHONE = createField("telephone", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_partenaire.statut_structure</code>.
+     */
+    public final TableField<VPartenaireRecord, String> STATUT_STRUCTURE = createField("statut_structure", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_partenaire.type_structure</code>.
+     */
+    public final TableField<VPartenaireRecord, String> TYPE_STRUCTURE = createField("type_structure", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_partenaire.suspension</code>.
+     */
+    public final TableField<VPartenaireRecord, Boolean> SUSPENSION = createField("suspension", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
 
     /**
      * The column <code>public.v_partenaire.region</code>.

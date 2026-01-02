@@ -75,7 +75,7 @@ public class UserCtrl extends Controller {
 			a = userService.getUserByLogin(login);
 
 		}
-		return ok(views.html.users.render(viewMode, users, a,request));
+		return ok(views.html.users.render(viewMode, users,userService.listRegion(), a,request));
 
 	}
 
@@ -139,7 +139,7 @@ public class UserCtrl extends Controller {
 	}
 
 	private boolean isSuperAdmin(Request request) {
-		return String.valueOf(request.session().get("droit").get()).equals("SuperAdmin");
+		return String.valueOf(request.session().get("droit").get()).equals("Admin");
 	}
 
 }

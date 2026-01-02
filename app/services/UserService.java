@@ -10,6 +10,7 @@ import java.util.List;
 
 import models.Tables;
 import models.tables.daos.UsersDao;
+import models.tables.pojos.Region;
 import models.tables.pojos.Users;
 import utils.BCryptHash;
 import utils.IConnectionHelper;
@@ -31,8 +32,8 @@ public class UserService extends UsersDao implements IUser {
 	}
 
 	@Override
-	public String saveLogical(Users u, boolean b) {
-		
+	public String saveLogical(Users user, boolean b) {
+	/* 	
 		Users user = new Users();
 		user.setNomPrenom(u.getNomPrenom());
 		user.setLogin(u.getLogin());
@@ -42,7 +43,8 @@ public class UserService extends UsersDao implements IUser {
 		user.setPasse(BCryptHash.hashPassword(u.getPasse()));
 		user.setWhenDone(u.getWhenDone());
 		user.setWhoDone(u.getWhoDone());
-		
+		*/
+		user.setPasse(BCryptHash.hashPassword(user.getPasse()));
 		try {
 			if (b)
 				super.insert(user);
@@ -99,6 +101,13 @@ public class UserService extends UsersDao implements IUser {
 	public boolean isUserExist(String libelle) {
 		List<Users> users = super.fetchByLogin(libelle);
 		return users.size() > 0;
+	}
+
+	public List<Region> listRegion() {
+
+		//return con.connection().selectFrom(models.Tables.REGION).where(Tables.REGION.IS_DELETED.isFalse())
+		return con.connection().selectFrom(models.Tables.REGION)
+				.fetchInto(Region.class);
 	}
 
 }

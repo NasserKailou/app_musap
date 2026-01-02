@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bon_commande" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="379035be-cf63-4451-a2b4-d2e536a83485">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="MSAP.xml"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="id" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM public.v_bon_de_commande where id =$P{id}::bigint and on_deleted is false]]>
+	</queryString>
+	<field name="id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="id"/>
+	</field>
+	<field name="nom_ad" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nom_ad"/>
+	</field>
+	<field name="prenom_ad" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="prenom_ad"/>
+	</field>
+	<field name="id_adherent" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="id_adherent"/>
+	</field>
+	<field name="matricule" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="matricule"/>
+	</field>
+	<field name="code_carnet" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="code_carnet"/>
+	</field>
+	<field name="ref_facture" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ref_facture"/>
+	</field>
+	<field name="structure" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="structure"/>
+	</field>
+	<field name="date_payement" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="date_payement"/>
+	</field>
+	<field name="who_done" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="who_done"/>
+	</field>
+	<field name="when_done" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="when_done"/>
+	</field>
+	<field name="is_confirmed_bon" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.label" value="is_confirmed_bon"/>
+	</field>
+	<field name="when_confirmed_bon" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="when_confirmed_bon"/>
+	</field>
+	<field name="date_expiration" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="date_expiration"/>
+	</field>
+	<field name="type_reglement" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="type_reglement"/>
+	</field>
+	<field name="annee" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="annee"/>
+	</field>
+	<field name="on_deleted" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.label" value="on_deleted"/>
+	</field>
+	<field name="prestation" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="prestation"/>
+	</field>
+	<field name="taux_effectif" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="taux_effectif"/>
+	</field>
+	<field name="type_structure" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="type_structure"/>
+	</field>
+	<field name="statut_structure" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="statut_structure"/>
+	</field>
+	<field name="nom_ay" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nom_ay"/>
+	</field>
+	<field name="lien" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="lien"/>
+	</field>
+	<field name="genre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="genre"/>
+	</field>
+	<field name="ayant_droit" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="ayant_droit"/>
+	</field>
+	<field name="montant_total" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="montant_total"/>
+	</field>
+	<field name="montant_reglement" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="montant_reglement"/>
+	</field>
+	<field name="montant_paye" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="montant_paye"/>
+	</field>
+	<field name="id_structure" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="id_structure"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="1" splitType="Stretch"/>
+	</detail>
+	<summary>
+		<band height="301" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="391" height="300" uuid="ad67466a-e406-4b30-9fab-931274a64e02"/>
+				<subreportParameter name="id">
+					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["sr_bon_commande.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="391" y="0" width="419" height="300" uuid="59f94a6c-515d-40df-86ff-2480e3014be9"/>
+				<subreportParameter name="id">
+					<subreportParameterExpression><![CDATA[$P{id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["sr_bon_commande.jasper"]]></subreportExpression>
+			</subreport>
+			<line>
+				<reportElement x="405" y="0" width="1" height="301" uuid="624bd1b5-3186-441f-9f63-a30caf5c23a9"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 import javax.inject.Inject;
 
+import models.tables.pojos.Adherent;
 import models.tables.pojos.AyantDroit;
 import play.data.Form;
 import play.data.FormFactory;
@@ -47,6 +48,23 @@ public class AyantDroitCtrl extends Controller {
 		this.adherentService = adherentService;
 		this.jasper = jasper;
 	}
+
+	private double getTauxPourLien(String lien) {
+				if (lien == null) return 0.0;
+
+				String v = lien.trim().toUpperCase();
+				switch (v) {
+					case "ENFANT":
+						return 1.0;
+					case "CONJOINT":
+						return 1.5;
+					case "PARENT":
+						return 3.0;
+					default:
+						return 0.0;
+				}
+			}
+
 
 	public Result show(String subAction, Long idAyantDroit, Long idAdherent, Request request) {
 
@@ -90,6 +108,122 @@ public class AyantDroitCtrl extends Controller {
 
 	public Result save(Request request) {
 
+    final String viewMode = formFactory.form().bindFromRequest(request).get("viewMode");
+
+    Form<AyantDroit> uForm = formFactory.form(AyantDroit.class).bindFromRequest(request);
+    String dateNaiss = formFactory.form().bindFromRequest(request).get("tmpDate");
+
+    AyantDroit c = uForm.get();
+    c.setWhenDone(new Timestamp(System.currentTimeMillis()));
+    c.setOnDeleted(false);
+    c.setWhoDone(String.valueOf(request.session().get("login").get()));
+    
+    // Adhérent concerné
+    Adherent ad = adherentService.findById(c.getAdherent());
+
+    // ================== GESTION DES POURCENTAGES ==================
+    double deltaPourcentage = 0.0;
+
+    if (ViewMode.VIEW_MODE_CREATE.equals(viewMode)) {
+        // Nouveau AYANT DROIT : on ajoute son taux
+        double taux = getTauxPourLien(c.getLien());
+        c.setPourcentageRetenue(taux);
+        deltaPourcentage = taux;
+		c.setDateNaiss(ayantDroitService.getDateT(dateNaiss));
+
+
+    } else if (ViewMode.VIEW_MODE_EDIT.equals(viewMode)) {
+        // On récupère l'ancien pour recalculer le delta
+        AyantDroit ancien = ayantDroitService.findById(c.getId());
+        if (ancien != null && !Boolean.TRUE.equals(ancien.getOnDeleted())) {
+            double ancienTaux = (ancien.getPourcentageRetenue() != null)
+                    ? ancien.getPourcentageRetenue()
+                    : getTauxPourLien(ancien.getLien());
+
+            double nouveauTaux = getTauxPourLien(c.getLien());
+            c.setPourcentageRetenue(nouveauTaux);
+
+            deltaPourcentage = nouveauTaux - ancienTaux;
+        }
+		c.setDateNaiss(ayantDroitService.getDateT(dateNaiss));
+
+    } else if (ViewMode.VIEW_MODE_DELETE.equals(viewMode)) {
+        // Suppression → on retire son taux
+        AyantDroit ancien = ayantDroitService.findById(c.getId());
+        if (ancien != null && !Boolean.TRUE.equals(ancien.getOnDeleted())) {
+            double ancienTaux = (ancien.getPourcentageRetenue() != null)
+                    ? ancien.getPourcentageRetenue()
+                    : getTauxPourLien(ancien.getLien());
+
+            deltaPourcentage = -ancienTaux;
+        }
+        c.setOnDeleted(true);
+		c.setDateNaiss(c.getDateNaiss());
+
+    }
+    // En mode TRAITE on ne touche pas aux pourcentages
+
+    // Application du delta sur l’adhérent
+    if (deltaPourcentage != 0.0 && ad != null) {
+        Double total = ad.getPourcentageTotalRetenue();
+        if (total == null) total = 0.0;
+        total = total + deltaPourcentage;
+        if (total < 0.0) total = 0.0; // sécurité pour éviter les valeurs négatives
+        ad.setPourcentageTotalRetenue(total);
+        adherentService.saveLogical(ad, false);
+    }
+    // ================== FIN GESTION POURCENTAGES ==================
+
+    // ====== CRUD classique sur AyantDroit ======
+    if (ViewMode.VIEW_MODE_CREATE.equals(viewMode)) {
+        c.setPicture(new File("").getAbsolutePath() + "/public/images/ayantDroits/1.jpg");
+
+        if ("ok".equals(ayantDroitService.saveLogical(c, true))) {
+            return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+                    .flashing("success", " AyantDroit " + c.getNomAy() + " ajouté avec succès");
+        } else {
+            return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+                    .flashing("error", " AyantDroit " + c.getNomAy() + " non ajouté");
+        }
+
+    } else if (ViewMode.VIEW_MODE_EDIT.equals(viewMode)) {
+
+        if ("ok".equals(ayantDroitService.saveLogical(c, false))) {
+            return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+                    .flashing("success", " AyantDroit modifié avec succès");
+        } else {
+            return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+                    .flashing("error", " AyantDroit non modifié");
+        }
+
+    } else if (ViewMode.VIEW_MODE_TRAITE.equals(viewMode)) {
+
+        if ("ok".equals(ayantDroitService.saveLogical(c, false))) {
+            return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+                    .flashing("success", " AyantDroit traité avec succès");
+        } else {
+            return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+                    .flashing("error", "Échec lors du traitement de l'AyantDroit");
+        }
+
+    } else if (ViewMode.VIEW_MODE_DELETE.equals(viewMode)) {
+
+        if ("ok".equals(ayantDroitService.saveLogical(c, false))) {
+            return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+                    .flashing("success", " AyantDroit supprimé avec succès");
+        } else {
+            return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+                    .flashing("error", " AyantDroit non supprimé");
+        }
+    }
+
+    return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()));
+}
+
+
+/** 
+	public Result save(Request request) {
+
 		final String viewMode = formFactory.form().bindFromRequest(request).get("viewMode");
 
 		Form<AyantDroit> uForm = formFactory.form(AyantDroit.class).bindFromRequest(request);
@@ -100,6 +234,24 @@ public class AyantDroitCtrl extends Controller {
 		c.setOnDeleted(false);
 		c.setWhoDone(String.valueOf(request.session().get("login").get()));
 		c.setDateNaiss(ayantDroitService.getDateT(dateNaiss));
+
+		Adherent ad = adherentService.findById(c.getAdherent());
+
+		if(c.getLien().equals("ENFANT") ){
+			c.setPourcentageRetenue(1.0);
+			ad.setPourcentageTotalRetenue(ad.getPourcentageTotalRetenue()+1.0);
+			adherentService.saveLogical(ad, false);
+		}
+			
+		if(c.getLien().equals("CONJOINT")){
+			ad.setPourcentageTotalRetenue(ad.getPourcentageTotalRetenue()+1.5);
+			adherentService.saveLogical(ad, false);
+		}
+			
+		if(c.getLien().equals("PARENT")){
+			ad.setPourcentageTotalRetenue(ad.getPourcentageTotalRetenue()+3.0);
+			adherentService.saveLogical(ad, false);
+		}
 
 		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE)) {
 			c.setPicture(new File("").getAbsolutePath() + "/public/images/ayantDroits//1.jpg");
@@ -150,7 +302,7 @@ public class AyantDroitCtrl extends Controller {
 		}
 		return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()));
 	}
-
+*/
 	public Result formProfil(Request request, Long idAdherent) {
 		
 		return ok(views.html.photoAyantDroit.render(idAdherent,request));

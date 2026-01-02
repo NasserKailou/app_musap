@@ -23,8 +23,10 @@ import models.tables.Direction;
 import models.tables.Division;
 import models.tables.Ecriture;
 import models.tables.Email;
+import models.tables.EtudeConsommations;
 import models.tables.JournalEcriture;
 import models.tables.Notification;
+import models.tables.OtpMessage;
 import models.tables.Params;
 import models.tables.Personnel;
 import models.tables.Programme;
@@ -48,9 +50,13 @@ import models.tables.VDepassement;
 import models.tables.VEcriture;
 import models.tables.VEffectifMains;
 import models.tables.VEffectifMainsAyantDroit;
+import models.tables.VHopitaux;
 import models.tables.VNbrBenefiaireParPrestation;
 import models.tables.VNbrPrestationParAdherent;
 import models.tables.VPartenaire;
+import models.tables.VPharmacie;
+import models.tables.VRegBonCommande;
+import models.tables.VRegPriseEnCharge;
 import models.tables.VReglement;
 import models.tables.VReglementDetails;
 import models.tables.VReglementGlobal;
@@ -84,7 +90,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -1047972142;
+    private static final long serialVersionUID = -1363852353;
 
     /**
      * The reference instance of <code>public</code>
@@ -157,6 +163,11 @@ public class Public extends SchemaImpl {
     public final Email EMAIL = models.tables.Email.EMAIL;
 
     /**
+     * Table stockant les données d'étude de consommations des bons de commande
+     */
+    public final EtudeConsommations ETUDE_CONSOMMATIONS = models.tables.EtudeConsommations.ETUDE_CONSOMMATIONS;
+
+    /**
      * The table <code>public.journal_ecriture</code>.
      */
     public final JournalEcriture JOURNAL_ECRITURE = models.tables.JournalEcriture.JOURNAL_ECRITURE;
@@ -165,6 +176,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.notification</code>.
      */
     public final Notification NOTIFICATION = models.tables.Notification.NOTIFICATION;
+
+    /**
+     * The table <code>public.otp_message</code>.
+     */
+    public final OtpMessage OTP_MESSAGE = models.tables.OtpMessage.OTP_MESSAGE;
 
     /**
      * The table <code>public.params</code>.
@@ -282,6 +298,11 @@ public class Public extends SchemaImpl {
     public final VEffectifMainsAyantDroit V_EFFECTIF_MAINS_AYANT_DROIT = models.tables.VEffectifMainsAyantDroit.V_EFFECTIF_MAINS_AYANT_DROIT;
 
     /**
+     * The table <code>public.v_hopitaux</code>.
+     */
+    public final VHopitaux V_HOPITAUX = models.tables.VHopitaux.V_HOPITAUX;
+
+    /**
      * The table <code>public.v_nbr_benefiaire_par_prestation</code>.
      */
     public final VNbrBenefiaireParPrestation V_NBR_BENEFIAIRE_PAR_PRESTATION = models.tables.VNbrBenefiaireParPrestation.V_NBR_BENEFIAIRE_PAR_PRESTATION;
@@ -295,6 +316,21 @@ public class Public extends SchemaImpl {
      * The table <code>public.v_partenaire</code>.
      */
     public final VPartenaire V_PARTENAIRE = models.tables.VPartenaire.V_PARTENAIRE;
+
+    /**
+     * The table <code>public.v_pharmacie</code>.
+     */
+    public final VPharmacie V_PHARMACIE = models.tables.VPharmacie.V_PHARMACIE;
+
+    /**
+     * The table <code>public.v_reg_bon_commande</code>.
+     */
+    public final VRegBonCommande V_REG_BON_COMMANDE = models.tables.VRegBonCommande.V_REG_BON_COMMANDE;
+
+    /**
+     * The table <code>public.v_reg_prise_en_charge</code>.
+     */
+    public final VRegPriseEnCharge V_REG_PRISE_EN_CHARGE = models.tables.VRegPriseEnCharge.V_REG_PRISE_EN_CHARGE;
 
     /**
      * The table <code>public.v_reglement</code>.
@@ -399,8 +435,10 @@ public class Public extends SchemaImpl {
             Sequences.DIVISION_ID_SEQ,
             Sequences.ECRITURE_ID_SEQ,
             Sequences.EMAIL_ID_SEQ,
+            Sequences.ETUDE_CONSOMMATIONS_ID_SEQ,
             Sequences.JOURNAL_ECRITURE_ID_SEQ,
             Sequences.NOTIFICATION_ID_SEQ,
+            Sequences.OTP_MESSAGE_ID_SEQ,
             Sequences.PARAMS_ID_SEQ,
             Sequences.PROGRAMME_ID_SEQ,
             Sequences.REGION_ID_SEQ,
@@ -435,8 +473,10 @@ public class Public extends SchemaImpl {
             Division.DIVISION,
             Ecriture.ECRITURE,
             Email.EMAIL,
+            EtudeConsommations.ETUDE_CONSOMMATIONS,
             JournalEcriture.JOURNAL_ECRITURE,
             Notification.NOTIFICATION,
+            OtpMessage.OTP_MESSAGE,
             Params.PARAMS,
             Personnel.PERSONNEL,
             Programme.PROGRAMME,
@@ -460,9 +500,13 @@ public class Public extends SchemaImpl {
             VEcriture.V_ECRITURE,
             VEffectifMains.V_EFFECTIF_MAINS,
             VEffectifMainsAyantDroit.V_EFFECTIF_MAINS_AYANT_DROIT,
+            VHopitaux.V_HOPITAUX,
             VNbrBenefiaireParPrestation.V_NBR_BENEFIAIRE_PAR_PRESTATION,
             VNbrPrestationParAdherent.V_NBR_PRESTATION_PAR_ADHERENT,
             VPartenaire.V_PARTENAIRE,
+            VPharmacie.V_PHARMACIE,
+            VRegBonCommande.V_REG_BON_COMMANDE,
+            VRegPriseEnCharge.V_REG_PRISE_EN_CHARGE,
             VReglement.V_REGLEMENT,
             VReglement_2.V_REGLEMENT_2,
             VReglementDetails.V_REGLEMENT_DETAILS,

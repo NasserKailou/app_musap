@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class AyantDroit extends TableImpl<AyantDroitRecord> {
 
-    private static final long serialVersionUID = -420679439;
+    private static final long serialVersionUID = -1262139645;
 
     /**
      * The reference instance of <code>public.ayant_droit</code>
@@ -110,6 +110,11 @@ public class AyantDroit extends TableImpl<AyantDroitRecord> {
      * The column <code>public.ayant_droit.is_ok_for_printing</code>.
      */
     public final TableField<AyantDroitRecord, Boolean> IS_OK_FOR_PRINTING = createField("is_ok_for_printing", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>public.ayant_droit.pourcentage_retenue</code>.
+     */
+    public final TableField<AyantDroitRecord, Double> POURCENTAGE_RETENUE = createField("pourcentage_retenue", org.jooq.impl.SQLDataType.DOUBLE, this, "");
 
     /**
      * Create a <code>public.ayant_droit</code> table reference

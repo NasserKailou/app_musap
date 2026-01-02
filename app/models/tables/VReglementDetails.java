@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetails extends TableImpl<VReglementDetailsRecord> {
 
-    private static final long serialVersionUID = 346708483;
+    private static final long serialVersionUID = -575361365;
 
     /**
      * The reference instance of <code>public.v_reglement_details</code>
@@ -67,6 +67,21 @@ public class VReglementDetails extends TableImpl<VReglementDetailsRecord> {
      * The column <code>public.v_reglement_details.montant</code>.
      */
     public final TableField<VReglementDetailsRecord, Long> MONTANT = createField("montant", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.v_reglement_details.quantite</code>.
+     */
+    public final TableField<VReglementDetailsRecord, Long> QUANTITE = createField("quantite", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.v_reglement_details.prix_unitaire</code>.
+     */
+    public final TableField<VReglementDetailsRecord, Long> PRIX_UNITAIRE = createField("prix_unitaire", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.v_reglement_details.code_carnet</code>.
+     */
+    public final TableField<VReglementDetailsRecord, String> CODE_CARNET = createField("code_carnet", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * The column <code>public.v_reglement_details.who_done</code>.
@@ -119,9 +134,9 @@ public class VReglementDetails extends TableImpl<VReglementDetailsRecord> {
     public final TableField<VReglementDetailsRecord, String> STRUCTURE = createField("structure", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
-     * The column <code>public.v_reglement_details.couverture</code>.
+     * The column <code>public.v_reglement_details.taux_effectif</code>.
      */
-    public final TableField<VReglementDetailsRecord, String> COUVERTURE = createField("couverture", org.jooq.impl.SQLDataType.VARCHAR(255), this, "");
+    public final TableField<VReglementDetailsRecord, Long> TAUX_EFFECTIF = createField("taux_effectif", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.v_reglement_details.date_payement</code>.
@@ -137,6 +152,21 @@ public class VReglementDetails extends TableImpl<VReglementDetailsRecord> {
      * The column <code>public.v_reglement_details.lien</code>.
      */
     public final TableField<VReglementDetailsRecord, String> LIEN = createField("lien", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement_details.is_confirmed_bon</code>.
+     */
+    public final TableField<VReglementDetailsRecord, Boolean> IS_CONFIRMED_BON = createField("is_confirmed_bon", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>public.v_reglement_details.when_confirmed_bon</code>.
+     */
+    public final TableField<VReglementDetailsRecord, Timestamp> WHEN_CONFIRMED_BON = createField("when_confirmed_bon", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>public.v_reglement_details.date_expiration</code>.
+     */
+    public final TableField<VReglementDetailsRecord, Timestamp> DATE_EXPIRATION = createField("date_expiration", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
     /**
      * The column <code>public.v_reglement_details.total_couvert</code>.

@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglement extends TableImpl<VReglementRecord> {
 
-    private static final long serialVersionUID = 1393804559;
+    private static final long serialVersionUID = -2034936969;
 
     /**
      * The reference instance of <code>public.v_reglement</code>
@@ -74,9 +74,34 @@ public class VReglement extends TableImpl<VReglementRecord> {
     public final TableField<VReglementRecord, String> MATRICULE = createField("matricule", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
+     * The column <code>public.v_reglement.salaire_net</code>.
+     */
+    public final TableField<VReglementRecord, Long> SALAIRE_NET = createField("salaire_net", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.v_reglement.code_carnet</code>.
+     */
+    public final TableField<VReglementRecord, String> CODE_CARNET = createField("code_carnet", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement.telephone</code>.
+     */
+    public final TableField<VReglementRecord, String> TELEPHONE = createField("telephone", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement.pourcentage_total_retenue</code>.
+     */
+    public final TableField<VReglementRecord, Double> POURCENTAGE_TOTAL_RETENUE = createField("pourcentage_total_retenue", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+    /**
      * The column <code>public.v_reglement.ref_facture</code>.
      */
     public final TableField<VReglementRecord, String> REF_FACTURE = createField("ref_facture", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement.id_struc</code>.
+     */
+    public final TableField<VReglementRecord, Long> ID_STRUC = createField("id_struc", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.v_reglement.structure</code>.
@@ -99,6 +124,26 @@ public class VReglement extends TableImpl<VReglementRecord> {
     public final TableField<VReglementRecord, Timestamp> WHEN_DONE = createField("when_done", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
     /**
+     * The column <code>public.v_reglement.is_confirmed_bon</code>.
+     */
+    public final TableField<VReglementRecord, Boolean> IS_CONFIRMED_BON = createField("is_confirmed_bon", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>public.v_reglement.when_confirmed_bon</code>.
+     */
+    public final TableField<VReglementRecord, Timestamp> WHEN_CONFIRMED_BON = createField("when_confirmed_bon", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>public.v_reglement.date_expiration</code>.
+     */
+    public final TableField<VReglementRecord, Timestamp> DATE_EXPIRATION = createField("date_expiration", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>public.v_reglement.type_reglement</code>.
+     */
+    public final TableField<VReglementRecord, String> TYPE_REGLEMENT = createField("type_reglement", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
      * The column <code>public.v_reglement.annee</code>.
      */
     public final TableField<VReglementRecord, String> ANNEE = createField("annee", org.jooq.impl.SQLDataType.VARCHAR, this, "");
@@ -109,6 +154,11 @@ public class VReglement extends TableImpl<VReglementRecord> {
     public final TableField<VReglementRecord, Boolean> ON_DELETED = createField("on_deleted", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
 
     /**
+     * The column <code>public.v_reglement.id_prestation</code>.
+     */
+    public final TableField<VReglementRecord, Long> ID_PRESTATION = createField("id_prestation", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
      * The column <code>public.v_reglement.prestation</code>.
      */
     public final TableField<VReglementRecord, String> PRESTATION = createField("prestation", org.jooq.impl.SQLDataType.VARCHAR(255), this, "");
@@ -117,6 +167,26 @@ public class VReglement extends TableImpl<VReglementRecord> {
      * The column <code>public.v_reglement.couverture</code>.
      */
     public final TableField<VReglementRecord, String> COUVERTURE = createField("couverture", org.jooq.impl.SQLDataType.VARCHAR(255), this, "");
+
+    /**
+     * The column <code>public.v_reglement.taux_public</code>.
+     */
+    public final TableField<VReglementRecord, String> TAUX_PUBLIC = createField("taux_public", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement.taux_prive</code>.
+     */
+    public final TableField<VReglementRecord, String> TAUX_PRIVE = createField("taux_prive", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement.type_structure</code>.
+     */
+    public final TableField<VReglementRecord, String> TYPE_STRUCTURE = createField("type_structure", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement.statut_structure</code>.
+     */
+    public final TableField<VReglementRecord, String> STATUT_STRUCTURE = createField("statut_structure", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * The column <code>public.v_reglement.nom_ay</code>.
@@ -142,6 +212,11 @@ public class VReglement extends TableImpl<VReglementRecord> {
      * The column <code>public.v_reglement.montant_total</code>.
      */
     public final TableField<VReglementRecord, Long> MONTANT_TOTAL = createField("montant_total", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.v_reglement.taux_couverture_effectif</code>.
+     */
+    public final TableField<VReglementRecord, String> TAUX_COUVERTURE_EFFECTIF = createField("taux_couverture_effectif", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * The column <code>public.v_reglement.montant_reglement</code>.

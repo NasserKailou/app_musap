@@ -19,8 +19,10 @@ import models.tables.Direction;
 import models.tables.Division;
 import models.tables.Ecriture;
 import models.tables.Email;
+import models.tables.EtudeConsommations;
 import models.tables.JournalEcriture;
 import models.tables.Notification;
+import models.tables.OtpMessage;
 import models.tables.Params;
 import models.tables.Personnel;
 import models.tables.Programme;
@@ -44,9 +46,13 @@ import models.tables.VDepassement;
 import models.tables.VEcriture;
 import models.tables.VEffectifMains;
 import models.tables.VEffectifMainsAyantDroit;
+import models.tables.VHopitaux;
 import models.tables.VNbrBenefiaireParPrestation;
 import models.tables.VNbrPrestationParAdherent;
 import models.tables.VPartenaire;
+import models.tables.VPharmacie;
+import models.tables.VRegBonCommande;
+import models.tables.VRegPriseEnCharge;
 import models.tables.VReglement;
 import models.tables.VReglementDetails;
 import models.tables.VReglementGlobal;
@@ -141,6 +147,11 @@ public class Tables {
     public static final Email EMAIL = models.tables.Email.EMAIL;
 
     /**
+     * Table stockant les données d'étude de consommations des bons de commande
+     */
+    public static final EtudeConsommations ETUDE_CONSOMMATIONS = models.tables.EtudeConsommations.ETUDE_CONSOMMATIONS;
+
+    /**
      * The table <code>public.journal_ecriture</code>.
      */
     public static final JournalEcriture JOURNAL_ECRITURE = models.tables.JournalEcriture.JOURNAL_ECRITURE;
@@ -149,6 +160,11 @@ public class Tables {
      * The table <code>public.notification</code>.
      */
     public static final Notification NOTIFICATION = models.tables.Notification.NOTIFICATION;
+
+    /**
+     * The table <code>public.otp_message</code>.
+     */
+    public static final OtpMessage OTP_MESSAGE = models.tables.OtpMessage.OTP_MESSAGE;
 
     /**
      * The table <code>public.params</code>.
@@ -266,6 +282,11 @@ public class Tables {
     public static final VEffectifMainsAyantDroit V_EFFECTIF_MAINS_AYANT_DROIT = models.tables.VEffectifMainsAyantDroit.V_EFFECTIF_MAINS_AYANT_DROIT;
 
     /**
+     * The table <code>public.v_hopitaux</code>.
+     */
+    public static final VHopitaux V_HOPITAUX = models.tables.VHopitaux.V_HOPITAUX;
+
+    /**
      * The table <code>public.v_nbr_benefiaire_par_prestation</code>.
      */
     public static final VNbrBenefiaireParPrestation V_NBR_BENEFIAIRE_PAR_PRESTATION = models.tables.VNbrBenefiaireParPrestation.V_NBR_BENEFIAIRE_PAR_PRESTATION;
@@ -279,6 +300,21 @@ public class Tables {
      * The table <code>public.v_partenaire</code>.
      */
     public static final VPartenaire V_PARTENAIRE = models.tables.VPartenaire.V_PARTENAIRE;
+
+    /**
+     * The table <code>public.v_pharmacie</code>.
+     */
+    public static final VPharmacie V_PHARMACIE = models.tables.VPharmacie.V_PHARMACIE;
+
+    /**
+     * The table <code>public.v_reg_bon_commande</code>.
+     */
+    public static final VRegBonCommande V_REG_BON_COMMANDE = models.tables.VRegBonCommande.V_REG_BON_COMMANDE;
+
+    /**
+     * The table <code>public.v_reg_prise_en_charge</code>.
+     */
+    public static final VRegPriseEnCharge V_REG_PRISE_EN_CHARGE = models.tables.VRegPriseEnCharge.V_REG_PRISE_EN_CHARGE;
 
     /**
      * The table <code>public.v_reglement</code>.

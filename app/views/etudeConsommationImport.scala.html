@@ -1,0 +1,254 @@
+@import models.tables.pojos.EtudeConsommations
+@(etudes: List[models.tables.pojos.EtudeConsommations])(implicit request: Http.Request)
+
+@main("Import Étude Consommations") {
+
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Import des données Adhérents</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+          <li class="breadcrumb-item active">Import Étude Consommations</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+    
+    @* Messages flash *@
+    @if(request.flash.get("success").isPresent) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @request.flash.get("success").get()
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    }
+    
+    @if(request.flash.get("error").isPresent) {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-times-circle"></i> @request.flash.get("error").get()
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    }
+    
+    @if(request.flash.get("warning").isPresent) {
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle"></i> @request.flash.get("warning").get()
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    }
+    
+    @* Formulaire d'import *@
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-file-upload"></i> Importer un fichier Excel
+            </h3>
+          </div>
+          <form method="POST" action='@controllers.routes.EtudeConsommationCtrl.importExcel()' enctype="multipart/form-data">
+            @helper.CSRF.formField
+            
+            <div class="card-body">
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Instructions:</strong>
+                <ul class="mb-0">
+                  <li>Le fichier doit être au format Excel (.xls ou .xlsx)</li>
+                  <li>La première ligne doit contenir les en-têtes</li>
+                  <li>Les colonnes doivent correspondre à la structure attendue</li>
+                </ul>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <label for="fichierExcel">
+                      <i class="fas fa-file-excel"></i> Sélectionner le fichier Excel
+                      <span class="text-danger">*</span>
+                    </label>
+                    <div class="custom-file">
+                      <input type="file" 
+                             class="custom-file-input" 
+                             id="fichierExcel" 
+                             name="fichierExcel"
+                             accept=".xls,.xlsx"
+                             required>
+                      <label class="custom-file-label" for="fichierExcel">Choisir un fichier...</label>
+                    </div>
+                    <small class="form-text text-muted">Formats acceptés: .xls, .xlsx</small>
+                  </div>
+                </div>
+                
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>&nbsp;</label>
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" 
+                             class="custom-control-input" 
+                             id="supprimerAnciennes"
+                             name="supprimerAnciennes">
+                      <label class="custom-control-label" for="supprimerAnciennes">
+                        Supprimer les données existantes avant import
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card-footer">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-upload"></i> Importer
+              </button>
+              <button type="reset" class="btn btn-secondary">
+                <i class="fas fa-undo"></i> Réinitialiser
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    @* Liste des données importées *@
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-success">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-table"></i> Données Importées (@etudes.size() enregistrements)
+            </h3>
+          </div>
+          <div class="card-body">
+            <table id="tableEtudes" class="table table-bordered table-hover table-striped">
+              <thead>
+                <tr>
+                  <th>N°Carnet</th>
+                  <th>Code</th>
+                  <th>Nom & Prénoms</th>
+                  <th>Salaire Base</th>
+                  <th>Crédit Annuel</th>
+                  <th>Total Consommation</th>
+                  <th>Solde 1</th>
+                   <th>Solde 2</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(etude <- etudes) {
+                <tr>
+                  <td>@etude.getNumeroCarnet()</td>
+                  <td>@etude.getCodeAgent()</td>
+                  <td>@etude.getNomPrenoms()</td>
+                  <td class="text-right">
+                    @if(etude.getSalaireBase() != null) {@etude.getSalaireBase().toPlainString() F CFA}
+                  </td>
+                  <td class="text-right">
+                    @if(etude.getCreditAnnuel() != null) {@etude.getCreditAnnuel().toPlainString() F CFA}
+                  </td>
+                  <td class="text-right">
+                    @if(etude.getTotalConsommation() != null) {@etude.getTotalConsommation().toPlainString() F CFA}
+                  </td>
+                  <td class="text-right">
+                    @if(etude.getSolde_1() != null) {
+                     @if(etude.getSolde_1().compareTo(java.math.BigDecimal.ZERO) < 0) {
+                        <span class="text-danger font-weight-bold">@etude.getSolde_1().toPlainString() F CFA</span>
+                      } else {
+                        <span class="text-success font-weight-bold">@etude.getSolde_1().toPlainString() F CFA</span>
+                      }
+                    }
+                  </td>
+                  <td class="text-right">
+                    @if(etude.getSolde_2() != null) {
+                     @if(etude.getSolde_2().compareTo(java.math.BigDecimal.ZERO) < 0) {
+                        <span class="text-danger font-weight-bold">@etude.getSolde_2().toPlainString() F CFA</span>
+                      } else {
+                        <span class="text-success font-weight-bold">@etude.getSolde_2().toPlainString() F CFA</span>
+                      }
+                    }
+                  </td>
+
+                  <td>
+                    @if(etude.getStatutAvertissement() != null && !etude.getStatutAvertissement().isEmpty()) {
+                      <span class="badge badge-warning">@etude.getStatutAvertissement()</span>
+                    }
+                    @if(etude.getStatutSuspension() != null && !etude.getStatutSuspension().isEmpty()) {
+                      <span class="badge badge-danger">@etude.getStatutSuspension()</span>
+                    }
+                  </td>
+                  
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+<!-- LE SCRIPT DOIT ÊTRE ICI, À LA FIN, APRÈS main() -->
+<script>
+// Attendre que jQuery soit disponible
+(function waitForJQuery() {
+  if (typeof jQuery === 'undefined') {
+    console.log("⏳ Attente de jQuery...");
+    setTimeout(waitForJQuery, 50);
+    return;
+  }
+  
+  console.log("✅ jQuery chargé, initialisation DataTable...");
+  
+  jQuery(function($) {
+    // Vérifier si DataTable est disponible
+    if (typeof $.fn.DataTable === 'undefined') {
+      console.error("❌ DataTables non chargé");
+      return;
+    }
+    
+    // Initialiser DataTable
+    $("#tableEtudes").DataTable({
+      "responsive": true,
+      "lengthChange": true,
+      "autoWidth": false,
+      "pageLength": 25,
+      "order": [[8, "desc"]],
+      "language": {
+        "sProcessing": "Traitement en cours...",
+        "sSearch": "Rechercher&nbsp;:",
+        "sLengthMenu": "Afficher _MENU_ éléments",
+        "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+        "sInfoEmpty": "Aucun élément",
+        "sInfoFiltered": "(filtré de _MAX_ éléments au total)",
+        "sZeroRecords": "Aucun élément correspondant trouvé",
+        "sEmptyTable": "Aucune donnée disponible",
+        "oPaginate": {
+          "sFirst": "Premier",
+          "sPrevious": "Précédent",
+          "sNext": "Suivant",
+          "sLast": "Dernier"
+        }
+      }
+    });
+    
+    console.log("✅ DataTable initialisé avec succès");
+    
+    // Custom file input label
+    $('.custom-file-input').on('change', function() {
+      var fileName = $(this).val().split('\\').pop();
+      $(this).next('.custom-file-label').html(fileName || 'Choisir un fichier...');
+    });
+  });
+})();
+</script>
+
+}

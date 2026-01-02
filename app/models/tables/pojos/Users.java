@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Users implements Serializable {
 
-    private static final long serialVersionUID = -355015545;
+    private static final long serialVersionUID = 616107892;
 
     private Long      id;
     private String    login;
@@ -35,6 +35,7 @@ public class Users implements Serializable {
     private Boolean   connectFirst;
     private String    whoDone;
     private Timestamp whenDone;
+    private Long      regionCode;
 
     public Users() {}
 
@@ -49,6 +50,7 @@ public class Users implements Serializable {
         this.connectFirst = value.connectFirst;
         this.whoDone = value.whoDone;
         this.whenDone = value.whenDone;
+        this.regionCode = value.regionCode;
     }
 
     public Users(
@@ -61,7 +63,8 @@ public class Users implements Serializable {
         String    photo,
         Boolean   connectFirst,
         String    whoDone,
-        Timestamp whenDone
+        Timestamp whenDone,
+        Long      regionCode
     ) {
         this.id = id;
         this.login = login;
@@ -73,6 +76,7 @@ public class Users implements Serializable {
         this.connectFirst = connectFirst;
         this.whoDone = whoDone;
         this.whenDone = whenDone;
+        this.regionCode = regionCode;
     }
 
     public Long getId() {
@@ -155,6 +159,14 @@ public class Users implements Serializable {
         this.whenDone = whenDone;
     }
 
+    public Long getRegionCode() {
+        return this.regionCode;
+    }
+
+    public void setRegionCode(Long regionCode) {
+        this.regionCode = regionCode;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Users (");
@@ -169,6 +181,7 @@ public class Users implements Serializable {
         sb.append(", ").append(connectFirst);
         sb.append(", ").append(whoDone);
         sb.append(", ").append(whenDone);
+        sb.append(", ").append(regionCode);
 
         sb.append(")");
         return sb.toString();

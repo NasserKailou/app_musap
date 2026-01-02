@@ -5,6 +5,7 @@ package models.tables.pojos;
 
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import javax.annotation.Generated;
@@ -23,28 +24,37 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VAdherent implements Serializable {
 
-    private static final long serialVersionUID = -146281575;
+    private static final long serialVersionUID = 1801677549;
 
-    private Long      id;
-    private String    nomAd;
-    private String    prenomAd;
-    private String    sexe;
-    private String    matricule;
-    private String    categorie;
-    private String    fonction;
-    private String    structureSigle;
-    private Timestamp dateNaiss;
-    private Double    age;
-    private Timestamp datePriseService;
-    private Double    anciennete;
-    private String    picture;
-    private Timestamp whenDone;
-    private String    whoDone;
-    private Boolean   onDeleted;
-    private String    direction;
-    private String    division;
-    private String    service;
-    private String    telephone;
+    private Long       id;
+    private String     nomAd;
+    private String     prenomAd;
+    private String     sexe;
+    private String     matricule;
+    private String     codeCarnet;
+    private String     categorie;
+    private String     fonction;
+    private String     structureSigle;
+    private Timestamp  dateNaiss;
+    private Integer    age;
+    private Timestamp  datePriseService;
+    private Integer    anciennete;
+    private Long       salaireNet;
+    private Double     pourcentageTotalRetenue;
+    private Double     totalCotisationAgent;
+    private Double     totalCreditAnnuelle;
+    private Double     totalCreditAConsomer;
+    private BigDecimal montantTotalBrute;
+    private BigDecimal montantReglementCouvert;
+    private BigDecimal montantPayer;
+    private String     picture;
+    private Timestamp  whenDone;
+    private String     whoDone;
+    private Boolean    onDeleted;
+    private String     direction;
+    private String     division;
+    private String     service;
+    private String     telephone;
 
     public VAdherent() {}
 
@@ -54,6 +64,7 @@ public class VAdherent implements Serializable {
         this.prenomAd = value.prenomAd;
         this.sexe = value.sexe;
         this.matricule = value.matricule;
+        this.codeCarnet = value.codeCarnet;
         this.categorie = value.categorie;
         this.fonction = value.fonction;
         this.structureSigle = value.structureSigle;
@@ -61,6 +72,14 @@ public class VAdherent implements Serializable {
         this.age = value.age;
         this.datePriseService = value.datePriseService;
         this.anciennete = value.anciennete;
+        this.salaireNet = value.salaireNet;
+        this.pourcentageTotalRetenue = value.pourcentageTotalRetenue;
+        this.totalCotisationAgent = value.totalCotisationAgent;
+        this.totalCreditAnnuelle = value.totalCreditAnnuelle;
+        this.totalCreditAConsomer = value.totalCreditAConsomer;
+        this.montantTotalBrute = value.montantTotalBrute;
+        this.montantReglementCouvert = value.montantReglementCouvert;
+        this.montantPayer = value.montantPayer;
         this.picture = value.picture;
         this.whenDone = value.whenDone;
         this.whoDone = value.whoDone;
@@ -72,32 +91,42 @@ public class VAdherent implements Serializable {
     }
 
     public VAdherent(
-        Long      id,
-        String    nomAd,
-        String    prenomAd,
-        String    sexe,
-        String    matricule,
-        String    categorie,
-        String    fonction,
-        String    structureSigle,
-        Timestamp dateNaiss,
-        Double    age,
-        Timestamp datePriseService,
-        Double    anciennete,
-        String    picture,
-        Timestamp whenDone,
-        String    whoDone,
-        Boolean   onDeleted,
-        String    direction,
-        String    division,
-        String    service,
-        String    telephone
+        Long       id,
+        String     nomAd,
+        String     prenomAd,
+        String     sexe,
+        String     matricule,
+        String     codeCarnet,
+        String     categorie,
+        String     fonction,
+        String     structureSigle,
+        Timestamp  dateNaiss,
+        Integer    age,
+        Timestamp  datePriseService,
+        Integer    anciennete,
+        Long       salaireNet,
+        Double     pourcentageTotalRetenue,
+        Double     totalCotisationAgent,
+        Double     totalCreditAnnuelle,
+        Double     totalCreditAConsomer,
+        BigDecimal montantTotalBrute,
+        BigDecimal montantReglementCouvert,
+        BigDecimal montantPayer,
+        String     picture,
+        Timestamp  whenDone,
+        String     whoDone,
+        Boolean    onDeleted,
+        String     direction,
+        String     division,
+        String     service,
+        String     telephone
     ) {
         this.id = id;
         this.nomAd = nomAd;
         this.prenomAd = prenomAd;
         this.sexe = sexe;
         this.matricule = matricule;
+        this.codeCarnet = codeCarnet;
         this.categorie = categorie;
         this.fonction = fonction;
         this.structureSigle = structureSigle;
@@ -105,6 +134,14 @@ public class VAdherent implements Serializable {
         this.age = age;
         this.datePriseService = datePriseService;
         this.anciennete = anciennete;
+        this.salaireNet = salaireNet;
+        this.pourcentageTotalRetenue = pourcentageTotalRetenue;
+        this.totalCotisationAgent = totalCotisationAgent;
+        this.totalCreditAnnuelle = totalCreditAnnuelle;
+        this.totalCreditAConsomer = totalCreditAConsomer;
+        this.montantTotalBrute = montantTotalBrute;
+        this.montantReglementCouvert = montantReglementCouvert;
+        this.montantPayer = montantPayer;
         this.picture = picture;
         this.whenDone = whenDone;
         this.whoDone = whoDone;
@@ -155,6 +192,14 @@ public class VAdherent implements Serializable {
         this.matricule = matricule;
     }
 
+    public String getCodeCarnet() {
+        return this.codeCarnet;
+    }
+
+    public void setCodeCarnet(String codeCarnet) {
+        this.codeCarnet = codeCarnet;
+    }
+
     public String getCategorie() {
         return this.categorie;
     }
@@ -187,11 +232,11 @@ public class VAdherent implements Serializable {
         this.dateNaiss = dateNaiss;
     }
 
-    public Double getAge() {
+    public Integer getAge() {
         return this.age;
     }
 
-    public void setAge(Double age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
@@ -203,12 +248,76 @@ public class VAdherent implements Serializable {
         this.datePriseService = datePriseService;
     }
 
-    public Double getAnciennete() {
+    public Integer getAnciennete() {
         return this.anciennete;
     }
 
-    public void setAnciennete(Double anciennete) {
+    public void setAnciennete(Integer anciennete) {
         this.anciennete = anciennete;
+    }
+
+    public Long getSalaireNet() {
+        return this.salaireNet;
+    }
+
+    public void setSalaireNet(Long salaireNet) {
+        this.salaireNet = salaireNet;
+    }
+
+    public Double getPourcentageTotalRetenue() {
+        return this.pourcentageTotalRetenue;
+    }
+
+    public void setPourcentageTotalRetenue(Double pourcentageTotalRetenue) {
+        this.pourcentageTotalRetenue = pourcentageTotalRetenue;
+    }
+
+    public Double getTotalCotisationAgent() {
+        return this.totalCotisationAgent;
+    }
+
+    public void setTotalCotisationAgent(Double totalCotisationAgent) {
+        this.totalCotisationAgent = totalCotisationAgent;
+    }
+
+    public Double getTotalCreditAnnuelle() {
+        return this.totalCreditAnnuelle;
+    }
+
+    public void setTotalCreditAnnuelle(Double totalCreditAnnuelle) {
+        this.totalCreditAnnuelle = totalCreditAnnuelle;
+    }
+
+    public Double getTotalCreditAConsomer() {
+        return this.totalCreditAConsomer;
+    }
+
+    public void setTotalCreditAConsomer(Double totalCreditAConsomer) {
+        this.totalCreditAConsomer = totalCreditAConsomer;
+    }
+
+    public BigDecimal getMontantTotalBrute() {
+        return this.montantTotalBrute;
+    }
+
+    public void setMontantTotalBrute(BigDecimal montantTotalBrute) {
+        this.montantTotalBrute = montantTotalBrute;
+    }
+
+    public BigDecimal getMontantReglementCouvert() {
+        return this.montantReglementCouvert;
+    }
+
+    public void setMontantReglementCouvert(BigDecimal montantReglementCouvert) {
+        this.montantReglementCouvert = montantReglementCouvert;
+    }
+
+    public BigDecimal getMontantPayer() {
+        return this.montantPayer;
+    }
+
+    public void setMontantPayer(BigDecimal montantPayer) {
+        this.montantPayer = montantPayer;
     }
 
     public String getPicture() {
@@ -284,6 +393,7 @@ public class VAdherent implements Serializable {
         sb.append(", ").append(prenomAd);
         sb.append(", ").append(sexe);
         sb.append(", ").append(matricule);
+        sb.append(", ").append(codeCarnet);
         sb.append(", ").append(categorie);
         sb.append(", ").append(fonction);
         sb.append(", ").append(structureSigle);
@@ -291,6 +401,14 @@ public class VAdherent implements Serializable {
         sb.append(", ").append(age);
         sb.append(", ").append(datePriseService);
         sb.append(", ").append(anciennete);
+        sb.append(", ").append(salaireNet);
+        sb.append(", ").append(pourcentageTotalRetenue);
+        sb.append(", ").append(totalCotisationAgent);
+        sb.append(", ").append(totalCreditAnnuelle);
+        sb.append(", ").append(totalCreditAConsomer);
+        sb.append(", ").append(montantTotalBrute);
+        sb.append(", ").append(montantReglementCouvert);
+        sb.append(", ").append(montantPayer);
         sb.append(", ").append(picture);
         sb.append(", ").append(whenDone);
         sb.append(", ").append(whoDone);

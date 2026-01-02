@@ -137,6 +137,12 @@ public class AdherentCtrl extends Controller {
 			ad.setOnDeleted(false);
 			ad.setWhenDone(new Timestamp(System.currentTimeMillis()));
 			ad.setWhoDone(String.valueOf(request.session().get("login").get()));
+			ad.setTelephone(adherentService.normaliserNumeroNiger(ad.getTelephone()));
+
+			if(viewMode.equals(ViewMode.VIEW_MODE_CREATE))
+				ad.setPourcentageTotalRetenue(2.5);
+			if(viewMode.equals(ViewMode.VIEW_MODE_EDIT))
+				ad.setPourcentageTotalRetenue(ad.getPourcentageTotalRetenue());
 
 			ad.setDateNaiss(adherentService.getDateT(dateNaisse));
 			ad.setDatePriseService(adherentService.getDateT(dateDebut));
@@ -240,9 +246,9 @@ public class AdherentCtrl extends Controller {
 
 	}
 
-	public Result addRembourssement(Request request, Long idAdherent) {
+	public Result addRembourssement(Request request, Long idAdherent, String typeOP) {
 
-		return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, idAdherent));
+		return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOP, 0L, idAdherent));
 
 	}
 

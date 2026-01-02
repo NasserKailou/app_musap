@@ -114,6 +114,8 @@ public class AuthenticationCtrl extends Controller {
 								.addingToSession(request, "login", us.getLogin())
 								.removingFromSession(request, "nomUser")
 								.addingToSession(request, "nomUser", us.getNomPrenom())
+								.removingFromSession(request, "region")
+								.addingToSession(request, "region", String.valueOf(us.getRegionCode()))
 								.removingFromSession(request, "gestion").addingToSession(request, "gestion", gestion)
 								.removingFromSession(request, "plafond").addingToSession(request, "plafond",
 										String.valueOf(paramsService.paramsByGestion(gestion).getPlafond()))
@@ -139,7 +141,6 @@ public class AuthenticationCtrl extends Controller {
 		Users a = uForm.get();
 		if (a.getPasse().equals(confirm)) {
 			a.setConnectFirst(false);
-			a.setWhoDone("Admin_mutuel");
 			a.setWhenDone(new Timestamp(System.currentTimeMillis()));
 			if (userService.saveLogical(a, false).equals("ok")) {
 				return redirect(controllers.routes.AuthenticationCtrl.login()).withNewSession().flashing("success",

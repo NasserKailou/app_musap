@@ -4,88 +4,374 @@
 @import utils._
 @(listes: List[models.tables.pojos.VReglementGlobalByAdherent])(implicit request: Http.Request)
 
-@main("Rembourssement"){
+@main("Remboursement"){
 
-<hr>
-<div class="card-header" id="titre_header">
-
-	<div class="col-md-12 col-sm-12 col-xs-12 row">
-
-	<center>
-		
-		<form  method="POST" name="form" action="@controllers.routes.ReglementCtrl.rapportAnnuel("situation_global_annuel")"  class="form-horizontal col-md-12 col-sm-12 col-xs-12" >
-			@helper.CSRF.formField
-			<fieldset style=" color:#000; width:90%; background-color:#DDE7E9; border-radius:10px; font-size:14px;" >
-			
-					<h6 style="color:#000;">
-						<strong>
-							<i> <font style="color:red;  font-size:14px;">Situations Global par année :</font> </i>	
-						</strong>
-					</h6>
-					<center>
-						<div class="form-group row">
-						 
-						 
-						  	<label class="col-sm-1 col-form-label" for="nom" ><b>Année</b></label>
-						  	<div class="col-sm-2">
-								<input type="number" id="annee"  name="annee" placeholder="AAAA" class="form-control" />
-							</div>
-
-						  	 
-						 <div class="col-sm-2">
-						  	<button class="btn btn-success" type="submit" id="valider" name="Valider" title="Valider les informations" >	<i class="glyphicon glyphicon-print"></i> Imprimer</button> 
-						</div>
-						  </div>
-				</center>
-			
-			
-				</fieldset>
-			
-			</form>
-			
-			</center>
-
-	</div>
-	
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Gestion des Remboursements</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+                    <li class="breadcrumb-item active">Remboursements</li>
+                </ol>
+            </div>
+        </div>
+    </div>
 </div>
-<hr>
-<section class="container">
-	
-	<div class="row">
 
-		<div class = "col-md-12 col-sm-12 col-xs-12 table-responsive">
-		
-				<table class="dta-tbl table table-bordered table-striped text-center" >
-				<center><div class="badged-title"><h4> <b>L</b>istes des reglements des Adhérents<br></div></center>
-					<thead>
-						 <tr>
-							
-							<th style="text-align: center"><b>MAtricule</b></th>
-							<th style="text-align: center"><b>Nom & Prenom</b></th>
-							<th style="text-align: center"><b>Montant(En  F CFA)</b></th>
-							<th style="text-align: center"><b>Année</b></th>
-							
-						 </tr>
-					 </thead>
-					 <tbody>
-						@for(c <-listes){
-							 <tr>
-							  <td>@c.getMatricule() </td>
-								<td>@c.getNomAd() -- @c.getPrenomAd() </td>
-								<td>@c.getTotalAnnuel()</td>
-								<td>@c.getAnnee()</td>
-								
-								
-							 </tr>
-							}
-					  </tbody>
-				</table>
-				
-	
-		</div>
-	</div>
-  </section>
-  
-  
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        
+        <!-- Formulaire de recherche -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-search"></i>
+                            Situations Global par année
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" name="form" action="@controllers.routes.ReglementCtrl.rapportAnnuel("situation_global_annuel")" class="form-horizontal">
+                            @helper.CSRF.formField
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="annee">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            Année
+                                        </label>
+                                        <input type="number" 
+                                               id="annee" 
+                                               name="annee" 
+                                               placeholder="AAAA" 
+                                               class="form-control" 
+                                               min="2000" 
+                                               max="2100"
+                                               required />
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button class="btn btn-success btn-block" type="submit" id="valider" name="Valider">
+                                            <i class="fas fa-print"></i>
+                                            Imprimer le rapport
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau des règlements -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-list"></i>
+                            Listes des règlements des Adhérents
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <table id="tableReglements" class="table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Matricule</th>
+                                    <th>Nom & Prénom</th>
+                                    <th>Montant (En F CFA)</th>
+                                    <th>Année</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for(c <- listes){
+                                <tr>
+                                    <td>@c.getMatricule()</td>
+                                    <td>@c.getNomAd() @c.getPrenomAd()</td>
+                                    <td class="text-right">@{"%,d".format(c.getTotalAnnuel())}</td>
+                                    <td class="text-center">@c.getAnnee()</td>
+                                    <td class="text-center">
+                                        <button type="button" 
+                                                class="btn btn-sm btn-info btn-detail" 
+                                                data-matricule="@c.getMatricule()"
+                                                data-nom="@c.getNomAd()"
+                                                data-prenom="@c.getPrenomAd()"
+                                                data-montant="@c.getTotalAnnuel()"
+                                                data-annee="@c.getAnnee()"
+                                                title="Voir les détails">
+                                            <i class="fas fa-eye"></i>
+                                            Détails
+                                        </button>
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Matricule</th>
+                                    <th>Nom & Prénom</th>
+                                    <th>Montant (En F CFA)</th>
+                                    <th>Année</th>
+                                    <th>Action</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</section>
+
+<!-- Modal pour les détails de l'adhérent -->
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title" id="detailModalLabel">
+                    <i class="fas fa-user"></i>
+                    Détails de l'Adhérent
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card card-widget widget-user-2">
+                            <div class="widget-user-header bg-gradient-info">
+                                <div class="widget-user-image">
+                                    <i class="fas fa-user-circle fa-3x"></i>
+                                </div>
+                                <h3 class="widget-user-username" id="modal-nom-prenom">Nom Prénom</h3>
+                                <h5 class="widget-user-desc" id="modal-matricule">Matricule</h5>
+                            </div>
+                            <div class="card-footer p-0">
+                                <ul class="nav flex-column">
+                                    <li class="nav-item">
+                                        <a href="#" class="nav-link">
+                                            <i class="fas fa-id-card"></i>
+                                            Matricule 
+                                            <span class="float-right badge bg-primary" id="modal-matricule-detail"></span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#" class="nav-link">
+                                            <i class="fas fa-user"></i>
+                                            Nom 
+                                            <span class="float-right badge bg-info" id="modal-nom"></span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#" class="nav-link">
+                                            <i class="fas fa-user-tag"></i>
+                                            Prénom 
+                                            <span class="float-right badge bg-info" id="modal-prenom"></span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#" class="nav-link">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                            Montant Total 
+                                            <span class="float-right badge bg-success" id="modal-montant"></span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#" class="nav-link">
+                                            <i class="fas fa-calendar"></i>
+                                            Année 
+                                            <span class="float-right badge bg-warning" id="modal-annee"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                    Fermer
+                </button>
+                <button type="button" class="btn btn-primary" id="btnImprimerDetail">
+                    <i class="fas fa-print"></i>
+                    Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Animation pour les lignes du tableau */
+@@keyframes fadeInRow {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
+#tableReglements tbody tr {
+    animation: fadeInRow 0.3s ease-out forwards;
+    opacity: 0;
+}
+
+/* Style pour le survol */
+#tableReglements tbody tr:hover {
+    background-color: #e3f2fd !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+</style>
+
+}
+
+
+<script>
+// Attendre que le DOM et jQuery soient prêts
+(function() {
+    'use strict';
+    
+    // Fonction d'initialisation
+    function initPage() {
+        if (typeof jQuery === 'undefined') {
+            console.error('jQuery n\'est pas chargé !');
+            return;
+        }
+        
+        // Initialisation de DataTables
+        var table = jQuery('#tableReglements').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Tous"]],
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json",
+                "decimal": ",",
+                "thousands": " "
+            },
+            "order": [[3, "desc"], [0, "asc"]],
+            "columnDefs": [
+                { 
+                    "orderable": false, 
+                    "targets": 4,
+                    "className": "text-center"
+                },
+                {
+                    "targets": 2,
+                    "className": "text-right",
+                    "render": function(data, type, row) {
+                        if (type === 'display' || type === 'filter') {
+                            return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                        }
+                        return data;
+                    }
+                },
+                {
+                    "targets": 3,
+                    "className": "text-center"
+                }
+            ],
+            "drawCallback": function(settings) {
+                jQuery('#tableReglements tbody tr').each(function(index) {
+                    jQuery(this).css('animation-delay', (index * 0.05) + 's');
+                });
+            }
+        });
+
+        // Gestion des clics sur les boutons détails
+        jQuery('#tableReglements').on('click', '.btn-detail', function() {
+            var button = jQuery(this);
+            
+            var matricule = button.data('matricule');
+            var nom = button.data('nom');
+            var prenom = button.data('prenom');
+            var montant = button.data('montant');
+            var annee = button.data('annee');
+            
+            var montantFormate = montant.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' F CFA';
+            
+            jQuery('#modal-nom-prenom').text(nom + ' ' + prenom);
+            jQuery('#modal-matricule').text('Matricule: ' + matricule);
+            jQuery('#modal-matricule-detail').text(matricule);
+            jQuery('#modal-nom').text(nom);
+            jQuery('#modal-prenom').text(prenom);
+            jQuery('#modal-montant').text(montantFormate);
+            jQuery('#modal-annee').text(annee);
+            
+            jQuery('#detailModal').modal('show');
+        });
+
+        // Animation au survol des lignes
+        jQuery('#tableReglements tbody').on('mouseenter', 'tr', function() {
+            jQuery(this).addClass('table-active');
+        }).on('mouseleave', 'tr', function() {
+            jQuery(this).removeClass('table-active');
+        });
+
+        // Gestion du bouton d'impression
+        jQuery('#btnImprimerDetail').on('click', function() {
+            imprimerDetail();
+        });
+    }
+
+    // Fonction d'impression des détails
+    function imprimerDetail() {
+        var contenu = document.querySelector('#detailModal .modal-body').innerHTML;
+        var fenetreImpression = window.open('', '', 'height=600,width=800');
+        
+        fenetreImpression.document.write('<html><head><title>Détails Adhérent</title>');
+        fenetreImpression.document.write('<link rel="stylesheet" href="/assets/adminlte/dist/css/adminlte.min.css">');
+        fenetreImpression.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">');
+        fenetreImpression.document.write('<style>');
+        fenetreImpression.document.write('body { padding: 20px; }');
+        fenetreImpression.document.write('.widget-user-header { padding: 20px; text-align: center; }');
+        fenetreImpression.document.write('@@media print { .no-print { display: none; } }');
+        fenetreImpression.document.write('</style>');
+        fenetreImpression.document.write('</head><body>');
+        fenetreImpression.document.write('<h2 style="text-align: center; margin-bottom: 30px;">Détails de l\'Adhérent</h2>');
+        fenetreImpression.document.write(contenu);
+        fenetreImpression.document.write('</body></html>');
+        
+        fenetreImpression.document.close();
+        fenetreImpression.focus();
+        
+        setTimeout(function() {
+            fenetreImpression.print();
+            fenetreImpression.close();
+        }, 250);
+    }
+
+    // Démarrer l'initialisation quand le DOM est prêt
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+        // Le DOM est déjà chargé
+        initPage();
+    }
+})();
+</script>

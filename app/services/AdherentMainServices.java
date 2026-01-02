@@ -9,8 +9,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
-import org.jooq.Configuration;
-
 import com.google.inject.Inject;
 import com.ibm.icu.text.NumberFormat;
 import com.ibm.icu.text.RuleBasedNumberFormat;
@@ -71,6 +69,8 @@ public class AdherentMainServices extends AdherentDao {
 		con.connection().close();
 		return c;
 	}
+
+
 
 		public Adherent getByMatricule(String mat) {
 		Adherent c = con.connection().selectFrom(models.Tables.ADHERENT)
@@ -149,4 +149,40 @@ public class AdherentMainServices extends AdherentDao {
 		}
 
 	}
+	
+	public List<Adherent> findAll() {
+		List<Adherent> adherents = con.connection().selectFrom(models.Tables.ADHERENT)
+				.where(models.Tables.ADHERENT.ON_DELETED.isFalse())
+				.fetchInto(Adherent.class);
+		con.connection().close();
+		return adherents;
+	}
+
+
+	public VAdherent getVAdherentById(Long id) {
+		VAdherent c = con.connection().selectFrom(models.Tables.V_ADHERENT)
+				.where(models.Tables.V_ADHERENT.ON_DELETED.isFalse()).and(models.Tables.V_ADHERENT.ID.eq(id))
+				.fetchOneInto(VAdherent.class);
+		con.connection().close();
+		return c;
+	}
+
+	public  String normaliserNumeroNiger(String telephone) {
+
+				if (telephone == null || telephone.trim().isEmpty()) {
+					throw new IllegalArgumentException("Le numéro de téléphone est vide ou null");
+				}
+
+				// Nettoyage : suppression des espaces, tirets, etc.
+				telephone = telephone.replaceAll("[^0-9]", "");
+
+				// Si le numéro commence déjà par 227 → on laisse
+				if (telephone.startsWith("227")) {
+					return telephone;
+				}
+
+				// Sinon on ajoute 227
+				return "227" + telephone;
+			}
+
 }

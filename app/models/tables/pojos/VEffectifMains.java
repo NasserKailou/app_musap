@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VEffectifMains implements Serializable {
 
-    private static final long serialVersionUID = 1247328091;
+    private static final long serialVersionUID = -105642417;
 
     private Long      id;
     private String    nomAd;
@@ -34,9 +34,9 @@ public class VEffectifMains implements Serializable {
     private String    fonction;
     private String    structureSigle;
     private Timestamp dateNaiss;
-    private Double    age;
+    private Integer   age;
     private Timestamp datePriseService;
-    private Double    anciennete;
+    private Integer   anciennete;
     private String    picture;
     private Timestamp whenDone;
     private String    whoDone;
@@ -81,9 +81,9 @@ public class VEffectifMains implements Serializable {
         String    fonction,
         String    structureSigle,
         Timestamp dateNaiss,
-        Double    age,
+        Integer   age,
         Timestamp datePriseService,
-        Double    anciennete,
+        Integer   anciennete,
         String    picture,
         Timestamp whenDone,
         String    whoDone,
@@ -187,11 +187,11 @@ public class VEffectifMains implements Serializable {
         this.dateNaiss = dateNaiss;
     }
 
-    public Double getAge() {
+    public Integer getAge() {
         return this.age;
     }
 
-    public void setAge(Double age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
@@ -203,11 +203,11 @@ public class VEffectifMains implements Serializable {
         this.datePriseService = datePriseService;
     }
 
-    public Double getAnciennete() {
+    public Integer getAnciennete() {
         return this.anciennete;
     }
 
-    public void setAnciennete(Double anciennete) {
+    public void setAnciennete(Integer anciennete) {
         this.anciennete = anciennete;
     }
 

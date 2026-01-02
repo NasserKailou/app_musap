@@ -84,4 +84,25 @@ public class TypePrestationDao extends DAOImpl<TypePrestationRecord, models.tabl
     public List<models.tables.pojos.TypePrestation> fetchByOnDeleted(Boolean... values) {
         return fetch(TypePrestation.TYPE_PRESTATION.ON_DELETED, values);
     }
+
+    /**
+     * Fetch records that have <code>taux_public IN (values)</code>
+     */
+    public List<models.tables.pojos.TypePrestation> fetchByTauxPublic(String... values) {
+        return fetch(TypePrestation.TYPE_PRESTATION.TAUX_PUBLIC, values);
+    }
+
+    /**
+     * Fetch records that have <code>taux_prive IN (values)</code>
+     */
+    public List<models.tables.pojos.TypePrestation> fetchByTauxPrive(String... values) {
+        return fetch(TypePrestation.TYPE_PRESTATION.TAUX_PRIVE, values);
+    }
+
+    /**
+     * Fetch records that have <code>type IN (values)</code>
+     */
+    public List<models.tables.pojos.TypePrestation> fetchByType(String... values) {
+        return fetch(TypePrestation.TYPE_PRESTATION.TYPE, values);
+    }
 }

@@ -49,4 +49,23 @@ private final IConnectionHelper con;
 		con.connection().close();
 		return c;
 	}
+	
+	public List<TypePrestation> findOrdonnance() {
+		List<TypePrestation> c = con.connection().selectFrom(models.Tables.TYPE_PRESTATION)
+				.where(models.Tables.TYPE_PRESTATION.ON_DELETED.isFalse()).and(models.Tables.TYPE_PRESTATION.TYPE.eq("BC")).fetchInto(TypePrestation.class);
+		con.connection().close();
+		return c;
+	}
+
+
+	public List<TypePrestation> findOthers() {
+		List<TypePrestation> c = con.connection().selectFrom(models.Tables.TYPE_PRESTATION)
+				.where(models.Tables.TYPE_PRESTATION.ON_DELETED.isFalse()).and(models.Tables.TYPE_PRESTATION.TYPE.eq("PC")).fetchInto(TypePrestation.class);
+		con.connection().close();
+		return c;
+	}
+
+	public List<TypePrestation> getAllTypePrestation() {
+		return findAll();
+	}
 }

@@ -4,6 +4,7 @@
 package models.tables;
 
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import javax.annotation.Generated;
@@ -33,7 +34,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VAdherent extends TableImpl<VAdherentRecord> {
 
-    private static final long serialVersionUID = 2129435840;
+    private static final long serialVersionUID = 1798998111;
 
     /**
      * The reference instance of <code>public.v_adherent</code>
@@ -74,6 +75,11 @@ public class VAdherent extends TableImpl<VAdherentRecord> {
     public final TableField<VAdherentRecord, String> MATRICULE = createField("matricule", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
+     * The column <code>public.v_adherent.code_carnet</code>.
+     */
+    public final TableField<VAdherentRecord, String> CODE_CARNET = createField("code_carnet", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
      * The column <code>public.v_adherent.categorie</code>.
      */
     public final TableField<VAdherentRecord, String> CATEGORIE = createField("categorie", org.jooq.impl.SQLDataType.CLOB, this, "");
@@ -96,7 +102,7 @@ public class VAdherent extends TableImpl<VAdherentRecord> {
     /**
      * The column <code>public.v_adherent.age</code>.
      */
-    public final TableField<VAdherentRecord, Double> AGE = createField("age", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<VAdherentRecord, Integer> AGE = createField("age", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>public.v_adherent.date_prise_service</code>.
@@ -106,7 +112,47 @@ public class VAdherent extends TableImpl<VAdherentRecord> {
     /**
      * The column <code>public.v_adherent.anciennete</code>.
      */
-    public final TableField<VAdherentRecord, Double> ANCIENNETE = createField("anciennete", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+    public final TableField<VAdherentRecord, Integer> ANCIENNETE = createField("anciennete", org.jooq.impl.SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>public.v_adherent.salaire_net</code>.
+     */
+    public final TableField<VAdherentRecord, Long> SALAIRE_NET = createField("salaire_net", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.v_adherent.pourcentage_total_retenue</code>.
+     */
+    public final TableField<VAdherentRecord, Double> POURCENTAGE_TOTAL_RETENUE = createField("pourcentage_total_retenue", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>public.v_adherent.total_cotisation_agent</code>.
+     */
+    public final TableField<VAdherentRecord, Double> TOTAL_COTISATION_AGENT = createField("total_cotisation_agent", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>public.v_adherent.total_credit_annuelle</code>.
+     */
+    public final TableField<VAdherentRecord, Double> TOTAL_CREDIT_ANNUELLE = createField("total_credit_annuelle", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>public.v_adherent.total_credit_a_consomer</code>.
+     */
+    public final TableField<VAdherentRecord, Double> TOTAL_CREDIT_A_CONSOMER = createField("total_credit_a_consomer", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>public.v_adherent.montant_total_brute</code>.
+     */
+    public final TableField<VAdherentRecord, BigDecimal> MONTANT_TOTAL_BRUTE = createField("montant_total_brute", org.jooq.impl.SQLDataType.NUMERIC, this, "");
+
+    /**
+     * The column <code>public.v_adherent.montant_reglement_couvert</code>.
+     */
+    public final TableField<VAdherentRecord, BigDecimal> MONTANT_REGLEMENT_COUVERT = createField("montant_reglement_couvert", org.jooq.impl.SQLDataType.NUMERIC, this, "");
+
+    /**
+     * The column <code>public.v_adherent.montant_payer</code>.
+     */
+    public final TableField<VAdherentRecord, BigDecimal> MONTANT_PAYER = createField("montant_payer", org.jooq.impl.SQLDataType.NUMERIC, this, "");
 
     /**
      * The column <code>public.v_adherent.picture</code>.

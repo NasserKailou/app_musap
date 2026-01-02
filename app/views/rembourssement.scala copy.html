@@ -1,0 +1,817 @@
+@import java.time.LocalDateTime
+@import java.time.temporal.ChronoUnit
+@import java.sql.Timestamp
+@import helper._
+@import java.util
+@import utils._
+@(viewMode: String,
+  reglements: List[models.tables.pojos.VReglement],
+  reglement: models.tables.pojos.Reglement,
+  adherent: models.tables.pojos.Adherent,
+  structures: List[models.tables.pojos.StructurePartenaire],
+  totalRegler: Long,
+  plafondAnnuel: Long,
+  typePrestations: List[models.tables.pojos.TypePrestation],
+  ayantDroits: List[models.tables.pojos.VAdherentAyantDroit]
+)(implicit request: Http.Request)
+
+@main("Bon de Commande") {
+
+<!-- Content Header -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Gestion des Bons de Commande</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+          <li class="breadcrumb-item active">Remboursements</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+
+    @* ================== INFORMATIONS ADHÉRENT ================== *@
+    @if(adherent != null) {
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary card-outline">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-user"></i> Informations de l'adhérent
+            </h3>
+            <div class="card-tools">
+              @if(
+                request.session.get("droit").isPresent &&
+                (request.session.get("droit").get() == "Admin" ||
+                 request.session.get("droit").get() == "SuperAdmin" ||
+                 request.session.get("droit").get() == "Agent Saisie" ||
+                 request.session.get("droit").get() == "Comptable")
+              ) {
+              <button type="button" 
+                      class="btn btn-success btn-sm" 
+                      data-toggle="modal" 
+                      data-target="#reglementModal">
+                <i class="fas fa-plus"></i> Nouveau Bon de Commande
+              </button>
+              }
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-12 text-center">
+                <h5 class="text-primary mb-3">
+                  <strong>Matricule n°@adherent.getMatricule()</strong> - 
+                  @adherent.getNomAd @adherent.getPrenomAd
+                  <br>
+                  <small class="text-muted">
+                    <i class="fas fa-phone"></i> @adherent.getTelephone()
+                  </small>
+                </h5>
+              </div>
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-md-6">
+                <div class="info-box bg-success">
+                  <span class="info-box-icon"><i class="fas fa-money-bill-wave"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Total couverture des Bons</span>
+                    <span class="info-box-number">@totalRegler F CFA</span>
+                  </div>
+                </div>
+              </div>
+
+              @if(totalRegler > plafondAnnuel) {
+              <div class="col-md-6">
+                <div class="info-box bg-danger">
+                  <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Dépassement - Montant à rembourser</span>
+                    <span class="info-box-number">@(totalRegler - plafondAnnuel) F CFA</span>
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    @* ================== LISTE DES Bon de commande ================== *@
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-list"></i> Liste des Bon de Commande
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="reglementTable" class="table table-bordered table-hover table-striped" style="width:100%">
+                <thead>
+                  <tr>
+                    <th>N°BC</th>
+                    <th>Montant Total</th>
+                    <th>Montant Couvert</th>
+                    <th>Montant à Payer</th>
+                    <th>Structure</th>
+                    <th>Date Délivré</th>
+                    <th>Date Expiration</th>
+                    <th>Temps Restant</th>
+                    <th>Statut</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+               <tbody>
+  @for(c <- reglements) {
+  @defining({
+  // Conversion de Timestamp vers LocalDateTime
+  val datePayement = c.getDatePayement().toLocalDateTime()
+  val dateExpiration = c.getDateExpiration().toLocalDateTime()
+  val now = LocalDateTime.now()
+  val joursRestants = ChronoUnit.DAYS.between(now, dateExpiration)
+  val isConfirmedValue = c.getIsConfirmedBon()
+  val isConfirmed: Boolean = (isConfirmedValue != null && isConfirmedValue == true)
+  (datePayement, dateExpiration, joursRestants, isConfirmed)
+}) { case (datePayement, dateExpiration, joursRestants, isConfirmed) =>
+
+  <tr>
+    <td>@c.getId()</td>
+    <td>@c.getMontantTotal() F CFA</td>
+    <td class="text-success"><strong>@c.getMontantReglement() F CFA</strong></td>
+    <td class="text-warning"><strong>@c.getMontantPaye() F CFA</strong></td>
+    <td>@c.getStructure()</td>
+    <td>@datePayement.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</td>
+    <td class="text-danger"><strong>@dateExpiration.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</strong></td>
+    <td data-order="@joursRestants">
+      @if(joursRestants < 0) {
+        <span class="badge badge-danger">
+          <i class="fas fa-times-circle"></i> Expiré depuis @Math.abs(joursRestants) jour(s)
+        </span>
+      } else if(joursRestants == 0) {
+        <span class="badge badge-warning">
+          <i class="fas fa-exclamation-triangle"></i> Expire aujourd'hui
+        </span>
+      } else if(joursRestants <= 7) {
+        <span class="badge badge-warning">
+          <i class="fas fa-clock"></i> @joursRestants jour(s) restant(s)
+        </span>
+      } else {
+        <span class="badge badge-success">
+          <i class="fas fa-check-circle"></i> @joursRestants jour(s) restant(s)
+        </span>
+      }
+    </td>
+    <td class="text-center" data-order="@if(isConfirmed){1}else{0}">
+      <div class="d-flex align-items-center justify-content-center">
+        @if(isConfirmed) {
+          <span class="badge badge-success mr-2">
+            <i class="fas fa-check-circle"></i> Confirmé
+          </span>
+        } else {
+          <span class="badge badge-warning mr-2">
+            <i class="fas fa-hourglass-half"></i> Non confirmé
+          </span>
+        }
+        
+        @if(!isConfirmed && request.session.get("droit").isPresent && (
+          request.session.get("droit").get() == "SuperAdmin" ||
+          request.session.get("droit").get() == "Admin" ||
+          request.session.get("droit").get() == "Comptable")
+        ) {
+          <button type="button"
+                  class="btn btn-sm btn-primary"
+                  onclick="confirmerBon(@c.getId(), @c.getIdAdherent())"
+                  title="Confirmer le bon">
+            <i class="fas fa-check"></i>
+          </button>
+        }
+      </div>
+    </td>
+    <td class="text-center">
+      <div class="btn-group" role="group">
+        <!-- Voir détails -->
+        <button type="button"
+                class="btn btn-info btn-sm"
+                data-toggle="modal"
+                data-target="#detailModal@c.getId()"
+                title="Voir détails">
+          <i class="fas fa-eye"></i>
+        </button>
+
+        @if(
+          request.session.get("droit").isPresent && (
+          request.session.get("droit").get() == "SuperAdmin" ||
+          request.session.get("droit").get() == "Comptable" ||
+          request.session.get("droit").get() == "Admin")
+        ) {
+        <!-- Modifier -->
+        <a href='@controllers.routes.ReglementCtrl.show("EDIT","BC", c.getId(), c.getIdAdherent())'
+           class="btn btn-warning btn-sm"
+           title="Modifier">
+          <i class="fas fa-edit"></i>
+        </a>
+        }
+
+        @if(
+          request.session.get("droit").isPresent && (
+          request.session.get("droit").get() == "SuperAdmin" ||
+          request.session.get("droit").get() == "Admin" ||
+          request.session.get("droit").get() == "Agent Saisie" ||
+          request.session.get("droit").get() == "Comptable")
+        ) {
+        <!-- Lignes -->
+        <a href='@controllers.routes.ReglementCtrl.reglementDetailForm("CREATE", c.getId(), c.getIdAdherent(), 0L)'
+           class="btn btn-success btn-sm"
+           title="Lignes de détail">
+          <i class="fas fa-list"></i>
+        </a>
+        }
+
+        @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "SuperAdmin") {
+        <!-- Supprimer -->
+        <a href='@controllers.routes.ReglementCtrl.show("DELETE","BC", c.getId(), c.getIdAdherent())'
+           class="btn btn-danger btn-sm"
+           title="Supprimer"
+           onclick="return window.confirm('Voulez-vous vraiment supprimer ce règlement ?');">
+          <i class="fas fa-trash"></i>
+        </a>
+        }
+      </div>
+    </td>
+  </tr>
+  }
+  }
+</tbody>
+
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Loader -->
+<div class="modal fade" id="loadingModal" data-backdrop="static" data-keyboard="false" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+          <span class="sr-only">Chargement...</span>
+        </div>
+        <p class="mt-3 mb-0">Traitement en cours...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</section>
+
+@* ================== MODAL FORMULAIRE REGLEMENT ================== *@
+<div class="modal fade" id="reglementModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <form method="POST" id="reglementForm" action='@controllers.routes.ReglementCtrl.save()'>
+        @helper.CSRF.formField
+
+        <input type="hidden" id="formViewMode" name="viewMode" value="CREATE">
+        <input type="hidden" name="adherent" value="@adherent.getId()">
+        <input type="hidden" id="formReglementId" name="id" value="">
+
+        <div class="modal-header bg-primary">
+          <h5 class="modal-title text-white">
+            <i class="fas fa-file-invoice"></i> Nouveau Bon de Commande
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="alert alert-info">
+            <i class="icon fas fa-info"></i>
+            Tous les champs avec <span class="text-danger"><strong>*</strong></span> sont obligatoires.
+          </div>
+
+          <!-- Informations Générales -->
+          <div class="card card-secondary">
+            <div class="card-header">
+              <h3 class="card-title">Informations Générales</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                
+                <!-- Bénéficiaire -->
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>
+                      <i class="fas fa-user-check"></i> Bénéficiaire 
+                      <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-control select2" required id="benef" name="benef">
+                      <option value="">Sélectionner le bénéficiaire</option>
+                      <option value="@adherent.getId()">
+                        @adherent.getNomAd @adherent.getPrenomAd (Adhérent)
+                      </option>
+                      @for(c <- ayantDroits) {
+                      <option value="@c.getIdAyantDroit()">
+                        @c.getNomAy (Ayant droit)
+                      </option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Type de Prestation -->
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>
+                      <i class="fas fa-briefcase-medical"></i> Type de prestation 
+                      <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-control select2" required id="tprestation" name="typePrestation">
+                      <option value="">Sélectionner le type</option>
+                      @for(c <- typePrestations) {
+                      <option value="@c.getId()">
+                        @c.getPrestation() - @c.getCouverture()%
+                      </option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Structure -->
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>
+                      <i class="fas fa-hospital"></i> Structure 
+                      <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-control select2" required id="structure" name="structure">
+                      <option value="">Sélectionner la structure</option>
+                      @for(c <- structures) {
+                      <option value="@c.getId()">
+                        @c.getLibelle()
+                      </option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                 <div class="col-md-3">
+                  <div class="form-group">
+                    <label>
+                      <i class="far fa-calendar-alt"></i> Date d'établissement du Bon 
+                      <span class="text-danger">*</span>
+                    </label>
+                    <input type="date" class="form-control" id="tmpDate" name="tmpDate" required>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Informations Complémentaires -->
+          <div class="card card-secondary">
+            <div class="card-header">
+              <h3 class="card-title">Informations Complémentaires (Si remboursement en espèces)</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                
+                <!-- Structure Émettrice -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>
+                      <i class="fas fa-building"></i> Structure émettrice
+                    </label>
+                    <input type="text"
+                           id="structureEmettriceRembourssement"
+                           name="structureEmettriceRembourssement"
+                           class="form-control"
+                           placeholder="Nom de la structure émettrice">
+                  </div>
+                </div>
+
+                <!-- Téléphone Structure -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>
+                      <i class="fas fa-phone"></i> Numéro de téléphone
+                    </label>
+                    <input type="text"
+                           id="telStructureEmettrice"
+                           name="telStructureEmettrice"
+                           class="form-control"
+                           placeholder="Téléphone de la structure">
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-default" data-dismiss="modal">
+            <i class="fas fa-times"></i> Fermer
+          </button>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-save"></i> Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+@* ================== MODALES DE DÉTAILS ================== *@
+@for(c <- reglements) {
+@defining({
+  val datePayementDetail = c.getDatePayement().toLocalDateTime()
+  val dateExpirationDetail = c.getDateExpiration().toLocalDateTime()
+  val isConfirmedValue = c.getIsConfirmedBon()
+  val isConfirmedDetail: Boolean = (isConfirmedValue != null && isConfirmedValue == true)
+  (datePayementDetail, dateExpirationDetail, isConfirmedDetail)
+}) { case (datePayementDetail, dateExpirationDetail, isConfirmedDetail) =>
+
+<div class="modal fade" id="detailModal@c.getId()" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-info">
+        <h5 class="modal-title text-white">
+          <i class="fas fa-info-circle"></i> Détails du Règlement
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered table-sm">
+          <tr>
+            <th style="width: 30%;">Nom & prénom adhérent</th>
+            <td class="text-success"><strong>@c.getNomAd() @c.getPrenomAd()</strong></td>
+          </tr>
+          <tr>
+            <th>Bénéficiaire</th>
+            <td class="text-success">
+              <strong>
+                @if(c.getAyantDroit() != null) {
+                  @c.getNomAy() - @c.getLien()
+                } else {
+                  @c.getNomAd() @c.getPrenomAd()
+                }
+              </strong>
+            </td>
+          </tr>
+          <tr>
+            <th>Réf Facture</th>
+            <td><strong>@c.getRefFacture()</strong></td>
+          </tr>
+          <tr>
+            <th>Type de prestation</th>
+            <td><strong>@c.getPrestation()</strong></td>
+          </tr>
+          <tr>
+            <th>Structure</th>
+            <td><strong>@c.getStructure()</strong></td>
+          </tr>
+          <tr>
+            <th>Date paiement</th>
+            <td><strong>@datePayementDetail.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</strong></td>
+          </tr>
+          <tr>
+            <th>Date expiration</th>
+            <td class="text-danger"><strong>@dateExpirationDetail.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</strong></td>
+          </tr>
+          <tr>
+            <th>Statut du Bon</th>
+            <td>
+              @if(isConfirmedDetail) {
+                <span class="badge badge-success">
+                  <i class="fas fa-check-circle"></i> Confirmé
+                </span>
+              } else {
+                <span class="badge badge-warning">
+                  <i class="fas fa-hourglass-half"></i> Non confirmé
+                </span>
+              }
+            </td>
+          </tr>
+          <tr>
+            <th>Montant Total de la Facture</th>
+            <td class="text-primary"><strong>@c.getMontantTotal() F CFA</strong></td>
+          </tr>
+          <tr>
+            <th>Montant à payer</th>
+            <td class="text-warning"><strong>@c.getMontantPaye() F CFA</strong></td>
+          </tr>
+          <tr>
+            <th>Montant Règlement (pris en charge)</th>
+            <td class="text-success"><strong>@c.getMontantReglement() F CFA</strong></td>
+          </tr>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          <i class="fas fa-times"></i> Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+}
+
+<script>
+// Fonction pour confirmer un bon
+// Fonction pour confirmer un bon
+function confirmerBon(bonId, adherentId) {
+  if (confirm('Voulez-vous vraiment confirmer ce bon de commande ?')) {
+    // Afficher le modal de chargement
+    $('#loadingModal').modal('show');
+    
+    // Appel AJAX pour confirmer le bon
+    $.ajax({
+      url: '@controllers.routes.ReglementCtrl.confirmerBon(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
+      type: 'POST',
+      headers: {
+        'Csrf-Token': $('input[name="csrfToken"]').val()
+      },
+      success: function(response) {
+        // Masquer le modal de chargement
+        $('#loadingModal').modal('hide');
+        
+        // Notification de succès
+        if (typeof toastr !== 'undefined') {
+          toastr.success('Bon de commande confirmé avec succès');
+        } else {
+          // Alternative avec SweetAlert si disponible
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Succès',
+              text: 'Bon de commande confirmé avec succès',
+              timer: 2000
+            });
+          } else {
+            alert('Bon de commande confirmé avec succès');
+          }
+        }
+        
+        // Recharger la page après 1 seconde
+        setTimeout(function() {
+          location.reload();
+        }, 1000);
+      },
+      error: function(xhr, status, error) {
+        // Masquer le modal de chargement
+        $('#loadingModal').modal('hide');
+        
+        // Notification d'erreur
+        if (typeof toastr !== 'undefined') {
+          toastr.error('Erreur lors de la confirmation du bon');
+        } else {
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'error',
+              title: 'Erreur',
+              text: 'Erreur lors de la confirmation du bon'
+            });
+          } else {
+            alert('Erreur lors de la confirmation du bon');
+          }
+        }
+        console.error('Erreur:', error);
+      }
+    });
+  }
+}
+
+
+$(function () {
+  // Initialisation de DataTable
+  var table = $("#reglementTable").DataTable({
+    "responsive": true,
+    "lengthChange": true,
+    "autoWidth": false,
+    "pageLength": 10,
+    "order": [[7, "asc"]], // Tri par défaut sur la colonne "Temps Restant"
+    "columnDefs": [
+      {
+        "targets": 6, // Colonne Date Expiration
+        "className": "text-danger font-weight-bold"
+      },
+      {
+        "targets": [8, 9], // Colonnes Statut et Actions
+        "orderable": true,
+        "searchable": false
+      }
+    ],
+    "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+           '<"row"<"col-sm-12 col-md-6"B>>' +
+           '<"row"<"col-sm-12"tr>>' +
+           '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+    "buttons": [
+      {
+        extend: 'copy',
+        text: '<i class="fas fa-copy"></i> Copier',
+        className: 'btn btn-sm btn-secondary',
+        exportOptions: {
+          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8] // Exclure la colonne Actions
+        }
+      },
+      {
+        extend: 'csv',
+        text: '<i class="fas fa-file-csv"></i> CSV',
+        className: 'btn btn-sm btn-secondary',
+        exportOptions: {
+          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        }
+      },
+      {
+        extend: 'excel',
+        text: '<i class="fas fa-file-excel"></i> Excel',
+        className: 'btn btn-sm btn-success',
+        exportOptions: {
+          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        }
+      },
+      {
+        extend: 'pdf',
+        text: '<i class="fas fa-file-pdf"></i> PDF',
+        className: 'btn btn-sm btn-danger',
+        exportOptions: {
+          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        },
+        orientation: 'landscape',
+        pageSize: 'A4'
+      },
+      {
+        extend: 'print',
+        text: '<i class="fas fa-print"></i> Imprimer',
+        className: 'btn btn-sm btn-info',
+        exportOptions: {
+          columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        }
+      }
+    ],
+    "language": {
+      "sProcessing": "Traitement en cours...",
+      "sSearch": "Rechercher&nbsp;:",
+      "sLengthMenu": "Afficher _MENU_ éléments",
+      "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+      "sInfoEmpty": "Affichage de 0 à 0 sur 0 élément",
+      "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
+      "sInfoPostFix": "",
+      "sLoadingRecords": "Chargement...",
+      "sZeroRecords": "Aucun élément correspondant trouvé",
+      "sEmptyTable": "Aucune donnée disponible dans le tableau",
+      "oPaginate": {
+        "sFirst": "Premier",
+        "sPrevious": "Précédent",
+        "sNext": "Suivant",
+        "sLast": "Dernier"
+      },
+      "oAria": {
+        "sSortAscending": ": activer pour trier la colonne par ordre croissant",
+        "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
+      }
+    }
+  });
+
+  // Select2
+  $('.select2').select2({
+    theme: 'bootstrap4',
+    width: '100%',
+    dropdownParent: $('#reglementModal')
+  });
+
+  // Réinitialiser le formulaire à la fermeture du modal
+  $('#reglementModal').on('hidden.bs.modal', function () {
+    $('#reglementForm')[0].reset();
+    $('.select2').val(null).trigger('change');
+  });
+
+  // Ouvrir automatiquement le modal si viewMode = CREATE
+  @if(viewMode.equals("CREATE")) {
+    $('#reglementModal').modal('show');
+  }
+});
+</script>
+
+<style>
+/* Info boxes */
+.info-box-number { 
+  font-size: 1.5rem; 
+  font-weight: bold; 
+}
+
+/* Modal headers */
+.modal-header.bg-primary,
+.modal-header.bg-info { 
+  color: white; 
+}
+
+/* Select2 */
+.select2-container { 
+  z-index: 9999 !important; 
+}
+
+/* Table responsiveness */
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* Date expiration styling */
+#reglementTable tbody tr td:nth-child(7) {
+  background-color: #ffe6e6;
+  font-weight: bold;
+  color: #dc3545 !important;
+}
+
+/* Badges styling */
+.badge {
+  font-size: 0.85rem;
+  padding: 0.4em 0.6em;
+}
+
+.badge i {
+  margin-right: 4px;
+}
+
+/* Button groups */
+.btn-group {
+  white-space: nowrap;
+}
+
+.btn-group .btn {
+  margin: 0 2px;
+}
+
+/* DataTable buttons */
+.dt-buttons {
+  margin-bottom: 15px;
+}
+
+.dt-buttons .btn {
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+/* Statut column styling */
+.d-flex {
+  display: flex !important;
+}
+
+.align-items-center {
+  align-items: center !important;
+}
+
+.justify-content-center {
+  justify-content: center !important;
+}
+
+.mr-2 {
+  margin-right: 0.5rem !important;
+}
+
+/* Responsive adjustments */
+@@media (max-width: 768px) {
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .btn-group .btn {
+    margin-bottom: 5px;
+    width: 100%;
+  }
+  
+  .d-flex {
+    flex-direction: column !important;
+  }
+  
+  .mr-2 {
+    margin-right: 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+}
+</style>
+
+}
