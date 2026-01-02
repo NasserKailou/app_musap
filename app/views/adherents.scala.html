@@ -891,35 +891,35 @@
 </section>
 
 <script>
-// Données des adhérents en JSON
-const adherentsData = {
-  @for(c <- adherents) {
-    "@c.getId()": {
-      id: "@c.getId()",
-      matricule: "@c.getMatricule()",
-      codeCarnet: "@c.getCodeCarnet()",
-      nomAd: "@Html(c.getNomAd().replace("\"", "\\\"").replace("'", "\\'"))",
-      prenomAd: "@Html(c.getPrenomAd().replace("\"", "\\\"").replace("'", "\\'"))",
-      sexe: "@c.getSexe()",
-      salaireNet: "@c.getSalaireNet()",
-      email: "@if(c.getEmail() != null){@c.getEmail()}",
-      telephone: "@c.getTelephone()",
-      categorie: "@if(c.getCategorie() != null){@c.getCategorie()}",
-      dateNaiss: "@c.getDateNaiss().format("yyyy-MM-dd")",
-      datePriseService: "@c.getDatePriseService().format("yyyy-MM-dd")",
-      fonction: "@if(c.getFonction() != null){@Html(c.getFonction().replace("\"", "\\\"").replace("'", "\\'"))}",
-      structureSigle: "@if(c.getStructureSigle() != null){@Html(c.getStructureSigle().replace("\"", "\\\"").replace("'", "\\'"))}",
-      isMember: @c.getIsMember(),
-      picture: "@c.getPicture()",
-      pourcentageTotalRetenue: "@c.getPourcentageTotalRetenue()"
-    }@if(adherents.indexOf(c) < adherents.size - 1){,}
-  }
-};
+// Données des adhérents - chargées de manière sécurisée
+const adherentsData = {};
+
+@for(c <- adherents) {
+  adherentsData["@c.getId()"] = {
+    id: "@c.getId()",
+    matricule: "@c.getMatricule()",
+    codeCarnet: "@c.getCodeCarnet()",
+    nomAd: "@c.getNomAd().replaceAll("[^a-zA-Z0-9 àâäéèêëïîôöùûüÿçÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇ-]", "")",
+    prenomAd: "@c.getPrenomAd().replaceAll("[^a-zA-Z0-9 àâäéèêëïîôöùûüÿçÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇ-]", "")",
+    sexe: "@c.getSexe()",
+    salaireNet: "@c.getSalaireNet()",
+    email: "@if(c.getEmail() != null && c.getEmail().trim() != ""){@c.getEmail().trim()}else{}",
+    telephone: "@c.getTelephone()",
+    categorie: "@if(c.getCategorie() != null){@c.getCategorie()}else{}",
+    dateNaiss: "@{c.getDateNaiss().format("yyyy-MM-dd")}",
+    datePriseService: "@{c.getDatePriseService().format("yyyy-MM-dd")}",
+    fonction: "@if(c.getFonction() != null){@c.getFonction().replaceAll("[^a-zA-Z0-9 àâäéèêëïîôöùûüÿçÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇ-]", "")}else{}",
+    structureSigle: "@if(c.getStructureSigle() != null){@c.getStructureSigle().replaceAll("[^a-zA-Z0-9 àâäéèêëïîôöùûüÿçÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇ-]", "")}else{}",
+    isMember: @c.getIsMember(),
+    picture: "@c.getPicture()",
+    pourcentageTotalRetenue: "@c.getPourcentageTotalRetenue()"
+  };
+}
 
 /**
  * Ouvre le modal en mode édition avec les données de l'adhérent
  */
-function openEditModal(adherentId) {
+window.openEditModal = function(adherentId) {
   console.log('Opening edit modal for adherent:', adherentId);
   
   const data = adherentsData[adherentId];
@@ -982,7 +982,7 @@ function openEditModal(adherentId) {
 /**
  * Ouvre le modal en mode création (nouveau adhérent)
  */
-function openCreateModal() {
+window.openCreateModal = function() {
   console.log('Opening create modal');
   
   // Réinitialiser le formulaire
