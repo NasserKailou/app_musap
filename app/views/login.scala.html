@@ -1,11 +1,11 @@
 @import helper._
 @(implicit request: Http.Request)
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ges-Dossier TGI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Connexion - Mutuelle Niger Poste</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="@routes.Assets.versioned("dist/css/googleapis.css")">
@@ -15,79 +15,564 @@
   <link rel="stylesheet" href="@routes.Assets.versioned("plugins/icheck-bootstrap/icheck-bootstrap.min.css")">
   <!-- Theme style -->
   <link rel="stylesheet" href="@routes.Assets.versioned("dist/css/adminlte.min.css")">
+  
+  <style>
+    :root {
+      --primary-sky-blue: #87CEEB;
+      --dark-sky-blue: #4A9FC7;
+      --light-sky-blue: #B0E0E6;
+      --accent-blue: #1E90FF;
+      --gradient-start: #87CEEB;
+      --gradient-end: #4A9FC7;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Source Sans Pro', sans-serif;
+      background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animation des bulles d'arrière-plan */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      top: -150px;
+      right: -150px;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      bottom: -100px;
+      left: -100px;
+      animation: float 8s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) translateX(0px); }
+      50% { transform: translateY(-30px) translateX(20px); }
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 450px;
+      position: relative;
+      z-index: 10;
+      animation: slideInDown 0.8s ease-out;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .login-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--primary-sky-blue) 0%, var(--dark-sky-blue) 100%);
+      padding: 40px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    .logo-container {
+      position: relative;
+      z-index: 1;
+      animation: slideInDown 1s ease-out;
+    }
+
+    .logo-img {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 5px solid white;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      object-fit: cover;
+      margin: 0 auto;
+      display: block;
+      background: white;
+      transition: transform 0.3s ease;
+    }
+
+    .logo-img:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .app-title {
+      color: white;
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      letter-spacing: 1px;
+    }
+
+    .app-subtitle {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 15px;
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    .card-body {
+      padding: 40px 35px;
+      animation: slideInUp 1s ease-out;
+    }
+
+    .welcome-text {
+      text-align: center;
+      color: var(--dark-sky-blue);
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .welcome-text::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-sky-blue), var(--accent-blue));
+      margin: 10px auto 0;
+      border-radius: 2px;
+    }
+
+    .alert {
+      border-radius: 10px;
+      border: none;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      animation: slideInDown 0.5s ease-out;
+    }
+
+    .alert-danger {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      color: white;
+    }
+
+    .alert-warning {
+      background: linear-gradient(135deg, #ffd93d 0%, #ffaa3d 100%);
+      color: #856404;
+    }
+
+    .alert-success {
+      background: linear-gradient(135deg, #6bcf7f 0%, #4db8a1 100%);
+      color: white;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 15px;
+      color: var(--primary-sky-blue);
+      font-size: 18px;
+      z-index: 2;
+      transition: color 0.3s ease;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px 15px 14px 45px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-sky-blue);
+      box-shadow: 0 0 0 0.2rem rgba(135, 206, 235, 0.25);
+      background: white;
+      outline: none;
+    }
+
+    .form-control:focus + .input-icon,
+    .input-wrapper:focus-within .input-icon {
+      color: var(--accent-blue);
+      transform: scale(1.1);
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      color: #999;
+      cursor: pointer;
+      z-index: 2;
+      transition: color 0.3s ease;
+    }
+
+    .password-toggle:hover {
+      color: var(--accent-blue);
+    }
+
+    .remember-section {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .custom-checkbox {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .custom-checkbox input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+      cursor: pointer;
+      accent-color: var(--primary-sky-blue);
+    }
+
+    .custom-checkbox label {
+      color: #666;
+      font-size: 14px;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary-sky-blue) 0%, var(--accent-blue) 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(135, 206, 235, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-login::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(135, 206, 235, 0.5);
+    }
+
+    .btn-login:hover::before {
+      left: 100%;
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+    }
+
+    .btn-login i {
+      margin-right: 8px;
+    }
+
+    .card-footer {
+      background: #f8f9fa;
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .footer-text {
+      color: #6c757d;
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .footer-text strong {
+      color: var(--dark-sky-blue);
+    }
+
+    /* Animations pour les icônes */
+    @keyframes iconBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .input-wrapper:focus-within .input-icon {
+      animation: iconBounce 0.6s ease;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 576px) {
+      .login-container {
+        max-width: 100%;
+        padding: 0 10px;
+      }
+
+      .card-header {
+        padding: 30px 20px;
+      }
+
+      .logo-img {
+        width: 110px;
+        height: 110px;
+      }
+
+      .app-title {
+        font-size: 22px;
+      }
+
+      .app-subtitle {
+        font-size: 13px;
+      }
+
+      .card-body {
+        padding: 30px 25px;
+      }
+
+      .welcome-text {
+        font-size: 18px;
+      }
+
+      .form-control {
+        font-size: 14px;
+        padding: 12px 12px 12px 40px;
+      }
+
+      .btn-login {
+        font-size: 14px;
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .logo-img {
+        width: 90px;
+        height: 90px;
+      }
+
+      .app-title {
+        font-size: 20px;
+      }
+
+      .card-body {
+        padding: 25px 20px;
+      }
+    }
+  </style>
 </head>
-<body class="hold-transition login-page">
-<div class="login-box">
- 
- <div style="margin-left: 0px; width: 390px">
-	           @if(request.flash.get("error").isPresent()) {
-	                            <div id="feedBackArea" style="margin-bottom: 6px !important;" class="alert alert-danger"> @request.flash.get("error").get</div>
-	                        }
-	                        @if(request.flash.get("warning").isPresent()) {
-	                            <div id="feedBackArea" style="margin-bottom: 6px !important;" class="alert alert-warning">@request.flash.get("warning").get</div>
-	                        }
-	                        @if(request.flash.get("success").isPresent()) {
-	                            <div id="feedBackArea" style="margin-bottom: 6px !important;" class="alert alert-success">@request.flash.get("success").get</div>
-	                        }
-	        </div>
- 
-  <div class="card card-outline card-primary">
-    <div class="card-header text-center">
-      <img src="@routes.Assets.versioned("images/logo.png")" class="profile-img-card0" style="width: 220px;height:150px; border: 1px solid ;border-radius:5px;">
-<!-- 	       
-      <h4><b>TGI de Niamey</b></h4> -->
-    </div>
-    <div class="card-body">
-      <p class="login-box-msg">Tribunal de Grande Instance de Niamey</p>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Header avec logo -->
+      <div class="card-header">
+        <div class="logo-container">
+          <img src="@routes.Assets.versioned("images/logo.png")" class="logo-img" alt="Logo Niger Poste">
+          <h1 class="app-title">Mutuelle Niger Poste</h1>
+          <p class="app-subtitle">Système de Gestion des Adhérents</p>
+        </div>
+      </div>
 
-      <form action="@CSRF(controllers.routes.AuthenticationCtrl.authentification())" method="post">
-      @helper.CSRF.formField
-        <div class="input-group mb-3">
-          <input type="mail" class="form-control" required="required"  name="login" placeholder="Login">
-          <div class="input-group-append">
-            <div class="input-group-text">
-              <span class="fas fa-envelope"></span>
-            </div>
-          </div>
+      <!-- Corps du formulaire -->
+      <div class="card-body">
+        <div class="welcome-text">
+          <i class="fas fa-user-shield"></i> Connexion Sécurisée
         </div>
-        <div class="input-group mb-3">
-          <input type="password" class="form-control" name="passe" required="required" placeholder="Password">
-          <div class="input-group-append">
-            <div class="input-group-text">
-              <span class="fas fa-lock"></span>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-8">
-            <div class="icheck-primary">
-              <input type="checkbox" id="remember">
-              <label for="remember">
-                Se Souvenir de moi?
-              </label>
-            </div>
-          </div>
-          <!-- /.col -->
-          <div class="col-5">
-            <button type="submit" class="btn btn-primary btn-block">Connexion</button>
-          </div>
-          <!-- /.col -->
-        </div>
-      </form>
 
-     
+        <!-- Messages Flash -->
+        @if(request.flash.get("error").isPresent()) {
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> @request.flash.get("error").get
+          </div>
+        }
+        @if(request.flash.get("warning").isPresent()) {
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> @request.flash.get("warning").get
+          </div>
+        }
+        @if(request.flash.get("success").isPresent()) {
+          <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> @request.flash.get("success").get
+          </div>
+        }
+
+        <!-- Formulaire de connexion -->
+        <form action="@CSRF(controllers.routes.AuthenticationCtrl.authentification())" method="post" id="loginForm">
+          @helper.CSRF.formField
+          
+          <!-- Champ Login -->
+          <div class="form-group">
+            <div class="input-wrapper">
+              <i class="fas fa-user input-icon"></i>
+              <input type="text" 
+                     class="form-control" 
+                     id="login"
+                     name="login" 
+                     placeholder="Identifiant" 
+                     required
+                     autocomplete="username">
+            </div>
+          </div>
+
+          <!-- Champ Password -->
+          <div class="form-group">
+            <div class="input-wrapper">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" 
+                     class="form-control" 
+                     id="password"
+                     name="passe" 
+                     placeholder="Mot de passe" 
+                     required
+                     autocomplete="current-password">
+              <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+            </div>
+          </div>
+
+          <!-- Se souvenir de moi -->
+          <div class="remember-section">
+            <div class="custom-checkbox">
+              <input type="checkbox" id="remember" name="remember">
+              <label for="remember">Se souvenir de moi</label>
+            </div>
+          </div>
+
+          <!-- Bouton de connexion -->
+          <button type="submit" class="btn-login">
+            <i class="fas fa-sign-in-alt"></i> Se connecter
+          </button>
+        </form>
+      </div>
+
+      <!-- Footer -->
+      <div class="card-footer">
+        <p class="footer-text">
+          © 2024 <strong>Niger Poste</strong> - Tous droits réservés
+        </p>
+      </div>
     </div>
-    <!-- /.card-body -->
   </div>
-  <!-- /.card -->
-</div>
-<!-- /.login-box -->
 
-<!-- jQuery -->
-<script src="@routes.Assets.versioned("plugins/jquery/jquery.min.js")"></script>
-<!-- Bootstrap 4 -->
-<script src="@routes.Assets.versioned("plugins/bootstrap/js/bootstrap.bundle.min.js")"></script>
-<!-- AdminLTE App -->
-<script src="@routes.Assets.versioned("dist/js/adminlte.min.js")"></script>
+  <!-- jQuery -->
+  <script src="@routes.Assets.versioned("plugins/jquery/jquery.min.js")"></script>
+  <!-- Bootstrap 4 -->
+  <script src="@routes.Assets.versioned("plugins/bootstrap/js/bootstrap.bundle.min.js")"></script>
+  <!-- AdminLTE App -->
+  <script src="@routes.Assets.versioned("dist/js/adminlte.min.js")"></script>
+
+  <script>
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordField = document.getElementById('password');
+      const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordField.setAttribute('type', type);
+      
+      // Toggle icon
+      this.classList.toggle('fa-eye');
+      this.classList.toggle('fa-eye-slash');
+    });
+
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(function(alert) {
+        alert.style.transition = 'opacity 0.5s ease';
+        alert.style.opacity = '0';
+        setTimeout(function() {
+          alert.remove();
+        }, 500);
+      });
+    }, 5000);
+
+    // Form validation animation
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      const btn = document.querySelector('.btn-login');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion en cours...';
+      btn.disabled = true;
+    });
+  </script>
 </body>
 </html>

@@ -82,6 +82,15 @@
         </ol>
       </div>
     </div>
+    @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin") && !viewMode.equals("EDIT") && !viewMode.equals("DELETE")) {
+    <div class="row mt-3">
+      <div class="col-12">
+        <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modal-adherent-form">
+          <i class="fas fa-user-plus"></i> Nouvel Adhérent
+        </button>
+      </div>
+    </div>
+    }
   </div>
 </section>
 
@@ -89,10 +98,25 @@
 <section class="content">
   <div class="container-fluid">
 
-    @* ================== FORMULAIRE ADHERENT ================== *@
+    @* ================== FORMULAIRE ADHERENT DANS UN MODAL ================== *@
     @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
 
-      <div class="row">
+      <div class="modal fade" id="modal-adherent-form" tabindex="-1" role="dialog" aria-labelledby="modalAdherentLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" style="max-width: 95%;">
+          <div class="modal-content">
+            <div class="modal-header bg-primary">
+              <h5 class="modal-title" id="modalAdherentLabel">
+                <i class="fas fa-user-plus"></i> 
+                @if(viewMode.equals("CREATE")) { Nouvel adhérent }
+                @if(viewMode.equals("EDIT")) { Modifier adhérent }
+                @if(viewMode.equals("DELETE")) { Désactiver adhérent }
+              </h5>
+              <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fermer">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+      <div class="row" style="display: none;">
         <div class="col-12">
           <div class="card card-primary">
             <div class="card-header">
@@ -252,8 +276,7 @@
                   <div class="col-md-3">
                     <div class="form-group">
                       <label>
-                        <i class="fas fa-envelope"></i> E-mail 
-                        <span class="text-danger">*</span>
+                        <i class="fas fa-envelope"></i> E-mail
                       </label>
                       <input type="email"
                              id="email"
@@ -262,7 +285,7 @@
                              autocomplete="off"
                              value="@adherent.getEmail()"
                              placeholder="Email adhérent"
-                             required
+                            
                              @if(viewMode.equals("DELETE")) { readonly="readonly" }>
                     </div>
                   </div>
@@ -290,13 +313,12 @@
                   <div class="col-md-3">
                     <div class="form-group">
                       <label>
-                        <i class="fas fa-tags"></i> Catégorie 
-                        <span class="text-danger">*</span>
+                        <i class="fas fa-tags"></i> Catégorie
                       </label>
                       <select class="form-control"
                               id="typeConsultation"
                               name="categorie"
-                              required
+                             
                               @if(viewMode.equals("DELETE")) { disabled="disabled" }>
                         <option value="">Sélectionner la catégorie</option>
                         @for(c <- cats) {
@@ -349,13 +371,13 @@
                                name="tmpDate2"
                                class="form-control"
                                placeholder="JJ/MM/AAAA"
-                               required>
+                              >
                       } else {
                         <input type="date"
                                name="tmpDate2"
                                class="form-control"
                                value='@adherent.getDatePriseService().format("yyyy-MM-dd")'
-                               required>
+                              >
                       }
                     </div>
                   </div>
@@ -364,8 +386,7 @@
                   <div class="col-md-3">
                     <div class="form-group">
                       <label>
-                        <i class="fas fa-briefcase"></i> Fonction 
-                        <span class="text-danger">*</span>
+                        <i class="fas fa-briefcase"></i> Fonction
                       </label>
                       <input type="text"
                              name="fonction"
@@ -373,7 +394,7 @@
                              autocomplete="off"
                              value="@adherent.getFonction()"
                              placeholder="Fonction de l'adhérent"
-                             required
+                            
                              @if(viewMode.equals("DELETE")) { readonly="readonly" }>
                     </div>
                   </div>
@@ -382,8 +403,7 @@
                   <div class="col-md-3">
                     <div class="form-group">
                       <label>
-                        <i class="fas fa-building"></i> Sigle structure 
-                        <span class="text-danger">*</span>
+                        <i class="fas fa-building"></i> Sigle structure
                       </label>
                       <input type="text"
                              name="structureSigle"
@@ -391,7 +411,7 @@
                              autocomplete="off"
                              value="@adherent.getStructureSigle()"
                              placeholder="Sigle structure"
-                             required
+                            
                              @if(viewMode.equals("DELETE")) { readonly="readonly" }>
                     </div>
                   </div>
@@ -468,6 +488,9 @@
               </div>
 
             </form>
+          </div>
+        </div>
+      </div>
           </div>
         </div>
       </div>
@@ -948,10 +971,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Auto-open modal selon viewMode
   var viewMode = '@viewMode';
-  if (viewMode && viewMode.trim() !== '') {
+  if (viewMode && viewMode.trim() !== '' && (viewMode === 'CREATE' || viewMode === 'EDIT' || viewMode === 'DELETE')) {
     console.log('Ouverture du modal pour viewMode:', viewMode);
     setTimeout(function () {
-      $('#ayantDroitModal').modal('show');
+      $('#modal-adherent-form').modal('show');
     }, 100);
   }
 });
