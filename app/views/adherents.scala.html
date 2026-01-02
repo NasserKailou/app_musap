@@ -85,7 +85,7 @@
     @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin") && !viewMode.equals("EDIT") && !viewMode.equals("DELETE")) {
     <div class="row mt-3">
       <div class="col-12">
-        <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modal-adherent-form">
+        <button type="button" class="btn btn-primary btn-lg" onclick="openCreateModal()">
           <i class="fas fa-user-plus"></i> Nouvel Adhérent
         </button>
       </div>
@@ -721,11 +721,13 @@
                             request.session.get("droit").isPresent &&
                             request.session.get("droit").get() == "Admin"
                           ) {
-                            <a class="btn btn-primary btn-sm"
-                               title="Modifier"
-                               href='@controllers.routes.AdherentCtrl.show("EDIT", c.getId())'>
+                            <button type="button"
+                                    class="btn btn-primary btn-sm"
+                                    title="Modifier"
+                                    onclick="openEditModal(@c.getId())"
+                                    data-adherent-id="@c.getId()">
                               <i class="fas fa-edit"></i>
-                            </a>
+                            </button>
                             
                             <a class="btn btn-danger btn-sm"
                                title="Désactiver adhérent"
@@ -736,11 +738,13 @@
                           }
 
                           @if(request.session.get("droit").isPresent &&(request.session.get("droit").get() == "Adherent")) {
-                            <a class="btn btn-primary btn-sm"
-                               title="Modifier"
-                               href='@controllers.routes.AdherentCtrl.show("EDIT", c.getId())'>
+                            <button type="button"
+                                    class="btn btn-primary btn-sm"
+                                    title="Modifier"
+                                    onclick="openEditModal(@c.getId())"
+                                    data-adherent-id="@c.getId()">
                               <i class="fas fa-edit"></i>
-                            </a>
+                            </button>
                           }
 
                           @if( request.session.get("droit").isPresent &&(request.session.get("droit").get() == "Admin")) {
@@ -887,6 +891,130 @@
 </section>
 
 <script>
+// Données des adhérents en JSON
+const adherentsData = {
+  @for(c <- adherents) {
+    "@c.getId()": {
+      id: "@c.getId()",
+      matricule: "@c.getMatricule()",
+      codeCarnet: "@c.getCodeCarnet()",
+      nomAd: "@Html(c.getNomAd().replace("\"", "\\\"").replace("'", "\\'"))",
+      prenomAd: "@Html(c.getPrenomAd().replace("\"", "\\\"").replace("'", "\\'"))",
+      sexe: "@c.getSexe()",
+      salaireNet: "@c.getSalaireNet()",
+      email: "@if(c.getEmail() != null){@c.getEmail()}",
+      telephone: "@c.getTelephone()",
+      categorie: "@if(c.getCategorie() != null){@c.getCategorie()}",
+      dateNaiss: "@c.getDateNaiss().format("yyyy-MM-dd")",
+      datePriseService: "@c.getDatePriseService().format("yyyy-MM-dd")",
+      fonction: "@if(c.getFonction() != null){@Html(c.getFonction().replace("\"", "\\\"").replace("'", "\\'"))}",
+      structureSigle: "@if(c.getStructureSigle() != null){@Html(c.getStructureSigle().replace("\"", "\\\"").replace("'", "\\'"))}",
+      isMember: @c.getIsMember(),
+      picture: "@c.getPicture()",
+      pourcentageTotalRetenue: "@c.getPourcentageTotalRetenue()"
+    }@if(adherents.indexOf(c) < adherents.size - 1){,}
+  }
+};
+
+/**
+ * Ouvre le modal en mode édition avec les données de l'adhérent
+ */
+function openEditModal(adherentId) {
+  console.log('Opening edit modal for adherent:', adherentId);
+  
+  const data = adherentsData[adherentId];
+  if (!data) {
+    console.error('Adhérent non trouvé:', adherentId);
+    alert('Erreur : Adhérent non trouvé');
+    return;
+  }
+  
+  // Remplir les champs cachés
+  document.querySelector('input[name="viewMode"]').value = 'EDIT';
+  document.querySelector('input[name="id"]').value = data.id;
+  document.querySelector('input[name="picture"]').value = data.picture;
+  document.querySelector('input[name="pourcentageTotalRetenue"]').value = data.pourcentageTotalRetenue;
+  
+  // Remplir les champs du formulaire
+  document.getElementById('matricule').value = data.matricule;
+  document.querySelector('input[name="nomAd"]').value = data.nomAd;
+  document.querySelector('input[name="prenomAd"]').value = data.prenomAd;
+  document.getElementById('sexe').value = data.sexe;
+  document.getElementById('codeCarnet').value = data.codeCarnet;
+  document.getElementById('salaireNet').value = data.salaireNet;
+  document.getElementById('email').value = data.email;
+  document.getElementById('telPatient').value = data.telephone;
+  document.getElementById('typeConsultation').value = data.categorie;
+  document.querySelector('input[name="tmpDate"]').value = data.dateNaiss;
+  document.querySelector('input[name="tmpDate2"]').value = data.datePriseService;
+  document.querySelector('input[name="fonction"]').value = data.fonction;
+  document.querySelector('input[name="structureSigle"]').value = data.structureSigle;
+  
+  // Radio buttons pour membre actif
+  if (data.isMember) {
+    document.getElementById('membre_actif_oui').checked = true;
+  } else {
+    document.getElementById('membre_actif_non').checked = true;
+  }
+  
+  // Mettre à jour le titre du modal
+  document.getElementById('modalAdherentLabel').innerHTML = '<i class="fas fa-edit"></i> Modifier adhérent';
+  
+  // Mettre à jour les boutons du footer
+  const submitBtnContainer = document.querySelector('.modal-footer');
+  const submitButtons = submitBtnContainer.querySelectorAll('button[type="submit"]');
+  
+  // Cacher tous les boutons submit
+  submitButtons.forEach(btn => {
+    btn.style.display = 'none';
+  });
+  
+  // Afficher uniquement le bouton Modifier
+  const editBtn = submitBtnContainer.querySelector('button[form="form-adherent"][title*="Modifier"]');
+  if (editBtn) {
+    editBtn.style.display = 'inline-block';
+  }
+  
+  // Ouvrir le modal
+  $('#modal-adherent-form').modal('show');
+}
+
+/**
+ * Ouvre le modal en mode création (nouveau adhérent)
+ */
+function openCreateModal() {
+  console.log('Opening create modal');
+  
+  // Réinitialiser le formulaire
+  document.getElementById('form-adherent').reset();
+  
+  // Définir le mode CREATE
+  document.querySelector('input[name="viewMode"]').value = 'CREATE';
+  document.querySelector('input[name="id"]').value = '';
+  document.querySelector('input[name="picture"]').value = '';
+  
+  // Mettre à jour le titre du modal
+  document.getElementById('modalAdherentLabel').innerHTML = '<i class="fas fa-user-plus"></i> Nouvel adhérent';
+  
+  // Mettre à jour les boutons du footer
+  const submitBtnContainer = document.querySelector('.modal-footer');
+  const submitButtons = submitBtnContainer.querySelectorAll('button[type="submit"]');
+  
+  // Cacher tous les boutons submit
+  submitButtons.forEach(btn => {
+    btn.style.display = 'none';
+  });
+  
+  // Afficher uniquement le bouton Enregistrer
+  const createBtn = submitBtnContainer.querySelector('button[form="form-adherent"][title*="Enregistrer"]');
+  if (createBtn) {
+    createBtn.style.display = 'inline-block';
+  }
+  
+  // Ouvrir le modal
+  $('#modal-adherent-form').modal('show');
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   console.log('=== Initialisation DataTables ===');
 
@@ -960,10 +1088,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Auto-open modal selon viewMode
   var viewMode = '@viewMode';
-  if (viewMode && viewMode.trim() !== '' && (viewMode === 'CREATE' || viewMode === 'EDIT' || viewMode === 'DELETE')) {
-    console.log('Ouverture du modal pour viewMode:', viewMode);
+  var adherentId = '@adherent.getId()';
+  
+  if (viewMode && viewMode.trim() !== '') {
+    console.log('Ouverture du modal pour viewMode:', viewMode, 'adherentId:', adherentId);
     setTimeout(function () {
-      $('#modal-adherent-form').modal('show');
+      if (viewMode === 'CREATE') {
+        openCreateModal();
+      } else if (viewMode === 'EDIT' && adherentId && adherentId !== 'null' && adherentId !== '0') {
+        openEditModal(adherentId);
+      } else if (viewMode === 'DELETE' && adherentId && adherentId !== 'null' && adherentId !== '0') {
+        // Pour le mode DELETE, on peut aussi utiliser openEditModal
+        // mais mettre à jour le titre et les boutons
+        openEditModal(adherentId);
+        setTimeout(function() {
+          document.getElementById('modalAdherentLabel').innerHTML = '<i class="fas fa-trash"></i> Désactiver adhérent';
+          
+          // Afficher uniquement le bouton Supprimer
+          const submitBtnContainer = document.querySelector('.modal-footer');
+          const submitButtons = submitBtnContainer.querySelectorAll('button[type="submit"]');
+          submitButtons.forEach(btn => btn.style.display = 'none');
+          
+          const deleteBtn = submitBtnContainer.querySelector('button[form="form-adherent"][title*="Désactiver"]');
+          if (deleteBtn) {
+            deleteBtn.style.display = 'inline-block';
+          }
+        }, 200);
+      }
     }, 100);
   }
 });
