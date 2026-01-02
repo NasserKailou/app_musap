@@ -118,6 +118,7 @@
 
             <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
             <form method="POST"
+                  id="form-adherent"
                   name="form"
                   action='@controllers.routes.AdherentCtrl.save()'
                   class="form-horizontal"
@@ -437,44 +438,47 @@
 
               </div><!-- /.card-body -->
 
-              <div class="modal-footer justify-content-between">
-                <button class="btn btn-secondary"
-                        type="button"
-                        data-dismiss="modal">
-                  <i class="fas fa-times"></i> Fermer
-                </button>
-
-                @if(viewMode.equals("CREATE")) {
-                  <button class="btn btn-success"
-                          type="submit"
-                          id="valider"
-                          name="Valider"
-                          title="Enregistrer les informations">
-                    <i class="fas fa-save"></i> Enregistrer
-                  </button>
-                }
-                @if(viewMode.equals("EDIT")) {
-                  <button class="btn btn-warning"
-                          type="submit"
-                          id="valider"
-                          name="Valider"
-                          title="Modifier les informations">
-                    <i class="fas fa-edit"></i> Modifier
-                  </button>
-                }
-                @if(viewMode.equals("DELETE")) {
-                  <button class="btn btn-danger"
-                          type="submit"
-                          id="valider"
-                          name="Valider"
-                          title="Désactiver"
-                          onclick="return window.confirm('Voulez-vous vraiment désactiver cet adhérent ?');">
-                    <i class="fas fa-trash"></i> Supprimer
-                  </button>
-                }
-              </div>
-
             </form>
+            
+            <div class="modal-footer justify-content-between">
+              <button class="btn btn-secondary"
+                      type="button"
+                      data-dismiss="modal">
+                <i class="fas fa-times"></i> Fermer
+              </button>
+
+              @if(viewMode.equals("CREATE")) {
+                <button class="btn btn-success"
+                        type="submit"
+                        form="form-adherent"
+                        id="valider"
+                        name="Valider"
+                        title="Enregistrer les informations">
+                  <i class="fas fa-save"></i> Enregistrer
+                </button>
+              }
+              @if(viewMode.equals("EDIT")) {
+                <button class="btn btn-warning"
+                        type="submit"
+                        form="form-adherent"
+                        id="valider"
+                        name="Valider"
+                        title="Modifier les informations">
+                  <i class="fas fa-edit"></i> Modifier
+                </button>
+              }
+              @if(viewMode.equals("DELETE")) {
+                <button class="btn btn-danger"
+                        type="submit"
+                        form="form-adherent"
+                        id="valider"
+                        name="Valider"
+                        title="Désactiver"
+                        onclick="return window.confirm('Voulez-vous vraiment désactiver cet adhérent ?');">
+                  <i class="fas fa-trash"></i> Supprimer
+                </button>
+              }
+            </div>
             </div><!-- /.modal-body -->
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
