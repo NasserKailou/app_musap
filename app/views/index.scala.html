@@ -1,0 +1,673 @@
+@import helper._
+@(params: List[models.tables.pojos.Params])(implicit request: Http.Request)
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Connexion - Mutuelle Niger Poste</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="@routes.Assets.versioned("images/logo.png")">
+  <link rel="icon" type="image/png" sizes="16x16" href="@routes.Assets.versioned("images/logo.png")">
+  <link rel="shortcut icon" href="@routes.Assets.versioned("images/logo.png")">
+  <link rel="apple-touch-icon" sizes="180x180" href="@routes.Assets.versioned("images/logo.png")">
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="@routes.Assets.versioned("plugins/fontawesome-free/css/all.min.css")">
+  
+  <style>
+    /* Variables CSS pour les couleurs */
+    :root {
+      --primary-sky-blue: #87CEEB;
+      --dark-sky-blue: #4A9FC7;
+      --light-sky-blue: #B0E0E6;
+      --accent-blue: #1E90FF;
+      --gradient-start: #87CEEB;
+      --gradient-end: #4A9FC7;
+      --white: #ffffff;
+      --shadow-dark: rgba(0, 0, 0, 0.3);
+    }
+
+    /* Reset et configuration de base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #87CEEB 0%, #4A9FC7 100%) !important;
+      min-height: 100vh;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Bulles d'arrière-plan animées */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      top: -200px;
+      right: -200px;
+      animation: float 8s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      bottom: -150px;
+      left: -150px;
+      animation: float 10s ease-in-out infinite reverse;
+      z-index: 1;
+    }
+
+    /* Animations */
+    @@keyframes float {
+      0%, 100% { 
+        transform: translateY(0px) translateX(0px) scale(1); 
+      }
+      50% { 
+        transform: translateY(-40px) translateX(30px) scale(1.1); 
+      }
+    }
+
+    @@keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-80px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @@keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(80px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @@keyframes pulse {
+      0%, 100% { 
+        transform: scale(1); 
+        opacity: 0.8;
+      }
+      50% { 
+        transform: scale(1.1); 
+        opacity: 1;
+      }
+    }
+
+    @@keyframes shimmer {
+      0% {
+        background-position: -1000px 0;
+      }
+      100% {
+        background-position: 1000px 0;
+      }
+    }
+
+    @@keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @@keyframes iconBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Container principal */
+    .login-container {
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      z-index: 10;
+      animation: slideInDown 1s ease-out;
+    }
+
+    /* Carte de connexion */
+    .login-card {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .login-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Header avec logo */
+    .card-header {
+      background: linear-gradient(135deg, #87CEEB 0%, #4A9FC7 100%);
+      padding: 50px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+      animation: pulse 5s ease-in-out infinite;
+    }
+
+    .card-header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 3s infinite;
+    }
+
+    .logo-container {
+      position: relative;
+      z-index: 1;
+      animation: slideInDown 1.2s ease-out;
+    }
+
+    .logo-img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 6px solid white;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+      object-fit: cover;
+      margin: 0 auto;
+      display: block;
+      background: white;
+      transition: all 0.4s ease;
+    }
+
+    .logo-img:hover {
+      transform: scale(1.15) rotate(8deg);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.35);
+    }
+
+    .app-title {
+      color: white;
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 25px;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.25);
+      letter-spacing: 1px;
+      line-height: 1.3;
+    }
+
+    .app-subtitle {
+      color: rgba(255, 255, 255, 0.98);
+      font-size: 15px;
+      margin-top: 10px;
+      font-weight: 500;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Corps du formulaire */
+    .card-body {
+      padding: 45px 40px;
+      animation: slideInUp 1.2s ease-out;
+      background: white;
+    }
+
+    .welcome-text {
+      text-align: center;
+      color: #4A9FC7;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 35px;
+      position: relative;
+    }
+
+    .welcome-text i {
+      margin-right: 10px;
+      color: #87CEEB;
+    }
+
+    .welcome-text::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #87CEEB, #1E90FF);
+      margin: 15px auto 0;
+      border-radius: 3px;
+    }
+
+    /* Messages d'alerte */
+    .alert {
+      border-radius: 12px;
+      border: none;
+      padding: 15px 18px;
+      margin-bottom: 25px;
+      font-size: 15px;
+      animation: slideInDown 0.6s ease-out;
+      font-weight: 500;
+    }
+
+    .alert i {
+      margin-right: 10px;
+    }
+
+    .alert-danger {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    .alert-warning {
+      background: linear-gradient(135deg, #ffd93d 0%, #ffaa3d 100%);
+      color: #856404;
+      box-shadow: 0 4px 12px rgba(255, 217, 61, 0.3);
+    }
+
+    .alert-success {
+      background: linear-gradient(135deg, #6bcf7f 0%, #4db8a1 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(107, 207, 127, 0.3);
+    }
+
+    /* Groupes de formulaire */
+    .form-group {
+      margin-bottom: 28px;
+      position: relative;
+    }
+
+    .form-group label {
+      color: #495057;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: block;
+      font-size: 15px;
+    }
+
+    .form-group label .required {
+      color: #ff6b6b;
+      font-size: 16px;
+      margin-left: 4px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 18px;
+      color: #87CEEB;
+      font-size: 19px;
+      z-index: 2;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 16px 18px 16px 50px;
+      border: 2px solid #e0e0e0;
+      border-radius: 14px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+      font-weight: 400;
+    }
+
+    .form-control:focus {
+      border-color: #87CEEB;
+      box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.2);
+      background: white;
+      outline: none;
+    }
+
+    .form-control:focus + .input-icon,
+    .input-wrapper:focus-within .input-icon {
+      color: #1E90FF;
+      transform: scale(1.15);
+      animation: iconBounce 0.8s ease;
+    }
+
+    /* Select personnalisé */
+    select.form-control {
+      padding: 16px 18px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2387CEEB' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 18px center;
+      background-size: 16px;
+      padding-right: 45px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    select.form-control:focus {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231E90FF' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+    }
+
+    /* Bouton de connexion */
+    .btn-login {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #87CEEB 0%, #1E90FF 100%);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      box-shadow: 0 6px 20px rgba(135, 206, 235, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-login::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(135, 206, 235, 0.6);
+      background: linear-gradient(135deg, #1E90FF 0%, #87CEEB 100%);
+    }
+
+    .btn-login:hover::before {
+      left: 100%;
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 15px rgba(135, 206, 235, 0.4);
+    }
+
+    .btn-login i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+
+    .btn-login:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .fa-spinner {
+      animation: spin 1s linear infinite;
+    }
+
+    /* Footer */
+    .card-footer {
+      background: #f8f9fa;
+      padding: 25px;
+      text-align: center;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .footer-text {
+      color: #6c757d;
+      font-size: 14px;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .footer-text strong {
+      color: #4A9FC7;
+      font-weight: 700;
+    }
+
+    /* Design Responsive */
+    @@media (max-width: 576px) {
+      .login-container {
+        max-width: 100%;
+        padding: 0 15px;
+      }
+
+      .card-header {
+        padding: 40px 30px;
+      }
+
+      .logo-img {
+        width: 120px;
+        height: 120px;
+      }
+
+      .app-title {
+        font-size: 22px;
+      }
+
+      .app-subtitle {
+        font-size: 13px;
+      }
+
+      .card-body {
+        padding: 35px 30px;
+      }
+
+      .welcome-text {
+        font-size: 19px;
+      }
+
+      .form-control {
+        font-size: 15px;
+        padding: 14px 15px 14px 45px;
+      }
+
+      .btn-login {
+        font-size: 15px;
+        padding: 14px;
+      }
+    }
+
+    @@media (max-width: 400px) {
+      .logo-img {
+        width: 100px;
+        height: 100px;
+      }
+
+      .app-title {
+        font-size: 20px;
+      }
+
+      .card-body {
+        padding: 30px 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Header avec logo -->
+      <div class="card-header">
+        <div class="logo-container">
+          <img src="@routes.Assets.versioned("images/logo.jpg")" class="logo-img" alt="Logo Niger Poste" onerror="this.src='@routes.Assets.versioned("images/logo.png")'">
+          <h1 class="app-title">Mutuelle Niger Poste</h1>
+          <p class="app-subtitle">Mutuelle de santé des agents de Niger POSTE</p>
+        </div>
+      </div>
+
+      <!-- Corps du formulaire -->
+      <div class="card-body">
+        <div class="welcome-text">
+          <i class="fas fa-user-shield"></i>Connexion Sécurisée
+        </div>
+
+        <!-- Messages Flash -->
+        @if(request.flash.get("error").isPresent()) {
+          <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-circle"></i>@request.flash.get("error").get()
+          </div>
+        }
+        @if(request.flash.get("warning").isPresent()) {
+          <div class="alert alert-warning" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>@request.flash.get("warning").get()
+          </div>
+        }
+        @if(request.flash.get("success").isPresent()) {
+          <div class="alert alert-success" role="alert">
+            <i class="fas fa-check-circle"></i>@request.flash.get("success").get()
+          </div>
+        }
+
+        <!-- Formulaire de connexion -->
+        <form action="@CSRF(controllers.routes.AuthenticationCtrl.authentification())" method="post" id="loginForm" novalidate>
+          @helper.CSRF.formField
+          
+          <!-- Champ Login -->
+          <div class="form-group">
+            <div class="input-wrapper">
+              <input type="text" 
+                     class="form-control" 
+                     id="login"
+                     name="login" 
+                     placeholder="Identifiant" 
+                     required
+                     autocomplete="username"
+                     aria-label="Identifiant">
+              <i class="fas fa-user input-icon" aria-hidden="true"></i>
+            </div>
+          </div>
+
+          <!-- Champ Password -->
+          <div class="form-group">
+            <div class="input-wrapper">
+              <input type="password" 
+                     class="form-control" 
+                     id="password"
+                     name="passe" 
+                     placeholder="Mot de passe" 
+                     required
+                     autocomplete="current-password"
+                     aria-label="Mot de passe">
+              <i class="fas fa-lock input-icon" aria-hidden="true"></i>
+            </div>
+          </div>
+
+          <!-- Gestion / Année -->
+          <div class="form-group">
+            <label for="gestion">
+              <i class="fas fa-calendar-alt"></i> Gestion (Année)
+              <span class="required">*</span>
+            </label>
+            <select id="gestion" 
+                    name="gestion" 
+                    class="form-control" 
+                    required
+                    aria-label="Sélectionner une année de gestion">
+              <option value="">Sélectionner une année</option>
+              @for(c <- params) {
+                <option value="@c.getGestion()">@c.getGestion()</option>
+              }
+            </select>
+          </div>
+
+          <!-- Bouton de connexion -->
+          <button type="submit" class="btn-login" id="btnLogin">
+            <i class="fas fa-sign-in-alt"></i>Se connecter
+          </button>
+        </form>
+      </div>
+
+     
+      <div class="card-footer">
+       <!--  <p class="footer-text">
+          © 2026 <strong>Niger Poste</strong> - Tous droits réservés
+        </p>Footer --> 
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery -->
+  <script src="@routes.Assets.versioned("plugins/jquery/jquery.min.js")"></script>
+  <!-- Bootstrap 4 -->
+  <script src="@routes.Assets.versioned("plugins/bootstrap/js/bootstrap.bundle.min.js")"></script>
+
+  <script>
+    (function() {
+      'use strict';
+
+      console.log('✅ Page de connexion chargée');
+
+      // Auto-hide alerts after 5 seconds
+      setTimeout(function() {
+        $('.alert').fadeOut(500, function() {
+          $(this).remove();
+        });
+      }, 5000);
+
+      // Form validation et animation
+      const loginForm = document.getElementById('loginForm');
+      const btnLogin = document.getElementById('btnLogin');
+
+      if (loginForm && btnLogin) {
+        loginForm.addEventListener('submit', function(e) {
+          const login = document.getElementById('login').value.trim();
+          const password = document.getElementById('password').value;
+          const gestion = document.getElementById('gestion').value;
+
+          if (!login || !password || !gestion) {
+            e.preventDefault();
+            alert('Veuillez remplir tous les champs obligatoires');
+            return false;
+          }
+
+          // Animation du bouton
+          btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i>Connexion en cours...';
+          btnLogin.disabled = true;
+          
+          console.log('Soumission du formulaire...');
+        });
+      }
+
+      console.log('✅ Initialisation terminée');
+    })();
+  </script>
+</body>
+</html>

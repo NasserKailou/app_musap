@@ -1,0 +1,670 @@
+@import java.text.NumberFormat
+@import java.util.Locale
+@import java.time.LocalDateTime
+@import java.time.temporal.ChronoUnit
+@import java.sql.Timestamp
+@import helper._
+@import java.util
+@import utils._
+@(reglements: List[models.tables.pojos.VReglement])(implicit request: Http.Request)
+
+@main("Bon de Commande") {
+
+<!-- Content Header -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+       
+          <h1>Validations des Bons</h1>
+       
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+          <li class="breadcrumb-item active">Remboursements</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+
+    @* ================== INFORMATIONS ADHÉRENT ================== *@
+
+
+    @* ================== LISTE DES Bon de commande ================== *@
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-list"></i> Liste des Bons à valider
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="reglementTable" class="table table-bordered table-hover table-striped" style="width:100%">
+                <thead>
+                  <tr>
+                    <th>N°BC</th>
+                    <th>Montant Total</th>
+                    <th>Montant Couvert</th>
+                    <th>Montant à Payer</th>
+                    <th>Structure</th>
+                    <th>Date Délivré</th>
+                    <th>Date Expiration</th>
+                    <th>Temps Restant</th>
+                    <th>Statut</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+             <tbody>
+        @for(c <- reglements) {
+        @defining({
+          // Conversion de Timestamp vers LocalDateTime
+          val datePayement = c.getDatePayement().toLocalDateTime()
+          val dateExpiration = c.getDateExpiration().toLocalDateTime()
+          val now = LocalDateTime.now()
+          val joursRestants = ChronoUnit.DAYS.between(now, dateExpiration)
+          val isConfirmedValue = c.getIsConfirmedBon()
+          val isConfirmed: Boolean = (isConfirmedValue != null && isConfirmedValue == true)
+          val estExpire: Boolean = joursRestants <= 0
+          (datePayement, dateExpiration, joursRestants, isConfirmed, estExpire)
+        }) { case (datePayement, dateExpiration, joursRestants, isConfirmed, estExpire) =>
+
+  <tr>
+    <td>@c.getId()</td>
+    <td>@c.getMontantTotal() F CFA</td>
+    <td class="text-success"><strong>@c.getMontantReglement() F CFA</strong></td>
+    <td class="text-warning"><strong>@c.getMontantPaye() F CFA</strong></td>
+    <td>@c.getStructure()</td>
+    <td>@datePayement.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</td>
+    <td class="text-danger"><strong>@dateExpiration.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</strong></td>
+    
+    @* Colonne Temps Restant - Afficher "Consommé" si confirmé *@
+    <td data-order="@if(isConfirmed){-999}else{@joursRestants}">
+      @if(isConfirmed) {
+        <span class="badge badge-secondary">
+          <i class="fas fa-check-double"></i> Consommé
+        </span>
+      } else {
+        @if(joursRestants < 0) {
+          <span class="badge badge-danger">
+            <i class="fas fa-times-circle"></i> Expiré depuis @Math.abs(joursRestants) jour(s)
+          </span>
+        } else if(joursRestants == 0) {
+          <span class="badge badge-warning">
+            <i class="fas fa-exclamation-triangle"></i> Expire aujourd'hui
+          </span>
+        } else if(joursRestants <= 7) {
+          <span class="badge badge-warning">
+            <i class="fas fa-clock"></i> @joursRestants jour(s) restant(s)
+          </span>
+        } else {
+          <span class="badge badge-success">
+            <i class="fas fa-check-circle"></i> @joursRestants jour(s) restant(s)
+          </span>
+        }
+      }
+    </td>
+    
+    @* Colonne Statut - Ne pas afficher le bouton si expiré ou expirant aujourd'hui *@
+    <td class="text-center" data-order="@if(isConfirmed){1}else{0}">
+      <div class="d-flex align-items-center justify-content-center">
+        @if(isConfirmed) {
+          <span class="badge badge-success mr-2">
+            <i class="fas fa-check-circle"></i> Confirmé
+          </span>
+        } else {
+          <span class="badge badge-warning mr-2">
+            <i class="fas fa-hourglass-half"></i> Non confirmé
+          </span>
+        }
+        
+        @* Afficher le bouton de confirmation uniquement si non confirmé, non expiré et droits suffisants *@
+        @if(!isConfirmed && !estExpire && request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Validateur")) {
+          <button type="button"
+                  class="btn btn-sm btn-primary"
+                  onclick="confirmerBon(@c.getId(), @c.getIdAdherent())"
+                  title="Confirmer le bon">
+            <i class="fas fa-check"></i>
+          </button>
+        }
+        
+        @* Afficher un badge si expiré et non confirmé *@
+        @if(!isConfirmed && estExpire) {
+          <span class="badge badge-danger ml-2">
+            <i class="fas fa-ban"></i> Impossible de confirmer
+          </span>
+        }
+      </div>
+    </td>
+    
+    @* Colonne Actions - Désactiver "Modifier" si confirmé *@
+    @* Colonne Actions *@
+<td class="text-center">
+  <div class="btn-group" role="group">
+    <!-- Voir détails -->
+    <button type="button"
+            class="btn btn-info btn-sm"
+            data-toggle="modal"
+            data-target="#detailModal@c.getId()"
+            title="Voir détails">
+      <i class="fas fa-eye"></i>
+    </button>
+
+
+
+
+    @* Bouton Réactualiser - Uniquement pour Admin sur bon confirmé *@
+    @if(request.session.get("droit").isPresent && 
+        (request.session.get("droit").get() == "Admin") &&  isConfirmed) {
+      <button type="button"
+              class="btn btn-secondary btn-sm"
+              onclick="reactualiserBon(@c.getId(), @c.getIdAdherent())"
+              title="Réactualiser le bon (remettre à non confirmé)">
+        <i class="fas fa-undo"></i>
+      </button>
+    }
+
+   
+  </div>
+</td>
+
+  </tr>
+  }
+  }
+</tbody>
+
+
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Loader -->
+<div class="modal fade" id="loadingModal" data-backdrop="static" data-keyboard="false" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+          <span class="sr-only">Chargement...</span>
+        </div>
+        <p class="mt-3 mb-0">Traitement en cours...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</section>
+
+
+@* ================== MODALES DE DÉTAILS ================== *@
+@for(c <- reglements) {
+@defining({
+  val datePayementDetail = c.getDatePayement().toLocalDateTime()
+  val dateExpirationDetail = c.getDateExpiration().toLocalDateTime()
+  val isConfirmedValue = c.getIsConfirmedBon()
+  val isConfirmedDetail: Boolean = (isConfirmedValue != null && isConfirmedValue == true)
+  (datePayementDetail, dateExpirationDetail, isConfirmedDetail)
+}) { case (datePayementDetail, dateExpirationDetail, isConfirmedDetail) =>
+
+<div class="modal fade" id="detailModal@c.getId()" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-info">
+        <h5 class="modal-title text-white">
+          <i class="fas fa-info-circle"></i> Détails du Règlement
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered table-sm">
+          <tr>
+            <th style="width: 30%;">Nom & prénom adhérent</th>
+            <td class="text-success"><strong>@c.getNomAd() @c.getPrenomAd()</strong></td>
+          </tr>
+          <tr>
+            <th>Bénéficiaire</th>
+            <td class="text-success">
+              <strong>
+                @if(c.getAyantDroit() != null) {
+                  @c.getNomAy() - @c.getLien()
+                } else {
+                  @c.getNomAd() @c.getPrenomAd()
+                }
+              </strong>
+            </td>
+          </tr>
+          <tr>
+            <th>Code Carnet</th>
+            <td><strong>@c.getCodeCarnet()</strong></td>
+          </tr>
+          <tr>
+            <th>Matricule</th>
+            <td><strong>@c.getMatricule()</strong></td>
+          </tr>
+          <tr>
+            <th>Type de prestation</th>
+            <td><strong>@c.getPrestation()</strong></td>
+          </tr>
+          <tr>
+            <th>Structure</th>
+            <td><strong>@c.getStructure()</strong></td>
+          </tr>
+          <tr>
+            <th>Date paiement</th>
+            <td><strong>@datePayementDetail.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</strong></td>
+          </tr>
+          <tr>
+            <th>Date expiration</th>
+            <td class="text-danger"><strong>@dateExpirationDetail.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</strong></td>
+          </tr>
+          <tr>
+            <th>Statut du Bon</th>
+            <td>
+              @if(isConfirmedDetail) {
+                <span class="badge badge-success">
+                  <i class="fas fa-check-circle"></i> Confirmé
+                </span>
+              } else {
+                <span class="badge badge-warning">
+                  <i class="fas fa-hourglass-half"></i> Non confirmé
+                </span>
+              }
+            </td>
+          </tr>
+          <tr>
+            <th>Montant Total de la Facture</th>
+            <td class="text-primary"><strong>@c.getMontantTotal() F CFA</strong></td>
+          </tr>
+          <tr>
+            <th>Montant à payer</th>
+            <td class="text-warning"><strong>@c.getMontantPaye() F CFA</strong></td>
+          </tr>
+          <tr>
+            <th>Montant Règlement (pris en charge)</th>
+            <td class="text-success"><strong>@c.getMontantReglement() F CFA</strong></td>
+          </tr>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          <i class="fas fa-times"></i> Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  
+  setTimeout(function() {
+    
+    if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
+      console.error('jQuery n\'est pas chargé !');
+      return;
+    }
+
+    console.log('✅ jQuery version:', $.fn.jquery);
+
+    // Fonction pour confirmer un bon
+    window.confirmerBon = function(bonId, adherentId) {
+      if (confirm('Voulez-vous vraiment confirmer ce bon de commande ?')) {
+        $('#loadingModal').modal('show');
+        
+        $.ajax({
+          url: '@controllers.routes.ReglementCtrl.confirmerBon(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
+          type: 'POST',
+          headers: {
+            'Csrf-Token': $('input[name="csrfToken"]').val()
+          },
+          success: function(response) {
+            $('#loadingModal').modal('hide');
+            alert('Bon de commande confirmé avec succès');
+            setTimeout(function() { location.reload(); }, 1000);
+          },
+          error: function(xhr, status, error) {
+            $('#loadingModal').modal('hide');
+            alert('Erreur lors de la confirmation du bon');
+            console.error('Erreur:', error);
+          }
+        });
+      }
+    };
+
+
+    // Configuration DataTable simplifiée
+    var dtConfig = {
+      "responsive": true,
+      "lengthChange": true,
+      "autoWidth": false,
+      "pageLength": 10,
+      "order": [[7, "asc"]],
+      "columnDefs": [
+        {
+          "targets": 6,
+          "className": "text-danger font-weight-bold"
+        },
+        {
+          "targets": [8, 9],
+          "orderable": true,
+          "searchable": false
+        }
+      ],
+      "language": {
+        "sProcessing": "Traitement en cours...",
+        "sSearch": "Rechercher&nbsp;:",
+        "sLengthMenu": "Afficher _MENU_ éléments",
+        "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+        "sInfoEmpty": "Affichage de 0 à 0 sur 0 élément",
+        "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
+        "sInfoPostFix": "",
+        "sLoadingRecords": "Chargement...",
+        "sZeroRecords": "Aucun élément correspondant trouvé",
+        "sEmptyTable": "Aucune donnée disponible dans le tableau",
+        "oPaginate": {
+          "sFirst": "Premier",
+          "sPrevious": "Précédent",
+          "sNext": "Suivant",
+          "sLast": "Dernier"
+        },
+        "oAria": {
+          "sSortAscending": ": activer pour trier la colonne par ordre croissant",
+          "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
+        }
+      }
+    };
+
+    // Initialiser DataTable
+    try {
+      var table = $("#reglementTable").DataTable(dtConfig);
+      console.log('✅ DataTable initialisé');
+    } catch(e) {
+      console.error('❌ Erreur DataTable:', e);
+    }
+
+    // Select2 - Initialiser seulement si disponible
+    if (typeof $.fn.select2 !== 'undefined') {
+      try {
+        $('.select2').select2({
+          theme: 'bootstrap4',
+          width: '100%',
+          dropdownParent: $('#reglementModal')
+        });
+        console.log('✅ Select2 initialisé');
+      } catch(e) {
+        console.warn('⚠️ Select2 non disponible, utilisation des selects standards');
+      }
+    } else {
+      console.warn('⚠️ Select2 non chargé, utilisation des selects standards');
+      // Retirer la classe select2 pour éviter les problèmes de style
+      $('.select2').removeClass('select2');
+    }
+
+    // ========== GESTION DYNAMIQUE DES TAUX PUBLIC/PRIVÉ ==========
+    
+    function normalizeStatut(statut) {
+      if (!statut) return '';
+      var statutUpper = String(statut).toUpperCase().trim();
+      if (statutUpper === 'PUBLIC' || statutUpper === 'PUBLIQUE') {
+        return 'PUBLIC';
+      } else if (statutUpper.indexOf('PRIV') !== -1) {
+        return 'PRIVE';
+      }
+      return statutUpper;
+    }
+    
+    function updatePrestationOptions(statutStructure) {
+      var prestationSelect = $('#tprestation');
+      var statut = normalizeStatut(statutStructure);
+      
+      console.log('📋 Mise à jour prestations - Statut structure:', statut);
+      
+      var compteur = 0;
+      prestationSelect.find('option').each(function() {
+        var $option = $(this);
+        
+        if ($option.val() === '') return; // Ignorer option par défaut
+        
+        var tauxPublic = $option.data('taux-public');
+        var tauxPrive = $option.data('taux-prive');
+        var prestation = $option.data('prestation');
+        
+        if (!tauxPublic || !tauxPrive || !prestation) {
+          console.warn('⚠️ Données manquantes pour option:', $option.val());
+          return;
+        }
+        
+        var tauxAffiche = (statut === 'PUBLIC') ? tauxPublic : tauxPrive;
+        $option.text(prestation + ' - ' + tauxAffiche + '%');
+        
+        console.log('  ✓', prestation, '→', tauxAffiche + '% (' + (statut === 'PUBLIC' ? 'Public' : 'Privé') + ')');
+        compteur++;
+      });
+      
+      console.log('✅', compteur, 'prestations mises à jour');
+      
+      // Rafraîchir Select2 si disponible
+      if (typeof $.fn.select2 !== 'undefined') {
+        prestationSelect.trigger('change.select2');
+      }
+    }
+    
+    // Écouter le changement de structure
+    $('#structure').on('change', function() {
+      var $selectedOption = $(this).find('option:selected');
+      var statutStructure = $selectedOption.data('statut');
+      
+      console.log('🏥 Structure changée:', $selectedOption.text());
+      console.log('   Statut:', statutStructure);
+      
+      // Réinitialiser le select des prestations
+      $('#tprestation').val('');
+      if (typeof $.fn.select2 !== 'undefined') {
+        $('#tprestation').trigger('change');
+      }
+      
+      // Mettre à jour les options si statut présent
+      if (statutStructure) {
+        updatePrestationOptions(statutStructure);
+      } else {
+        console.warn('⚠️ Pas de statut pour cette structure');
+      }
+    });
+    
+    // Initialiser au chargement si une structure est déjà sélectionnée
+    var initialStructure = $('#structure').val();
+    if (initialStructure) {
+      var initialStatut = $('#structure').find('option:selected').data('statut');
+      console.log('🔄 Initialisation avec structure:', initialStructure, 'Statut:', initialStatut);
+      if (initialStatut) {
+        updatePrestationOptions(initialStatut);
+      }
+    } else {
+      console.log('ℹ️ Aucune structure sélectionnée au chargement');
+    }
+    
+    console.log('✅ Gestion dynamique des taux initialisée');
+    
+    // ========== FIN GESTION DYNAMIQUE ==========
+
+    // Réinitialiser le formulaire à la fermeture du modal
+    $('#reglementModal').on('hidden.bs.modal', function () {
+      $('#reglementForm')[0].reset();
+      if (typeof $.fn.select2 !== 'undefined') {
+        $('.select2').val(null).trigger('change');
+      }
+    });
+
+   
+    console.log('✅ Initialisation complète terminée');
+
+  }, 200); // Augmenter le délai à 200ms
+  
+});
+</script>
+
+<style>
+/* Info boxes */
+.info-box-number { 
+  font-size: 1.5rem; 
+  font-weight: bold; 
+}
+
+/* Modal headers */
+.modal-header.bg-primary,
+.modal-header.bg-info { 
+  color: white; 
+}
+
+/* Select2 */
+.select2-container { 
+  z-index: 9999 !important; 
+}
+
+/* Table responsiveness */
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* Date expiration styling */
+#reglementTable tbody tr td:nth-child(7) {
+  background-color: #ffe6e6;
+  font-weight: bold;
+  color: #dc3545 !important;
+}
+
+/* Badges styling */
+.badge {
+  font-size: 0.85rem;
+  padding: 0.4em 0.6em;
+}
+
+.badge i {
+  margin-right: 4px;
+}
+
+/* Button groups */
+.btn-group {
+  white-space: nowrap;
+}
+
+.btn-group .btn {
+  margin: 0 2px;
+}
+
+/* DataTable buttons */
+.dt-buttons {
+  margin-bottom: 15px;
+}
+
+.dt-buttons .btn {
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+/* Statut column styling */
+.d-flex {
+  display: flex !important;
+}
+
+.align-items-center {
+  align-items: center !important;
+}
+
+.justify-content-center {
+  justify-content: center !important;
+}
+
+.mr-2 {
+  margin-right: 0.5rem !important;
+}
+
+/* Responsive adjustments */
+@@media (max-width: 768px) {
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .btn-group .btn {
+    margin-bottom: 5px;
+    width: 100%;
+  }
+  
+  .d-flex {
+    flex-direction: column !important;
+  }
+  
+  .mr-2 {
+    margin-right: 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+/* Bon consommé styling */
+.badge-secondary {
+  background-color: #6c757d !important;
+}
+
+/* Bouton désactivé styling */
+.btn-warning:disabled,
+.btn-warning.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #ffc107;
+  border-color: #ffc107;
+}
+
+.btn-warning:disabled:hover,
+.btn-warning.disabled:hover {
+  background-color: #ffc107;
+  border-color: #ffc107;
+}
+
+/* Badge impossible de confirmer */
+.ml-2 {
+  margin-left: 0.5rem !important;
+}
+
+/* Ligne pour bon consommé - optionnel */
+#reglementTable tbody tr:has(td span.badge-secondary) {
+  background-color: #f8f9fa;
+  opacity: 0.9;
+}
+
+/* Bouton réactualiser styling */
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+/* Animation pour le bouton réactualiser */
+.btn-secondary:active {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+
+
+</style>
+
+}

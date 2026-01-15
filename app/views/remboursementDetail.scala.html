@@ -1,0 +1,737 @@
+@import java.text.NumberFormat
+@import java.util.Locale
+@import java.time.LocalDateTime
+@import java.time.temporal.ChronoUnit
+@import java.sql.Timestamp
+@import helper._
+@import java.util
+@import utils._
+@(viewMode: String,
+adherent: models.tables.pojos.VAdherent,
+ typeOP: String,
+  idReglement: Long,
+  details: models.tables.pojos.ReglementDetail,
+  reglementDetails: List[models.tables.pojos.ReglementDetail],
+  totalRegler: Long,
+  plafondAnnuel: Long
+)(implicit request: Http.Request)
+
+@main("Remboursement Détail") {
+
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        @if(typeOP.equals("BC")){
+          <h1>Gestion des Bons de Commande</h1>
+        } else{
+          <h1>Gestion des Prises en Charge</h1>
+        }
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+          <li class="breadcrumb-item"><a href="@controllers.routes.AdherentCtrl.addRembourssement(adherent.getId(), typeOP)">@if(typeOP.equals("BC")){Bons de Commande}else{Gestion des Prises en Charge}</a></li>
+          <li class="breadcrumb-item active">Détails</li>
+        </ol>
+      </div>
+      <div class="col-sm-6">
+        <div class="float-sm-right">
+          <a class="btn btn-secondary"
+             href="@controllers.routes.AdherentCtrl.addRembourssement(adherent.getId(),typeOP)">
+            <i class="fas fa-arrow-left"></i> Retour à la liste
+          </a>
+            <a class="btn btn-primary"
+                               title="Imprimer @if(typeOP.equals("BC")){ le Bon de commande}else{La prise en charge} "
+                               href='@controllers.routes.ReglementCtrl.print(idReglement, if(typeOP.equals("BC")){"bon_commande"}else{"bon_commande"})'
+                               onclick="return(openPopup(this.href, 600, 600, 600, 600));">
+                              <i class="fas fa-print">Impression du Bon</i>
+                            </a>
+
+          @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur") ) {
+          <button type="button"
+                  class="btn btn-success"
+                  onclick="openDetailModal('CREATE', null)">
+            <i class="fas fa-plus"></i> Ajouter des lignes
+          </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+
+    @* ================== INFORMATIONS ADHÉRENT ================== *@
+    @if(adherent != null) {
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary card-outline">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-user"></i> Informations de l'adhérent
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="alert alert-info mb-3">
+                  <h5 class="mb-2">
+                    <i class="fas fa-id-card"></i>
+                    <strong>Matricule n°@adherent.getMatricule()</strong>
+                  </h5>
+                  <p class="mb-1">
+                    <i class="fas fa-user"></i>
+                    <strong>Nom complet :</strong> @adherent.getNomAd @adherent.getPrenomAd
+                  </p>
+                  <p class="mb-0">
+                    <i class="fas fa-phone"></i>
+                    <strong>Téléphone :</strong> @adherent.getTelephone()
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "Admin" )) { 
+              @defining(NumberFormat.getInstance(Locale.FRANCE)) { fmt =>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="info-box bg-warning">
+                  <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Seuil d'Alerte des consommations </span>
+                    <span class="info-box-number">@fmt.format(adherent.getTotalCreditAnnuelle()) F CFA</span>
+                  </div>
+                </div>
+              </div>
+             
+              <div class="col-md-4">
+                <div class="info-box bg-danger">
+                  <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Plafond Annuelle des consommations a ne pas dépasser </span>
+                    <span class="info-box-number">@fmt.format(adherent.getTotalCreditAConsomer()) F CFA</span>
+                  </div>
+                </div>
+              </div>
+
+              @if(totalRegler > adherent.getTotalCreditAConsomer()) {
+              <div class="col-md-6">
+                <div class="info-box bg-danger">
+                  <span class="info-box-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                  </span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Dépassement - À rembourser</span>
+                    <span class="info-box-number">@(totalRegler - adherent.getTotalCreditAConsomer()) F CFA</span>
+                  </div>
+                </div>
+              </div>
+              }
+            }
+            </div>
+          }
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    @* ================== TABLEAU DES DÉTAILS ================== *@
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-list-ul"></i> Liste des lignes de détail
+            </h3>
+            <div class="card-tools">
+              <span class="badge badge-light">
+                @reglementDetails.size() ligne(s)
+              </span>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <table id="reglementDetailsTable" class="table table-bordered table-hover table-striped">
+              <thead>
+                <tr>
+                  <th style="width: 3%">#</th>
+                  <th style="width: 20%">Intitulé</th>
+                  <th style="width: 10%">Quantité</th>
+                  <th style="width: 15%">Prix Unitaire</th>
+                  <th style="width: 15%">Montant (F CFA)</th>
+                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur") ) {
+                  <th class="text-center" style="width: 15%">Actions</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @if(reglementDetails.isEmpty) {
+                <tr>
+                  <td colspan="6" class="text-center text-muted">
+                    <i class="fas fa-info-circle"></i> Aucun détail enregistré pour ce bon de commande
+                  </td>
+                </tr>
+                } else {
+                @for((c, index) <- reglementDetails.zipWithIndex) {
+                <tr>
+                  <td><strong>@(index + 1)</strong></td>
+                  <td>@c.getIntitule()</td>
+                  <td class="text-right">
+                    <span class="badge badge-info badge-lg">
+                      @c.getQuantite()
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <span class="badge badge-primary badge-lg">
+                      @c.getPrixUnitaire() F CFA
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <span class="badge badge-success badge-lg">
+                      @c.getMontant() F CFA
+                    </span>
+                  </td>
+
+                
+                  <td class="text-center">
+                    <div class="btn-group">
+                      <button type="button"
+                              class="btn btn-warning btn-sm"
+                              onclick="openDetailModal('EDIT', '@c.getId()')"
+                              title="Modifier">
+                        <i class="fas fa-edit"></i>
+                      </button>
+
+                      @if(request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Admin") {
+                      <button type="button"
+                              class="btn btn-danger btn-sm"
+                              onclick="deleteDetail('@c.getId()')"
+                              title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                      }
+                    </div>
+                  </td>
+                
+                </tr>
+                }
+                }
+              </tbody>
+              @if(!reglementDetails.isEmpty) {
+              <tfoot>
+                <tr class="bg-light">
+                  <th colspan="4" class="text-right">Total général :</th>
+                  <th class="text-right">
+                    <span class="badge badge-primary badge-lg">
+                      @reglementDetails.foldLeft(0L)((sum, detail) => sum + detail.getMontant()) F CFA
+                    </span>
+                  </th>
+                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" )) {
+                  <th></th>
+                  }
+                </tr>
+              </tfoot>
+              }
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+@* ================== MODAL FORMULAIRE (CREATE/EDIT) ================== *@
+<div class="modal fade" id="modal-detail-reglement" tabindex="-1" role="dialog" aria-labelledby="modalDetailLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document" style="max-width: 95%;">
+    <div class="modal-content">
+      <form id="form-detail" method="POST" action="@controllers.routes.ReglementCtrl.reglementDetailsave()">
+        @helper.CSRF.formField
+
+        <input type="hidden" name="viewMode" id="formViewMode" value="">
+        <input type="hidden" name="reglement" value="@idReglement">
+        <input type="hidden" name="adh" value="@adherent.getId()">
+        <input type="hidden" name="id" id="formDetailId" value="">
+        <input type="hidden" id="typeOP" name="typeOP" value="@typeOP">
+        
+        <div class="modal-header bg-primary">
+          <h5 class="modal-title" id="modalDetailLabel">
+            <i class="fas fa-file-invoice"></i> <span id="modalTitle">Détail de règlement</span>
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fermer">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+          
+          <!-- Mode Edition Simple -->
+          <div id="edit-mode-section" style="display: none;">
+            <div class="alert alert-info">
+              <i class="icon fas fa-info"></i>
+              Tous les champs avec <span class="text-danger"><strong>*</strong></span> sont obligatoires
+            </div>
+
+            <div class="card card-secondary">
+              <div class="card-header">
+                <h3 class="card-title">Informations du détail</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label for="intitule">
+                        <i class="fas fa-tag"></i> Intitulé <span class="text-danger">*</span>
+                      </label>
+                      <input type="text"
+                             class="form-control"
+                             id="intitule"
+                             name="intitule"
+                             placeholder="Entrez l'intitulé du détail">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="quantite">
+                        <i class="fas fa-cubes"></i> Quantité <span class="text-danger">*</span>
+                      </label>
+                      <input type="number"
+                             class="form-control"
+                             id="quantite"
+                             name="quantite"
+                             placeholder="0"
+                             min="1"
+                             step="1">
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="prixUnitaire">
+                        <i class="fas fa-money-bill-wave"></i> Prix Unitaire (F CFA) <span class="text-danger">*</span>
+                      </label>
+                      <input type="number"
+                             class="form-control"
+                             id="prixUnitaire"
+                             name="prixUnitaire"
+                             placeholder="0"
+                             min="0"
+                             step="1">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mode Création Multiple -->
+          <div id="create-mode-section" style="display: none;">
+            <div class="alert alert-success">
+              <i class="icon fas fa-info-circle"></i>
+              <strong>Saisie Multiple :</strong> Vous pouvez saisir jusqu'à 10 lignes de détails simultanément. 
+              Seules les lignes avec au moins un intitulé renseigné seront enregistrées.
+            </div>
+
+            <div class="card card-info">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-list"></i> Saisie de plusieurs lignes de détails
+                </h3>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped mb-0">
+                    <thead class="bg-light">
+                      <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 50%;">
+                          <i class="fas fa-tag"></i> Intitulé <span class="text-danger">*</span>
+                        </th>
+                        <th style="width: 15%;">
+                          <i class="fas fa-cubes"></i> Quantité <span class="text-danger">*</span>
+                        </th>
+                        <th style="width: 15%;">
+                          <i class="fas fa-money-bill-wave"></i> Prix Unitaire <span class="text-danger">*</span>
+                        </th>
+                        <th style="width: 15%;">
+                          <i class="fas fa-calculator"></i> Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody id="multiple-details-tbody">
+                      @for(i <- 1 to 10) {
+                        <tr class="detail-row">
+                          <td class="text-center align-middle">
+                            <strong>@i</strong>
+                          </td>
+                          <td>
+                            <input type="text"
+                                   class="form-control form-control-sm detail-intitule"
+                                   name="intitules[@i]"
+                                   data-row="@i"
+                                   placeholder="Entrez l'intitulé">
+                          </td>
+                          <td>
+                            <input type="number"
+                                   class="form-control form-control-sm detail-quantite"
+                                   name="quantites[@i]"
+                                   data-row="@i"
+                                   placeholder="1"
+                                   min="0"
+                                   step="1"
+                                   value="0">
+                          </td>
+                          <td>
+                            <input type="number"
+                                   class="form-control form-control-sm detail-prix"
+                                   name="prixUnitaires[@i]"
+                                   data-row="@i"
+                                   placeholder="0"
+                                   min="0"
+                                   step="1"
+                                   value="0">
+                          </td>
+                          <td class="text-center align-middle">
+                            <span class="badge badge-success detail-total" data-row="@i">0 F</span>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                    <tfoot class="bg-light">
+                      <tr>
+                        <td colspan="4" class="text-right">
+                          <strong>Total Général :</strong>
+                        </td>
+                        <td class="text-center">
+                          <span class="badge badge-primary badge-lg" id="grand-total">0 F CFA</span>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-default" data-dismiss="modal">
+            <i class="fas fa-times"></i> Fermer
+          </button>
+          <button type="submit" class="btn" id="submitBtn">
+            <i class="fas fa-save"></i> <span id="btnText">Enregistrer</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+@* ================== STYLES CSS ================== *@
+<style>
+  .info-box-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .modal-header.bg-primary {
+    color: white;
+  }
+  
+  .table thead th {
+    vertical-align: middle;
+  }
+  
+  .btn-group .btn {
+    margin: 0 2px;
+  }
+
+  .badge-lg {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .alert-info {
+    border-left: 4px solid #17a2b8;
+  }
+
+  .form-text {
+    font-size: 0.875rem;
+  }
+
+  /* Style pour le total */
+  tfoot tr {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  /* S'assurer que le modal s'affiche correctement */
+  .modal {
+    z-index: 1050;
+  }
+  
+  .modal-backdrop {
+    z-index: 1040;
+  }
+
+  /* Styles pour la saisie multiple */
+  .detail-row:hover {
+    background-color: #f8f9fa;
+  }
+
+  .detail-row input:focus {
+    border-color: #87CEEB;
+    box-shadow: 0 0 0 0.2rem rgba(135, 206, 235, 0.25);
+  }
+
+  .detail-total {
+    font-size: 0.9rem;
+    min-width: 80px;
+    display: inline-block;
+  }
+
+  #grand-total {
+    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+  }
+</style>
+
+@* ================== SCRIPT JAVASCRIPT ================== *@
+<script>
+  // Données des détails en JSON
+  const detailsData = {
+    @for(c <- reglementDetails) {
+      "@c.getId()": {
+        id: "@c.getId()",
+        intitule: "@Html(c.getIntitule().replace("\"", "\\\"").replace("'", "\\'"))",
+        quantite: "@c.getQuantite()",
+        prixUnitaire: "@c.getPrixUnitaire()",
+        montant: "@c.getMontant()"
+      }@if(reglementDetails.indexOf(c) < reglementDetails.size - 1){,}
+    }
+  };
+
+  /**
+   * Calcule et affiche le total pour une ligne
+   */
+  function updateRowTotal(rowIndex) {
+    const quantiteInput = document.querySelector(`.detail-quantite[data-row="${rowIndex}"]`);
+    const prixInput = document.querySelector(`.detail-prix[data-row="${rowIndex}"]`);
+    const totalBadge = document.querySelector(`.detail-total[data-row="${rowIndex}"]`);
+    
+    const quantite = parseFloat(quantiteInput.value) || 0;
+    const prix = parseFloat(prixInput.value) || 0;
+    const total = quantite * prix;
+    
+    totalBadge.textContent = total.toLocaleString('fr-FR') + ' F';
+    
+    // Mettre à jour le total général
+    updateGrandTotal();
+  }
+
+  /**
+   * Calcule et affiche le total général
+   */
+  function updateGrandTotal() {
+    let grandTotal = 0;
+    
+    for (let i = 1; i <= 10; i++) {
+      const quantiteInput = document.querySelector(`.detail-quantite[data-row="${i}"]`);
+      const prixInput = document.querySelector(`.detail-prix[data-row="${i}"]`);
+      
+      const quantite = parseFloat(quantiteInput.value) || 0;
+      const prix = parseFloat(prixInput.value) || 0;
+      
+      grandTotal += quantite * prix;
+    }
+    
+    document.getElementById('grand-total').textContent = grandTotal.toLocaleString('fr-FR') + ' F CFA';
+  }
+
+  /**
+   * Attache les écouteurs d'événements pour le calcul automatique
+   */
+  function attachCalculationListeners() {
+    console.log('Attaching calculation listeners');
+    
+    // Ajouter des écouteurs pour calculer les totaux en temps réel
+    for (let i = 1; i <= 10; i++) {
+      const quantiteInput = document.querySelector(`.detail-quantite[data-row="${i}"]`);
+      const prixInput = document.querySelector(`.detail-prix[data-row="${i}"]`);
+      
+      if (quantiteInput) {
+        // Supprimer l'ancien écouteur s'il existe
+        quantiteInput.removeEventListener('input', quantiteInput._updateHandler);
+        // Créer et attacher le nouvel écouteur
+        quantiteInput._updateHandler = function() {
+          updateRowTotal(i);
+        };
+        quantiteInput.addEventListener('input', quantiteInput._updateHandler);
+      }
+      
+      if (prixInput) {
+        // Supprimer l'ancien écouteur s'il existe
+        prixInput.removeEventListener('input', prixInput._updateHandler);
+        // Créer et attacher le nouvel écouteur
+        prixInput._updateHandler = function() {
+          updateRowTotal(i);
+        };
+        prixInput.addEventListener('input', prixInput._updateHandler);
+      }
+    }
+  }
+
+  /**
+   * Ouvre le modal en mode CREATE ou EDIT
+   */
+  function openDetailModal(mode, detailId) {
+    console.log('openDetailModal called with mode:', mode, 'detailId:', detailId);
+    
+    // Réinitialiser le formulaire
+    document.getElementById('form-detail').reset();
+    
+    // Définir le mode
+    document.getElementById('formViewMode').value = mode;
+    
+    let modalTitle = '';
+    let btnClass = 'btn-success';
+    let btnText = 'Enregistrer';
+    let btnIcon = 'fa-save';
+
+    if (mode === 'CREATE') {
+      modalTitle = 'Ajouter des détails (saisie multiple)';
+      document.getElementById('formDetailId').value = '';
+      
+      // Afficher le mode création multiple
+      document.getElementById('create-mode-section').style.display = 'block';
+      document.getElementById('edit-mode-section').style.display = 'none';
+      
+      // Attacher les écouteurs après l'affichage du formulaire
+      setTimeout(function() {
+        attachCalculationListeners();
+        
+        // Réinitialiser tous les totaux
+        for (let i = 1; i <= 10; i++) {
+          updateRowTotal(i);
+        }
+      }, 100);
+      
+    } else if (mode === 'EDIT') {
+      modalTitle = 'Modifier un détail';
+      btnClass = 'btn-warning';
+      btnText = 'Modifier';
+      btnIcon = 'fa-edit';
+      
+      // Afficher le mode édition simple
+      document.getElementById('create-mode-section').style.display = 'none';
+      document.getElementById('edit-mode-section').style.display = 'block';
+      
+      // Charger les données du détail
+      if (detailId && detailsData[detailId]) {
+        const data = detailsData[detailId];
+        console.log('Loading data:', data);
+        document.getElementById('formDetailId').value = data.id;
+        document.getElementById('intitule').value = data.intitule;
+        document.getElementById('quantite').value = data.quantite;
+        document.getElementById('prixUnitaire').value = data.prixUnitaire;
+      } else {
+        console.error('Detail not found for id:', detailId);
+      }
+    }
+
+    // Appliquer les changements visuels
+    document.getElementById('modalTitle').textContent = modalTitle;
+    document.getElementById('submitBtn').className = 'btn ' + btnClass;
+    document.getElementById('btnText').textContent = btnText;
+    document.querySelector('#submitBtn i').className = 'fas ' + btnIcon;
+
+    // Ouvrir le modal avec Bootstrap 4
+    $('#modal-detail-reglement').modal('show');
+  }
+
+  /**
+   * Supprime un détail avec confirmation
+   */
+  window.deleteDetail = function(detailId) {
+    if (confirm('Voulez-vous vraiment supprimer ce détail de règlement ?')) {
+      var url = '/Reglement-detail/form?subAction=DELETE&idReglement=@idReglement&idAdherent=@adherent.getId()&idDetails=' + detailId;
+      console.log('Redirecting to:', url);
+      window.location.href = url;
+    }
+  };
+
+  // Initialisation au chargement du document
+  $(document).ready(function() {
+    console.log('Document ready');
+    
+    // Initialisation DataTable
+    $("#reglementDetailsTable").DataTable({
+      "responsive": true,
+      "lengthChange": true,
+      "autoWidth": false,
+      "pageLength": 25,
+      "order": [[0, "asc"]],
+      "buttons": [
+        {
+          extend: 'copy',
+          text: '<i class="fas fa-copy"></i> Copier',
+          className: 'btn-sm'
+        },
+        {
+          extend: 'csv',
+          text: '<i class="fas fa-file-csv"></i> CSV',
+          className: 'btn-sm'
+        },
+        {
+          extend: 'excel',
+          text: '<i class="fas fa-file-excel"></i> Excel',
+          className: 'btn-sm'
+        },
+        {
+          extend: 'pdf',
+          text: '<i class="fas fa-file-pdf"></i> PDF',
+          className: 'btn-sm'
+        },
+        {
+          extend: 'print',
+          text: '<i class="fas fa-print"></i> Imprimer',
+          className: 'btn-sm'
+        }
+      ],
+      "language": {
+        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+      },
+      "columnDefs": [
+        { "orderable": false, "targets": @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Comptable" || request.session.get("droit").get() == "Admin")){5}else{-1} }
+      ]
+    }).buttons().container().appendTo('#reglementDetailsTable_wrapper .col-md-6:eq(0)');
+
+    // Focus sur le premier champ quand le modal s'ouvre
+    $('#modal-detail-reglement').on('shown.bs.modal', function () {
+      const viewMode = document.getElementById('formViewMode').value;
+      if (viewMode === 'CREATE') {
+        document.querySelector('.detail-intitule[data-row="1"]').focus();
+      } else {
+        $('#intitule').focus();
+      }
+    });
+
+    // Vérifier si on doit ouvrir le modal au chargement
+    @if(viewMode.equals("EDIT") && details != null && details.getId() != null) {
+      console.log('Opening modal in EDIT mode');
+      openDetailModal('EDIT', '@details.getId()');
+    }
+    @if(viewMode.equals("CREATE")) {
+      console.log('Opening modal in CREATE mode');
+      openDetailModal('CREATE', null);
+    }
+  });
+</script>
+
+}

@@ -1,0 +1,856 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sr_pc" pageWidth="420" pageHeight="595" columnWidth="380" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="67a750d0-6369-4115-a529-04ca895febdd">
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="muaposte\MSAP.xml"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="id" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT * FROM public.v_bon_de_commande where id =$P{id}::bigint and on_deleted is false]]>
+	</queryString>
+	<field name="id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="nom_ad" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nom_ad"/>
+		<property name="com.jaspersoft.studio.field.label" value="nom_ad"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="prenom_ad" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="prenom_ad"/>
+		<property name="com.jaspersoft.studio.field.label" value="prenom_ad"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="id_adherent" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id_adherent"/>
+		<property name="com.jaspersoft.studio.field.label" value="id_adherent"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="matricule" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="matricule"/>
+		<property name="com.jaspersoft.studio.field.label" value="matricule"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="code_carnet" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="code_carnet"/>
+		<property name="com.jaspersoft.studio.field.label" value="code_carnet"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="ref_facture" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="ref_facture"/>
+		<property name="com.jaspersoft.studio.field.label" value="ref_facture"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="structure" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="structure"/>
+		<property name="com.jaspersoft.studio.field.label" value="structure"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="date_payement" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="date_payement"/>
+		<property name="com.jaspersoft.studio.field.label" value="date_payement"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="who_done" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="who_done"/>
+		<property name="com.jaspersoft.studio.field.label" value="who_done"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="when_done" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="when_done"/>
+		<property name="com.jaspersoft.studio.field.label" value="when_done"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="is_confirmed_bon" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.name" value="is_confirmed_bon"/>
+		<property name="com.jaspersoft.studio.field.label" value="is_confirmed_bon"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="when_confirmed_bon" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="when_confirmed_bon"/>
+		<property name="com.jaspersoft.studio.field.label" value="when_confirmed_bon"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="date_expiration" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="date_expiration"/>
+		<property name="com.jaspersoft.studio.field.label" value="date_expiration"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="type_reglement" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="type_reglement"/>
+		<property name="com.jaspersoft.studio.field.label" value="type_reglement"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="annee" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="annee"/>
+		<property name="com.jaspersoft.studio.field.label" value="annee"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="on_deleted" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.name" value="on_deleted"/>
+		<property name="com.jaspersoft.studio.field.label" value="on_deleted"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="prestation" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="prestation"/>
+		<property name="com.jaspersoft.studio.field.label" value="prestation"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="taux_effectif" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="taux_effectif"/>
+		<property name="com.jaspersoft.studio.field.label" value="taux_effectif"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="type_structure" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="type_structure"/>
+		<property name="com.jaspersoft.studio.field.label" value="type_structure"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="statut_structure" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="statut_structure"/>
+		<property name="com.jaspersoft.studio.field.label" value="statut_structure"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="nom_ay" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nom_ay"/>
+		<property name="com.jaspersoft.studio.field.label" value="nom_ay"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="lien" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="lien"/>
+		<property name="com.jaspersoft.studio.field.label" value="lien"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="genre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="genre"/>
+		<property name="com.jaspersoft.studio.field.label" value="genre"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="ayant_droit" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="ayant_droit"/>
+		<property name="com.jaspersoft.studio.field.label" value="ayant_droit"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="montant_total" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="montant_total"/>
+		<property name="com.jaspersoft.studio.field.label" value="montant_total"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="montant_reglement" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="montant_reglement"/>
+		<property name="com.jaspersoft.studio.field.label" value="montant_reglement"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="montant_paye" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="montant_paye"/>
+		<property name="com.jaspersoft.studio.field.label" value="montant_paye"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<field name="id_structure" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id_structure"/>
+		<property name="com.jaspersoft.studio.field.label" value="id_structure"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="v_bon_de_commande"/>
+	</field>
+	<title>
+		<band height="96" splitType="Stretch">
+			<image>
+				<reportElement x="318" y="2" width="62" height="57" uuid="2dc97cd3-37ca-44c5-bf40-fe9e9aee82aa"/>
+				<imageExpression><![CDATA["logo.png"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="103" y="0" width="180" height="20" uuid="c27815d1-f4b7-491d-a5f5-4b72f0c44903"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Republique du Niger]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="101" y="14" width="180" height="20" uuid="a0dca1bc-78d9-48e3-9160-72f550f751de"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[NIGER POSTE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="88" y="28" width="230" height="36" uuid="2f03d6da-1427-4864-acff-0c8e99728e85"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Mutuelle de Santé des Agents de la Poste et Filiales, BP: 742, Tel: 20 72 38 09]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="91" y="64" width="119" height="21" uuid="679796fb-4b33-4b0f-ae4a-8ec0778ceda1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Gestion : "+ new SimpleDateFormat("yyyy").format($F{date_payement})]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement x="309" y="64" width="69" height="30" uuid="66d42e30-3b75-4a5d-af81-5dd5ab302da9"/>
+				<jr:Codabar xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<jr:codeExpression><![CDATA["123456789"]]></jr:codeExpression>
+				</jr:Codabar>
+			</componentElement>
+			<image>
+				<reportElement x="-11" y="2" width="99" height="78" uuid="d8970f62-3c4f-4c22-ad1c-0e3230940bac"/>
+				<imageExpression><![CDATA["poste2.png"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="66" splitType="Stretch">
+			<textField>
+				<reportElement x="99" y="16" width="172" height="22" uuid="c367f330-4ded-4203-a7ef-169978944043"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Informations sur l'Adhérent"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2" y="-3" width="376" height="20" uuid="221e7d01-88c7-42c4-9474-e66b4855c81d"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ATTESTATION DE PRISE EN CHARGE N° "+$F{id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="-1" y="32" width="379" height="17" uuid="b691f5f5-df79-492c-b7a0-f30dca14a4e2"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Nom & Prénom: "+$F{nom_ad}+" "+$F{prenom_ad}+", Carnet N°:"+$F{code_carnet}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="-1" y="49" width="379" height="17" uuid="061667fe-7471-4f88-9dcb-762e3ca29bdb"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Prestation : "+$F{prestation}+" "+", Taux de Couverture:"+$F{taux_effectif}+"%"]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="22" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="2" width="172" height="20" backcolor="#C7C7C7" uuid="bcb7f79a-a52b-410f-ace1-1c3915bfa54d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="588ae7c4-1fb9-4698-866a-1e9c3bf7a6c0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Désignation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="172" y="2" width="38" height="20" backcolor="#C7C7C7" uuid="b00433e0-e831-482b-8e08-c050b97f64cb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ec58a365-ef47-4911-81ce-95ff09377ac3"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Quantite]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="210" y="2" width="61" height="20" backcolor="#C7C7C7" uuid="3db8604f-6750-44a6-9d18-fdbf037e7f0d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="31348c29-6f7e-44e1-be81-3c6a04f11d00"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Prix unitaire]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="271" y="2" width="107" height="20" backcolor="#C7C7C7" uuid="33afec26-cfd9-42a6-834d-c01a8575cb55">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8f31592c-e51a-40c9-8939-e190e6a9b104"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Prix TOTAL(En F CFA)]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="200" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="172" height="20" uuid="a9ae9884-1c29-4b92-82f8-8c077f2fd2d0"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="0" width="38" height="20" uuid="f872f94a-8621-4cda-8b6c-27455fd90d15"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="0" width="61" height="20" uuid="10c23980-85d3-4d2a-9ff1-f891087c056c"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="0" width="107" height="20" uuid="4ee0b5e3-feb8-43ff-b1b1-eabfec8dbc6f"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="20" width="107" height="20" uuid="8a47d601-a814-415a-a086-bd984f22395d"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="20" width="61" height="20" uuid="2275327c-c3b1-412e-a4e5-6095517a4394"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="20" width="38" height="20" uuid="9c98c6a4-cfa0-4483-ae26-0c9c6f576518"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="20" width="172" height="20" uuid="c21925d0-2b8c-46d8-b932-af80fb91faa4"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="40" width="172" height="20" uuid="0967b1fc-6236-42c0-bbde-30c26fbbc379"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="60" width="172" height="20" uuid="e8d0458d-12ec-4d89-aab1-0aff81c42196"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="40" width="38" height="20" uuid="6f3ac9b7-1f63-4c33-94e9-88f3da013864"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="60" width="38" height="20" uuid="26bf38f1-460c-4e7a-8841-b94380920cdd"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="40" width="61" height="20" uuid="0e192af6-108b-471d-a6b4-04c40b007967"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="60" width="61" height="20" uuid="8fb89ea5-70e5-4b83-9934-bb377893c0c4"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="40" width="107" height="20" uuid="4fc78911-feb8-4d51-862b-a7af7aa47a46"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="60" width="107" height="20" uuid="4eb986f2-52a4-4cd7-a812-7543677202b6"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="80" width="172" height="20" uuid="87c6b8fe-180c-492c-ba78-060ae4c3d803"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="120" width="172" height="20" uuid="266f08de-334a-49cd-82a0-5499a5cf7d00"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="100" width="172" height="20" uuid="ce2d24ed-1f43-4783-ab2b-d1d59a704589"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="140" width="172" height="20" uuid="788be90e-202a-454a-8ddf-f023aab9977c"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="140" width="38" height="20" uuid="247c1240-60d0-4003-9426-e419753f108c"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="120" width="38" height="20" uuid="f4206a59-0c6b-4d45-be78-7aba9e2a334f"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="100" width="38" height="20" uuid="95d191dd-09b9-4746-9b91-8aa3603ab48f"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="80" width="38" height="20" uuid="4a2d0d5c-d64a-4460-9e88-7c6a0efabe8a"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="80" width="61" height="20" uuid="f1b49096-0be9-4c6f-beff-08442c77aa55"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="100" width="61" height="20" uuid="224b4615-acac-4e01-bbfa-136a5664f587"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="120" width="61" height="20" uuid="5b9a3c7a-a42e-4131-96f3-8c5a423a2c4b"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="140" width="61" height="20" uuid="996cfd8d-02da-4121-90d8-2a8188be4ea9"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="140" width="107" height="20" uuid="96ca8b3b-135a-46be-9d33-8b14f9f413b5"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="120" width="107" height="20" uuid="d6f3c76f-83da-4194-9389-3b221adfed10"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="100" width="107" height="20" uuid="fca360d7-efbc-4401-be3d-ef54ab0687fe"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="80" width="107" height="20" uuid="7f948c9e-1f2b-4dc3-9e93-21c99a57caa6"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="160" width="107" height="20" uuid="173ecd3b-9628-4915-b475-b6a5340c55f9"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="180" width="107" height="20" uuid="d45a5327-f738-4f93-a9d8-e523bdab4984"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="180" width="61" height="20" uuid="3c37eec6-12d2-4a67-88e5-53b35a3d2602"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="160" width="61" height="20" uuid="a65bed81-cf08-4ec6-880b-657c78ed9426"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="160" width="38" height="20" uuid="c34cbda3-d245-4908-a5b1-06395f25315d"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="180" width="38" height="20" uuid="76c4ce3f-2817-4189-b780-856eb803f06d"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="160" width="172" height="20" uuid="1644c432-9a2c-4df7-8ac0-2f1667749e79"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="180" width="172" height="20" uuid="3e9916a1-c0b3-4d1d-a2fa-7e60dce3d1d7"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement x="2" y="12" width="378" height="18" uuid="e75f4181-3ce4-40ea-b1a7-81626c5e25c7"/>
+				<textFieldExpression><![CDATA["MUSAPOSTE, Imprimé par :"+$F{who_done} +" , le "+new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="118" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="271" height="20" uuid="24e93475-9fb5-47b6-9668-3525bf10dec1"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Montant TOTAL de la prise en charge  (100%) :"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="20" width="271" height="20" uuid="e3623212-f0b1-44b0-8676-99ff03104f96"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Montant TOTAL couvert par la mutuelle à : "+$F{taux_effectif}+" %"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="40" width="271" height="20" uuid="0371d4b2-8916-49a0-b29f-dfdd210fbfa0"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Montant TOTAL à la charge de l'adhérent : " 
++ (100 
+   - ($F{taux_effectif} == null ? 0 : $F{taux_effectif}.intValue())
+  )
++ " %"]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement x="290" y="62" width="89" height="53" uuid="d29cdd04-f805-46d2-a003-8fc38e3d094b"/>
+				<jr:QRCode xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<jr:codeExpression><![CDATA["Mutuelle de Santé des agents de la Poste, Prise en charge N°"+$F{id}+"délivré à l'adhérent "+$F{nom_ad}+" "+$F{prenom_ad}]]></jr:codeExpression>
+				</jr:QRCode>
+			</componentElement>
+			<staticText>
+				<reportElement x="2" y="79" width="158" height="35" uuid="576afdf4-6a88-499a-bdec-3301dc9fcfd4"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Signature]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="2" y="63" width="248" height="20" uuid="0956adba-e86e-4f3a-8f0f-9917d0c6023a"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Fournisseur  : "+$F{structure}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="7" y="99" width="149" height="19" uuid="091ea77a-62e4-4448-93e0-f9ac1c4b07a7"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[A......................., Le ..................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="0" width="107" height="20" uuid="b9d79c67-c3b0-402f-9649-54a82e0188fa"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="20" width="107" height="20" uuid="8cdf7224-3714-4232-bb9f-fd75faaddead"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="40" width="107" height="20" uuid="7a7c6101-8c65-4b3f-bb28-28a7dc6cfff1"/>
+				<box>
+					<pen lineWidth="0.6"/>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

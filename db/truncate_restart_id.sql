@@ -1,0 +1,2 @@
+TRUNCATE TABLE public.reglement RESTART IDENTITY;
+TRUNCATE TABLE public.reglement_detail RESTART IDENTITY;

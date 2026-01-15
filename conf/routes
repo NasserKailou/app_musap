@@ -1,0 +1,130 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# An example controller showing a sample home page
+#GET     /                           controllers.HomeController.index
+GET     /       controllers.HomeController.index(equest:Request)
+GET     /accueil                           controllers.HomeController.acceuil(request:Request)
+POST    /login                  	controllers.HomeController.authentification(request:Request)
+GET     /logout                 	controllers.HomeController.deconnecter(request:Request)
+GET     /acceuil                    controllers.HomeController.acceuil(request:Request)
+GET     /api/stats/reglements-structure    controllers.HomeController.getStatsReglementsByStructure(request:Request)
+
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+
+#Authentification Ressources
+POST     /auth                           controllers.AuthenticationCtrl.authentification(request:Request)
+GET     /login                          controllers.AuthenticationCtrl.login(request:Request)
+GET     /login                          controllers.AuthenticationCtrl.logout(request:Request)
+GET     /returnFirtPageConnexion                           controllers.AuthenticationCtrl.returnFirtPageConnexion(login: String, request:Request)
+POST     /first-auth                           controllers.AuthenticationCtrl.firstConnexion(request:Request) 
+#User ressources
+GET     /user                           controllers.UserCtrl.show(viewMode: String, login: String,request:Request)
+POST     /user/save                         controllers.UserCtrl.save(request:Request)
+GET     /user/index                           controllers.UserCtrl.index(request:Request)
+GET     /user/delete                           controllers.UserCtrl.delete(login: String, etat: Boolean,request:Request)
+
+
+#Adherent Ressources
+GET			/Adherent/show/:subAction/    		controllers.AdherentCtrl.show(request:Request,subAction: String, idConsult: Long)
+#GET			/Adherent/restaure/    		controllers.AdherentCtrl.restaure(request:Request,idConsult: Long)
+#GET			/Adherent/deleted-ticket/    		controllers.AdherentCtrl.consultationSupp(request:Request)
+POST    	/Adherent/save                        controllers.AdherentCtrl.save(request:Request)
+GET			/Adherent-add-ayantDroit/show    		controllers.AdherentCtrl.addAyantDroit(request:Request,idConsult: Long)
+GET			/Adherent-add-rembourssement/show    		controllers.AdherentCtrl.addRembourssement(request:Request,idConsult: Long, typeOP: String)
+GET			/Adherent/profil-photo/    		controllers.AdherentCtrl.formProfil(request:Request,idAdherant: Long)
+POST			/Adherent/profil-photo/save    		controllers.AdherentCtrl.formProfilSave(request:Request)
+GET			/Adherent/profil-photo-path/    		controllers.AdherentCtrl.path( request:Request, path: String)
+GET			/Adherents/SitutationView/    		controllers.AdherentCtrl.showSituationView(request:Request)
+GET			/impression-situation-adherent/    	 controllers.AdherentCtrl.print(request:Request,numeroMatricule: String, fileName:String)
+GET			/impression-carte-adherent/    	 controllers.AdherentCtrl.printCarte(request:Request,idAdherent: Long, fileName:String)
+POST			/impression-situation-adh-betewenne/    	 controllers.AdherentCtrl.rapportAdhBetwenne(request:Request)
+POST			/impression-situation-betewenne/    	 controllers.AdherentCtrl.rapportBetwenne(request:Request)
+POST			/impression-badgesGlobal/    	 controllers.AdherentCtrl.impressionCarteMainsGlobal(request:Request)
+
+
+#AyantDroit Ressources
+GET			/AyantDroit/show/:subAction/    		controllers.AyantDroitCtrl.show(subAction: String, idOrd: Long, idConsult: Long,request:Request)
+GET			/AyantDroit/restaure/    		controllers.AyantDroitCtrl.restaure(idOrd: Long,request:Request)
+POST    	/AyantDroit/save                        controllers.AyantDroitCtrl.save(request:Request)
+POST			/AyantDroit/profil-photo/save    		controllers.AyantDroitCtrl.formProfilSave(request:Request)
+GET			/AyantDroit/profil-photo-path/    		controllers.AyantDroitCtrl.path( request:Request, path: String)
+GET			/AyantDroit/profil-photo/    		controllers.AyantDroitCtrl.formProfil(request:Request,idAdherant: Long)
+GET			/impression-carte-ayantDroit/    	 controllers.AyantDroitCtrl.printCarte(request:Request,idAdherent: Long, fileName:String)
+#Reglement Ressources
+GET			/Reglement/show/:subAction/    		controllers.ReglementCtrl.show(subAction: String, typeOP: String, idOrd: Long, idConsult: Long,request:Request)
+GET			/Reglement/confirm-bon/:subAction/    		controllers.ReglementCtrl.showConfirmBon(subAction: String, idAdherent: Long, request:Request)
+GET			/Reglement/restaure/    		controllers.ReglementCtrl.restaure(idOrd: Long,request:Request)
+POST    	/Reglement/save                        controllers.ReglementCtrl.save(request:Request)
+POST    	/Reglement-detail/save                        controllers.ReglementCtrl.reglementDetailsave(request:Request)
+GET    	/Reglement-detail/form                        controllers.ReglementCtrl.reglementDetailForm(subAction: String, typeOperation: String,idReglement: Long, idAdherent: Long,idDetails: Long , request:Request)
+GET			/Reglement/SitutationGlobalView/    		controllers.ReglementCtrl.showRegementGlobal(request:Request)
+POST			/Reglement-impression-situation-global/    	 controllers.ReglementCtrl.rapportAnnuel(request:Request, fileName:String)
+POST			/impression-global-situation-betewenne/    	 controllers.ReglementCtrl.rapportBetwenne(request:Request)
+POST			/alerte-email/    	 controllers.ReglementCtrl.infoViaMail(request:Request)
+GET			/Reglement/Eamil-alerte/    		controllers.ReglementCtrl.showAlerteView(request:Request)
+GET   /reglement/detail/json/:id     controllers.ReglementCtrl.detailJson(id: Long)
+GET   /reglement/json/:id    controllers.ReglementCtrl.getReglementJson(id: Long)
+#GET   /reglementDeleteDetails    controllers.ReglementCtrl.deleteDetails(request:Request, id: Long, id2: Long, operation: String)
+GET    	/Reglement/ShowBonToConfirmed                        controllers.ReglementCtrl.showBonToValidate(request:Request) 
+GET    	/Reglement/ShowRapSynthese                       controllers.ReglementCtrl.showRapSynthese(request:Request) 
+GET    	/Reglement/ShowRapSuperviseur                       controllers.ReglementCtrl.showRapSuperviseur(request:Request) 
+
+
+POST    /reglement/confirmer/:bonId/:adherentId    controllers.ReglementCtrl.confirmerBon(bonId: Long, adherentId: Long)
+# Réactualiser un bon de commande
+POST    /reglement/reactualiser/:bonId/:adherentId    controllers.ReglementCtrl.reactualiserBon(bonId: Long, adherentId: Long)
+#imprime un bon commande
+GET			/impression-BonPriseEnC/    	 controllers.ReglementCtrl.print(request:Request,numBon: Long, fileName:String)
+#Partenaire Ressources
+GET			/Partenaire-Str/show/:subAction/    		controllers.StructurePartenaireCtrl.show(request:Request,subAction: String, idPArtenaire: Long)
+#GET			/Partenaire-Str/restaure/    		controllers.StructurePartenaireCtrl.restaure(idOrd: Long,request:Request)
+POST    	/Partenaire-Str/save                        controllers.StructurePartenaireCtrl.save(request:Request)
+GET			/impression-situation-partenaire/    	 controllers.StructurePartenaireCtrl.print(request:Request,idStruc: Long, fileName:String)
+
+#Prestation Ressources
+GET			/Prestation-Str/show/:subAction/    		controllers.PrestationCtrl.show(request:Request,subAction: String, idPrestations: Long)
+#GET			/Prestation-Str/restaure/    		controllers.PrestationCtrl.restaure(idOrd: Long,request:Request)
+POST    	/Prestation-Str/save                        controllers.PrestationCtrl.save(request:Request)
+GET			/impression-situation-prestations/    	 controllers.PrestationCtrl.print(request:Request,idPrestation: Long, fileName:String)
+
+
+#Budget Ressources
+GET			/Bugets/show/:subAction/    		         controllers.BudgetCtrl.show(subAction: String, idBudget: Long, gestion: String, request:Request)
+POST    	/Budgets/save                                controllers.BudgetCtrl.save(request:Request)
+
+#Comptabilites Ressource
+GET			/Categorie/show/:subAction/    		         controllers.CategorieCompteCtrl.show(subAction: String, mode:String,  idC: Long, request:Request)
+POST    	/CategorieClasse/save                        controllers.CategorieCompteCtrl.save(request:Request)
+
+GET			/Classification/show/:subAction/    		controllers.CompteCtrl.show(subAction: String,mode :String,  idCat: Long, idCompte: Long, request:Request)
+POST    	/ClassificationCategorie/save               controllers.CompteCtrl.save(request:Request)
+POST    	/ClassificationCategorie/saveRapide                       controllers.CompteCtrl.saveRapide(request:Request)
+
+#Ecriture_Depense
+GET			/Depense/show/:subAction/    		         controllers.OperationComptableCtrl.showDepense(subAction: String, idDepense: Long, request:Request)
+POST    	/Depense/save                        controllers.OperationComptableCtrl.saveDepense(request:Request)
+GET			/EcritureComptable/show/:subAction/    		controllers.OperationComptableCtrl.showEcriture(subAction: String, idDep: Long, idEcriture: Long, request:Request)
+POST    	/EcritureComptable/save               controllers.OperationComptableCtrl.saveEcriture(request:Request)
+
+POST    	/Beneficiare/save               controllers.JournalEcritureCtrl.save(request:Request)
+POST		/impression-journals-betewenne/    	 controllers.OperationComptableCtrl.printJournal(request:Request)
+
+
+#Json Ressources
+GET     /json-ayantDroit                        controllers.ServerJson.jsonAyantDroit(query:String?="")
+GET     /json-CompteComptable                     controllers.ServerJson.jsonCompte(query:String?="")
+GET     /json-CompteBudget                    	 controllers.ServerJson.jsonCompteB(query:String?="")
+
+# Import Étude Consommations
+GET     /etude-consommations/import        controllers.EtudeConsommationCtrl.showImportForm(request:Request)
+POST    /etude-consommations/import        controllers.EtudeConsommationCtrl.importExcel(request: Request)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+
+### fin stock Routes

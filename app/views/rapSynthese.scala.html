@@ -1,0 +1,1013 @@
+
+@import java.text.NumberFormat
+@import java.util.Locale
+@import java.time.LocalDateTime
+@import java.time.temporal.ChronoUnit
+@import java.sql.Timestamp
+@import helper._
+@import java.util
+@import utils._
+@(reglements: List[models.tables.pojos.VReglement])(implicit request: Http.Request)
+
+@defining({
+  // Récupérer le login de l'utilisateur connecté
+  val userLogin = request.session.get("login").get()
+  
+  // Filtrer les éléments saisis par l'utilisateur connecté
+  val mesReglements = reglements.filter(r => r.getWhoDone() != null && r.getWhoDone() == userLogin)
+  
+  // Séparer Bons de Commande et Prises en Charge
+  val mesBonsCommande = mesReglements.filter(r => r.getTypeReglement() != null && r.getTypeReglement() == "BC")
+  val mesPrisesEnCharge = mesReglements.filter(r => r.getTypeReglement() != null && r.getTypeReglement() == "PC")
+  
+  // Calculer les statistiques par jour pour le graphique
+  val reglementsByDate = mesReglements.groupBy { r =>
+    r.getDatePayement().toLocalDateTime().toLocalDate()
+  }.map { case (date, regs) =>
+    (date, regs.size)
+  }.toSeq.sortBy(_._1)
+  
+  (userLogin, mesReglements, mesBonsCommande, mesPrisesEnCharge, reglementsByDate)
+}) { case (userLogin, mesReglements, mesBonsCommande, mesPrisesEnCharge, reglementsByDate) =>
+
+@main("Ma Progression - Saisie") {
+
+@* ===== TOKEN CSRF - CRITIQUE POUR LES REQUÊTES AJAX ===== *@
+@helper.CSRF.formField
+
+<!-- Content Header -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>
+          <i class="fas fa-chart-line"></i> Ma situation personnel
+        </h1>
+        <p class="text-muted">Agent : <strong>@userLogin</strong></p>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+          <li class="breadcrumb-item active">Ma Progression</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+
+    @* ================== STATISTIQUES PERSONNELLES ================== *@
+    <div class="row mb-3">
+      <div class="col-lg-4 col-12">
+        <div class="info-box bg-gradient-primary clickable-box" data-toggle="modal" data-target="#modalBonsCommande" style="cursor: pointer;">
+          <span class="info-box-icon"><i class="fas fa-file-invoice"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Mes Bons de Commande</span>
+            <span class="info-box-number">@mesBonsCommande.size</span>
+            <span class="info-box-footer"><i class="fas fa-eye"></i> Cliquez pour voir la liste</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-12">
+        <div class="info-box bg-gradient-success clickable-box" data-toggle="modal" data-target="#modalPrisesEnCharge" style="cursor: pointer;">
+          <span class="info-box-icon"><i class="fas fa-hands-helping"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Mes Prises en Charge</span>
+            <span class="info-box-number">@mesPrisesEnCharge.size</span>
+            <span class="info-box-footer"><i class="fas fa-eye"></i> Cliquez pour voir la liste</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-12">
+        <div class="info-box bg-gradient-info">
+          <span class="info-box-icon"><i class="fas fa-clipboard-check"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Total Saisi</span>
+            <span class="info-box-number">@mesReglements.size</span>
+            <span class="info-box-footer">BC + PC</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @* ================== GRAPHIQUE D'ÉVOLUTION PAR JOUR ================== *@
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-chart-area"></i> Évolution de mes Saisies par Jour
+            </h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            @if(reglementsByDate.isEmpty) {
+              <div class="text-center py-5">
+                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Aucune donnée de saisie disponible pour le graphique</p>
+              </div>
+            } else {
+              <div style="position: relative; height: 350px;">
+                <canvas id="evolutionChart"></canvas>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @* ================== STATISTIQUES DÉTAILLÉES ================== *@
+    <div class="row mb-3">
+      <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box">
+          <span class="info-box-icon bg-info"><i class="fas fa-calendar-day"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Aujourd'hui</span>
+            <span class="info-box-number">
+              @{
+                val today = LocalDateTime.now().toLocalDate()
+                mesReglements.count(r => r.getDatePayement().toLocalDateTime().toLocalDate().equals(today))
+              }
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box">
+          <span class="info-box-icon bg-success"><i class="fas fa-calendar-week"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Cette Semaine</span>
+            <span class="info-box-number">
+              @{
+                val now = LocalDateTime.now()
+                val weekAgo = now.minusDays(7)
+                mesReglements.count(r => r.getDatePayement().toLocalDateTime().isAfter(weekAgo))
+              }
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box">
+          <span class="info-box-icon bg-warning"><i class="fas fa-calendar-alt"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Ce Mois</span>
+            <span class="info-box-number">
+              @{
+                val now = LocalDateTime.now()
+                val monthStart = now.withDayOfMonth(1)
+                mesReglements.count(r => r.getDatePayement().toLocalDateTime().isAfter(monthStart))
+              }
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6 col-12">
+        <div class="info-box">
+          <span class="info-box-icon bg-danger"><i class="fas fa-money-bill-wave"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Montant Total</span>
+            <span class="info-box-number" style="font-size: 1.3rem;">
+              @{
+                val totalMontant: Double = mesReglements.map { r =>
+                  val montant = r.getMontantTotal()
+                  if (montant != null) montant.doubleValue() else 0.0
+                }.sum
+                f"$totalMontant%,.0f"
+              } F
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @* ================== LISTE COMPLÈTE DE MES SAISIES ================== *@
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-list"></i> Toutes mes Saisies
+              <span class="badge badge-light ml-2">@mesReglements.size élément(s)</span>
+            </h3>
+          </div>
+          <div class="card-body">
+            @if(mesReglements.isEmpty) {
+              <div class="text-center py-5">
+                <div class="empty-state">
+                  <i class="fas fa-inbox fa-5x text-muted mb-4"></i>
+                  <h3 class="text-muted">Aucune saisie effectuée</h3>
+                  <p class="text-muted">
+                    Vous n'avez pas encore effectué de saisie.<br>
+                    Vos saisies apparaîtront automatiquement ici.
+                  </p>
+                </div>
+              </div>
+            } else {
+              <div class="table-responsive">
+                <table id="mesReglementTable" class="table table-bordered table-hover table-striped" style="width:100%">
+                  <thead>
+                    <tr>
+                      <th>N°</th>
+                      <th>Type</th>
+                      <th>Adhérent</th>
+                      <th>Bénéficiaire</th>
+                      <th>Structure</th>
+                      <th>Prestation</th>
+                      <th>Montant Total</th>
+                      <th>Montant Couvert</th>
+                      <th>Montant à Payer</th>
+                      <th>Date Saisie</th>
+                      <th class="text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for(c <- mesReglements) {
+                      @defining({
+                        val datePayement = c.getDatePayement().toLocalDateTime()
+                        val typeReglement = c.getTypeReglement()
+                        val isBC = typeReglement != null && typeReglement == "BC"
+                        (datePayement, isBC)
+                      }) { case (datePayement, isBC) =>
+
+                        <tr>
+                          <td><strong>@c.getId()</strong></td>
+                          <td>
+                            @if(isBC) {
+                              <span class="badge badge-primary">
+                                <i class="fas fa-file-invoice"></i> Bon de Commande
+                              </span>
+                            } else {
+                              <span class="badge badge-success">
+                                <i class="fas fa-hands-helping"></i> Prise en Charge
+                              </span>
+                            }
+                          </td>
+                          <td>@c.getNomAd() @c.getPrenomAd()</td>
+                          <td>
+                            @if(c.getAyantDroit() != null) {
+                              @c.getNomAy() (@c.getLien())
+                            } else {
+                              @c.getNomAd() @c.getPrenomAd()
+                            }
+                          </td>
+                          <td>@c.getStructure()</td>
+                          <td>@c.getPrestation()</td>
+                          <td class="text-primary"><strong>@c.getMontantTotal() F CFA</strong></td>
+                          <td class="text-success"><strong>@c.getMontantReglement() F CFA</strong></td>
+                          <td class="text-warning"><strong>@c.getMontantPaye() F CFA</strong></td>
+                          <td>@datePayement.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))</td>
+                          <td class="text-center">
+                            <button type="button"
+                                    class="btn btn-info btn-sm"
+                                    data-toggle="modal"
+                                    data-target="#detailModal@c.getId()"
+                                    title="Voir détails">
+                              <i class="fas fa-eye"></i> Détails
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+@* ================== MODAL: BONS DE COMMANDE ================== *@
+<div class="modal fade" id="modalBonsCommande" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary">
+        <h5 class="modal-title text-white">
+          <i class="fas fa-file-invoice"></i> Mes Bons de Commande (@mesBonsCommande.size)
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        @if(mesBonsCommande.isEmpty) {
+          <div class="text-center py-4">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Aucun bon de commande saisi</p>
+          </div>
+        } else {
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover table-sm modal-table">
+              <thead>
+                <tr>
+                  <th>N°</th>
+                  <th>Adhérent</th>
+                  <th>Structure</th>
+                  <th>Prestation</th>
+                  <th>Montant Total</th>
+                  <th>Date Saisie</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(r <- mesBonsCommande) {
+                  <tr>
+                    <td><strong>@r.getId()</strong></td>
+                    <td>@r.getNomAd() @r.getPrenomAd()</td>
+                    <td>@r.getStructure()</td>
+                    <td>@r.getPrestation()</td>
+                    <td class="text-primary"><strong>@r.getMontantTotal() F CFA</strong></td>
+                    <td>@r.getDatePayement().toLocalDateTime().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          <i class="fas fa-times"></i> Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@* ================== MODAL: PRISES EN CHARGE ================== *@
+<div class="modal fade" id="modalPrisesEnCharge" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-success">
+        <h5 class="modal-title text-white">
+          <i class="fas fa-hands-helping"></i> Mes Prises en Charge (@mesPrisesEnCharge.size)
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        @if(mesPrisesEnCharge.isEmpty) {
+          <div class="text-center py-4">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Aucune prise en charge saisie</p>
+          </div>
+        } else {
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover table-sm modal-table">
+              <thead>
+                <tr>
+                  <th>N°</th>
+                  <th>Adhérent</th>
+                  <th>Structure</th>
+                  <th>Prestation</th>
+                  <th>Montant Total</th>
+                  <th>Date Saisie</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(r <- mesPrisesEnCharge) {
+                  <tr>
+                    <td><strong>@r.getId()</strong></td>
+                    <td>@r.getNomAd() @r.getPrenomAd()</td>
+                    <td>@r.getStructure()</td>
+                    <td>@r.getPrestation()</td>
+                    <td class="text-success"><strong>@r.getMontantTotal() F CFA</strong></td>
+                    <td>@r.getDatePayement().toLocalDateTime().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          <i class="fas fa-times"></i> Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@* ================== MODALES DE DÉTAILS ================== *@
+@for(c <- mesReglements) {
+  @defining({
+    val datePayementDetail = c.getDatePayement().toLocalDateTime()
+    val isRembValueDetail = c.getIsRemboursement()
+    val isRemboursementDetail: Boolean = (isRembValueDetail != null && isRembValueDetail == true)
+    val typeReglement = c.getTypeReglement()
+    val isBC = typeReglement != null && typeReglement == "BC"
+    (datePayementDetail, isRemboursementDetail, isBC)
+  }) { case (datePayementDetail, isRemboursementDetail, isBC) =>
+
+    <div class="modal fade" id="detailModal@c.getId()" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header @if(isBC){bg-primary}else{bg-success}">
+            <h5 class="modal-title text-white">
+              <i class="fas fa-info-circle"></i> Détails 
+              @if(isBC) {
+                du Bon de Commande N°@c.getId()
+              } else {
+                de la Prise en Charge N°@c.getId()
+              }
+            </h5>
+            <button type="button" class="close text-white" data-dismiss="modal">
+              <span>&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-bordered table-sm">
+              <tr>
+                <th style="width: 30%;" class="bg-light">Type de Règlement</th>
+                <td>
+                  @if(isBC) {
+                    <span class="badge badge-primary badge-lg">
+                      <i class="fas fa-file-invoice"></i> Bon de Commande
+                    </span>
+                  } else {
+                    <span class="badge badge-success badge-lg">
+                      <i class="fas fa-hands-helping"></i> Prise en Charge
+                    </span>
+                  }
+                </td>
+              </tr>
+              <tr>
+                <th class="bg-light">Nom & prénom adhérent</th>
+                <td><strong>@c.getNomAd() @c.getPrenomAd()</strong></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Bénéficiaire</th>
+                <td>
+                  <strong>
+                    @if(c.getAyantDroit() != null) {
+                      @c.getNomAy() - @c.getLien()
+                    } else {
+                      @c.getNomAd() @c.getPrenomAd()
+                    }
+                  </strong>
+                </td>
+              </tr>
+              <tr>
+                <th class="bg-light">Code Carnet</th>
+                <td><strong>@c.getCodeCarnet()</strong></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Matricule</th>
+                <td><strong>@c.getMatricule()</strong></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Type de prestation</th>
+                <td><strong>@c.getPrestation()</strong></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Structure</th>
+                <td><strong>@c.getStructure()</strong></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Remboursement</th>
+                <td>
+                  @if(isRemboursementDetail) {
+                    <span class="badge badge-info">
+                      <i class="fas fa-hand-holding-usd"></i> Oui
+                    </span>
+                  } else {
+                    <span class="badge badge-secondary">
+                      <i class="fas fa-times"></i> Non
+                    </span>
+                  }
+                </td>
+              </tr>
+              <tr>
+                <th class="bg-light">Date de saisie</th>
+                <td><strong>@datePayementDetail.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))</strong></td>
+              </tr>
+              <tr>
+                <th class="bg-light">Saisi par</th>
+                <td><span class="badge badge-info">@c.getWhoDone()</span></td>
+              </tr>
+              <tr class="table-info">
+                <th class="bg-light">Montant Total de la Facture</th>
+                <td class="text-primary"><strong style="font-size: 1.2rem;">@c.getMontantTotal() F CFA</strong></td>
+              </tr>
+              <tr class="table-warning">
+                <th class="bg-light">Montant à payer</th>
+                <td class="text-warning"><strong style="font-size: 1.2rem;">@c.getMontantPaye() F CFA</strong></td>
+              </tr>
+              <tr class="table-success">
+                <th class="bg-light">Montant Règlement (pris en charge)</th>
+                <td class="text-success"><strong style="font-size: 1.2rem;">@c.getMontantReglement() F CFA</strong></td>
+              </tr>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+              <i class="fas fa-times"></i> Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+}
+
+<!-- Chargement de Chart.js depuis CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@@3.9.1/dist/chart.min.js"></script>
+
+
+<script src="@routes.Assets.versioned("javascripts/chart.min.js")"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  
+  setTimeout(function() {
+    
+    if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
+      console.error('jQuery n\'est pas chargé !');
+      return;
+    }
+
+    console.log('✅ jQuery version:', $.fn.jquery);
+
+    // ========== INITIALISATION DATATABLE (tableau principal) ==========
+    if ($('#mesReglementTable').length > 0) {
+      var dtConfig = {
+        "responsive": true,
+        "lengthChange": true,
+        "autoWidth": false,
+        "pageLength": 25,
+        "order": [[9, "desc"]], // Trier par date (plus récent en premier)
+        "columnDefs": [
+          {
+            "targets": [1],
+            "orderable": true,
+            "searchable": true
+          },
+          {
+            "targets": [10],
+            "orderable": false,
+            "searchable": false
+          }
+        ],
+        "language": {
+          "sProcessing": "Traitement en cours...",
+          "sSearch": "Rechercher&nbsp;:",
+          "sLengthMenu": "Afficher _MENU_ éléments",
+          "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+          "sInfoEmpty": "Affichage de 0 à 0 sur 0 élément",
+          "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
+          "sInfoPostFix": "",
+          "sLoadingRecords": "Chargement...",
+          "sZeroRecords": "Aucun élément correspondant trouvé",
+          "sEmptyTable": "Aucune donnée disponible dans le tableau",
+          "oPaginate": {
+            "sFirst": "Premier",
+            "sPrevious": "Précédent",
+            "sNext": "Suivant",
+            "sLast": "Dernier"
+          },
+          "oAria": {
+            "sSortAscending": ": activer pour trier la colonne par ordre croissant",
+            "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
+          }
+        }
+      };
+
+      try {
+        var table = $("#mesReglementTable").DataTable(dtConfig);
+        console.log('✅ DataTable initialisé');
+      } catch(e) {
+        console.error('❌ Erreur DataTable:', e);
+      }
+    } else {
+      console.log('ℹ️ Aucun tableau à initialiser (liste vide)');
+    }
+
+    // ========== INITIALISATION DATATABLES DANS LES MODALES ==========
+    $('.modal-table').each(function() {
+      try {
+        $(this).DataTable({
+          "responsive": true,
+          "lengthChange": true,
+          "autoWidth": false,
+          "pageLength": 10,
+          "order": [[5, "desc"]], // Trier par date
+          "language": {
+            "sProcessing": "Traitement en cours...",
+            "sSearch": "Rechercher&nbsp;:",
+            "sLengthMenu": "Afficher _MENU_ éléments",
+            "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+            "sInfoEmpty": "Affichage de 0 à 0 sur 0 élément",
+            "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
+            "sInfoPostFix": "",
+            "sLoadingRecords": "Chargement...",
+            "sZeroRecords": "Aucun élément correspondant trouvé",
+            "sEmptyTable": "Aucune donnée disponible dans le tableau",
+            "oPaginate": {
+              "sFirst": "Premier",
+              "sPrevious": "Précédent",
+              "sNext": "Suivant",
+              "sLast": "Dernier"
+            }
+          }
+        });
+      } catch(e) {
+        console.warn('⚠️ Erreur initialisation DataTable modal:', e);
+      }
+    });
+
+    // ========== GRAPHIQUE CHART.JS ==========
+    @if(reglementsByDate.nonEmpty) {
+      console.log('📊 Initialisation du graphique...');
+      
+      // Vérifier que Chart.js est chargé
+      if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js n\'est pas chargé !');
+        $('#evolutionChart').parent().html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Erreur: Chart.js n\'est pas chargé. Le graphique ne peut pas être affiché.</div>');
+      } else {
+        console.log('✅ Chart.js version:', Chart.version);
+        
+        var ctx = document.getElementById('evolutionChart');
+        if (ctx) {
+          ctx = ctx.getContext('2d');
+          
+          // Données pour le graphique
+          var chartData = {
+            dates: [@for((date, _) <- reglementsByDate) { '@date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))', }],
+            counts: [@for((_, count) <- reglementsByDate) { @count, }]
+          };
+          
+          console.log('📊 Données du graphique:', chartData);
+          
+          // Calculer les cumuls
+          var cumuls = [];
+          var cumul = 0;
+          for (var i = 0; i < chartData.counts.length; i++) {
+            cumul += chartData.counts[i];
+            cumuls.push(cumul);
+          }
+          
+          console.log('📊 Cumuls calculés:', cumuls);
+          
+          try {
+            var evolutionChart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: chartData.dates,
+                datasets: [
+                  {
+                    label: 'Nombre de saisies par jour',
+                    data: chartData.counts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                  },
+                  {
+                    label: 'Cumul total',
+                    data: cumuls,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 3,
+                    borderDash: [5, 5],
+                    fill: false,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                  mode: 'index',
+                  intersect: false
+                },
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                      usePointStyle: true,
+                      padding: 20,
+                      font: {
+                        size: 13,
+                        weight: 'bold'
+                      }
+                    }
+                  },
+                  tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                      size: 14,
+                      weight: 'bold'
+                    },
+                    bodyFont: {
+                      size: 13
+                    },
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    borderWidth: 1,
+                    callbacks: {
+                      label: function(context) {
+                        var label = context.dataset.label || '';
+                        if (label) {
+                          label += ': ';
+                        }
+                        label += context.parsed.y;
+                        if (context.datasetIndex === 0) {
+                          label += ' saisie(s)';
+                        } else {
+                          label += ' au total';
+                        }
+                        return label;
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  x: {
+                    display: true,
+                    title: {
+                      display: true,
+                      text: 'Date de saisie',
+                      font: {
+                        size: 14,
+                        weight: 'bold'
+                      },
+                      color: '#666'
+                    },
+                    ticks: {
+                      maxRotation: 45,
+                      minRotation: 45,
+                      font: {
+                        size: 11
+                      },
+                      color: '#666'
+                    },
+                    grid: {
+                      display: true,
+                      color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                  },
+                  y: {
+                    display: true,
+                    position: 'left',
+                    title: {
+                      display: true,
+                      text: 'Nombre de saisies',
+                      font: {
+                        size: 14,
+                        weight: 'bold'
+                      },
+                      color: 'rgba(54, 162, 235, 1)'
+                    },
+                    beginAtZero: true,
+                    ticks: {
+                      stepSize: 1,
+                      precision: 0,
+                      font: {
+                        size: 12
+                      },
+                      color: '#666'
+                    },
+                    grid: {
+                      display: true,
+                      color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                  }
+                }
+              }
+            });
+            
+            console.log('✅ Graphique Chart.js initialisé avec succès');
+          } catch(e) {
+            console.error('❌ Erreur lors de la création du graphique:', e);
+            $('#evolutionChart').parent().html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Erreur lors de la création du graphique: ' + e.message + '</div>');
+          }
+        } else {
+          console.error('❌ Élément canvas #evolutionChart non trouvé');
+        }
+      }
+    } else {
+      console.log('ℹ️ Aucune donnée pour le graphique');
+    }
+
+    console.log('✅ Initialisation complète terminée');
+
+  }, 300); // Augmenté à 300ms pour s'assurer que Chart.js est chargé
+  
+});
+</script>
+
+<style>
+/* Info boxes */
+.info-box {
+  min-height: 110px;
+  box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+  transition: all 0.3s ease;
+}
+
+.info-box.clickable-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,.3);
+}
+
+.info-box-icon {
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+}
+
+.info-box-icon i {
+  font-size: 2rem;
+}
+
+.info-box-content {
+  padding: 10px;
+}
+
+.info-box-number { 
+  font-size: 1.8rem; 
+  font-weight: bold; 
+  display: block;
+  margin-bottom: 5px;
+}
+
+.info-box-text {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.info-box-footer {
+  font-size: 0.75rem;
+  font-style: italic;
+  opacity: 0.8;
+  display: block;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  color: white !important;
+}
+
+.bg-gradient-success {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
+  color: white !important;
+}
+
+.bg-gradient-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%) !important;
+  color: white !important;
+}
+
+/* Empty state */
+.empty-state {
+  padding: 3rem 1rem;
+}
+
+.empty-state i {
+  opacity: 0.3;
+}
+
+.empty-state h3 {
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+/* Modal headers */
+.modal-header.bg-primary,
+.modal-header.bg-info,
+.modal-header.bg-success,
+.modal-header.bg-warning,
+.modal-header.bg-danger { 
+  color: white; 
+}
+
+/* Modal tables */
+.modal-table {
+  font-size: 0.9rem;
+}
+
+.modal-table thead {
+  background-color: #f4f6f9;
+}
+
+.modal-table th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Table responsiveness */
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* Badges styling */
+.badge {
+  font-size: 0.85rem;
+  padding: 0.4em 0.6em;
+}
+
+.badge i {
+  margin-right: 4px;
+}
+
+.badge-lg {
+  font-size: 1rem;
+  padding: 0.5em 0.8em;
+}
+
+/* Badge types */
+.badge-primary {
+  background-color: #007bff !important;
+}
+
+.badge-success {
+  background-color: #28a745 !important;
+}
+
+.badge-info {
+  background-color: #17a2b8 !important;
+}
+
+.badge-secondary {
+  background-color: #6c757d !important;
+}
+
+/* Card styling */
+.card {
+  box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+}
+
+.card-header {
+  border-bottom: 2px solid rgba(0,0,0,.1);
+}
+
+/* Chart container - IMPORTANT */
+#evolutionChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Detail modal table */
+.table th.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+/* Responsive adjustments */
+@@media (max-width: 768px) {
+  .info-box-number {
+    font-size: 1.5rem;
+  }
+  
+  .info-box {
+    min-height: 100px;
+    margin-bottom: 15px;
+  }
+}
+
+/* Print styles */
+@@media print {
+  .card-tools,
+  .btn,
+  .breadcrumb,
+  .info-box-footer {
+    display: none !important;
+  }
+}
+</style>
+
+}
+}

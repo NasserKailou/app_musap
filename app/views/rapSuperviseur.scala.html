@@ -1,0 +1,788 @@
+@* Vue de Comparaison des Agents avec Période Personnalisable *@
+@import java.time.LocalDateTime
+@import java.time.LocalDate
+@import java.time.temporal.ChronoUnit
+@import scala.collection.immutable.Map
+
+@(reglements: List[models.tables.pojos.VReglement])(implicit request: Http.Request)
+
+@**************************************************
+ * BLOC DE CALCUL DES STATISTIQUES AVEC @defining
+ * Ce bloc crée un scope où les variables sont accessibles dans le template
+ **************************************************@
+@defining({
+  // Récupérer le login de session pour vérifier les droits
+  val login = request.session.get("login").getOrElse("")
+  
+  // Tous les règlements avec un agent de saisie
+  val tousReglements = reglements.filter(r => 
+    r.getWhoDone() != null && r.getWhoDone().trim.nonEmpty
+  )
+  
+  // Dates pour les filtres
+  val now = LocalDateTime.now()
+  val today = now.toLocalDate()
+  val weekAgo = today.minusDays(7)
+  val monthStart = today.withDayOfMonth(1)
+  val yearStart = today.withDayOfYear(1)
+  
+  // Statistiques par agent et par période
+  val statsByAgentAndPeriod = tousReglements.groupBy(_.getWhoDone()).map { case (agent, regs) =>
+    val bcRegs = regs.filter(_.getTypeReglement() == "BC")
+    val pcRegs = regs.filter(_.getTypeReglement() == "PC")
+    
+    // Semaine
+    val semaineRegs = regs.filter { r =>
+      val datePayement = r.getDatePayement().toLocalDateTime().toLocalDate()
+      !datePayement.isBefore(weekAgo)
+    }
+    val semaineBc = semaineRegs.count(_.getTypeReglement() == "BC")
+    val semainePc = semaineRegs.count(_.getTypeReglement() == "PC")
+    val semaineMontant = semaineRegs.map { r =>
+      val montant = r.getMontantTotal()
+      if (montant != null) montant.doubleValue() else 0.0
+    }.sum
+    
+    // Mois
+    val moisRegs = regs.filter { r =>
+      val datePayement = r.getDatePayement().toLocalDateTime().toLocalDate()
+      !datePayement.isBefore(monthStart)
+    }
+    val moisBc = moisRegs.count(_.getTypeReglement() == "BC")
+    val moisPc = moisRegs.count(_.getTypeReglement() == "PC")
+    val moisMontant = moisRegs.map { r =>
+      val montant = r.getMontantTotal()
+      if (montant != null) montant.doubleValue() else 0.0
+    }.sum
+    
+    // Année
+    val anneeRegs = regs.filter { r =>
+      val datePayement = r.getDatePayement().toLocalDateTime().toLocalDate()
+      !datePayement.isBefore(yearStart)
+    }
+    val anneeBc = anneeRegs.count(_.getTypeReglement() == "BC")
+    val anneePc = anneeRegs.count(_.getTypeReglement() == "PC")
+    val anneeMontant = anneeRegs.map { r =>
+      val montant = r.getMontantTotal()
+      if (montant != null) montant.doubleValue() else 0.0
+    }.sum
+    
+    // Total
+    val totalBc = bcRegs.size
+    val totalPc = pcRegs.size
+    val totalMontant: Double = regs.map { r =>
+      val montant = r.getMontantTotal()
+      if (montant != null) montant.doubleValue() else 0.0
+    }.sum
+    
+    Map(
+      "agent" -> agent,
+      "totalBc" -> totalBc,
+      "totalPc" -> totalPc,
+      "total" -> regs.size,
+      "totalMontant" -> totalMontant,
+      "semaineBc" -> semaineBc,
+      "semainePc" -> semainePc,
+      "semaineTotal" -> semaineRegs.size,
+      "semaineMontant" -> semaineMontant,
+      "moisBc" -> moisBc,
+      "moisPc" -> moisPc,
+      "moisTotal" -> moisRegs.size,
+      "moisMontant" -> moisMontant,
+      "anneeBc" -> anneeBc,
+      "anneePc" -> anneePc,
+      "anneeTotal" -> anneeRegs.size,
+      "anneeMontant" -> anneeMontant
+    )
+  }.toList.sortBy(m => -m("total").asInstanceOf[Int])
+  
+  // Évolution par jour pour chaque agent (pour graphique d'évolution)
+  val evolutionParAgent = tousReglements.groupBy(_.getWhoDone()).map { case (agent, regs) =>
+    val evolution = regs.groupBy { r =>
+      r.getDatePayement().toLocalDateTime().toLocalDate()
+    }.map { case (date, dailyRegs) =>
+      (date, dailyRegs.size)
+    }.toSeq.sortBy(_._1)
+    
+    (agent, evolution)
+  }
+  
+  // IMPORTANT : Retourner un tuple pour @defining
+  (statsByAgentAndPeriod, evolutionParAgent)
+}) { case (statsByAgentAndPeriod, evolutionParAgent) =>
+
+@main("Comparaison des Agents") {
+
+@* ===== TOKEN CSRF ===== *@
+@helper.CSRF.formField
+
+<!-- Content Header -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>
+          <i class="fas fa-chart-line"></i> Suivis des Agents
+        </h1>
+        <p class="text-muted">Analyse comparative des performances</p>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="@routes.HomeController.index()">Accueil</a></li>
+          <li class="breadcrumb-item active">Comparaison</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+    
+    <!-- Sélecteur de Période -->
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-3">
+                <label><i class="fas fa-calendar-alt"></i> Période d'analyse :</label>
+              </div>
+              <div class="col-md-9">
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                  <label class="btn btn-outline-primary">
+                    <input type="radio" name="periode" id="periode-semaine" value="semaine"> 
+                    <i class="fas fa-calendar-week"></i> Cette Semaine
+                  </label>
+                  <label class="btn btn-outline-primary active">
+                    <input type="radio" name="periode" id="periode-mois" value="mois" checked> 
+                    <i class="fas fa-calendar"></i> Ce Mois
+                  </label>
+                  <label class="btn btn-outline-primary">
+                    <input type="radio" name="periode" id="periode-annee" value="annee"> 
+                    <i class="fas fa-calendar-alt"></i> Cette Année
+                  </label>
+                  <label class="btn btn-outline-primary">
+                    <input type="radio" name="periode" id="periode-total" value="total"> 
+                    <i class="fas fa-infinity"></i> Tout
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique Comparatif Principal -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header bg-primary">
+            <h3 class="card-title">
+              <i class="fas fa-chart-bar"></i> Comparaison des Performances
+            </h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            @if(statsByAgentAndPeriod.isEmpty) {
+              <div class="text-center py-5">
+                <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Aucune donnée disponible</p>
+              </div>
+            } else {
+              <canvas id="chartComparaison" style="height: 400px;"></canvas>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique Évolution dans le Temps -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header bg-success">
+            <h3 class="card-title">
+              <i class="fas fa-chart-line"></i> Évolution dans le Temps
+            </h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            @if(evolutionParAgent.isEmpty) {
+              <div class="text-center py-5">
+                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Aucune donnée disponible</p>
+              </div>
+            } else {
+              <canvas id="chartEvolution" style="height: 400px;"></canvas>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique Type de Saisies (BC vs PC) -->
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-info">
+            <h3 class="card-title">
+              <i class="fas fa-chart-pie"></i> Répartition BC vs PC
+            </h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            @if(statsByAgentAndPeriod.isEmpty) {
+              <div class="text-center py-5">
+                <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Aucune donnée disponible</p>
+              </div>
+            } else {
+              <canvas id="chartRepartition" style="height: 300px;"></canvas>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-warning">
+            <h3 class="card-title">
+              <i class="fas fa-dollar-sign"></i> Montants par Agent
+            </h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            @if(statsByAgentAndPeriod.isEmpty) {
+              <div class="text-center py-5">
+                <i class="fas fa-dollar-sign fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Aucune donnée disponible</p>
+              </div>
+            } else {
+              <canvas id="chartMontants" style="height: 300px;"></canvas>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tableau Comparatif Détaillé -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header bg-gradient-dark">
+            <h3 class="card-title">
+              <i class="fas fa-table"></i> Tableau Comparatif Détaillé
+            </h3>
+          </div>
+          <div class="card-body">
+            <table id="tableComparaison" class="table table-bordered table-hover table-striped">
+              <thead class="bg-dark">
+                <tr>
+                  <th>Agent</th>
+                  <th class="text-center">Semaine<br><small>BC / PC / Total</small></th>
+                  <th class="text-center">Mois<br><small>BC / PC / Total</small></th>
+                  <th class="text-center">Année<br><small>BC / PC / Total</small></th>
+                  <th class="text-center">Total Général</th>
+                  <th class="text-right">Montant (Semaine)</th>
+                  <th class="text-right">Montant (Mois)</th>
+                  <th class="text-right">Montant (Année)</th>
+                  <th class="text-right">Montant Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(stats <- statsByAgentAndPeriod) {
+                  <tr>
+                    <td><strong>@stats("agent")</strong></td>
+                    <td class="text-center">
+                      <span class="badge badge-primary">@stats("semaineBc")</span>
+                      <span class="badge badge-success">@stats("semainePc")</span>
+                      <span class="badge badge-info">@stats("semaineTotal")</span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge badge-primary">@stats("moisBc")</span>
+                      <span class="badge badge-success">@stats("moisPc")</span>
+                      <span class="badge badge-info">@stats("moisTotal")</span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge badge-primary">@stats("anneeBc")</span>
+                      <span class="badge badge-success">@stats("anneePc")</span>
+                      <span class="badge badge-info">@stats("anneeTotal")</span>
+                    </td>
+                    <td class="text-center">
+                      <strong class="text-primary">@stats("total")</strong>
+                    </td>
+                    <td class="text-right">@{f"${stats("semaineMontant").asInstanceOf[Double]}%,.0f"} F</td>
+                    <td class="text-right">@{f"${stats("moisMontant").asInstanceOf[Double]}%,.0f"} F</td>
+                    <td class="text-right">@{f"${stats("anneeMontant").asInstanceOf[Double]}%,.0f"} F</td>
+                    <td class="text-right"><strong>@{f"${stats("totalMontant").asInstanceOf[Double]}%,.0f"} F</strong></td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot class="bg-light">
+                <tr>
+                  <th>TOTAL</th>
+                  <th class="text-center">
+                    <span class="badge badge-primary">@statsByAgentAndPeriod.map(_("semaineBc").asInstanceOf[Int]).sum</span>
+                    <span class="badge badge-success">@statsByAgentAndPeriod.map(_("semainePc").asInstanceOf[Int]).sum</span>
+                    <span class="badge badge-info">@statsByAgentAndPeriod.map(_("semaineTotal").asInstanceOf[Int]).sum</span>
+                  </th>
+                  <th class="text-center">
+                    <span class="badge badge-primary">@statsByAgentAndPeriod.map(_("moisBc").asInstanceOf[Int]).sum</span>
+                    <span class="badge badge-success">@statsByAgentAndPeriod.map(_("moisPc").asInstanceOf[Int]).sum</span>
+                    <span class="badge badge-info">@statsByAgentAndPeriod.map(_("moisTotal").asInstanceOf[Int]).sum</span>
+                  </th>
+                  <th class="text-center">
+                    <span class="badge badge-primary">@statsByAgentAndPeriod.map(_("anneeBc").asInstanceOf[Int]).sum</span>
+                    <span class="badge badge-success">@statsByAgentAndPeriod.map(_("anneePc").asInstanceOf[Int]).sum</span>
+                    <span class="badge badge-info">@statsByAgentAndPeriod.map(_("anneeTotal").asInstanceOf[Int]).sum</span>
+                  </th>
+                  <th class="text-center"><strong>@statsByAgentAndPeriod.map(_("total").asInstanceOf[Int]).sum</strong></th>
+                  <th class="text-right"><strong>@{
+                    val totalSemaineMontant = statsByAgentAndPeriod.foldLeft(0.0)((acc, stats) => acc + stats("semaineMontant").asInstanceOf[Double])
+                    f"$totalSemaineMontant%,.0f"
+                  } F</strong></th>
+                  <th class="text-right"><strong>@{
+                    val totalMoisMontant = statsByAgentAndPeriod.foldLeft(0.0)((acc, stats) => acc + stats("moisMontant").asInstanceOf[Double])
+                    f"$totalMoisMontant%,.0f"
+                  } F</strong></th>
+                  <th class="text-right"><strong>@{
+                    val totalAnneeMontant = statsByAgentAndPeriod.foldLeft(0.0)((acc, stats) => acc + stats("anneeMontant").asInstanceOf[Double])
+                    f"$totalAnneeMontant%,.0f"
+                  } F</strong></th>
+                  <th class="text-right"><strong>@{
+                    val totalMontantGlobal = statsByAgentAndPeriod.foldLeft(0.0)((acc, stats) => acc + stats("totalMontant").asInstanceOf[Double])
+                    f"$totalMontantGlobal%,.0f"
+                  } F</strong></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CSS DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+
+<!-- Scripts jQuery, DataTables et Chart.js -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@@3.9.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+<script>
+$(document).ready(function() {
+  
+  // DataTable
+  $('#tableComparaison').DataTable({
+    responsive: true,
+    pageLength: 25,
+    order: [[4, 'desc']], // Tri par Total Général décroissant
+    language: {
+      url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json'
+    }
+  });
+  
+  // Données des agents - Génération JavaScript directe
+  var agentsData = [
+    @for((stats, idx) <- statsByAgentAndPeriod.zipWithIndex) {
+      {
+        agent: '@stats("agent")',
+        semaineBc: @stats("semaineBc"),
+        semainePc: @stats("semainePc"),
+        semaineTotal: @stats("semaineTotal"),
+        semaineMontant: @stats("semaineMontant"),
+        moisBc: @stats("moisBc"),
+        moisPc: @stats("moisPc"),
+        moisTotal: @stats("moisTotal"),
+        moisMontant: @stats("moisMontant"),
+        anneeBc: @stats("anneeBc"),
+        anneePc: @stats("anneePc"),
+        anneeTotal: @stats("anneeTotal"),
+        anneeMontant: @stats("anneeMontant"),
+        totalBc: @stats("totalBc"),
+        totalPc: @stats("totalPc"),
+        total: @stats("total"),
+        totalMontant: @stats("totalMontant")
+      }@if(idx < statsByAgentAndPeriod.size - 1){,}
+    }
+  ];
+  
+  // Données d'évolution - Génération JavaScript directe
+  var evolutionData = [
+    @for((agentEvol, idx1) <- evolutionParAgent.zipWithIndex) {
+      {
+        agent: '@agentEvol._1',
+        evolution: [
+          @for((dateCount, idx2) <- agentEvol._2.zipWithIndex) {
+            {
+              date: '@dateCount._1.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"))',
+              count: @dateCount._2
+            }@if(idx2 < agentEvol._2.size - 1){,}
+          }
+        ]
+      }@if(idx1 < evolutionParAgent.size - 1){,}
+    }
+  ];
+  
+  console.log('Agents Data:', agentsData);
+  console.log('Evolution Data:', evolutionData);
+  
+  // Variables globales pour les graphiques
+  var chartComparaison, chartEvolution, chartRepartition, chartMontants;
+  
+  // Fonction pour mettre à jour les graphiques selon la période
+  function updateCharts(periode) {
+    console.log('Mise à jour des graphiques pour la période:', periode);
+    
+    // Déterminer les données à utiliser selon la période
+    var bcKey = periode + 'Bc';
+    var pcKey = periode + 'Pc';
+    var totalKey = periode + 'Total';
+    var montantKey = periode + 'Montant';
+    
+    // Si période "total", utiliser les clés sans préfixe
+    if (periode === 'total') {
+      bcKey = 'totalBc';
+      pcKey = 'totalPc';
+      totalKey = 'total';
+      montantKey = 'totalMontant';
+    }
+    
+    // Extraire les données
+    var agents = agentsData.map(d => d.agent);
+    var bcData = agentsData.map(d => d[bcKey] || 0);
+    var pcData = agentsData.map(d => d[pcKey] || 0);
+    var montantData = agentsData.map(d => d[montantKey] || 0);
+    
+    console.log('BC Data:', bcData);
+    console.log('PC Data:', pcData);
+    console.log('Montant Data:', montantData);
+    
+    // Graphique Comparatif Principal
+    if (chartComparaison) chartComparaison.destroy();
+    var ctxComparaison = document.getElementById('chartComparaison').getContext('2d');
+    chartComparaison = new Chart(ctxComparaison, {
+      type: 'bar',
+      data: {
+        labels: agents,
+        datasets: [{
+          label: 'Bons de Commande',
+          data: bcData,
+          backgroundColor: 'rgba(54, 162, 235, 0.7)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 2
+        }, {
+          label: 'Prises en Charge',
+          data: pcData,
+          backgroundColor: 'rgba(75, 192, 192, 0.7)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top'
+          },
+          tooltip: {
+            callbacks: {
+              afterLabel: function(context) {
+                var total = bcData[context.dataIndex] + pcData[context.dataIndex];
+                return 'Total: ' + total;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Nombre de Saisies'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Agents'
+            }
+          }
+        }
+      }
+    });
+    
+    // Graphique Répartition (Pie Chart)
+    if (chartRepartition) chartRepartition.destroy();
+    var totalBc = bcData.reduce((a, b) => a + b, 0);
+    var totalPc = pcData.reduce((a, b) => a + b, 0);
+    var ctxRepartition = document.getElementById('chartRepartition').getContext('2d');
+    chartRepartition = new Chart(ctxRepartition, {
+      type: 'pie',
+      data: {
+        labels: ['Bons de Commande', 'Prises en Charge'],
+        datasets: [{
+          data: [totalBc, totalPc],
+          backgroundColor: [
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(75, 192, 192, 0.7)'
+          ],
+          borderColor: [
+            'rgba(54, 162, 235, 1)',
+            'rgba(75, 192, 192, 1)'
+          ],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                var label = context.label || '';
+                var value = context.parsed || 0;
+                var total = totalBc + totalPc;
+                var percentage = ((value / total) * 100).toFixed(1);
+                return label + ': ' + value + ' (' + percentage + '%)';
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Graphique Montants
+    if (chartMontants) chartMontants.destroy();
+    var ctxMontants = document.getElementById('chartMontants').getContext('2d');
+    chartMontants = new Chart(ctxMontants, {
+      type: 'bar',
+      data: {
+        labels: agents,
+        datasets: [{
+          label: 'Montant Total (F)',
+          data: montantData,
+          backgroundColor: 'rgba(255, 206, 86, 0.7)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return 'Montant: ' + context.parsed.y.toLocaleString('fr-FR') + ' F';
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Montant (F)'
+            },
+            ticks: {
+              callback: function(value) {
+                return value.toLocaleString('fr-FR') + ' F';
+              }
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Agents'
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  // Graphique d'Évolution (indépendant de la période sélectionnée)
+  function createEvolutionChart() {
+    if (chartEvolution) chartEvolution.destroy();
+    
+    // Préparer les données pour le graphique d'évolution
+    var colors = [
+      'rgba(255, 99, 132, 1)',
+      'rgba(54, 162, 235, 1)',
+      'rgba(75, 192, 192, 1)',
+      'rgba(255, 206, 86, 1)',
+      'rgba(153, 102, 255, 1)',
+      'rgba(255, 159, 64, 1)',
+      'rgba(199, 199, 199, 1)',
+      'rgba(83, 102, 255, 1)',
+      'rgba(255, 99, 255, 1)',
+      'rgba(99, 255, 132, 1)'
+    ];
+    
+    var datasets = evolutionData.slice(0, 10).map((agentData, index) => {
+      return {
+        label: agentData.agent,
+        data: agentData.evolution.map(e => ({
+          x: e.date,
+          y: e.count
+        })),
+        borderColor: colors[index % colors.length],
+        backgroundColor: colors[index % colors.length].replace('1)', '0.1)'),
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        fill: false
+      };
+    });
+    
+    var ctxEvolution = document.getElementById('chartEvolution').getContext('2d');
+    chartEvolution = new Chart(ctxEvolution, {
+      type: 'line',
+      data: {
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              boxWidth: 12,
+              font: {
+                size: 10
+              }
+            }
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Nombre de Saisies'
+            }
+          },
+          x: {
+            type: 'time',
+            time: {
+              unit: 'day',
+              displayFormats: {
+                day: 'DD/MM'
+              }
+            },
+            title: {
+              display: true,
+              text: 'Date'
+            }
+          }
+        },
+        interaction: {
+          mode: 'nearest',
+          axis: 'x',
+          intersect: false
+        }
+      }
+    });
+  }
+  
+  // Initialiser avec la période "mois" (bouton actif par défaut)
+  updateCharts('mois');
+  createEvolutionChart();
+  
+  // Écouter les changements de période
+  $('input[name="periode"]').change(function() {
+    var periode = $(this).val();
+    updateCharts(periode);
+  });
+  
+});
+</script>
+
+<style>
+  .card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+  }
+  
+  .card-header {
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+  }
+  
+  .badge {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.5rem;
+    margin: 0 2px;
+  }
+  
+  .btn-group-toggle label {
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .btn-group-toggle label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  
+  .btn-group-toggle label.active {
+    background-color: #007bff !important;
+    color: white !important;
+    border-color: #007bff !important;
+  }
+  
+  table.dataTable thead th {
+    background-color: #343a40 !important;
+    color: white !important;
+  }
+  
+  table.dataTable tfoot th {
+    font-weight: bold;
+    border-top: 2px solid #343a40;
+  }
+  
+  canvas {
+    max-height: 400px;
+  }
+</style>
+
+}
+}

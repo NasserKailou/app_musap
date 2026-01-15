@@ -1,0 +1,143 @@
+@(implicit request: Http.Request)
+<div class="navbar navbar-inverse navbar-fixed-top" style="background-color: #F4661B !important; z-index: 1030;">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-4">
+				<img src="@routes.Assets.versioned("images/logo.jpg")" class="logo" style="width: 80px; height: 70px" />
+			</div>
+			<div class="col-sm-5">
+				<h2 style="color: #fff;">Mutuelle de santé des Agents de L'INS</h2>
+<!-- <h2 style="color: #fff;">Logiciel de Gestion Médical KobiSoft</h2> -->
+			</div>
+			<div class="col-sm-3">
+				<ul class="nav navbar-nav pull-right">
+				<br/>
+				<button class="btn btn-success" data-target=".bs-example-modal-sm" data-toggle="modal">Déconnexion<i class="glyphicon glyphicon-log-out"></i></button>
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div tabindex="-1" class="modal bs-example-modal-sm" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-sm-4">
+    <div class="modal-content">
+      <div class="modal-header"><h4>Fermeture de Session<i class="fa fa-lock"></i></h4></div>
+      <div class="modal-body"><i class="fa fa-question-circle"></i><a class="btn btn-danger btn-block" 
+      		href="@controllers.routes.HomeController.deconnecter()">Voudriez-vous vraiment vous déconnecter ?</a> </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Retour</button>
+      </div>
+    
+    </div>
+  </div>
+</div>
+
+<div class="navbar navbar-inverse navbar-fixed-top" style="background-color: #2ba006 !important; top: 65px;">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<ul class="nav navbar-nav text-center">
+				@if(request.session.get("droit").get() == "AGENT_CARD_ID") {
+					<li><a href="@routes.HomeController.acceuil()" style="background-color: #F4661A; color: #fff;">Accueil</a></li>
+					<li><a href="@routes.AdherentCtrl.show("CREATE",0L)" style="color: #fff;">Adherent</a></li>
+					<li><a href="@routes.AdherentCtrl.showSituationView()" style="color: #fff;">Impression</a></li>
+				}
+				
+				@if(request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "SuperAdmin") {
+				<li><a href="@routes.HomeController.acceuil()" style="background-color: #F4661A; color: #fff;">Accueil</a></li>
+   					<li class="dropdown" >
+						<a data-toggle="dropdown" style="color: #fff;" href="#">Paramètrages<b class="caret"></b></a>
+						<ul class="dropdown-menu">
+						<li><a href="@routes.StructurePartenaireCtrl.show("CREATE",0L)">Structure Partenaire</a></li>
+								<li><a href="">Prestations</a></li>
+								<li><a href="#">Direction</a></li>
+								<li><a href="">Division</a></li>
+								<li><a href="#">Service</a></li>
+								
+						</ul>
+					</li>
+					
+					<li><a href="@routes.UserCtrl.index()" style="color: #fff;">Utilisateurs</a></li>
+					
+					<li><a href="@routes.AdherentCtrl.show("CREATE",0L)" style="color: #fff;">Adherent</a></li>
+<!-- 					<li><a href="@routes.AdherentCtrl.showSituationView()" style="color: #fff;">Situtation</a></li> -->
+					<li class="dropdown" >
+						<a data-toggle="dropdown" style="color: #fff;" href="#">Situtation<b class="caret"></b></a>
+						<ul class="dropdown-menu">
+						
+						<li><a href="@routes.AdherentCtrl.showSituationView()" >Impression</a></li>
+						<li><a href="@routes.ReglementCtrl.showRegementGlobal()">Situation Global Des Adherents</a></li>
+<!--						<li><a href="@routes.ReglementCtrl.showAlerteView()">Alerte E-mail</a></li>-->
+								
+						</ul>
+					</li>
+					
+<!--					<li class="dropdown" >-->
+<!--						<a data-toggle="dropdown" style="color: #fff;" href="#">Comptabilité<b class="caret"></b></a>-->
+<!--						<ul class="dropdown-menu">-->
+<!--						<li><a href="@controllers.routes.CategorieCompteCtrl.show("CREATE","BUDGET", 0L)">Compte Budgetaire</a></li>-->
+<!--						<li><a href="@controllers.routes.CategorieCompteCtrl.show("CREATE","COMPTA", 0L)">Classification</a></li>-->
+<!--						<li><a href="@controllers.routes.OperationComptableCtrl.showEcriture("CREATE", 1L, 0L) ">Opérations</a></li>-->
+<!--						<li><a href="@controllers.routes.BudgetCtrl.show("CREATE", 0L, request.session.get("gestion").get()) ">Budget</a></li>-->
+								
+<!--						</ul>-->
+<!--					</li>-->
+					
+					  }
+					
+						@if(request.session.get("droit").get() == "Agent Saisie") {
+				<li><a href="@routes.HomeController.acceuil()" style="background-color: #F4661A; color: #fff;">Accueil</a></li>
+   					
+<!-- 					<li><a href="@routes.UserCtrl.index()" style="color: #fff;">Utilisateurs</a></li> -->
+					<li><a href="@routes.AdherentCtrl.show("CREATE",0L)" style="color: #fff;">Adherent</a></li>
+					  }
+					
+				@if(request.session.get("droit").get() == "Adherent") {
+				<li><a href="@routes.HomeController.acceuil()" style="background-color: #F4661A; color: #fff;">Accueil</a></li>
+   					
+<!-- 					<li><a href="@routes.UserCtrl.index()" style="color: #fff;">Utilisateurs</a></li> -->
+					<li><a href="@routes.AdherentCtrl.show("CREATE",0L)" style="color: #fff;">Adherent</a></li>
+					  }
+					
+					@if(request.session.get("droit").get() == "Comptable") {
+				<li><a href="@routes.HomeController.acceuil()" style="background-color: #F4661A; color: #fff;">Accueil</a></li>
+   					
+<!-- 					<li><a href="@routes.UserCtrl.index()" style="color: #fff;">Utilisateurs</a></li> -->
+					<li><a href="@routes.AdherentCtrl.show("CREATE",0L)" style="color: #fff;">Adherent</a></li>
+					<li class="dropdown" >
+						<a data-toggle="dropdown" style="color: #fff;" href="#">Situtation<b class="caret"></b></a>
+						<ul class="dropdown-menu">
+						
+						<li><a href="@routes.AdherentCtrl.showSituationView()">Impression</a></li>
+								<li><a href="@routes.ReglementCtrl.showRegementGlobal()">Situation Global Des Adherents</a></li>
+								
+						</ul>
+						
+						
+						
+					</li>
+					
+<!--					<li class="dropdown" >-->
+<!--						<a data-toggle="dropdown" style="color: #fff;" href="#">Comptabilité<b class="caret"></b></a>-->
+<!--						<ul class="dropdown-menu">-->
+<!--						<li><a href="@controllers.routes.CategorieCompteCtrl.show("CREATE","BUDGET", 0L)">Compte Budgetaire</a></li>-->
+<!--						<li><a href="@controllers.routes.CategorieCompteCtrl.show("CREATE","COMPTA", 0L)">Classification</a></li>-->
+<!--						<li><a href="@controllers.routes.OperationComptableCtrl.showEcriture("CREATE", 1L, 0L) ">Opérations</a></li>-->
+						
+								
+<!--						</ul>-->
+<!--					</li>-->
+					
+					  } 
+					
+<!-- 				<ul class="nav navbar-nav navbar-right"> -->
+			    
+<!-- 			      <li><a ><span class="glyphicon glyphicon-user"></span> @request.session.get("login")</a></li> -->
+<!-- 			      <li><a href="@routes.AuthenticationCtrl.logout()"><span class="glyphicon glyphicon-log-in"></span> Deconnecter</a></li> -->
+<!-- 		    </ul> -->
+			</div>
+		</div>
+	</div>
+</div>

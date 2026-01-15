@@ -1,0 +1,347 @@
+@import java.time.LocalDateTime
+@import helper._
+@import java.util
+@(implicit request: Http.Request)
+
+@main("Rapports et Statistiques"){
+
+  <!-- Content Header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Rapports et Statistiques</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/accueil">Accueil</a></li>
+            <li class="breadcrumb-item active">Rapports</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+
+      @if(request.session.get("droit").isPresent() && request.session.get("droit").get() == "Admin"){
+        
+        <!-- Situation Globale Annuelle -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-chart-line mr-2"></i>
+                  Situation Globale par Année
+                </h3>
+              </div>
+              <form method="POST" 
+                    name="form" 
+                    action="@controllers.routes.ReglementCtrl.rapportAnnuel("situation_global_annuel")" 
+                    class="form-horizontal">
+                @helper.CSRF.formField
+                
+                <div class="card-body">
+                  <div class="form-group">
+                    <label for="annee1">
+                      <i class="fas fa-calendar-alt"></i> Année
+                      <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" 
+                           id="annee1" 
+                           name="annee" 
+                           placeholder="AAAA" 
+                           class="form-control"
+                           min="2000"
+                           max="2100"
+                           required />
+                  </div>
+                </div>
+                
+                <div class="card-footer">
+                  <button class="btn btn-success" type="submit">
+                    <i class="fas fa-print mr-1"></i> Générer le Rapport
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Situation des Dépassements -->
+         
+        </div>
+
+      }
+
+      @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Comptable")){
+        
+        <!-- État de Paiement par Période -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card-success">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-money-bill-wave mr-2"></i>
+                  État de Paiement des rembourssements par Période
+                </h3>
+              </div>
+              <form method="POST" 
+                    name="form" 
+                    action="@controllers.routes.AdherentCtrl.rapportBetwenne()" 
+                    class="form-horizontal">
+                @helper.CSRF.formField
+                
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-5">
+                      <div class="form-group">
+                        <label for="tmpDate1">
+                          <i class="fas fa-calendar-day"></i> Date de Début
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate1" 
+                               name="tmpDate" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-5">
+                      <div class="form-group">
+                        <label for="tmpDate2_1">
+                          <i class="fas fa-calendar-day"></i> Date de Fin
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate2_1" 
+                               name="tmpDate2" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                      <label>&nbsp;</label>
+                      <button class="btn btn-success btn-block" type="submit">
+                        <i class="fas fa-print mr-1"></i> Générer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Situation Adhérents par Période -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card-warning">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-users mr-2"></i>
+                  Situation des Adhérents par Période
+                </h3>
+              </div>
+              <form method="POST" 
+                    name="form" 
+                    action="@controllers.routes.AdherentCtrl.rapportAdhBetwenne()" 
+                    class="form-horizontal">
+                @helper.CSRF.formField
+                
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label for="tmpDate3">
+                          <i class="fas fa-calendar-day"></i> Date de Début
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate3" 
+                               name="tmpDate" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label for="tmpDate2_2">
+                          <i class="fas fa-calendar-day"></i> Date de Fin
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate2_2" 
+                               name="tmpDate2" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label for="adherent">
+                          <i class="fas fa-id-card"></i> Matricule Adhérent
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" 
+                               id="adherent" 
+                               name="adherent"
+                               placeholder="Ex: 01, 120, 292" 
+                               class="form-control" 
+                               required />
+                        <input type="hidden" id="partenaireid" name="partenaireid">
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-1">
+                      <label>&nbsp;</label>
+                      <button class="btn btn-warning btn-block" type="submit">
+                        <i class="fas fa-print"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Situation Globale par Période -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card-danger">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-chart-bar mr-2"></i>
+                  Situation Globale par Période
+                </h3>
+              </div>
+              <form method="POST" 
+                    name="form" 
+                    action="@controllers.routes.ReglementCtrl.rapportBetwenne()" 
+                    class="form-horizontal">
+                @helper.CSRF.formField
+                
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-5">
+                      <div class="form-group">
+                        <label for="tmpDate4">
+                          <i class="fas fa-calendar-day"></i> Date de Début
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate4" 
+                               name="tmpDate" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-5">
+                      <div class="form-group">
+                        <label for="tmpDate2_3">
+                          <i class="fas fa-calendar-day"></i> Date de Fin
+                          <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" 
+                               id="tmpDate2_3" 
+                               name="tmpDate2" 
+                               class="form-control"
+                               required />
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                      <label>&nbsp;</label>
+                      <button class="btn btn-danger btn-block" type="submit">
+                        <i class="fas fa-print mr-1"></i> Générer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      }
+
+      @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "AGENT_CARD_ID" || request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Admin")){
+        
+        <!-- 
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card-purple">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-id-card mr-2"></i>
+                  Impression des Cartes d'Accès MAINS
+                </h3>
+              </div>
+              <form method="POST" 
+                    name="form" 
+                    action="@controllers.routes.AdherentCtrl.impressionCarteMainsGlobal()" 
+                    class="form-horizontal">
+                @helper.CSRF.formField
+                
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-10">
+                      <div class="form-group">
+                        <label for="libelleCarte">
+                          <i class="fas fa-list"></i> Type de Carte
+                          <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-control" 
+                                required 
+                                id="libelleCarte" 
+                                name="libelleCarte">
+                          <option value="">Sélectionner le type de carte...</option>
+                          <option value="badge_principale">
+                            <i class="fas fa-user"></i> Cartes Globales Adhérents
+                          </option>
+                          <option value="badge_principale_ay">
+                            <i class="fas fa-user-friends"></i> Cartes Globales Ayants Droit
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                      <label>&nbsp;</label>
+                      <button class="btn btn-purple btn-block" 
+                              type="submit" 
+                              style="background-color: #6f42c1; border-color: #6f42c1; color: white;">
+                        <i class="fas fa-print mr-1"></i> Imprimer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      -->
+      }
+
+    </div>
+  </section>
+
+  <script>
+    $(document).ready(function() {
+      // Set default dates
+      const today = new Date().toISOString().split('T')[0];
+      const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+      
+      // Optionally set default date values
+      // $('input[type="date"]').val(today);
+    });
+  </script>
+
+}

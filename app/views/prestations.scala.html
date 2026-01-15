@@ -1,0 +1,366 @@
+@import java.time.LocalDateTime
+@import helper._
+@import java.util
+@(viewMode:String,
+  prestations: List[models.tables.pojos.TypePrestation],
+  part: models.tables.pojos.TypePrestation)(implicit request: Http.Request)
+
+@main("Prestations") {
+<style>
+  .badge-taux {
+  font-size: 1.1rem !important;        /* Texte plus grand */
+  padding: 0.6rem 1.2rem !important;   /* Plus d'espace interne */
+  font-weight: 600 !important;         /* Police plus grasse */
+  border-radius: 0.5rem !important;    /* Coins arrondis */
+  display: inline-block;
+  min-width: 80px;                     /* Largeur minimum */
+}
+</style>
+  <!-- Content Header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-hand-holding-medical"></i> Gestion des Prestations</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/accueil">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="#">Paramètrages</a></li>
+            <li class="breadcrumb-item active">Prestations</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+
+      <!-- CARD FORMULAIRE PRESTATION -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-hand-holding-medical mr-2"></i>
+                @if(viewMode.equals("CREATE")) { Nouvelle Prestation }
+                @if(viewMode.equals("EDIT")) { Modifier la Prestation }
+                @if(viewMode.equals("DELETE")) { Supprimer la Prestation }
+              </h3>
+            </div>
+
+            <form method="POST"
+                  name="form"
+                  action="@controllers.routes.PrestationCtrl.save()"
+                  class="form-horizontal"
+                  role="form">
+              @helper.CSRF.formField
+
+              <input type="hidden" name="viewMode" value="@viewMode">
+              <input type="hidden" name="id"       value="@part.getId()">
+
+              <div class="card-body">
+
+                <div class="alert alert-info">
+                  <i class="icon fas fa-info-circle"></i>
+                  Tous les champs avec <span class="text-danger font-weight-bold">*</span> sont obligatoires.
+                </div>
+
+                <div class="form-row">
+
+                  <!-- Libellé Prestation -->
+                  <div class="form-group col-md-4">
+                    <label for="prestation">
+                      <i class="fas fa-tag text-primary"></i>
+                      Libellé de la Prestation
+                      <span class="text-danger">*</span>
+                    </label>
+                    <input type="text"
+                           id="prestation"
+                           name="prestation"
+                           autocomplete="off"
+                           value="@part.getPrestation()"
+                           placeholder="Ex: Consultation médicale, Hospitalisation, etc."
+                           class="form-control @if(viewMode.equals("DELETE")) { is-invalid }"
+                           required
+                           @if(viewMode.equals("DELETE")) { disabled="disabled" readonly } >
+                    <small class="form-text text-muted">
+                      Précisez le type de prestation offerte
+                    </small>
+                  </div>
+
+                  <!-- Taux Privé -->
+                  <div class="form-group col-md-4">
+                    <label for="tauxPrive">
+                      <i class="fas fa-percentage text-warning"></i>
+                      Taux Privé (%)
+                      <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input type="number"
+                             id="tauxPrive"
+                             name="tauxPrive"
+                             autocomplete="off"
+                             value="@part.getTauxPrive()"
+                             placeholder="Ex: 80 pour 80%"
+                             class="form-control @if(viewMode.equals("DELETE")) { is-invalid }"
+                             min="0"
+                             max="100"
+                             step="0.01"
+                             required
+                             @if(viewMode.equals("DELETE")) { disabled="disabled" readonly } >
+                      <div class="input-group-append">
+                        <span class="input-group-text">
+                          <i class="fas fa-percent"></i>
+                        </span>
+                      </div>
+                    </div>
+                    <small class="form-text text-muted">
+                      Taux de couverture pour structures privées
+                    </small>
+                  </div>
+
+                  <!-- Taux Public -->
+                  <div class="form-group col-md-4">
+                    <label for="tauxPublic">
+                      <i class="fas fa-percentage text-success"></i>
+                      Taux Public (%)
+                      <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input type="number"
+                             id="tauxPublic"
+                             name="tauxPublic"
+                             autocomplete="off"
+                             value="@part.getTauxPublic()"
+                             placeholder="Ex: 90 pour 90%"
+                             class="form-control @if(viewMode.equals("DELETE")) { is-invalid }"
+                             min="0"
+                             max="100"
+                             step="0.01"
+                             required
+                             @if(viewMode.equals("DELETE")) { disabled="disabled" readonly } >
+                      <div class="input-group-append">
+                        <span class="input-group-text">
+                          <i class="fas fa-percent"></i>
+                        </span>
+                      </div>
+                    </div>
+                    <small class="form-text text-muted">
+                      Taux de couverture pour structures publiques
+                    </small>
+                  </div>
+
+                </div>
+
+              </div><!-- /.card-body -->
+
+              <div class="card-footer">
+                <div class="row">
+                  <div class="col-md-12 text-right">
+                    
+                    <a href="@controllers.routes.PrestationCtrl.show("CREATE", 0L)"
+                       class="btn btn-secondary">
+                      <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+
+                    @if(viewMode.equals("CREATE")) {
+                      <button class="btn btn-success"
+                              type="submit"
+                              id="valider"
+                              name="Valider"
+                              title="Enregistrer la prestation">
+                        <i class="fas fa-save"></i> Enregistrer
+                      </button>
+                    }
+
+                    @if(viewMode.equals("EDIT")) {
+                      <button class="btn btn-warning"
+                              type="submit"
+                              id="valider"
+                              name="Valider"
+                              title="Modifier la prestation">
+                        <i class="fas fa-edit"></i> Modifier
+                      </button>
+                    }
+
+                    @if(viewMode.equals("DELETE")) {
+                      <button class="btn btn-danger"
+                              type="submit"
+                              id="valider"
+                              name="Valider"
+                              title="Supprimer la prestation"
+                              onclick="return window.confirm('Êtes-vous sûr de vouloir supprimer cette prestation ?');">
+                        <i class="fas fa-trash"></i> Supprimer
+                      </button>
+                    }
+
+                  </div>
+                </div>
+              </div><!-- /.card-footer -->
+
+            </form>
+          </div><!-- /.card -->
+        </div><!-- /.col -->
+      </div><!-- /.row -->
+
+      <!-- CARD LISTE DES PRESTATIONS -->
+      <div class="row mt-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-list mr-2"></i>
+                Liste des Prestations
+              </h3>
+              <div class="card-tools">
+                <span class="badge badge-primary">@prestations.size() prestation(s)</span>
+              </div>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table id="tablePrestations" class="table table-head-fixed table-bordered table-hover text-nowrap"> 
+                <thead>
+                  <tr>
+                    
+                    <th><i class="fas fa-hand-holding-medical mr-1" ></i> Prestation</th>
+                    <th class="text-center" style="width: 150px;">
+                      <i class="fas fa-percentage mr-1"></i> Taux Privé
+                    </th>
+                    <th class="text-center" style="width: 150px;">
+                      <i class="fas fa-percentage mr-1"></i> Taux Public
+                    </th>
+                    <th class="text-center" style="width: 150px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if(prestations.isEmpty()) {
+                    <tr>
+                      <td colspan="5" class="text-center text-muted">
+                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                        <p>Aucune prestation enregistrée</p>
+                      </td>
+                    </tr>
+                  } else {
+                    @for(c <- prestations) {
+                      <tr>
+                       
+                        <td>
+                          <i class="fas fa-tag text-primary mr-2"></i>
+                          <strong>@c.getPrestation()</strong>
+                        </td>
+                        <td class="text-center">
+                          <span class="badge badge-warning badge-taux ">
+                          <!--  <i class="fas fa-percentage mr-1"></i>   --> 
+                            @if(c.getTauxPrive() != null) {
+                              @c.getTauxPrive() %
+                            } else {
+                              - %
+                            }
+                          </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-success badge-taux">
+                           <!--  <i class="fas fa-percentage mr-1"></i>   --> 
+                            @if(c.getTauxPublic() != null) {
+                            @c.getTauxPublic() %
+                            } else {
+                              - %
+                            }
+                          </span>
+                        </td>
+                        <td class="text-center">
+                          <div class="btn-group">
+                            <a class="btn btn-sm btn-warning"
+                               title="Modifier cette prestation"
+                               href='@controllers.routes.PrestationCtrl.show("EDIT", c.getId())'>
+                              <i class="fas fa-edit"></i>
+                            </a>
+                            <a class="btn btn-sm btn-danger"
+                               title="Supprimer cette prestation"
+                               href='@controllers.routes.PrestationCtrl.show("DELETE", c.getId())'
+                               onclick="return window.confirm('Êtes-vous sûr de vouloir supprimer cette prestation ?');">
+                              <i class="fas fa-trash-alt"></i>
+                            </a>
+
+                            <a class="btn btn-secondary btn-sm"
+                               title="Imprimer la situation des dépenses liées à c.getLibelle()"
+                               href='@controllers.routes.PrestationCtrl.print(c.getId(), "situation_paiement_prestations")'
+                               onclick="return(openPopup(this.href, 600, 600, 600, 600));">
+                              <i class="fas fa-print"></i>
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div><!-- /.card-body -->
+          </div><!-- /.card -->
+        </div><!-- /.col -->
+      </div><!-- /.row -->
+
+    </div><!-- /.container-fluid -->
+  </section>
+
+  <script>
+    // Protection contre l'absence de jQuery
+    (function() {
+      // Fonction d'initialisation DataTables
+      function initDataTable() {
+        if (typeof jQuery !== 'undefined' && jQuery.fn.DataTable) {
+          jQuery('#tablePrestations').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "pageLength": 10,
+            "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Tout"]],
+            "language": {
+              "sProcessing": "Traitement en cours...",
+              "sSearch": "Rechercher&nbsp;:",
+              "sLengthMenu": "Afficher _MENU_ éléments",
+              "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+              "sInfoEmpty": "Affichage de 0 à 0 sur 0 éléments",
+              "sInfoFiltered": "(filtré de _MAX_ éléments au total)",
+              "sZeroRecords": "Aucun élément à afficher",
+              "sEmptyTable": "Aucune donnée disponible dans le tableau",
+              "oPaginate": {
+                "sFirst": "Premier",
+                "sPrevious": "Précédent",
+                "sNext": "Suivant",
+                "sLast": "Dernier"
+              },
+              "oAria": {
+                "sSortAscending": ": activer pour trier la colonne par ordre croissant",
+                "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
+              }
+            },
+            "columnDefs": [
+              { "orderable": false, "targets": 4 }  // Désactiver le tri sur la colonne Actions
+            ],
+            "order": [[0, "desc"]]  // Trier par ID décroissant par défaut
+          });
+        } else {
+          console.error('jQuery ou DataTables n\'est pas chargé. Vérifiez votre template main.scala.html');
+        }
+      }
+
+      // Attendre le chargement complet du DOM
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          // Attendre encore un peu pour s'assurer que jQuery est bien chargé
+          setTimeout(initDataTable, 100);
+        });
+      } else {
+        // DOM déjà chargé
+        setTimeout(initDataTable, 100);
+      }
+    })();
+  </script>
+
+}
