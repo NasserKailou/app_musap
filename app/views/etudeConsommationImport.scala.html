@@ -128,7 +128,7 @@
       
       etudes.forEach { etude =>
         val adherentOpt = adherents.find(adh => 
-          (etude.getNumeroCarnet() != null && adh.getNumeroCarnet() != null && etude.getNumeroCarnet().equals(adh.getNumeroCarnet())) ||
+          (etude.getNumeroCarnet() != null && adh.getCodeCarnet() != null && etude.getNumeroCarnet().equals(adh.getCodeCarnet())) ||
           (etude.getCodeAgent() != null && adh.getMatricule() != null && etude.getCodeAgent().equals(adh.getMatricule()))
         )
         
@@ -136,8 +136,8 @@
           notFoundCount += 1
         } else {
           val adherent = adherentOpt.get
-          val salaireMatch = etude.getSalaireBase() != null && adherent.getSalaireBase() != null && 
-                            etude.getSalaireBase().compareTo(java.math.BigDecimal.valueOf(adherent.getSalaireBase())) == 0
+          val salaireMatch = etude.getSalaireBase() != null && adherent.getSalaireNet() != null && 
+                            etude.getSalaireBase().compareTo(java.math.BigDecimal.valueOf(adherent.getSalaireNet())) == 0
           val creditMatch = etude.getCreditAnnuel() != null && adherent.getTotalCreditAnnuelle() != null && 
                            etude.getCreditAnnuel().compareTo(java.math.BigDecimal.valueOf(adherent.getTotalCreditAnnuelle())) == 0
           
@@ -220,7 +220,7 @@
                   @for(etude <- etudes) {
                     @defining({
                       val adherentOpt = adherents.find(adh => 
-                        (etude.getNumeroCarnet() != null && adh.getNumeroCarnet() != null && etude.getNumeroCarnet().equals(adh.getNumeroCarnet())) ||
+                        (etude.getNumeroCarnet() != null && adh.getCodeCarnet() != null && etude.getNumeroCarnet().equals(adh.getCodeCarnet())) ||
                         (etude.getCodeAgent() != null && adh.getMatricule() != null && etude.getCodeAgent().equals(adh.getMatricule()))
                       )
                       adherentOpt
@@ -261,8 +261,8 @@
                     } else {
                       @defining(adherentOpt.get) { adherent =>
                         @defining({
-                          val salaireMatch = etude.getSalaireBase() != null && adherent.getSalaireBase() != null && 
-                                            etude.getSalaireBase().compareTo(java.math.BigDecimal.valueOf(adherent.getSalaireBase())) == 0
+                          val salaireMatch = etude.getSalaireBase() != null && adherent.getSalaireNet() != null && 
+                                            etude.getSalaireBase().compareTo(java.math.BigDecimal.valueOf(adherent.getSalaireNet())) == 0
                           val creditMatch = etude.getCreditAnnuel() != null && adherent.getTotalCreditAnnuelle() != null && 
                                            etude.getCreditAnnuel().compareTo(java.math.BigDecimal.valueOf(adherent.getTotalCreditAnnuelle())) == 0
                           val allMatch = salaireMatch && creditMatch
@@ -282,8 +282,8 @@
                               </span>
                               <span class="text-muted"> / </span>
                               <span class="@if(salaireMatch){text-success}else{text-danger}">
-                                @if(adherent.getSalaireBase() != null) {
-                                  @NumberFormat.getInstance(Locale.FRANCE).format(adherent.getSalaireBase())
+                                @if(adherent.getSalaireNet() != null) {
+                                  @NumberFormat.getInstance(Locale.FRANCE).format(adherent.getSalaireNet())
                                 } else {
                                   N/A
                                 }
@@ -339,7 +339,7 @@
                                       data-adherent-id="@adherent.getId()"
                                       data-salaire="@etude.getSalaireBase()"
                                       data-credit="@etude.getCreditAnnuel()"
-                                      data-salaire-actuel="@if(adherent.getSalaireBase() != null){@adherent.getSalaireBase()}else{0}"
+                                      data-salaire-actuel="@if(adherent.getSalaireNet() != null){@adherent.getSalaireNet()}else{0}"
                                       data-credit-actuel="@if(adherent.getTotalCreditAnnuelle() != null){@adherent.getTotalCreditAnnuelle()}else{0}"
                                       data-nom="@etude.getNomPrenoms()"
                                       title="Mettre à jour l'adhérent">

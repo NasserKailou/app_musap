@@ -99,10 +99,11 @@ public class EtudeConsommationCtrl extends Controller {
      */
     public Result updateAdherent(Http.Request request) {
         try {
-            Form<Object> form = formFactory.form().bindFromRequest(request);
-            
-            Long adherentId = Long.parseLong(form.get("adherentId"));
-            BigDecimal salaireBase = new BigDecimal(form.get("salaireBase"));
+            //Form<Object> form = formFactory.form().bindFromRequest(request);
+            Form<Adherent> uForm = formFactory.form(Adherent.class).bindFromRequest(request);
+            Adherent ad = uForm.get();
+            Long adherentId = ad.getId();
+            //BigDecimal salaireBase = new BigDecimal(ad.getsalaireNet());
             
             // Récupérer l'adhérent
             Adherent adherent = adherentService.findById(adherentId);
@@ -114,7 +115,7 @@ public class EtudeConsommationCtrl extends Controller {
             
             // Mettre à jour UNIQUEMENT le salaire de base
             // Le crédit annuel sera recalculé automatiquement
-            adherent.setSalaireBase(salaireBase.doubleValue());
+            adherent.setSalaireNet(ad.getSalaireNet());
             
             // Sauvegarder
             String result = adherentService.saveLogical(adherent, false);
