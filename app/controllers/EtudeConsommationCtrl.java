@@ -1,15 +1,20 @@
 package controllers;
 
+import models.tables.pojos.Adherent;
 import models.tables.pojos.EtudeConsommations;
+import play.data.Form;
+import play.data.FormFactory;
 import play.libs.Files.TemporaryFile;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import services.AdherentMainServices;
 import services.ExcelImportService;
 import services.ImportExcelClassServiceImpl;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class EtudeConsommationCtrl extends Controller {
@@ -17,12 +22,14 @@ public class EtudeConsommationCtrl extends Controller {
     private final ImportExcelClassServiceImpl etudeDao;
     private final AdherentMainServices adherentService;
     private final ExcelImportService excelService;
+    private final FormFactory formFactory;
 
     @Inject
-    public EtudeConsommationCtrl(ImportExcelClassServiceImpl etudeDao,AdherentMainServices adherentService, ExcelImportService excelService) {
+    public EtudeConsommationCtrl(ImportExcelClassServiceImpl etudeDao,AdherentMainServices adherentService, ExcelImportService excelService, FormFactory formFactory) {
         this.etudeDao = etudeDao;
         this.adherentService = adherentService;
         this.excelService = excelService;
+        this.formFactory = formFactory;
     }
 
     /**
@@ -83,6 +90,47 @@ public class EtudeConsommationCtrl extends Controller {
             e.printStackTrace();
             return redirect(routes.EtudeConsommationCtrl.showImportForm())
                     .flashing("error", "Erreur lors de l'import : " + e.getMessage());
+        }
+    }
+
+    /**
+     * Mettre à jour les données d'un adhérent depuis l'import
+     */
+    public Result updateAdherent(Http.Request request) {
+        try {
+            Form<Object> form = formFactory.form().bindFromRequest(request);
+            
+            Long adherentId = Long.parseLong(form.get("adherentId"));
+            BigDecimal salaireBase = new BigDecimal(form.get("salaireBase"));
+            BigDecimal creditAnnuel = new BigDecimal(form.get("creditAnnuel"));
+            
+            // Récupérer l'adhérent
+            Adherent adherent = adherentService.findById(adherentId);
+            
+            if (adherent == null) {
+                return redirect(routes.EtudeConsommationCtrl.showImportForm())
+                        .flashing("error", "Adhérent non trouvé");
+            }
+            
+            // Mettre à jour les champs
+            adherent.setSalaireBase(salaireBase.doubleValue());
+            adherent.setTotalCreditAnnuelle(creditAnnuel.doubleValue());
+            
+            // Sauvegarder
+            String result = adherentService.saveLogical(adherent, false);
+            
+            if ("ok".equals(result)) {
+                return redirect(routes.EtudeConsommationCtrl.showImportForm())
+                        .flashing("success", "Adhérent mis à jour avec succès");
+            } else {
+                return redirect(routes.EtudeConsommationCtrl.showImportForm())
+                        .flashing("error", "Erreur lors de la mise à jour: " + result);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return redirect(routes.EtudeConsommationCtrl.showImportForm())
+                    .flashing("error", "Erreur lors de la mise à jour: " + e.getMessage());
         }
     }
 }

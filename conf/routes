@@ -123,6 +123,7 @@ GET     /json-CompteBudget                    	 controllers.ServerJson.jsonCompt
 # Import Étude Consommations
 GET     /etude-consommations/import        controllers.EtudeConsommationCtrl.showImportForm(request:Request)
 POST    /etude-consommations/import        controllers.EtudeConsommationCtrl.importExcel(request: Request)
+POST    /etude-consommations/update        controllers.EtudeConsommationCtrl.updateAdherent(request: Request)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

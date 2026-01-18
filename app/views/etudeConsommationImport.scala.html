@@ -1,4 +1,7 @@
 @import models.tables.pojos.EtudeConsommations
+@import models.tables.pojos.VAdherent
+@import java.text.NumberFormat
+@import java.util.Locale
 @(etudes: List[models.tables.pojos.EtudeConsommations],adherents: List[models.tables.pojos.VAdherent])(implicit request: Http.Request)
 
 @main("Import Étude Consommations") {
@@ -117,77 +120,242 @@
       </div>
     </div>
     
-    @* Liste des données importées *@
+    @* Statistiques de comparaison *@
+    @defining({
+      var matchCount = 0
+      var mismatchCount = 0
+      var notFoundCount = 0
+      
+      etudes.forEach { etude =>
+        val adherentOpt = adherents.find(adh => 
+          (etude.getNumeroCarnet() != null && adh.getNumeroCarnet() != null && etude.getNumeroCarnet().equals(adh.getNumeroCarnet())) ||
+          (etude.getCodeAgent() != null && adh.getMatricule() != null && etude.getCodeAgent().equals(adh.getMatricule()))
+        )
+        
+        if (adherentOpt.isEmpty) {
+          notFoundCount += 1
+        } else {
+          val adherent = adherentOpt.get
+          val salaireMatch = etude.getSalaireBase() != null && adherent.getSalaireBase() != null && 
+                            etude.getSalaireBase().compareTo(java.math.BigDecimal.valueOf(adherent.getSalaireBase())) == 0
+          val creditMatch = etude.getCreditAnnuel() != null && adherent.getTotalCreditAnnuelle() != null && 
+                           etude.getCreditAnnuel().compareTo(java.math.BigDecimal.valueOf(adherent.getTotalCreditAnnuelle())) == 0
+          
+          if (salaireMatch && creditMatch) {
+            matchCount += 1
+          } else {
+            mismatchCount += 1
+          }
+        }
+      }
+      (matchCount, mismatchCount, notFoundCount)
+    }) { case (matchCount, mismatchCount, notFoundCount) =>
+    
+    <div class="row">
+      <div class="col-md-4">
+        <div class="info-box bg-success">
+          <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Correspondances exactes</span>
+            <span class="info-box-number">@matchCount / @etudes.size()</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="info-box bg-danger">
+          <span class="info-box-icon"><i class="fas fa-exclamation-circle"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Différences détectées</span>
+            <span class="info-box-number">@mismatchCount / @etudes.size()</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="info-box bg-warning">
+          <span class="info-box-icon"><i class="fas fa-user-times"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">Adhérents non trouvés</span>
+            <span class="info-box-number">@notFoundCount / @etudes.size()</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+    
+    @* Liste des données importées avec comparaison *@
     <div class="row">
       <div class="col-12">
-        <div class="card card-success">
+        <div class="card card-primary">
           <div class="card-header">
             <h3 class="card-title">
-              <i class="fas fa-table"></i> Données Importées (@etudes.size() enregistrements)
+              <i class="fas fa-table"></i> Comparaison des données (@etudes.size() enregistrements)
             </h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool btn-sm" onclick="imprimerTableau()" title="Imprimer">
+                <i class="fas fa-print"></i>
+              </button>
+              <button type="button" class="btn btn-tool btn-sm" onclick="exporterExcel()" title="Exporter Excel">
+                <i class="fas fa-file-excel"></i>
+              </button>
+            </div>
           </div>
           <div class="card-body">
-            <table id="tableEtudes" class="table table-bordered table-hover table-striped">
-              <thead>
-                <tr>
-                  <th>N°Carnet</th>
-                  <th>Code</th>
-                  <th>Nom & Prénoms</th>
-                  <th>Salaire Base</th>
-                  <th>Crédit Annuel</th>
-                  <th>Total Consommation</th>
-                  <th>Solde 1</th>
-                   <th>Solde 2</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for(etude <- etudes) {
-                <tr>
-                  <td>@etude.getNumeroCarnet()</td>
-                  <td>@etude.getCodeAgent()</td>
-                  <td>@etude.getNomPrenoms()</td>
-                  <td class="text-right">
-                    @if(etude.getSalaireBase() != null) {@etude.getSalaireBase().toPlainString() F CFA}
-                  </td>
-                  <td class="text-right">
-                    @if(etude.getCreditAnnuel() != null) {@etude.getCreditAnnuel().toPlainString() F CFA}
-                  </td>
-                  <td class="text-right">
-                    @if(etude.getTotalConsommation() != null) {@etude.getTotalConsommation().toPlainString() F CFA}
-                  </td>
-                  <td class="text-right">
-                    @if(etude.getSolde_1() != null) {
-                     @if(etude.getSolde_1().compareTo(java.math.BigDecimal.ZERO) < 0) {
-                        <span class="text-danger font-weight-bold">@etude.getSolde_1().toPlainString() F CFA</span>
-                      } else {
-                        <span class="text-success font-weight-bold">@etude.getSolde_1().toPlainString() F CFA</span>
+            <div id="tableContainer">
+              <table id="tableEtudes" class="table table-bordered table-hover table-sm">
+                <thead>
+                  <tr>
+                    <th>N°Carnet</th>
+                    <th>Matricule</th>
+                    <th>Nom & Prénoms</th>
+                    <th>Salaire Base<br><small>(Importé / Système)</small></th>
+                    <th>Crédit Annuel<br><small>(Importé / Système)</small></th>
+                    <th>Total Consommation</th>
+                    <th>Statut</th>
+                    <th class="no-print">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for(etude <- etudes) {
+                    @defining({
+                      val adherentOpt = adherents.find(adh => 
+                        (etude.getNumeroCarnet() != null && adh.getNumeroCarnet() != null && etude.getNumeroCarnet().equals(adh.getNumeroCarnet())) ||
+                        (etude.getCodeAgent() != null && adh.getMatricule() != null && etude.getCodeAgent().equals(adh.getMatricule()))
+                      )
+                      adherentOpt
+                    }) { adherentOpt =>
+                    
+                    @if(adherentOpt.isEmpty) {
+                      @* Adhérent non trouvé *@
+                      <tr class="table-warning">
+                        <td>@etude.getNumeroCarnet()</td>
+                        <td>@etude.getCodeAgent()</td>
+                        <td>@etude.getNomPrenoms()</td>
+                        <td class="text-right">
+                          @if(etude.getSalaireBase() != null) {
+                            <strong>@NumberFormat.getInstance(Locale.FRANCE).format(etude.getSalaireBase())</strong> / 
+                            <span class="text-muted">N/A</span>
+                          }
+                        </td>
+                        <td class="text-right">
+                          @if(etude.getCreditAnnuel() != null) {
+                            <strong>@NumberFormat.getInstance(Locale.FRANCE).format(etude.getCreditAnnuel())</strong> / 
+                            <span class="text-muted">N/A</span>
+                          }
+                        </td>
+                        <td class="text-right">
+                          @if(etude.getTotalConsommation() != null) {
+                            @NumberFormat.getInstance(Locale.FRANCE).format(etude.getTotalConsommation())
+                          }
+                        </td>
+                        <td class="text-center">
+                          <span class="badge badge-warning">
+                            <i class="fas fa-user-times"></i> Non trouvé
+                          </span>
+                        </td>
+                        <td class="text-center no-print">
+                          <span class="text-muted">-</span>
+                        </td>
+                      </tr>
+                    } else {
+                      @defining(adherentOpt.get) { adherent =>
+                        @defining({
+                          val salaireMatch = etude.getSalaireBase() != null && adherent.getSalaireBase() != null && 
+                                            etude.getSalaireBase().compareTo(java.math.BigDecimal.valueOf(adherent.getSalaireBase())) == 0
+                          val creditMatch = etude.getCreditAnnuel() != null && adherent.getTotalCreditAnnuelle() != null && 
+                                           etude.getCreditAnnuel().compareTo(java.math.BigDecimal.valueOf(adherent.getTotalCreditAnnuelle())) == 0
+                          val allMatch = salaireMatch && creditMatch
+                          (salaireMatch, creditMatch, allMatch)
+                        }) { case (salaireMatch, creditMatch, allMatch) =>
+                        
+                        <tr class="@if(allMatch){table-success}else{table-danger}">
+                          <td>@etude.getNumeroCarnet()</td>
+                          <td>@etude.getCodeAgent()</td>
+                          <td>@etude.getNomPrenoms()</td>
+                          
+                          @* Salaire Base *@
+                          <td class="text-right">
+                            @if(etude.getSalaireBase() != null) {
+                              <span class="@if(salaireMatch){text-success}else{text-danger} font-weight-bold">
+                                @NumberFormat.getInstance(Locale.FRANCE).format(etude.getSalaireBase())
+                              </span>
+                              <span class="text-muted"> / </span>
+                              <span class="@if(salaireMatch){text-success}else{text-danger}">
+                                @if(adherent.getSalaireBase() != null) {
+                                  @NumberFormat.getInstance(Locale.FRANCE).format(adherent.getSalaireBase())
+                                } else {
+                                  N/A
+                                }
+                              </span>
+                              @if(!salaireMatch) {
+                                <br><small class="text-danger"><i class="fas fa-exclamation-triangle"></i> Différent</small>
+                              }
+                            }
+                          </td>
+                          
+                          @* Crédit Annuel *@
+                          <td class="text-right">
+                            @if(etude.getCreditAnnuel() != null) {
+                              <span class="@if(creditMatch){text-success}else{text-danger} font-weight-bold">
+                                @NumberFormat.getInstance(Locale.FRANCE).format(etude.getCreditAnnuel())
+                              </span>
+                              <span class="text-muted"> / </span>
+                              <span class="@if(creditMatch){text-success}else{text-danger}">
+                                @if(adherent.getTotalCreditAnnuelle() != null) {
+                                  @NumberFormat.getInstance(Locale.FRANCE).format(adherent.getTotalCreditAnnuelle())
+                                } else {
+                                  N/A
+                                }
+                              </span>
+                              @if(!creditMatch) {
+                                <br><small class="text-danger"><i class="fas fa-exclamation-triangle"></i> Différent</small>
+                              }
+                            }
+                          </td>
+                          
+                          <td class="text-right">
+                            @if(etude.getTotalConsommation() != null) {
+                              @NumberFormat.getInstance(Locale.FRANCE).format(etude.getTotalConsommation())
+                            }
+                          </td>
+                          
+                          <td class="text-center">
+                            @if(allMatch) {
+                              <span class="badge badge-success">
+                                <i class="fas fa-check-circle"></i> Conforme
+                              </span>
+                            } else {
+                              <span class="badge badge-danger">
+                                <i class="fas fa-times-circle"></i> Différent
+                              </span>
+                            }
+                          </td>
+                          
+                          <td class="text-center no-print">
+                            @if(!allMatch) {
+                              <button type="button"
+                                      class="btn btn-warning btn-sm btn-update"
+                                      data-adherent-id="@adherent.getId()"
+                                      data-salaire="@etude.getSalaireBase()"
+                                      data-credit="@etude.getCreditAnnuel()"
+                                      data-nom="@etude.getNomPrenoms()"
+                                      title="Mettre à jour l'adhérent">
+                                <i class="fas fa-sync-alt"></i>
+                              </button>
+                            } else {
+                              <span class="text-success"><i class="fas fa-check"></i></span>
+                            }
+                          </td>
+                        </tr>
+                        }
                       }
                     }
-                  </td>
-                  <td class="text-right">
-                    @if(etude.getSolde_2() != null) {
-                     @if(etude.getSolde_2().compareTo(java.math.BigDecimal.ZERO) < 0) {
-                        <span class="text-danger font-weight-bold">@etude.getSolde_2().toPlainString() F CFA</span>
-                      } else {
-                        <span class="text-success font-weight-bold">@etude.getSolde_2().toPlainString() F CFA</span>
-                      }
                     }
-                  </td>
-
-                  <td>
-                    @if(etude.getStatutAvertissement() != null && !etude.getStatutAvertissement().isEmpty()) {
-                      <span class="badge badge-warning">@etude.getStatutAvertissement()</span>
-                    }
-                    @if(etude.getStatutSuspension() != null && !etude.getStatutSuspension().isEmpty()) {
-                      <span class="badge badge-danger">@etude.getStatutSuspension()</span>
-                    }
-                  </td>
-                  
-                </tr>
-                }
-              </tbody>
-            </table>
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -195,6 +363,63 @@
     
   </div>
 </section>
+
+@* Modal de confirmation de mise à jour *@
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title">
+          <i class="fas fa-sync-alt"></i> Mettre à jour l'adhérent
+        </h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <form method="POST" action='@controllers.routes.EtudeConsommationCtrl.updateAdherent()' id="updateForm">
+        @helper.CSRF.formField
+        <input type="hidden" name="adherentId" id="updateAdherentId">
+        <input type="hidden" name="salaireBase" id="updateSalaire">
+        <input type="hidden" name="creditAnnuel" id="updateCredit">
+        
+        <div class="modal-body">
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            Vous êtes sur le point de mettre à jour les données de l'adhérent <strong id="updateNom"></strong>.
+          </div>
+          
+          <table class="table table-bordered">
+            <tr>
+              <th>Champ</th>
+              <th>Nouvelle valeur</th>
+            </tr>
+            <tr>
+              <td><strong>Salaire Base</strong></td>
+              <td class="text-right" id="displaySalaire"></td>
+            </tr>
+            <tr>
+              <td><strong>Crédit Annuel</strong></td>
+              <td class="text-right" id="displayCredit"></td>
+            </tr>
+          </table>
+          
+          <p class="text-danger">
+            <i class="fas fa-info-circle"></i> Cette action est irréversible. Confirmez-vous la mise à jour ?
+          </p>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fas fa-times"></i> Annuler
+          </button>
+          <button type="submit" class="btn btn-warning">
+            <i class="fas fa-sync-alt"></i> Mettre à jour
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <!-- LE SCRIPT DOIT ÊTRE ICI, À LA FIN, APRÈS main() -->
 <script>
@@ -206,7 +431,7 @@
     return;
   }
   
-  console.log("✅ jQuery chargé, initialisation DataTable...");
+  console.log("✅ jQuery chargé, initialisation...");
   
   jQuery(function($) {
     // Vérifier si DataTable est disponible
@@ -221,7 +446,7 @@
       "lengthChange": true,
       "autoWidth": false,
       "pageLength": 25,
-      "order": [[8, "desc"]],
+      "order": [[6, "asc"]],
       "language": {
         "sProcessing": "Traitement en cours...",
         "sSearch": "Rechercher&nbsp;:",
@@ -247,8 +472,177 @@
       var fileName = $(this).val().split('\\').pop();
       $(this).next('.custom-file-label').html(fileName || 'Choisir un fichier...');
     });
+    
+    // Gestionnaire pour le bouton de mise à jour
+    $(document).on('click', '.btn-update', function() {
+      var adherentId = $(this).data('adherent-id');
+      var salaire = $(this).data('salaire');
+      var credit = $(this).data('credit');
+      var nom = $(this).data('nom');
+      
+      console.log('📝 Mise à jour adhérent:', adherentId, 'Salaire:', salaire, 'Crédit:', credit);
+      
+      // Remplir le modal
+      $('#updateAdherentId').val(adherentId);
+      $('#updateSalaire').val(salaire);
+      $('#updateCredit').val(credit);
+      $('#updateNom').text(nom);
+      
+      // Formater et afficher les valeurs
+      var formatter = new Intl.NumberFormat('fr-FR');
+      $('#displaySalaire').text(formatter.format(salaire) + ' F CFA');
+      $('#displayCredit').text(formatter.format(credit) + ' F CFA');
+      
+      // Ouvrir le modal
+      $('#updateModal').modal('show');
+    });
   });
 })();
+
+// Fonction d'impression
+function imprimerTableau() {
+  var contenu = document.getElementById('tableContainer').innerHTML;
+  var fenetre = window.open('', '', 'height=800,width=1200');
+  
+  fenetre.document.write('<html><head><title>Comparaison des données</title>');
+  fenetre.document.write('<style>');
+  fenetre.document.write('body { font-family: Arial, sans-serif; }');
+  fenetre.document.write('table { border-collapse: collapse; width: 100%; }');
+  fenetre.document.write('th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 10px; }');
+  fenetre.document.write('th { background-color: #007bff; color: white; }');
+  fenetre.document.write('.table-success { background-color: #d4edda !important; }');
+  fenetre.document.write('.table-danger { background-color: #f8d7da !important; }');
+  fenetre.document.write('.table-warning { background-color: #fff3cd !important; }');
+  fenetre.document.write('.text-success { color: #28a745 !important; }');
+  fenetre.document.write('.text-danger { color: #dc3545 !important; }');
+  fenetre.document.write('.text-right { text-align: right; }');
+  fenetre.document.write('.text-center { text-align: center; }');
+  fenetre.document.write('.no-print { display: none; }');
+  fenetre.document.write('.badge { padding: 4px 8px; border-radius: 4px; font-size: 9px; }');
+  fenetre.document.write('.badge-success { background-color: #28a745; color: white; }');
+  fenetre.document.write('.badge-danger { background-color: #dc3545; color: white; }');
+  fenetre.document.write('.badge-warning { background-color: #ffc107; color: #212529; }');
+  fenetre.document.write('@@media print { .no-print { display: none !important; } }');
+  fenetre.document.write('</style>');
+  fenetre.document.write('</head><body>');
+  fenetre.document.write('<h2>Comparaison des données importées</h2>');
+  fenetre.document.write('<p>Date: ' + new Date().toLocaleDateString('fr-FR') + '</p>');
+  fenetre.document.write(contenu);
+  fenetre.document.write('</body></html>');
+  
+  fenetre.document.close();
+  fenetre.focus();
+  
+  setTimeout(function() {
+    fenetre.print();
+    fenetre.close();
+  }, 250);
+}
+
+// Fonction d'export Excel (nécessite une bibliothèque comme SheetJS)
+function exporterExcel() {
+  alert('Fonctionnalité d\'export Excel à implémenter avec SheetJS ou similaire');
+  // TODO: Implémenter l'export avec une bibliothèque comme xlsx.js
+}
 </script>
+
+<style>
+/* Info boxes */
+.info-box {
+  min-height: 80px;
+  background: #fff;
+  width: 100%;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  border-radius: 2px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.info-box-icon {
+  border-top-left-radius: 2px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 2px;
+  display: block;
+  float: left;
+  height: 80px;
+  width: 80px;
+  text-align: center;
+  font-size: 45px;
+  line-height: 80px;
+  background: rgba(0,0,0,0.2);
+  color: #fff;
+}
+
+.info-box-content {
+  padding: 5px 10px;
+  margin-left: 90px;
+}
+
+.info-box-text {
+  display: block;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.info-box-number {
+  display: block;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+/* Table styles */
+.table-success {
+  background-color: #d4edda !important;
+}
+
+.table-danger {
+  background-color: #f8d7da !important;
+}
+
+.table-warning {
+  background-color: #fff3cd !important;
+}
+
+/* Print styles */
+@@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .card {
+    border: none;
+    box-shadow: none;
+  }
+  
+  .card-header {
+    background-color: #007bff !important;
+    color: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .table-success {
+    background-color: #d4edda !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .table-danger {
+    background-color: #f8d7da !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .table-warning {
+    background-color: #fff3cd !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+</style>
 
 }
