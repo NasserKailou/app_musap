@@ -339,6 +339,8 @@
                                       data-adherent-id="@adherent.getId()"
                                       data-salaire="@etude.getSalaireBase()"
                                       data-credit="@etude.getCreditAnnuel()"
+                                      data-salaire-actuel="@if(adherent.getSalaireBase() != null){@adherent.getSalaireBase()}else{0}"
+                                      data-credit-actuel="@if(adherent.getTotalCreditAnnuelle() != null){@adherent.getTotalCreditAnnuelle()}else{0}"
                                       data-nom="@etude.getNomPrenoms()"
                                       title="Mettre à jour l'adhérent">
                                 <i class="fas fa-sync-alt"></i>
@@ -380,31 +382,38 @@
         @helper.CSRF.formField
         <input type="hidden" name="adherentId" id="updateAdherentId">
         <input type="hidden" name="salaireBase" id="updateSalaire">
-        <input type="hidden" name="creditAnnuel" id="updateCredit">
         
         <div class="modal-body">
           <div class="alert alert-warning">
             <i class="fas fa-exclamation-triangle"></i>
-            Vous êtes sur le point de mettre à jour les données de l'adhérent <strong id="updateNom"></strong>.
+            Vous êtes sur le point de mettre à jour le <strong>salaire de base</strong> de l'adhérent <strong id="updateNom"></strong>.
+          </div>
+          
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Note importante :</strong> Le crédit annuel sera recalculé automatiquement en fonction du nouveau salaire de base et des paramètres de l'adhérent.
           </div>
           
           <table class="table table-bordered">
             <tr>
               <th>Champ</th>
+              <th>Valeur actuelle</th>
               <th>Nouvelle valeur</th>
             </tr>
             <tr>
               <td><strong>Salaire Base</strong></td>
-              <td class="text-right" id="displaySalaire"></td>
+              <td class="text-right" id="displaySalaireActuel"></td>
+              <td class="text-right text-success font-weight-bold" id="displaySalaire"></td>
             </tr>
             <tr>
               <td><strong>Crédit Annuel</strong></td>
-              <td class="text-right" id="displayCredit"></td>
+              <td class="text-right" id="displayCreditActuel"></td>
+              <td class="text-center text-muted"><em>Sera recalculé automatiquement</em></td>
             </tr>
           </table>
           
           <p class="text-danger">
-            <i class="fas fa-info-circle"></i> Cette action est irréversible. Confirmez-vous la mise à jour ?
+            <i class="fas fa-exclamation-triangle"></i> Cette action est irréversible. Confirmez-vous la mise à jour ?
           </p>
         </div>
         
@@ -476,22 +485,24 @@
     // Gestionnaire pour le bouton de mise à jour
     $(document).on('click', '.btn-update', function() {
       var adherentId = $(this).data('adherent-id');
-      var salaire = $(this).data('salaire');
-      var credit = $(this).data('credit');
+      var salaireNouveau = $(this).data('salaire');
+      var creditNouveau = $(this).data('credit');
+      var salaireActuel = $(this).data('salaire-actuel');
+      var creditActuel = $(this).data('credit-actuel');
       var nom = $(this).data('nom');
       
-      console.log('📝 Mise à jour adhérent:', adherentId, 'Salaire:', salaire, 'Crédit:', credit);
+      console.log('📝 Mise à jour adhérent:', adherentId, 'Salaire:', salaireActuel, '→', salaireNouveau);
       
       // Remplir le modal
       $('#updateAdherentId').val(adherentId);
-      $('#updateSalaire').val(salaire);
-      $('#updateCredit').val(credit);
+      $('#updateSalaire').val(salaireNouveau);
       $('#updateNom').text(nom);
       
       // Formater et afficher les valeurs
       var formatter = new Intl.NumberFormat('fr-FR');
-      $('#displaySalaire').text(formatter.format(salaire) + ' F CFA');
-      $('#displayCredit').text(formatter.format(credit) + ' F CFA');
+      $('#displaySalaireActuel').text(formatter.format(salaireActuel) + ' F CFA');
+      $('#displaySalaire').text(formatter.format(salaireNouveau) + ' F CFA');
+      $('#displayCreditActuel').text(formatter.format(creditActuel) + ' F CFA');
       
       // Ouvrir le modal
       $('#updateModal').modal('show');

@@ -94,7 +94,8 @@ public class EtudeConsommationCtrl extends Controller {
     }
 
     /**
-     * Mettre à jour les données d'un adhérent depuis l'import
+     * Mettre à jour uniquement le salaire de base d'un adhérent depuis l'import
+     * Note: Le crédit annuel est calculé automatiquement à partir du salaire
      */
     public Result updateAdherent(Http.Request request) {
         try {
@@ -102,7 +103,6 @@ public class EtudeConsommationCtrl extends Controller {
             
             Long adherentId = Long.parseLong(form.get("adherentId"));
             BigDecimal salaireBase = new BigDecimal(form.get("salaireBase"));
-            BigDecimal creditAnnuel = new BigDecimal(form.get("creditAnnuel"));
             
             // Récupérer l'adhérent
             Adherent adherent = adherentService.findById(adherentId);
@@ -112,16 +112,16 @@ public class EtudeConsommationCtrl extends Controller {
                         .flashing("error", "Adhérent non trouvé");
             }
             
-            // Mettre à jour les champs
+            // Mettre à jour UNIQUEMENT le salaire de base
+            // Le crédit annuel sera recalculé automatiquement
             adherent.setSalaireBase(salaireBase.doubleValue());
-            adherent.setTotalCreditAnnuelle(creditAnnuel.doubleValue());
             
             // Sauvegarder
             String result = adherentService.saveLogical(adherent, false);
             
             if ("ok".equals(result)) {
                 return redirect(routes.EtudeConsommationCtrl.showImportForm())
-                        .flashing("success", "Adhérent mis à jour avec succès");
+                        .flashing("success", "Salaire de base mis à jour avec succès. Le crédit annuel sera recalculé automatiquement.");
             } else {
                 return redirect(routes.EtudeConsommationCtrl.showImportForm())
                         .flashing("error", "Erreur lors de la mise à jour: " + result);
