@@ -296,8 +296,8 @@
                 class="btn btn-warning btn-sm btn-edit"
                 data-id="@c.getId()"
                 data-benef="@if(c.getAyantDroit() != null){@c.getAyantDroit()}else{@c.getIdAdherent()}"
-                data-structure="@c.getStructurePartenaire()"
-                data-typeprestation="@c.getTypePrestation()"
+                data-structure="@c.getStructure()"
+                data-typeprestation="@c.getPrestation()"
                 data-remboursement="@if(c.getIsRemboursement() != null && c.getIsRemboursement()){true}else{false}"
                 title="Modifier">
           <i class="fas fa-edit"></i>
