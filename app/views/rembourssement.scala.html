@@ -759,6 +759,12 @@ document.addEventListener('DOMContentLoaded', function() {
           'name': 'typeOP',
           'value': '@typeOP'
         }));
+
+         form.append($('<input>', {
+          'type': 'hidden',
+          'name': 'benef',
+          'value': '0'
+        }));
         
         // Ajouter le formulaire au body et le soumettre
         $('body').append(form);

@@ -15,11 +15,13 @@ import java.util.List;
 public class EtudeConsommationCtrl extends Controller {
 
     private final ImportExcelClassServiceImpl etudeDao;
+    private final AdherentMainServices adherentService;
     private final ExcelImportService excelService;
 
     @Inject
-    public EtudeConsommationCtrl(ImportExcelClassServiceImpl etudeDao, ExcelImportService excelService) {
+    public EtudeConsommationCtrl(ImportExcelClassServiceImpl etudeDao,AdherentMainServices adherentService, ExcelImportService excelService) {
         this.etudeDao = etudeDao;
+        this.adherentService = adherentService;
         this.excelService = excelService;
     }
 
@@ -28,7 +30,7 @@ public class EtudeConsommationCtrl extends Controller {
      */
     public Result showImportForm(Http.Request request) {
         List<EtudeConsommations> etudes = etudeDao.findAll();
-        return ok(views.html.etudeConsommationImport.render(etudes, request));
+        return ok(views.html.etudeConsommationImport.render(etudes,adherentService.listeAdherents(), request));
     }
 
     /**
