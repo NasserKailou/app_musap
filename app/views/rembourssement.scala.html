@@ -717,14 +717,52 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fonction pour supprimer un bon
     window.supprimerBon = function(bonId, adherentId) {
       if (confirm('⚠️ ATTENTION ⚠️\n\nVoulez-vous vraiment supprimer ce règlement ?\n\nCette action est irréversible !\n\nÊtes-vous sûr de vouloir continuer ?')) {
-        $('#loadingModal').modal('show');
+        console.log('🗑️ Suppression du bon ID:', bonId, 'Adhérent:', adherentId);
         
-        // Construire l'URL avec le bon format de paramètres
-        var typeOP = '@typeOP';
-        var deleteUrl = '/Reglement/show/DELETE/?typeOP=' + typeOP + '&idOrd=' + bonId + '&idConsult=' + adherentId;
+        // Créer un formulaire temporaire pour soumettre en POST
+        var form = $('<form>', {
+          'method': 'POST',
+          'action': '@controllers.routes.ReglementCtrl.save()'
+        });
         
-        console.log('🗑️ URL de suppression:', deleteUrl);
-        window.location.href = deleteUrl;
+        // Récupérer le token CSRF du formulaire existant
+        var csrfToken = $('#reglementForm input[name="csrfToken"]').val();
+        
+        // Ajouter le token CSRF
+        form.append($('<input>', {
+          'type': 'hidden',
+          'name': 'csrfToken',
+          'value': csrfToken
+        }));
+        
+        // Ajouter les champs nécessaires
+        form.append($('<input>', {
+          'type': 'hidden',
+          'name': 'viewMode',
+          'value': 'DELETE'
+        }));
+        
+        form.append($('<input>', {
+          'type': 'hidden',
+          'name': 'id',
+          'value': bonId
+        }));
+        
+        form.append($('<input>', {
+          'type': 'hidden',
+          'name': 'adherent',
+          'value': adherentId
+        }));
+        
+        form.append($('<input>', {
+          'type': 'hidden',
+          'name': 'typeOP',
+          'value': '@typeOP'
+        }));
+        
+        // Ajouter le formulaire au body et le soumettre
+        $('body').append(form);
+        form.submit();
       }
     };
 
