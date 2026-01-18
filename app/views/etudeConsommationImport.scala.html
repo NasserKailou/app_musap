@@ -138,8 +138,10 @@
           val adherent = adherentOpt.get
           val salaireMatch = etude.getSalaireBase() != null && adherent.getSalaireNet() != null && 
                             etude.getSalaireBase().compareTo(java.math.BigDecimal.valueOf(adherent.getSalaireNet())) == 0
+          // Comparaison du crédit annuel - partie entière uniquement
           val creditMatch = etude.getCreditAnnuel() != null && adherent.getTotalCreditAnnuelle() != null && 
-                           etude.getCreditAnnuel().compareTo(java.math.BigDecimal.valueOf(adherent.getTotalCreditAnnuelle())) == 0
+                           etude.getCreditAnnuel().setScale(0, java.math.RoundingMode.DOWN).compareTo(
+                             java.math.BigDecimal.valueOf(adherent.getTotalCreditAnnuelle()).setScale(0, java.math.RoundingMode.DOWN)) == 0
           
           if (salaireMatch && creditMatch) {
             matchCount += 1
@@ -240,7 +242,7 @@
                         </td>
                         <td class="text-right">
                           @if(etude.getCreditAnnuel() != null) {
-                            <strong>@NumberFormat.getInstance(Locale.FRANCE).format(etude.getCreditAnnuel())</strong> / 
+                            <strong>@NumberFormat.getInstance(Locale.FRANCE).format(etude.getCreditAnnuel().setScale(0, java.math.RoundingMode.DOWN))</strong> / 
                             <span class="text-muted">N/A</span>
                           }
                         </td>
@@ -263,8 +265,10 @@
                         @defining({
                           val salaireMatch = etude.getSalaireBase() != null && adherent.getSalaireNet() != null && 
                                             etude.getSalaireBase().compareTo(java.math.BigDecimal.valueOf(adherent.getSalaireNet())) == 0
+                          // Comparaison du crédit annuel - partie entière uniquement
                           val creditMatch = etude.getCreditAnnuel() != null && adherent.getTotalCreditAnnuelle() != null && 
-                                           etude.getCreditAnnuel().compareTo(java.math.BigDecimal.valueOf(adherent.getTotalCreditAnnuelle())) == 0
+                                           etude.getCreditAnnuel().setScale(0, java.math.RoundingMode.DOWN).compareTo(
+                                             java.math.BigDecimal.valueOf(adherent.getTotalCreditAnnuelle()).setScale(0, java.math.RoundingMode.DOWN)) == 0
                           val allMatch = salaireMatch && creditMatch
                           (salaireMatch, creditMatch, allMatch)
                         }) { case (salaireMatch, creditMatch, allMatch) =>
@@ -294,16 +298,16 @@
                             }
                           </td>
                           
-                          @* Crédit Annuel *@
+                          @* Crédit Annuel - Partie entière uniquement *@
                           <td class="text-right">
                             @if(etude.getCreditAnnuel() != null) {
                               <span class="@if(creditMatch){text-success}else{text-danger} font-weight-bold">
-                                @NumberFormat.getInstance(Locale.FRANCE).format(etude.getCreditAnnuel())
+                                @NumberFormat.getInstance(Locale.FRANCE).format(etude.getCreditAnnuel().setScale(0, java.math.RoundingMode.DOWN))
                               </span>
                               <span class="text-muted"> / </span>
                               <span class="@if(creditMatch){text-success}else{text-danger}">
                                 @if(adherent.getTotalCreditAnnuelle() != null) {
-                                  @NumberFormat.getInstance(Locale.FRANCE).format(adherent.getTotalCreditAnnuelle())
+                                  @NumberFormat.getInstance(Locale.FRANCE).format(java.math.BigDecimal.valueOf(adherent.getTotalCreditAnnuelle()).setScale(0, java.math.RoundingMode.DOWN))
                                 } else {
                                   N/A
                                 }
