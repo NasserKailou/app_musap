@@ -719,7 +719,12 @@ document.addEventListener('DOMContentLoaded', function() {
       if (confirm('⚠️ ATTENTION ⚠️\n\nVoulez-vous vraiment supprimer ce règlement ?\n\nCette action est irréversible !\n\nÊtes-vous sûr de vouloir continuer ?')) {
         $('#loadingModal').modal('show');
         
-        window.location.href = '@controllers.routes.ReglementCtrl.show("DELETE","", 0, 0)'.replace('/DELETE//0/0', '/DELETE/@typeOP/' + bonId + '/' + adherentId);
+        // Construire l'URL avec le bon format de paramètres
+        var typeOP = '@typeOP';
+        var deleteUrl = '/Reglement/show/DELETE/?typeOP=' + typeOP + '&idOrd=' + bonId + '&idConsult=' + adherentId;
+        
+        console.log('🗑️ URL de suppression:', deleteUrl);
+        window.location.href = deleteUrl;
       }
     };
 
