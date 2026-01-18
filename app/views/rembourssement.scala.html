@@ -292,11 +292,16 @@
           <i class="fas fa-lock"></i>
         </button>
       } else {
-        <a href='@controllers.routes.ReglementCtrl.show("EDIT",typeOP, c.getId(), c.getIdAdherent())'
-           class="btn btn-warning btn-sm"
-           title="Modifier">
+        <button type="button"
+                class="btn btn-warning btn-sm btn-edit"
+                data-id="@c.getId()"
+                data-benef="@if(c.getAyantDroit() != null){@c.getAyantDroit()}else{@c.getIdAdherent()}"
+                data-structure="@c.getStructurePartenaire()"
+                data-typeprestation="@c.getTypePrestation()"
+                data-remboursement="@if(c.getIsRemboursement() != null && c.getIsRemboursement()){true}else{false}"
+                title="Modifier">
           <i class="fas fa-edit"></i>
-        </a>
+        </button>
       }
     }
 
@@ -329,12 +334,13 @@
     }
 
     @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "Admin") {
-      <a href='@controllers.routes.ReglementCtrl.show("DELETE",typeOP, c.getId(), c.getIdAdherent())'
-         class="btn btn-danger btn-sm"
-         title="Supprimer"
-         onclick="return window.confirm('Voulez-vous vraiment supprimer ce règlement ?');">
+      <button type="button"
+              class="btn btn-danger btn-sm btn-delete"
+              data-id="@c.getId()"
+              data-adherent="@c.getIdAdherent()"
+              title="Supprimer">
         <i class="fas fa-trash"></i>
-      </a>
+      </button>
     } 
     
     <a class="btn btn-secondary btn-sm"
@@ -707,6 +713,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
     };
+
+    // Fonction pour supprimer un bon
+    window.supprimerBon = function(bonId, adherentId) {
+      if (confirm('⚠️ ATTENTION ⚠️\n\nVoulez-vous vraiment supprimer ce règlement ?\n\nCette action est irréversible !\n\nÊtes-vous sûr de vouloir continuer ?')) {
+        $('#loadingModal').modal('show');
+        
+        window.location.href = '@controllers.routes.ReglementCtrl.show("DELETE","", 0, 0)'.replace('/DELETE//0/0', '/DELETE/@typeOP/' + bonId + '/' + adherentId);
+      }
+    };
+
+    // Gestionnaire d'événement pour le bouton de suppression
+    $(document).on('click', '.btn-delete', function() {
+      var bonId = $(this).data('id');
+      var adherentId = $(this).data('adherent');
+      
+      console.log('🗑️ Demande de suppression - Bon ID:', bonId, 'Adhérent:', adherentId);
+      
+      supprimerBon(bonId, adherentId);
+    });
 
     // Fonction pour ouvrir le modal de modification
 $(document).on('click', '.btn-edit', function() {
