@@ -584,7 +584,10 @@ $(document).ready(function() {
                             stacked: false,
                             ticks: {
                                 beginAtZero: true,
-                                stepSize: 1
+                                stepSize: 10,
+                                callback: function(value) {
+                                    return Number.isInteger(value) ? value : '';
+                                }
                             },
                             scaleLabel: {
                                 display: true,

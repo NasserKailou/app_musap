@@ -452,7 +452,7 @@
                 <button class="btn btn-success"
                         type="submit"
                         form="form-adherent"
-                        id="valider"
+                        id="btn-enregistrer"
                         name="Valider"
                         title="Enregistrer les informations">
                   <i class="fas fa-save"></i> Enregistrer
@@ -462,7 +462,7 @@
                 <button class="btn btn-warning"
                         type="submit"
                         form="form-adherent"
-                        id="valider"
+                        id="btn-modifier"
                         name="Valider"
                         title="Modifier les informations">
                   <i class="fas fa-edit"></i> Modifier
@@ -472,7 +472,7 @@
                 <button class="btn btn-danger"
                         type="submit"
                         form="form-adherent"
-                        id="valider"
+                        id="btn-supprimer"
                         name="Valider"
                         title="Désactiver"
                         onclick="return window.confirm('Voulez-vous vraiment désactiver cet adhérent ?');">
@@ -1049,6 +1049,28 @@ function setValueById(id, value) {
 // === INITIALISATION ===
 document.addEventListener('DOMContentLoaded', function () {
   console.log('=== Init Page ===');
+
+  // Désactiver les boutons de soumission après clic pour éviter les doubles soumissions
+  const formAdherent = document.getElementById('form-adherent');
+  if (formAdherent) {
+    formAdherent.addEventListener('submit', function(e) {
+      // Désactiver tous les boutons de soumission
+      const submitButtons = document.querySelectorAll('#btn-enregistrer, #btn-modifier, #btn-supprimer');
+      submitButtons.forEach(function(btn) {
+        if (!btn.disabled) {
+          btn.disabled = true;
+          const originalContent = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+          
+          // Réactiver après 5 secondes en cas d'erreur
+          setTimeout(function() {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+          }, 5000);
+        }
+      });
+    });
+  }
 
   // Vérifier jQuery et DataTables
   if (typeof jQuery === 'undefined') {
