@@ -116,7 +116,7 @@ public class ReglementCtrl extends Controller {
             return badRequest("OTP invalide ou expiré");
         }
     }
-
+/** 
 	public Result show(String subAction, String typeOP, Long idReglement, Long idAdherent, Request request) {
 
 		String viewMode;
@@ -169,6 +169,101 @@ public class ReglementCtrl extends Controller {
 				vad,
 				request));
 	}
+**/
+
+public Result show(String subAction, String typeOP, Long idReglement, Long idAdherent, Request request) {
+
+    String viewMode;
+    Reglement c;
+    List<StructurePartenaire> listesPartenaires = new ArrayList<>();
+    List<TypePrestation> listeTypePrestation = new ArrayList<>();
+    List<VReglement> listeReg = new ArrayList<>();
+
+    if (typeOP.equals("BC")) {
+        // ✅ CORRECTION : Protection contre les valeurs null
+        listesPartenaires = structureService.findAllPharmacieByRegion(
+            Long.valueOf(request.session().get("region").get())
+        );
+        if (listesPartenaires == null) {
+            listesPartenaires = new ArrayList<>();
+            Logger.warn("findAllPharmacieByRegion a retourné null pour la région: " 
+                + request.session().get("region").get());
+        }
+        
+        listeTypePrestation = typePresta.findOrdonnance();
+        if (listeTypePrestation == null) {
+            listeTypePrestation = new ArrayList<>();
+            Logger.warn("findOrdonnance a retourné null");
+        }
+        
+        listeReg = regServices.findReglementBCByAdherent(idAdherent, 
+            request.session().get("gestion").get());
+        if (listeReg == null) {
+            listeReg = new ArrayList<>();
+        }
+    } else {
+        // ✅ CORRECTION : Protection contre les valeurs null (PC)
+        listesPartenaires = structureService.findAllHopitauxByRegion(
+            Long.valueOf(request.session().get("region").get())
+        );
+        if (listesPartenaires == null) {
+            listesPartenaires = new ArrayList<>();
+            Logger.warn("findAllHopitauxByRegion a retourné null pour la région: " 
+                + request.session().get("region").get());
+        }
+        
+        listeTypePrestation = typePresta.findOthers();
+        if (listeTypePrestation == null) {
+            listeTypePrestation = new ArrayList<>();
+            Logger.warn("findOthers a retourné null");
+        }
+        
+        listeReg = regServices.findReglementPCByAdherent(idAdherent, 
+            request.session().get("gestion").get());
+        if (listeReg == null) {
+            listeReg = new ArrayList<>();
+        }
+    }
+
+    List<VAdherentAyantDroit> vad = regServices.getAdherentAndAyantByAdherent(idAdherent);
+    if (vad == null) {
+        vad = new ArrayList<>();
+        Logger.warn("getAdherentAndAyantByAdherent a retourné null pour idAdherent: " + idAdherent);
+    }
+if (0 == idReglement) {
+			c = new Reglement();
+			viewMode = ViewMode.VIEW_MODE_CREATE;
+		} else if (ViewMode.VIEW_MODE_EDIT.equals(subAction)) {
+			c = regServices.findById(idReglement);
+			viewMode = ViewMode.VIEW_MODE_EDIT;
+		} else if (ViewMode.VIEW_MODE_TRAITE.equals(subAction)) {
+			c = regServices.findById(idReglement);
+			viewMode = ViewMode.VIEW_MODE_TRAITE;
+		} else if (ViewMode.VIEW_MODE_DELETE.equals(subAction)) {
+			c = regServices.findById(idReglement);
+			viewMode = ViewMode.VIEW_MODE_DELETE;
+		} else {
+			viewMode = ViewMode.VIEW_MODE_VIEW;
+			c = regServices.findById(idReglement);
+		}
+
+		return ok(views.html.rembourssement.render(
+				viewMode,
+				typeOP,
+				listeReg,
+				c,
+				adherentService.getVAdherentById(idAdherent),
+				listesPartenaires,
+				regServices.sommeRegler(idAdherent, request.session().get("gestion").get()),
+				regServices.sommeReglerBC(idAdherent, request.session().get("gestion").get()),
+				regServices.sommeReglerPC(idAdherent, request.session().get("gestion").get()),
+				Long.valueOf(request.session().get("plafond").get()),
+				listeTypePrestation,
+				vad,
+				request));
+    // ... reste du code inchangé
+}
+
 
 	//@AddCSRFToken  // ✅ Ajouter cette annotation
 	public Result showBonToValidate(Request request){
