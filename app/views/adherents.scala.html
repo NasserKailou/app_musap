@@ -638,13 +638,25 @@
                                href='@controllers.routes.AdherentCtrl.show("EDIT", c.getId())'>
                               <i class="fas fa-edit"></i>
                             </a>
-                            
-                            <a class="btn btn-danger btn-sm"
-                               title="Désactiver adhérent"
-                               href='@controllers.routes.AdherentCtrl.show("DELETE", c.getId())'
-                               onclick="return window.confirm('Voulez-vous vraiment désactiver cet adhérent ?');">
-                              <i class="fas fa-trash"></i>
-                            </a>
+
+                            <button type="button"
+                                    class="btn btn-danger btn-sm btn-desactiver-adherent"
+                                    title="Désactiver adhérent"
+                                    data-id="@c.getId()"
+                                    data-matricule="@c.getMatricule()"
+                                    data-nom="@c.getNomAd()"
+                                    data-prenom="@c.getPrenomAd()"
+                                    data-sexe="@c.getSexe()"
+                                    data-email="@c.getEmail()"
+                                    data-telephone="@c.getTelephone()"
+                                    data-categorie="@c.getCategorie()"
+                                    data-fonction="@c.getFonction()"
+                                    data-structure="@c.getStructureSigle()"
+                                    data-ismember="@c.getIsMember()"
+                                    data-datenaiss='@c.getDateNaiss().format("yyyy-MM-dd")'
+                                    data-dateservice='@c.getDatePriseService().format("yyyy-MM-dd")'>
+                              <i class="fas fa-user-slash"></i>
+                            </button>
                           }
 
                           @if(
@@ -783,6 +795,173 @@
       </div>
     }
 
+
+  @* ================== MODAL DÉSACTIVATION ADHÉRENT ================== *@
+  <div class="modal fade" id="modalDesactiverAdherent" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <form method="POST"
+              action='@controllers.routes.AdherentCtrl.save()'
+              enctype="multipart/form-data"
+              id="formDesactiverAdherent">
+          @helper.CSRF.formField
+
+          <input type="hidden" name="viewMode"  value="DELETE">
+          <input type="hidden" name="id"        id="desactId">
+          <input type="hidden" name="picture"   id="desactPicture" value="">
+
+          <div class="modal-header bg-danger">
+            <h5 class="modal-title text-white">
+              <i class="fas fa-user-slash"></i> Désactiver l'adhérent
+            </h5>
+            <button type="button" class="close text-white" data-dismiss="modal">
+              <span>&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+
+            <div class="alert alert-warning">
+              <i class="icon fas fa-exclamation-triangle"></i>
+              <strong>Attention !</strong> Cette action va désactiver définitivement l'adhérent.
+              Toutes les informations sont affichées en lecture seule à titre de confirmation.
+            </div>
+
+            <div class="row">
+
+              <!-- Matricule -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-id-badge"></i> Matricule</label>
+                  <input type="text" id="desactMatricule" name="matricule" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Nom -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-user"></i> Nom</label>
+                  <input type="text" id="desactNom" name="nomAd" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Prénom -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-user"></i> Prénom</label>
+                  <input type="text" id="desactPrenom" name="prenomAd" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Sexe -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-venus-mars"></i> Sexe</label>
+                  <select class="form-control" name="sexe" id="desactSexe" disabled="disabled">
+                    <option value="M">Masculin</option>
+                    <option value="F">Féminin</option>
+                  </select>
+                  <input type="hidden" name="sexe" id="desactSexeHidden">
+                </div>
+              </div>
+
+            </div>
+
+            <div class="row">
+
+              <!-- Email -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-envelope"></i> E-mail</label>
+                  <input type="email" id="desactEmail" name="email" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Téléphone -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-phone"></i> Téléphone</label>
+                  <input type="text" id="desactTelephone" name="telephone" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Catégorie -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-tags"></i> Catégorie</label>
+                  <input type="text" id="desactCategorie" class="form-control" readonly="readonly">
+                  <input type="hidden" name="categorie" id="desactCategorieHidden">
+                </div>
+              </div>
+
+              <!-- Date Naissance -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="far fa-calendar-alt"></i> Date de naissance</label>
+                  <input type="date" id="desactDateNaiss" name="tmpDate" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+            </div>
+
+            <div class="row">
+
+              <!-- Date prise de service -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="far fa-calendar-check"></i> Date prise de service</label>
+                  <input type="date" id="desactDateService" name="tmpDate2" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Fonction -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-briefcase"></i> Fonction</label>
+                  <input type="text" id="desactFonction" name="fonction" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Structure -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-building"></i> Sigle structure</label>
+                  <input type="text" id="desactStructure" name="structureSigle" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Membre actif -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-check-circle"></i> Membre actif ?</label>
+                  <div>
+                    <input type="radio" name="isMember" id="desactMemberOui" value="true" disabled> Oui &nbsp;
+                    <input type="radio" name="isMember" id="desactMemberNon" value="false" disabled> Non
+                  </div>
+                  <input type="hidden" name="isMember" id="desactIsMemberHidden">
+                </div>
+              </div>
+
+            </div>
+
+          </div><!-- /.modal-body -->
+
+          <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+              <i class="fas fa-times"></i> Annuler
+            </button>
+            <button type="submit"
+                    class="btn btn-danger"
+                    onclick="return window.confirm('Confirmez-vous la désactivation de cet adhérent ?');">
+              <i class="fas fa-user-slash"></i> Confirmer la désactivation
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
   </div><!-- /.container-fluid -->
 </section>
 
@@ -866,6 +1045,44 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#ayantDroitModal').modal('show');
     }, 100);
   }
+
+  // ===== MODAL DÉSACTIVATION ADHÉRENT =====
+  $(document).on('click', '.btn-desactiver-adherent', function () {
+    var btn = $(this);
+
+    // Remplir les champs readOnly du modal
+    $('#desactId').val(btn.data('id'));
+    $('#desactMatricule').val(btn.data('matricule'));
+    $('#desactNom').val(btn.data('nom'));
+    $('#desactPrenom').val(btn.data('prenom'));
+    $('#desactEmail').val(btn.data('email'));
+    $('#desactTelephone').val(btn.data('telephone'));
+    $('#desactCategorie').val(btn.data('categorie'));
+    $('#desactCategorieHidden').val(btn.data('categorie'));
+    $('#desactFonction').val(btn.data('fonction'));
+    $('#desactStructure').val(btn.data('structure'));
+    $('#desactDateNaiss').val(btn.data('datenaiss'));
+    $('#desactDateService').val(btn.data('dateservice'));
+
+    // Sexe (select disabled mais hidden pour le POST)
+    var sexe = btn.data('sexe');
+    $('#desactSexe').val(sexe);
+    $('#desactSexeHidden').val(sexe);
+
+    // Membre actif
+    var isMember = String(btn.data('ismember'));
+    $('#desactIsMemberHidden').val(isMember);
+    if (isMember === 'true') {
+      $('#desactMemberOui').prop('checked', true);
+      $('#desactMemberNon').prop('checked', false);
+    } else {
+      $('#desactMemberOui').prop('checked', false);
+      $('#desactMemberNon').prop('checked', true);
+    }
+
+    // Ouvrir le modal
+    $('#modalDesactiverAdherent').modal('show');
+  });
 });
 </script>
 

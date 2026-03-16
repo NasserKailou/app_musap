@@ -65,6 +65,9 @@ POST			/Reglement-impression-situation-global/    	 controllers.ReglementCtrl.ra
 POST			/impression-global-situation-betewenne/    	 controllers.ReglementCtrl.rapportBetwenne(request:Request)
 POST			/alerte-email/    	 controllers.ReglementCtrl.infoViaMail(request:Request)
 GET			/Reglement/Eamil-alerte/    		controllers.ReglementCtrl.showAlerteView(request:Request)
+GET			/Reglement/confirmation-bons/    		controllers.ReglementCtrl.showConfirmationBon(request:Request)
+GET			/Reglement/prolonger-bon/:id    		controllers.ReglementCtrl.prolongerBon(id: Long, request:Request)
+GET			/Reglement/prolonger-tous-bons-expires/    	controllers.ReglementCtrl.prolongerTousBonsExpires(request:Request)
 GET   /reglement/detail/json/:id     controllers.ReglementCtrl.detailJson(id: Long)
 GET   /reglement/json/:id    controllers.ReglementCtrl.getReglementJson(id: Long)
 

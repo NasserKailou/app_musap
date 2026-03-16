@@ -526,7 +526,73 @@ public class ReglementCtrl extends Controller {
 		}
 	}
 
-public Result detailJson(Long id) {
+/**
+	 * Affiche la liste de tous les bons de commande (vue confirmationBon)
+	 */
+	public Result showConfirmationBon(Request request) {
+		List<Reglement> bons = regServices.findAllBons();
+		return ok(views.html.confirmationBon.render(bons, request));
+	}
+
+	/**
+	 * Prolonge la validité d'un bon individuel d'un jour (ajoute 1 jour à whenConfirmedBon)
+	 */
+	public Result prolongerBon(Long idReglement, Request request) {
+		Reglement r = regServices.findById(idReglement);
+		if (r == null) {
+			return redirect(routes.ReglementCtrl.showConfirmationBon())
+					.flashing("error", "Bon introuvable (id=" + idReglement + ")");
+		}
+
+		java.sql.Timestamp nouvelleDate;
+		if (r.getWhenConfirmedBon() != null) {
+			// Ajouter 1 jour à la date de confirmation existante
+			java.time.LocalDateTime dt = r.getWhenConfirmedBon().toLocalDateTime().plusDays(1);
+			nouvelleDate = java.sql.Timestamp.valueOf(dt);
+		} else {
+			// Pas de date de confirmation : poser date système + 1 jour
+			java.time.LocalDateTime dt = java.time.LocalDateTime.now().plusDays(1);
+			nouvelleDate = java.sql.Timestamp.valueOf(dt);
+		}
+		r.setWhenConfirmedBon(nouvelleDate);
+		regServices.update(r);
+
+		return redirect(routes.ReglementCtrl.showConfirmationBon())
+				.flashing("success", "Bon n°" + (r.getNumBon() != null ? r.getNumBon() : idReglement)
+						+ " prolongé d'un jour. Nouvelle date : "
+						+ nouvelleDate.toLocalDateTime()
+								.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+	}
+
+	/**
+	 * Prolonge la validité de TOUS les bons expirés d'un jour (date système + 1)
+	 */
+	public Result prolongerTousBonsExpires(Request request) {
+		List<Reglement> bons = regServices.findAllBons();
+		java.time.LocalDateTime maintenant = java.time.LocalDateTime.now();
+		int compteur = 0;
+
+		for (Reglement r : bons) {
+			if (r.getWhenConfirmedBon() != null
+					&& r.getWhenConfirmedBon().toLocalDateTime().isBefore(maintenant)) {
+				// Bon expiré : nouvelle date = date système + 1 jour
+				java.time.LocalDateTime nouvelleDateDt = maintenant.plusDays(1);
+				r.setWhenConfirmedBon(java.sql.Timestamp.valueOf(nouvelleDateDt));
+				regServices.update(r);
+				compteur++;
+			}
+		}
+
+		String msg = compteur > 0
+				? compteur + " bon(s) expiré(s) prolongé(s) jusqu'au "
+						+ maintenant.plusDays(1)
+								.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+				: "Aucun bon expiré trouvé.";
+
+		return redirect(routes.ReglementCtrl.showConfirmationBon()).flashing("success", msg);
+	}
+
+	public Result detailJson(Long id) {
     ReglementDetail d = reDetailMainServices.findById(id);
     if (d == null) {
         return notFound("Détail introuvable");

@@ -176,12 +176,13 @@
 
                       @if(request.session.get("droit").get() == "SuperAdmin") {
                       <!-- Supprimer -->
-                      <a href='@controllers.routes.ReglementCtrl.show("DELETE", c.getId(), c.getIdAdherent())'
-                         class="btn btn-danger btn-sm"
-                         title="Supprimer"
-                         onclick="return window.confirm('Voulez-vous vraiment supprimer ce règlement ?');">
+                      <button type="button"
+                              class="btn btn-danger btn-sm btn-delete"
+                              data-id="@c.getId()"
+                              data-adherent="@c.getIdAdherent()"
+                              title="Supprimer">
                         <i class="fas fa-trash"></i>
-                      </a>
+                      </button>
                       }
                     </div>
                   </td>
@@ -492,6 +493,19 @@ $(function () {
   @if(viewMode.equals("CREATE")) {
     $('#reglementModal').modal('show');
   }
+
+  // ===== SUPPRESSION D'UN RÈGLEMENT (.btn-delete) =====
+  $(document).on('click', '.btn-delete', function () {
+    var id       = $(this).data('id');
+    var adherent = $(this).data('adherent');
+
+    if (!confirm('Voulez-vous vraiment supprimer ce règlement ?')) {
+      return;
+    }
+
+    // Redirection vers la route DELETE existante du contrôleur
+    window.location.href = '/Reglement/show/DELETE/?idOrd=' + id + '&idConsult=' + adherent;
+  });
 });
 </script>
 

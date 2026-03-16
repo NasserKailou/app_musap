@@ -1,0 +1,216 @@
+@import java.time.LocalDateTime
+@import helper._
+@import java.util
+@(bons: List[models.tables.pojos.Reglement])(implicit request: Http.Request)
+
+@main("Confirmation des Bons") {
+
+<!-- Content Header -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>
+          <i class="fas fa-file-invoice"></i> Gestion des Bons de Commande
+        </h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+          <li class="breadcrumb-item active">Confirmation des Bons</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+
+    @* ===== MESSAGES FLASH ===== *@
+    @request.flash.get("success").map { msg =>
+      <div class="alert alert-success alert-dismissible fade show">
+        <i class="icon fas fa-check"></i> @msg
+        <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+      </div>
+    }
+    @request.flash.get("error").map { msg =>
+      <div class="alert alert-danger alert-dismissible fade show">
+        <i class="icon fas fa-ban"></i> @msg
+        <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+      </div>
+    }
+
+    @* ===== BOUTONS D'ACTIONS GLOBALES ===== *@
+    @if(
+      request.session.get("droit").isPresent &&
+      (request.session.get("droit").get() == "SuperAdmin" ||
+       request.session.get("droit").get() == "Admin")
+    ) {
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="card card-warning card-outline">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-tools"></i> Actions globales
+            </h3>
+          </div>
+          <div class="card-body">
+            <p class="text-muted mb-3">
+              <i class="fas fa-info-circle"></i>
+              Ces actions s'appliquent à <strong>tous les bons expirés</strong> (dont la date de confirmation est dépassée).
+            </p>
+            <a href="@controllers.routes.ReglementCtrl.prolongerTousBonsExpires()"
+               class="btn btn-warning"
+               onclick="return confirm('Voulez-vous prolonger d\'un jour tous les bons expirés ?');"
+               title="Ajouter 1 jour à tous les bons dont la date de validation est dépassée">
+              <i class="fas fa-calendar-plus"></i>
+              Prolonger tous les bons expirés (+1 jour)
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    @* ===== LISTE DES BONS ===== *@
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-list"></i> Liste des bons de commande
+              <span class="badge badge-light ml-2">@bons.size() bon(s)</span>
+            </h3>
+          </div>
+          <div class="card-body">
+            <table id="bonsTable" class="table table-bordered table-hover table-striped text-center">
+              <thead>
+                <tr>
+                  <th>N° Bon</th>
+                  <th>Réf. Facture</th>
+                  <th>Date Paiement</th>
+                  <th>Statut</th>
+                  <th>Date Confirmation</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(c <- bons) {
+                <tr>
+                  <td>
+                    @if(c.getNumBon() != null && !c.getNumBon().isEmpty()) {
+                      <strong>@c.getNumBon()</strong>
+                    } else {
+                      <span class="text-muted">N/A</span>
+                    }
+                  </td>
+                  <td>@c.getRefFacture()</td>
+                  <td>
+                    @if(c.getDatePayement() != null) {
+                      @c.getDatePayement().toLocalDateTime().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                    }
+                  </td>
+                  <td>
+                    @if(c.getIsConfirmedBon() != null && c.getIsConfirmedBon()) {
+                      <span class="badge badge-success">
+                        <i class="fas fa-check-circle"></i> Confirmé
+                      </span>
+                    } else {
+                      <span class="badge badge-warning">
+                        <i class="fas fa-clock"></i> En attente
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    @if(c.getWhenConfirmedBon() != null) {
+                      @{
+                        val now = java.time.LocalDateTime.now()
+                        val confirmDate = c.getWhenConfirmedBon().toLocalDateTime()
+                        val isExpired = confirmDate.isBefore(now)
+                        val fmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                      }
+                      <span class='@{
+                        val now = java.time.LocalDateTime.now()
+                        val confirmDate = c.getWhenConfirmedBon().toLocalDateTime()
+                        if (confirmDate.isBefore(now)) "text-danger font-weight-bold" else "text-success"
+                      }'>
+                        @c.getWhenConfirmedBon().toLocalDateTime().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                        @{
+                          val now = java.time.LocalDateTime.now()
+                          val confirmDate = c.getWhenConfirmedBon().toLocalDateTime()
+                          if (confirmDate.isBefore(now)) " (Expiré)" else ""
+                        }
+                      </span>
+                    } else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    <div class="btn-group">
+                      @if(
+                        request.session.get("droit").isPresent &&
+                        (request.session.get("droit").get() == "SuperAdmin" ||
+                         request.session.get("droit").get() == "Admin")
+                      ) {
+                        <!-- Prolonger ce bon d'un jour -->
+                        <a href="@controllers.routes.ReglementCtrl.prolongerBon(c.getId())"
+                           class="btn btn-info btn-sm"
+                           title="Prolonger la validité de ce bon d'un jour (+1 jour)"
+                           onclick="return confirm('Prolonger la validité de ce bon d\'un jour ?');">
+                          <i class="fas fa-calendar-plus"></i> +1 jour
+                        </a>
+                      }
+                    </div>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.container-fluid -->
+</section>
+
+<script>
+$(function () {
+  $('#bonsTable').DataTable({
+    "responsive": true,
+    "lengthChange": true,
+    "autoWidth": false,
+    "pageLength": 25,
+    "order": [[4, "asc"]],
+    "language": {
+      "sProcessing":    "Traitement en cours...",
+      "sSearch":        "Rechercher&nbsp;:",
+      "sLengthMenu":    "Afficher _MENU_ éléments",
+      "sInfo":          "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+      "sInfoEmpty":     "Aucun élément",
+      "sZeroRecords":   "Aucun bon à afficher",
+      "sEmptyTable":    "Aucun bon disponible",
+      "oPaginate": {
+        "sFirst":    "Premier",
+        "sPrevious": "Précédent",
+        "sNext":     "Suivant",
+        "sLast":     "Dernier"
+      }
+    }
+  });
+});
+</script>
+
+<style>
+.badge-lg {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.6rem;
+}
+.table thead th {
+  vertical-align: middle;
+}
+</style>
+
+}

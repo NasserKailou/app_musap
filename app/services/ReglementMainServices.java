@@ -55,6 +55,19 @@ public class ReglementMainServices extends ReglementDao {
 	}
 
 	/**
+	 * Retourne tous les bons de commande (règlements non supprimés),
+	 * triés par date de création décroissante.
+	 */
+	public List<Reglement> findAllBons() {
+		List<Reglement> c = con.connection().selectFrom(models.Tables.REGLEMENT)
+				.where(models.Tables.REGLEMENT.ON_DELETED.isFalse())
+				.orderBy(models.Tables.REGLEMENT.WHEN_DONE.desc())
+				.fetchInto(Reglement.class);
+		con.connection().close();
+		return c;
+	}
+
+	/**
 	 * Return la liste des reglement par adhérent decommenter /commenter pour
 	 * cloturer ou ouvrir des nouvelle années apres la mise a jour 2021
 	 * 
