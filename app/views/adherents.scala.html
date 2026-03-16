@@ -1,5 +1,3 @@
-@import java.text.NumberFormat
-@import java.util.Locale
 @import java.time.LocalDateTime
 @import helper._
 @import java.util
@@ -18,17 +16,6 @@
       ', toolbar=no, menubar=yes, location=no, resizable=yes, scrollbars=yes, status=no');
     win.window.focus();
     return false;
-  }
-  
-  // Fonction pour déterminer le status
-  function getStatus(montantReglement, totalCreditAnnuelle, totalCreditAConsomer) {
-    if (montantReglement >= totalCreditAConsomer) {
-      return { label: 'Suspendu', class: 'badge-danger' };
-    } else if (montantReglement >= totalCreditAnnuelle) {
-      return { label: 'Avertissement', class: 'badge-warning' };
-    } else {
-      return { label: 'Normal', class: 'badge-success' };
-    }
   }
 </script>
 
@@ -59,13 +46,6 @@
     font-weight: 600;
     vertical-align: middle;
   }
-  
-  /* Styles pour les badges de status */
-  .badge-status {
-    font-size: 0.85em;
-    padding: 0.35em 0.65em;
-    font-weight: 600;
-  }
 </style>
 
 <!-- Content Header -->
@@ -82,15 +62,6 @@
         </ol>
       </div>
     </div>
-    @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin") && !viewMode.equals("EDIT") && !viewMode.equals("DELETE")) {
-    <div class="row mt-3">
-      <div class="col-12">
-        <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modal-adherent-form">
-          <i class="fas fa-user-plus"></i> Nouvel Adhérent
-        </button>
-      </div>
-    </div>
-    }
   </div>
 </section>
 
@@ -98,27 +69,29 @@
 <section class="content">
   <div class="container-fluid">
 
-    @* ================== FORMULAIRE ADHERENT DANS UN MODAL ================== *@
-    @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
+    @* ================== FORMULAIRE ADHERENT ================== *@
+    @if(
+      request.session.get("droit").isPresent &&
+      (request.session.get("droit").get() == "Admin"
+        || request.session.get("droit").get() == "Agent Saisie"
+        || request.session.get("droit").get() == "AGENT_CARD_ID"
+        || request.session.get("droit").get() == "SuperAdmin"
+        || request.session.get("droit").get() == "Adherent")
+    ) {
 
-      <div class="modal fade" id="modal-adherent-form" tabindex="-1" role="dialog" aria-labelledby="modalAdherentLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" style="max-width: 95%;">
-          <div class="modal-content">
-            <div class="modal-header bg-primary">
-              <h5 class="modal-title" id="modalAdherentLabel">
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">
                 <i class="fas fa-user-plus"></i> 
                 @if(viewMode.equals("CREATE")) { Nouvel adhérent }
                 @if(viewMode.equals("EDIT")) { Modifier adhérent }
                 @if(viewMode.equals("DELETE")) { Désactiver adhérent }
-              </h5>
-              <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fermer">
-                <span aria-hidden="true">&times;</span>
-              </button>
+              </h3>
             </div>
 
-            <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
             <form method="POST"
-                  id="form-adherent"
                   name="form"
                   action='@controllers.routes.AdherentCtrl.save()'
                   class="form-horizontal"
@@ -129,9 +102,8 @@
               <input type="hidden" name="viewMode" value="@viewMode">
               <input type="hidden" name="id"       value="@adherent.getId()">
               <input type="hidden" name="picture"  value="@adherent.getPicture()">
-               <input type="hidden" name="pourcentageTotalRetenue"  value="@adherent.getPourcentageTotalRetenue()">
 
-              <div class="card-body" style="padding: 20px;">
+              <div class="card-body">
 
                 <div class="alert alert-info">
                   <i class="icon fas fa-info"></i>
@@ -221,43 +193,6 @@
                   </div>
 
                 </div>
-              <div class="row">
-                 <div class="col-md-6">
-                <div class="form-group">
-                      <label>
-                        <i class="fas fa-id-badge"></i> N°Carnet 
-                        <span class="text-danger">*</span>
-                      </label>
-                      <input type="text"
-                             id="codeCarnet"
-                             name="codeCarnet"
-                             class="form-control"
-                             autocomplete="off"
-                             value="@adherent.getCodeCarnet()"
-                             placeholder="Code Carnet de l'agent"
-                             required
-                             @if(viewMode.equals("DELETE")) { readonly="readonly" }>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                      <label>
-                    
-                  <i class="fas fa-hand-holding-usd"></i> Salaire de base
-                        <span class="text-danger">*</span>
-                      </label>
-                      <input type="numeric"
-                             id="salaireNet"
-                             name="salaireNet"
-                             class="form-control"
-                             autocomplete="off"
-                             value="@adherent.getSalaireNet()"
-                             placeholder="Salaire de base de l'agent"
-                             required
-                             @if(viewMode.equals("DELETE")) { readonly="readonly" }>
-                    </div>
-                    </div>
-              </div>
 
                 <!-- Ligne 2 -->
                 <div class="row">
@@ -266,7 +201,8 @@
                   <div class="col-md-3">
                     <div class="form-group">
                       <label>
-                        <i class="fas fa-envelope"></i> E-mail
+                        <i class="fas fa-envelope"></i> E-mail 
+                        <span class="text-danger">*</span>
                       </label>
                       <input type="email"
                              id="email"
@@ -275,7 +211,7 @@
                              autocomplete="off"
                              value="@adherent.getEmail()"
                              placeholder="Email adhérent"
-                            
+                             required
                              @if(viewMode.equals("DELETE")) { readonly="readonly" }>
                     </div>
                   </div>
@@ -303,19 +239,19 @@
                   <div class="col-md-3">
                     <div class="form-group">
                       <label>
-                        <i class="fas fa-tags"></i> Catégorie
-                          <span class="text-danger">*</span>
+                        <i class="fas fa-tags"></i> Catégorie 
+                        <span class="text-danger">*</span>
                       </label>
                       <select class="form-control"
-                              id="categorie"
+                              id="typeConsultation"
                               name="categorie"
-                             
-                              @if(viewMode.equals("DELETE")) { disabled="disabled" } required="required">
+                              required
+                              @if(viewMode.equals("DELETE")) { disabled="disabled" }>
                         <option value="">Sélectionner la catégorie</option>
                         @for(c <- cats) {
-                        <option value="@c.getCode()" @if(adherent != null && adherent.getCategorie() != null 
-                            && adherent.getCategorie().equals(c.getCode())) { selected="selected" }>
-                                                  @c.getCode() -- @c.getLibelle()
+                          <option value="@c.getCode()"
+                            @if(adherent.getCategorie() == c.getCode()) { selected="selected" }>
+                            @c.getCode() -- @c.getLibelle()
                           </option>
                         }
                       </select>
@@ -362,13 +298,13 @@
                                name="tmpDate2"
                                class="form-control"
                                placeholder="JJ/MM/AAAA"
-                              >
+                               required>
                       } else {
                         <input type="date"
                                name="tmpDate2"
                                class="form-control"
                                value='@adherent.getDatePriseService().format("yyyy-MM-dd")'
-                              >
+                               required>
                       }
                     </div>
                   </div>
@@ -377,7 +313,8 @@
                   <div class="col-md-3">
                     <div class="form-group">
                       <label>
-                        <i class="fas fa-briefcase"></i> Fonction
+                        <i class="fas fa-briefcase"></i> Fonction 
+                        <span class="text-danger">*</span>
                       </label>
                       <input type="text"
                              name="fonction"
@@ -385,7 +322,7 @@
                              autocomplete="off"
                              value="@adherent.getFonction()"
                              placeholder="Fonction de l'adhérent"
-                            
+                             required
                              @if(viewMode.equals("DELETE")) { readonly="readonly" }>
                     </div>
                   </div>
@@ -394,7 +331,8 @@
                   <div class="col-md-3">
                     <div class="form-group">
                       <label>
-                        <i class="fas fa-building"></i> Sigle structure
+                        <i class="fas fa-building"></i> Sigle structure 
+                        <span class="text-danger">*</span>
                       </label>
                       <input type="text"
                              name="structureSigle"
@@ -402,7 +340,7 @@
                              autocomplete="off"
                              value="@adherent.getStructureSigle()"
                              placeholder="Sigle structure"
-                            
+                             required
                              @if(viewMode.equals("DELETE")) { readonly="readonly" }>
                     </div>
                   </div>
@@ -439,57 +377,60 @@
 
               </div><!-- /.card-body -->
 
-            </form>
-            
-            <div class="modal-footer justify-content-between">
-              <button class="btn btn-secondary"
-                      type="button"
-                      data-dismiss="modal">
-                <i class="fas fa-times"></i> Fermer
-              </button>
+              <div class="card-footer text-center">
+                <button class="btn btn-secondary"
+                        type="button"
+                        name="Annuler"
+                        value="Retour"
+                        onclick="history.go(-1)">
+                  <i class="fas fa-arrow-left"></i> Retour
+                </button>
 
-              
-                <button class="btn btn-success"
-                        type="submit"
-                        form="form-adherent"
-                        id="btn-enregistrer"
-                        name="Valider"
-                        title="Enregistrer les informations">
-                  <i class="fas fa-save"></i> Enregistrer
-                </button>
-              
-              @if(viewMode.equals("EDIT")) {
-                <button class="btn btn-warning"
-                        type="submit"
-                        form="form-adherent"
-                        id="btn-modifier"
-                        name="Valider"
-                        title="Modifier les informations">
-                  <i class="fas fa-edit"></i> Modifier
-                </button>
-              }
-              @if(viewMode.equals("DELETE")) {
-                <button class="btn btn-danger"
-                        type="submit"
-                        form="form-adherent"
-                        id="btn-supprimer"
-                        name="Valider"
-                        title="Désactiver"
-                        onclick="return window.confirm('Voulez-vous vraiment désactiver cet adhérent ?');">
-                  <i class="fas fa-trash"></i> Supprimer
-                </button>
-              }
-            </div>
-            </div><!-- /.modal-body -->
-          </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-      </div><!-- /.modal -->
+                @if(viewMode.equals("CREATE")) {
+                  <button class="btn btn-success"
+                          type="submit"
+                          id="valider"
+                          name="Valider"
+                          title="Enregistrer les informations">
+                    <i class="fas fa-save"></i> Enregistrer
+                  </button>
+                }
+                @if(viewMode.equals("EDIT")) {
+                  <button class="btn btn-warning"
+                          type="submit"
+                          id="valider"
+                          name="Valider"
+                          title="Modifier les informations">
+                    <i class="fas fa-edit"></i> Modifier
+                  </button>
+                }
+                @if(viewMode.equals("DELETE")) {
+                  <button class="btn btn-danger"
+                          type="submit"
+                          id="valider"
+                          name="Valider"
+                          title="Désactiver"
+                          onclick="return window.confirm('Voulez-vous vraiment désactiver cet adhérent ?');">
+                    <i class="fas fa-trash"></i> Supprimer
+                  </button>
+                }
+              </div><!-- /.card-footer -->
+
+            </form>
+          </div>
+        </div>
+      </div>
     }
 
     @* ================== FILTRE ================== *@
     @if(
-      request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
-<!-- 
+      request.session.get("droit").isPresent &&
+      (request.session.get("droit").get() == "Admin"
+        || request.session.get("droit").get() == "AGENT_CARD_ID"
+        || request.session.get("droit").get() == "Agent Saisie"
+        || request.session.get("droit").get() == "SuperAdmin")
+    ) {
+
       <div class="row">
         <div class="col-12">
           <div class="card card-secondary collapsed-card">
@@ -550,7 +491,6 @@
           </div>
         </div>
       </div>
-      /.card-footer -->
     }
 
     @* ================== LISTE DES ADHERENTS ================== *@
@@ -563,7 +503,7 @@
               @if(
                 request.session.get("droit").isPresent &&
                 (request.session.get("droit").get() == "Admin"
-                  || request.session.get("droit").get() == "saisie")
+                  || request.session.get("droit").get() == "Agent Saisie")
               ) {
                 Liste des adhérents
               } else {
@@ -578,49 +518,36 @@
                   <tr>
                     <th>Photo</th>
                     <th>Matricule</th>
-                     <th>Code carnet</th>
                     <th>Nom & Prénom</th>
                     <th>Téléphone</th>
-                    <th>Status</th>
 
-                    @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
+                    @if(
+                      request.session.get("droit").isPresent &&
+                      (request.session.get("droit").get() == "SuperAdmin"
+                        || request.session.get("droit").get() == "Admin"
+                        || request.session.get("droit").get() == "Agent Saisie"
+                        || request.session.get("droit").get() == "Comptable")
+                    ) {
                       <th>Bon de Commande</th>
-                      <th>Prise en Charge</th>
+                      <th>Règlement</th>
                       <th>Ayant droit</th>
                       <th>Photo</th>
                     }
 
-                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur")){
-                      <th>Bon de Commande</th>
-                      <th>Prise en Charge</th>
-                      
-                    }
-
-                    @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Adherent")) {
+                    @if(
+                      request.session.get("droit").isPresent &&
+                      (request.session.get("droit").get() == "AGENT_CARD_ID"
+                        || request.session.get("droit").get() == "Adherent")
+                    ) {
                       <th>Ayant droit</th>
                       <th>Photo</th>
                     }
-                @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
-                    
+
                     <th>Actions</th>
-                  }
                   </tr>
                 </thead>
                 <tbody>
                   @for(c <- adherents) {
-                    @defining({
-                      val montantReglement = if(c.getMontantReglementCouvert() != null) c.getMontantReglementCouvert().doubleValue() else 0.0
-                      val creditAnnuelle = if(c.getTotalCreditAnnuelle() != null) c.getTotalCreditAnnuelle().doubleValue() else 0.0
-                      val creditAConsomer = if(c.getTotalCreditAConsomer() != null) c.getTotalCreditAConsomer().doubleValue() else 0.0
-                      
-                      if (montantReglement >= creditAConsomer) {
-                        ("Suspendu", "badge-danger")
-                      } else if (montantReglement >= creditAnnuelle) {
-                        ("Avertissement", "badge-warning")
-                      } else {
-                        ("Normal", "badge-success")
-                      }
-                    }) { case (statusLabel, statusClass) =>
                     <tr>
                       
                       <td class="img-cell">
@@ -630,31 +557,29 @@
                       </td>
 
                       <td>@c.getMatricule()</td>
-                      <td>@c.getCodeCarnet()</td>
                       <td>@c.getNomAd() @c.getPrenomAd()</td>
                       <td>@c.getTelephone()</td>
-                      <td>
-                        <span class="badge @statusClass badge-status">
-                          @statusLabel
-                        </span>
-                      </td>
 
-                      @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
-                      <td class="text-center">
-                         @if(java.lang.Boolean.TRUE.equals(c.getIsMember())) {  
-                        <a class="btn btn-primary btn-sm"
+                      @if(
+                        request.session.get("droit").isPresent &&
+                        (request.session.get("droit").get() == "SuperAdmin"
+                          || request.session.get("droit").get() == "Admin"
+                          || request.session.get("droit").get() == "Agent Saisie"
+                          || request.session.get("droit").get() == "Comptable")
+                      ) {
+                        <td class="text-center">
+                          <a class="btn btn-primary btn-sm"
                              title="Ajouter un Bon de commande"
-                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId(),"BC")'>
+                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId())'>
                             <i class="fas fa-file-invoice"></i>
-                          </a>}else{ <span class="badge @statusClass badge-status">@statusLabel</span>}
+                          </a>
                         </td>
                         <td class="text-center">
-                           @if(java.lang.Boolean.TRUE.equals(c.getIsMember())) {
                           <a class="btn btn-success btn-sm"
-                             title="Prise En charge"
-                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId(),"PC")'>
+                             title="Remboursement"
+                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId())'>
                             <i class="fas fa-money-bill-wave"></i>
-                          </a>}else{ <span class="badge @statusClass badge-status">@statusLabel</span>}
+                          </a>
                         </td>
                         <td class="text-center">
                           <a class="btn btn-warning btn-sm"
@@ -671,26 +596,12 @@
                           </a>
                         </td>
                       }
-                
-              @if(request.session.get("droit").isPresent && (request.session.get("droit").get().equals("saisie") || request.session.get("droit").get() == "Validateur")) {
-                <td class="text-center">
-                         @if(java.lang.Boolean.TRUE.equals(c.getIsMember())) {  
-                        <a class="btn btn-primary btn-sm"
-                             title="Ajouter un Bon de commande"
-                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId(),"BC")'>
-                            <i class="fas fa-file-invoice"></i>
-                          </a>}else{ <span class="badge @statusClass badge-status">@statusLabel</span>}
-                        </td>
-                        <td class="text-center">
-                           @if(java.lang.Boolean.TRUE.equals(c.getIsMember())) {
-                          <a class="btn btn-success btn-sm"
-                             title="Prise En charge"
-                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId(),"PC")'>
-                            <i class="fas fa-money-bill-wave"></i>
-                          </a>}else{ <span class="badge @statusClass badge-status">@statusLabel</span>}
-                        </td>
-             }
-                      @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Adherent") ) {
+
+                      @if(
+                        request.session.get("droit").isPresent &&
+                        (request.session.get("droit").get() == "AGENT_CARD_ID"
+                          || request.session.get("droit").get() == "Adherent")
+                      ) {
                         <td class="text-center">
                           <a class="btn btn-warning btn-sm"
                              title="Ajouter des ayants droit"
@@ -706,12 +617,10 @@
                           </a>
                         </td>
                       }
-                   @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Adherent") ) {
-                
+
                       <td class="text-center">
                         <div class="btn-group">
                           <!-- Voir détails (modale) -->
-                   
                           <button type="button"
                                   class="btn btn-success btn-sm"
                                   data-toggle="modal"
@@ -719,39 +628,57 @@
                                   title="Voir les détails">
                             <i class="fas fa-eye"></i>
                           </button>
-                    
+
                           @if(
                             request.session.get("droit").isPresent &&
-                            request.session.get("droit").get() == "Admin"
+                            request.session.get("droit").get() == "SuperAdmin"
                           ) {
-                            <button type="button"
-                                    class="btn btn-primary btn-sm"
-                                    title="Modifier"
-                                    onclick="openEditModal(@c.getId())"
-                                    data-adherent-id="@c.getId()">
+                            <a class="btn btn-primary btn-sm"
+                               title="Modifier"
+                               href='@controllers.routes.AdherentCtrl.show("EDIT", c.getId())'>
                               <i class="fas fa-edit"></i>
+                            </a>
+
+                            <button type="button"
+                                    class="btn btn-danger btn-sm btn-desactiver-adherent"
+                                    title="Désactiver adhérent"
+                                    data-id="@c.getId()"
+                                    data-matricule="@c.getMatricule()"
+                                    data-nom="@c.getNomAd()"
+                                    data-prenom="@c.getPrenomAd()"
+                                    data-sexe="@c.getSexe()"
+                                    data-email="@c.getEmail()"
+                                    data-telephone="@c.getTelephone()"
+                                    data-categorie="@c.getCategorie()"
+                                    data-fonction="@c.getFonction()"
+                                    data-structure="@c.getStructureSigle()"
+                                    data-ismember="@c.getIsMember()"
+                                    data-datenaiss='@c.getDateNaiss().format("yyyy-MM-dd")'
+                                    data-dateservice='@c.getDatePriseService().format("yyyy-MM-dd")'>
+                              <i class="fas fa-user-slash"></i>
                             </button>
-                            
-                            <a class="btn btn-danger btn-sm"
-                               title="Désactiver adhérent"
-                               href='@controllers.routes.AdherentCtrl.show("DELETE", c.getId())'
-                               onclick="return window.confirm('Voulez-vous vraiment désactiver cet adhérent ?');">
-                              <i class="fas fa-trash"></i>
+                          }
+
+                          @if(
+                            request.session.get("droit").isPresent &&
+                            (request.session.get("droit").get() == "AGENT_CARD_ID"
+                              || request.session.get("droit").get() == "Adherent")
+                          ) {
+                            <a class="btn btn-primary btn-sm"
+                               title="Modifier"
+                               href='@controllers.routes.AdherentCtrl.show("EDIT", c.getId())'>
+                              <i class="fas fa-edit"></i>
                             </a>
                           }
 
-                          @if(request.session.get("droit").isPresent &&(request.session.get("droit").get() == "Adherent")) {
-                            <button type="button"
-                                class="btn btn-primary btn-sm"
-                                title="Modifier"
-                                onclick="openEditModal(@c.getId())"
-                                data-adherent-id="@c.getId()">
-                          <i class="fas fa-edit"></i>
-                        </button>
-
-                          }
-
-                          @if( request.session.get("droit").isPresent &&(request.session.get("droit").get() == "Admin")) {
+                          @if(
+                            request.session.get("droit").isPresent &&
+                            (request.session.get("droit").get() == "SuperAdmin"
+                              || request.session.get("droit").get() == "Adherent"
+                              || request.session.get("droit").get() == "Admin"
+                              || request.session.get("droit").get() == "Agent Saisie"
+                              || request.session.get("droit").get() == "Comptable")
+                          ) {
                             <a class="btn btn-secondary btn-sm"
                                title="Imprimer la situation des paiements"
                                href='@controllers.routes.AdherentCtrl.print(c.getMatricule(), "situation_paiement_adherrent")'
@@ -760,51 +687,52 @@
                             </a>
                           }
 
-                          @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
-                         <!--   <a class="btn btn-info btn-sm"
+                          @if(
+                            request.session.get("droit").isPresent &&
+                            (request.session.get("droit").get() == "SuperAdmin"
+                              || request.session.get("droit").get() == "Admin"
+                              || request.session.get("droit").get() == "Agent Saisie"
+                              || request.session.get("droit").get() == "AGENT_CARD_ID")
+                          ) {
+                            <a class="btn btn-info btn-sm"
                                title="Imprimer la carte d'adhérent"
                                href='@controllers.routes.AdherentCtrl.printCarte(c.getId(), "badge_adherent")'
                                onclick="return(openPopup(this.href, 600, 600, 600, 600));">
                               <i class="fas fa-id-card"></i>
-                            </a> /.container-fluid --> 
+                            </a>
                           }
                         </div>
                       </td>
-                    }
                     </tr>
-                    }
                   }
                 </tbody>
                 <tfoot>
                   <tr>
-                  <th>Photo</th>
+                    <th>Photo</th>
                     <th>Matricule</th>
-                     <th>Code carnet</th>
                     <th>Nom & Prénom</th>
                     <th>Téléphone</th>
-                    <th>Status</th>
-
-                    @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
+                    @if(
+                      request.session.get("droit").isPresent &&
+                      (request.session.get("droit").get() == "SuperAdmin"
+                        || request.session.get("droit").get() == "Admin"
+                        || request.session.get("droit").get() == "Agent Saisie"
+                        || request.session.get("droit").get() == "Comptable")
+                    ) {
                       <th>Bon de Commande</th>
-                      <th>Prise en Charge</th>
+                      <th>Règlement</th>
                       <th>Ayant droit</th>
                       <th>Photo</th>
                     }
-
-                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur")) {
-                      <th>Bon de Commande</th>
-                      <th>Prise en Charge</th>
-                      
-                    }
-
-                    @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Adherent")) {
+                    @if(
+                      request.session.get("droit").isPresent &&
+                      (request.session.get("droit").get() == "AGENT_CARD_ID"
+                        || request.session.get("droit").get() == "Adherent")
+                    ) {
                       <th>Ayant droit</th>
                       <th>Photo</th>
                     }
-                @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
-                    
                     <th>Actions</th>
-                  }
                   </tr>
                 </tfoot>
               </table>
@@ -816,19 +744,6 @@
 
     @* ================== MODALES DETAILS ADHERENT ================== *@
     @for(c <- adherents) {
-      @defining({
-        val montantReglement = if(c.getMontantReglementCouvert() != null) c.getMontantReglementCouvert().doubleValue() else 0.0
-        val creditAnnuelle = if(c.getTotalCreditAnnuelle() != null) c.getTotalCreditAnnuelle().doubleValue() else 0.0
-        val creditAConsomer = if(c.getTotalCreditAConsomer() != null) c.getTotalCreditAConsomer().doubleValue() else 0.0
-        
-        if (montantReglement >= creditAConsomer) {
-          ("Suspendu", "badge-danger")
-        } else if (montantReglement >= creditAnnuelle) {
-          ("Avertissement", "badge-warning")
-        } else {
-          ("Normal", "badge-success")
-        }
-      }) { case (statusLabel, statusClass) =>
       <div class="modal fade" id="detailModal@c.getId()" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
@@ -861,26 +776,6 @@
                     <tr><th>Téléphone :</th><td>@c.getTelephone()</td></tr>
                     <tr><th>Catégorie :</th><td>@c.getCategorie()</td></tr>
                     <tr><th>Fonction :</th><td>@c.getFonction()</td></tr>
-                  @defining(NumberFormat.getInstance(Locale.FRANCE)) { fmt =>
-                    <tr><th>Salaire Net :</th><td><b>@fmt.format(c.getSalaireNet()) F CFA</b></td></tr>
-                    <tr><th>% du Salaire retenue :</th><td><b>@c.getPourcentageTotalRetenue() %</b></td></tr>
-                   <tr><th>Total cautisation :</th><td><b>@fmt.format(c.getTotalCotisationAgent()) F CFA</b></td></tr>
-                    <tr><th>Crédit Annuelle :</th><td><b>@fmt.format(c.getTotalCreditAnnuelle()) F CFA</b></td></tr>
-                     <tr><th>Crédit à consommer :</th><td><b> @fmt.format(c.getTotalCreditAConsomer()) F CFA</b></td></tr>
-                     <tr>
-                      <th>Montant règlement couvert :</th>
-                      <td><b>@fmt.format(if(c.getMontantReglementCouvert() != null) c.getMontantReglementCouvert() else 0) F CFA</b></td>
-                    </tr>
-                    <tr>
-                      <th>Status :</th>
-                      <td>
-                        <span class="badge @statusClass badge-status">
-                          <i class="fas fa-@if(statusLabel == "Normal") {check-circle} else if(statusLabel == "Avertissement") {exclamation-triangle} else {ban}"></i>
-                          @statusLabel
-                        </span>
-                      </td>
-                    </tr>
-                    }
                     <tr><th>Service :</th><td>@c.getStructureSigle()</td></tr>
                     <tr><th>Date naissance :</th><td>@c.getDateNaiss().format("dd/MM/yyyy")</td></tr>
                     <tr><th>Âge :</th><td>@c.getAge() ans</td></tr>
@@ -898,277 +793,298 @@
           </div>
         </div>
       </div>
-      }
     }
+
+
+  @* ================== MODAL DÉSACTIVATION ADHÉRENT ================== *@
+  <div class="modal fade" id="modalDesactiverAdherent" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <form method="POST"
+              action='@controllers.routes.AdherentCtrl.save()'
+              enctype="multipart/form-data"
+              id="formDesactiverAdherent">
+          @helper.CSRF.formField
+
+          <input type="hidden" name="viewMode"  value="DELETE">
+          <input type="hidden" name="id"        id="desactId">
+          <input type="hidden" name="picture"   id="desactPicture" value="">
+
+          <div class="modal-header bg-danger">
+            <h5 class="modal-title text-white">
+              <i class="fas fa-user-slash"></i> Désactiver l'adhérent
+            </h5>
+            <button type="button" class="close text-white" data-dismiss="modal">
+              <span>&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+
+            <div class="alert alert-warning">
+              <i class="icon fas fa-exclamation-triangle"></i>
+              <strong>Attention !</strong> Cette action va désactiver définitivement l'adhérent.
+              Toutes les informations sont affichées en lecture seule à titre de confirmation.
+            </div>
+
+            <div class="row">
+
+              <!-- Matricule -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-id-badge"></i> Matricule</label>
+                  <input type="text" id="desactMatricule" name="matricule" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Nom -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-user"></i> Nom</label>
+                  <input type="text" id="desactNom" name="nomAd" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Prénom -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-user"></i> Prénom</label>
+                  <input type="text" id="desactPrenom" name="prenomAd" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Sexe -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-venus-mars"></i> Sexe</label>
+                  <select class="form-control" name="sexe" id="desactSexe" disabled="disabled">
+                    <option value="M">Masculin</option>
+                    <option value="F">Féminin</option>
+                  </select>
+                  <input type="hidden" name="sexe" id="desactSexeHidden">
+                </div>
+              </div>
+
+            </div>
+
+            <div class="row">
+
+              <!-- Email -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-envelope"></i> E-mail</label>
+                  <input type="email" id="desactEmail" name="email" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Téléphone -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-phone"></i> Téléphone</label>
+                  <input type="text" id="desactTelephone" name="telephone" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Catégorie -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-tags"></i> Catégorie</label>
+                  <input type="text" id="desactCategorie" class="form-control" readonly="readonly">
+                  <input type="hidden" name="categorie" id="desactCategorieHidden">
+                </div>
+              </div>
+
+              <!-- Date Naissance -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="far fa-calendar-alt"></i> Date de naissance</label>
+                  <input type="date" id="desactDateNaiss" name="tmpDate" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+            </div>
+
+            <div class="row">
+
+              <!-- Date prise de service -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="far fa-calendar-check"></i> Date prise de service</label>
+                  <input type="date" id="desactDateService" name="tmpDate2" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Fonction -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-briefcase"></i> Fonction</label>
+                  <input type="text" id="desactFonction" name="fonction" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Structure -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-building"></i> Sigle structure</label>
+                  <input type="text" id="desactStructure" name="structureSigle" class="form-control" readonly="readonly">
+                </div>
+              </div>
+
+              <!-- Membre actif -->
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label><i class="fas fa-check-circle"></i> Membre actif ?</label>
+                  <div>
+                    <input type="radio" name="isMember" id="desactMemberOui" value="true" disabled> Oui &nbsp;
+                    <input type="radio" name="isMember" id="desactMemberNon" value="false" disabled> Non
+                  </div>
+                  <input type="hidden" name="isMember" id="desactIsMemberHidden">
+                </div>
+              </div>
+
+            </div>
+
+          </div><!-- /.modal-body -->
+
+          <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+              <i class="fas fa-times"></i> Annuler
+            </button>
+            <button type="submit"
+                    class="btn btn-danger"
+                    onclick="return window.confirm('Confirmez-vous la désactivation de cet adhérent ?');">
+              <i class="fas fa-user-slash"></i> Confirmer la désactivation
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
 
   </div><!-- /.container-fluid -->
 </section>
 
 <script>
-// Fonction utilitaire pour nettoyer et échapper les chaînes
-function cleanString(str) {
-  if (!str) return '';
-  return str.replace(/[\r\n\t]/g, ' ')
-            .replace(/\s+/g, ' ')
-            .replace(/'/g, "\\'")
-            .replace(/"/g, '\\"')
-            .trim();
-}
-
-// Données des adhérents - chargées de manière sécurisée
-const adherentsData = {};
-
-@defining(adherents) { adherentsList =>
-  @for(c <- adherentsList) {
-    try {
-      adherentsData['@c.getId()'] = {
-        id: '@c.getId()',
-        matricule: '@{if(c.getMatricule() != null) c.getMatricule().replaceAll("[\r\n\t\'\"\\\\]", " ").trim() else ""}',
-        codeCarnet: '@{if(c.getCodeCarnet() != null) c.getCodeCarnet().replaceAll("[\r\n\t\'\"\\\\]", " ").trim() else ""}',
-        nomAd: '@{if(c.getNomAd() != null) c.getNomAd().replaceAll("[\r\n\t\'\"\\\\]", " ").replaceAll("\\s+", " ").trim() else ""}',
-        prenomAd: '@{if(c.getPrenomAd() != null) c.getPrenomAd().replaceAll("[\r\n\t\'\"\\\\]", " ").replaceAll("\\s+", " ").trim() else ""}',
-        sexe: '@{if(c.getSexe() != null) c.getSexe() else ""}',
-        salaireNet: '@{if(c.getSalaireNet() != null) c.getSalaireNet() else "0"}',
-        email: '@{if(c.getEmail() != null) c.getEmail().replaceAll("[\r\n\t\'\"\\\\]", " ").trim() else ""}',
-        telephone: '@{if(c.getTelephone() != null) c.getTelephone().replaceAll("[\r\n\t\'\"\\\\]", " ").trim() else ""}',
-        categorie: '@{if(c.getCategorie() != null) c.getCategorie().replaceAll("[\r\n\t\'\"\\\\]", " ").trim() else ""}',
-        dateNaiss: '@{if(c.getDateNaiss() != null) c.getDateNaiss().format("yyyy-MM-dd") else ""}',
-        datePriseService: '@{if(c.getDatePriseService() != null) c.getDatePriseService().format("yyyy-MM-dd") else ""}',
-        fonction: '@{if(c.getFonction() != null) c.getFonction().replaceAll("[\r\n\t\'\"\\\\]", " ").replaceAll("\\s+", " ").trim() else ""}',
-        structureSigle: '@{if(c.getStructureSigle() != null) c.getStructureSigle().replaceAll("[\r\n\t\'\"\\\\]", " ").replaceAll("\\s+", " ").trim() else ""}',
-        isMember: @{if(c.getIsMember() != null) c.getIsMember() else false},
-        picture: '@{if(c.getPicture() != null) c.getPicture().replaceAll("[\r\n\t\'\"\\\\]", " ").trim() else ""}',
-        pourcentageTotalRetenue: '@{if(c.getPourcentageTotalRetenue() != null) c.getPourcentageTotalRetenue() else "0"}'
-      };
-    } catch(e) {
-      console.error('Erreur chargement adhérent @c.getId():', e);
-    }
-  }
-}
-
-console.log('📊 Adhérents chargés:', Object.keys(adherentsData).length);
-
-/**
- * Ouvre le modal en mode édition avec les données de l'adhérent
- */
-window.openEditModal = function(adherentId) {
-  console.log('🔍 Ouverture modal pour ID:', adherentId);
-  
-  const idStr = String(adherentId);
-  const data = adherentsData[idStr];
-  
-  if (!data) {
-    console.error('❌ Adhérent introuvable:', idStr);
-    alert('Erreur : Adhérent non trouvé');
-    return;
-  }
-  
-  console.log('✅ Données:', data);
-  
-  try {
-    // Réinitialiser le formulaire
-    const form = document.getElementById('form-adherent');
-    if (!form) {
-      console.error('❌ Formulaire introuvable');
-      return;
-    }
-    form.reset();
-    
-    // === CHAMPS CACHÉS ===
-    setValue('input[name="viewMode"]', 'EDIT');
-    setValue('input[name="id"]', data.id);
-    setValue('input[name="picture"]', data.picture);
-    setValue('input[name="pourcentageTotalRetenue"]', data.pourcentageTotalRetenue);
-    
-    // === CHAMPS VISIBLES ===
-    setValueById('matricule', data.matricule);
-    setValue('input[name="nomAd"]', data.nomAd);
-    setValue('input[name="prenomAd"]', data.prenomAd);
-    setValueById('sexe', data.sexe);
-    setValueById('codeCarnet', data.codeCarnet);
-    setValueById('salaireNet', data.salaireNet);
-    setValueById('email', data.email);
-    setValueById('telPatient', data.telephone);
-    setValueById('typeConsultation', data.categorie);
-    setValue('input[name="tmpDate"]', data.dateNaiss);
-    setValue('input[name="tmpDate2"]', data.datePriseService);
-    setValue('input[name="fonction"]', data.fonction);
-    setValue('input[name="structureSigle"]', data.structureSigle);
-    
-    // Radio buttons pour membre actif
-    const membreOui = document.getElementById('membre_actif_oui');
-    const membreNon = document.getElementById('membre_actif_non');
-    if (membreOui && membreNon) {
-      membreOui.checked = data.isMember === true;
-      membreNon.checked = data.isMember !== true;
-    }
-    
-    // Titre du modal
-    const modalTitle = document.getElementById('modalAdherentLabel');
-    if (modalTitle) {
-      modalTitle.innerHTML = '<i class="fas fa-edit"></i> Modifier adhérent';
-    }
-    
-    // Boutons du footer
-    const footer = document.querySelector('#modal-adherent-form .modal-footer');
-    if (footer) {
-      const buttons = footer.querySelectorAll('button[type="submit"]');
-      buttons.forEach(btn => btn.style.display = 'yes');
-      
-      const editBtn = footer.querySelector('button.btn-warning[form="form-adherent"]');
-      if (editBtn) {
-        editBtn.style.display = 'inline-block';
-      }
-    }
-    
-    // Ouvrir le modal
-    $('#modal-adherent-form').modal('show');
-    console.log('✅ Modal ouvert');
-    
-  } catch (error) {
-    console.error('❌ Erreur:', error);
-    alert('Erreur: ' + error.message);
-  }
-}
-
-// Fonction helper pour définir une valeur
-function setValue(selector, value) {
-  const el = document.querySelector(selector);
-  if (el) {
-    el.value = value || '';
-  }
-}
-
-function setValueById(id, value) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.value = value || '';
-  }
-}
-
-// === INITIALISATION ===
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('=== Init Page ===');
+  console.log('=== Initialisation DataTables ===');
 
-  // Désactiver les boutons de soumission après clic pour éviter les doubles soumissions
-  const formAdherent = document.getElementById('form-adherent');
-  if (formAdherent) {
-    formAdherent.addEventListener('submit', function(e) {
-      // Désactiver tous les boutons de soumission
-      const submitButtons = document.querySelectorAll('#btn-enregistrer, #btn-modifier, #btn-supprimer');
-      submitButtons.forEach(function(btn) {
-        if (!btn.disabled) {
-          btn.disabled = true;
-          const originalContent = btn.innerHTML;
-          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
-          
-          // Réactiver après 5 secondes en cas d'erreur
-          setTimeout(function() {
-            btn.disabled = false;
-            btn.innerHTML = originalContent;
-          }, 5000);
-        }
-      });
-    });
-  }
-
-  // Vérifier jQuery et DataTables
+  // Vérifier que jQuery est là
   if (typeof jQuery === 'undefined') {
-    console.error('❌ jQuery manquant');
+    console.error("jQuery n'est pas chargé !");
     return;
   }
-  
+
   if (typeof $.fn.DataTable === 'undefined') {
-    console.error('❌ DataTables manquant');
+    console.error("DataTables n'est pas chargé !");
     return;
   }
 
-  // Initialiser DataTables
-  const $table = $('#adherentsTable');
-  
+  var $table = $('#adherentsTable');
+  console.log('Table trouvée:', $table.length);
+
   if ($table.length === 0) {
-    console.error('❌ Table introuvable');
+    console.error('Table #adherentsTable non trouvée !');
     return;
   }
 
-  // Détruire instance existante
   if ($.fn.DataTable.isDataTable('#adherentsTable')) {
+    console.log("Destruction de l'instance DataTable existante...");
     $table.DataTable().destroy();
   }
 
-  // Créer DataTable
-  try {
-    $table.DataTable({
-      language: {
-        sProcessing: "Traitement en cours...",
-        sSearch: "Rechercher&nbsp;:",
-        sLengthMenu: "Afficher _MENU_ éléments",
-        sInfo: "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
-        sInfoEmpty: "Affichage de l'élément 0 à 0 sur 0 élément",
-        sInfoFiltered: "(filtré de _MAX_ éléments au total)",
-        sLoadingRecords: "Chargement...",
-        sZeroRecords: "Aucun élément",
-        sEmptyTable: "Aucune donnée disponible",
-        oPaginate: {
-          sFirst: "Premier",
-          sPrevious: "Précédent",
-          sNext: "Suivant",
-          sLast: "Dernier"
-        },
-        oAria: {
-          sSortAscending: ": activer pour trier par ordre croissant",
-          sSortDescending: ": activer pour trier par ordre décroissant"
-        }
+  var dtInstance = $table.DataTable({
+    language: {
+      sProcessing: "Traitement en cours...",
+      sSearch: "Rechercher&nbsp;:",
+      sLengthMenu: "Afficher _MENU_ éléments",
+      sInfo: "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
+      sInfoEmpty: "Affichage de l'élément 0 à 0 sur 0 élément",
+      sInfoFiltered: "(filtré de _MAX_ éléments au total)",
+      sLoadingRecords: "Chargement en cours...",
+      sZeroRecords: "Aucun élément à afficher",
+      sEmptyTable: "Aucune donnée disponible dans le tableau",
+      oPaginate: {
+        sFirst: "Premier",
+        sPrevious: "Précédent",
+        sNext: "Suivant",
+        sLast: "Dernier"
       },
-      responsive: true,
-      lengthChange: true,
-      autoWidth: false,
-      pageLength: 10,
-      lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
-      order: [[1, 'asc']],
-      columnDefs: [
-        { orderable: false, targets: [0, -1] }
-      ],
-      dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-           "<'row'<'col-sm-12'tr>>" +
-           "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-      initComplete: function () {
-        console.log('✅ DataTable initialisé avec', this.api().rows().count(), 'lignes');
+      oAria: {
+        sSortAscending: ": activer pour trier la colonne par ordre croissant",
+        sSortDescending: ": activer pour trier la colonne par ordre décroissant"
       }
-    });
-    
-    console.log('✅ DataTable créé');
-    
-  } catch (error) {
-    console.error('❌ Erreur DataTable:', error);
-  }
+    },
+    responsive: true,
+    lengthChange: true,
+    autoWidth: false,
+    pageLength: 10,
+    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Tous"]],
+    order: [[1, 'asc']],
+    columnDefs: [
+      { orderable: false, targets: [0, -1] }
+    ],
+    dom:
+      "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+      "<'row'<'col-sm-12'tr>>" +
+      "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+    initComplete: function (settings, json) {
+      console.log("✓ DataTable initialisé avec succès !");
+      console.log("Nombre de lignes:", this.api().rows().count());
+    },
+    drawCallback: function (settings) {
+      console.log("Table redessinée");
+    }
+  });
 
   // Auto-open modal selon viewMode
-  const viewMode = '@viewMode';
-  
-  if (viewMode && viewMode.trim() !== '' && viewMode !== 'VIEW') {
-    console.log('⏱️ Ouverture auto du modal:', viewMode);
-    
+  var viewMode = '@viewMode';
+  if (viewMode && viewMode.trim() !== '') {
+    console.log('Ouverture du modal pour viewMode:', viewMode);
     setTimeout(function () {
-      //$('#modal-adherent-form').modal('show');
-      
-      const modalTitle = document.getElementById('modalAdherentLabel');
-      if (modalTitle) {
-        if (viewMode === 'CREATE') {
-          modalTitle.innerHTML = '<i class="fas fa-user-plus"></i> Nouvel adhérent';
-        } else if (viewMode === 'EDIT') {
-          modalTitle.innerHTML = '<i class="fas fa-edit"></i> Modifier adhérent';
-        } else if (viewMode === 'DELETE') {
-          modalTitle.innerHTML = '<i class="fas fa-trash"></i> Désactiver adhérent';
-        }
-      }
-      
-      console.log('✅ Modal ouvert');
-    }, 500);
+      $('#ayantDroitModal').modal('show');
+    }, 100);
   }
-  
-  console.log('=== Init terminée ===');
+
+  // ===== MODAL DÉSACTIVATION ADHÉRENT =====
+  $(document).on('click', '.btn-desactiver-adherent', function () {
+    var btn = $(this);
+
+    // Remplir les champs readOnly du modal
+    $('#desactId').val(btn.data('id'));
+    $('#desactMatricule').val(btn.data('matricule'));
+    $('#desactNom').val(btn.data('nom'));
+    $('#desactPrenom').val(btn.data('prenom'));
+    $('#desactEmail').val(btn.data('email'));
+    $('#desactTelephone').val(btn.data('telephone'));
+    $('#desactCategorie').val(btn.data('categorie'));
+    $('#desactCategorieHidden').val(btn.data('categorie'));
+    $('#desactFonction').val(btn.data('fonction'));
+    $('#desactStructure').val(btn.data('structure'));
+    $('#desactDateNaiss').val(btn.data('datenaiss'));
+    $('#desactDateService').val(btn.data('dateservice'));
+
+    // Sexe (select disabled mais hidden pour le POST)
+    var sexe = btn.data('sexe');
+    $('#desactSexe').val(sexe);
+    $('#desactSexeHidden').val(sexe);
+
+    // Membre actif
+    var isMember = String(btn.data('ismember'));
+    $('#desactIsMemberHidden').val(isMember);
+    if (isMember === 'true') {
+      $('#desactMemberOui').prop('checked', true);
+      $('#desactMemberNon').prop('checked', false);
+    } else {
+      $('#desactMemberOui').prop('checked', false);
+      $('#desactMemberNon').prop('checked', true);
+    }
+
+    // Ouvrir le modal
+    $('#modalDesactiverAdherent').modal('show');
+  });
 });
 </script>
+
 
 }

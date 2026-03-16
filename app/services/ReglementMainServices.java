@@ -54,9 +54,15 @@ public class ReglementMainServices extends ReglementDao {
 		return c;
 	}
 
-	public List<VReglement> findAllVReg() {
-		List<VReglement> c = con.connection().selectFrom(models.Tables.V_REGLEMENT)
-				.where(models.Tables.V_REGLEMENT.ON_DELETED.isFalse()).fetchInto(VReglement.class);
+	/**
+	 * Retourne tous les bons de commande (règlements non supprimés),
+	 * triés par date de création décroissante.
+	 */
+	public List<Reglement> findAllBons() {
+		List<Reglement> c = con.connection().selectFrom(models.Tables.REGLEMENT)
+				.where(models.Tables.REGLEMENT.ON_DELETED.isFalse())
+				.orderBy(models.Tables.REGLEMENT.WHEN_DONE.desc())
+				.fetchInto(Reglement.class);
 		con.connection().close();
 		return c;
 	}
@@ -81,57 +87,6 @@ public class ReglementMainServices extends ReglementDao {
 		return c;
 	}
 
-
-		public List<VReglement> findBonToValidate() {
-	
-		List<VReglement> c = con.connection().selectFrom(V_REGLEMENT).where(V_REGLEMENT.ON_DELETED.isFalse())
-				.and(V_REGLEMENT.IS_CONFIRMED_BON.isFalse()).fetchInto(VReglement.class);
-		con.connection().close();
-		return c;
-	}
-
-		public List<VReglement> findReglementBCByAdherent(Long idAdherent, String gestion) {
-		Timestamp d = new Timestamp(System.currentTimeMillis());
-
-		// String gestion = String.valueOf(d).substring(0, 4);
-		//System.out.println("la date est :" + d + " gestion :" + gestion);
-
-		List<VReglement> c = con.connection().selectFrom(V_REGLEMENT).where(V_REGLEMENT.ON_DELETED.isFalse())
-				.and(V_REGLEMENT.ID_ADHERENT.eq(idAdherent)).and(V_REGLEMENT.ANNEE.eq(gestion)).and(V_REGLEMENT.TYPE_STRUCTURE.eq("PHARMACIE"))//
-				.fetchInto(VReglement.class);
-		con.connection().close();
-		return c;
-	}
-
-	public List<VReglement> findReglementPCByAdherent(Long idAdherent, String gestion) {
-		Timestamp d = new Timestamp(System.currentTimeMillis());
-
-		// String gestion = String.valueOf(d).substring(0, 4);
-		//System.out.println("la date est :" + d + " gestion :" + gestion);
-
-		List<VReglement> c = con.connection().selectFrom(V_REGLEMENT).where(V_REGLEMENT.ON_DELETED.isFalse())
-				.and(V_REGLEMENT.ID_ADHERENT.eq(idAdherent)).and(V_REGLEMENT.ANNEE.eq(gestion))
-				.and(V_REGLEMENT.TYPE_STRUCTURE.eq("HOPITAL").or(V_REGLEMENT.TYPE_STRUCTURE.eq("CLINIQUE")).or(V_REGLEMENT.TYPE_STRUCTURE.eq("LABORATOIRE")))//
-				.fetchInto(VReglement.class);
-		con.connection().close();
-		return c;
-	}
-
-/** public List<VRegBonCommande> findReglementBCByAdherent(Long idAdherent, String gestion) {
-		List<VRegBonCommande> c = con.connection().selectFrom(V_REG_BON_COMMANDE).where(V_REG_BON_COMMANDE.ON_DELETED.isFalse())
-				.and(V_REG_BON_COMMANDE.ID_ADHERENT.eq(idAdherent)).and(V_REG_BON_COMMANDE.ANNEE.eq(gestion))//
-				.fetchInto(VRegBonCommande.class);
-		con.connection().close();
-		return c;
-	}
-
-	public List<VRegPriseEnCharge> findReglementPCByAdherent(Long idAdherent, String gestion) {
-		List<VRegPriseEnCharge> c = con.connection().selectFrom(V_REG_PRISE_EN_CHARGE).where(V_REG_PRISE_EN_CHARGE.ON_DELETED.isFalse())
-				.and(V_REGLEMENT.ID_ADHERENT.eq(idAdherent)).and(V_REGLEMENT.ANNEE.eq(gestion)).fetchInto(VRegPriseEnCharge.class);
-					con.connection().close();
-		return c;
-	} */
-
 	/**
 	 * decommenté la gestion apres mise a jour des montant
 	 * 
@@ -148,8 +103,6 @@ public class ReglementMainServices extends ReglementDao {
 		con.connection().close();
 		return c;
 	}
-
-		
 
 //	public Boolean isPlafond(Long idAdherent) {
 //		List<Reglement> listes = con.connection()
@@ -168,41 +121,6 @@ public class ReglementMainServices extends ReglementDao {
 
 		// List<VReglement> c = this.findReglementByAdherent(idAdherent);
 		List<VReglement> c = this.findReglementByAdherentByAnnee(idAdherent, gestion);
-		Long totalRegler = 0L;
-		for (VReglement element : c) {
-			// totalRegler += element.getMontantTotal();
-			totalRegler += element.getMontantReglement();
-		}
-		System.out.println("Le total Solder est :" + totalRegler + " F CFA");
-
-		return totalRegler;
-	}
-
-	public Long sommeReglerBC(Long idAdherent, String gestion) {
-		Timestamp d = new Timestamp(System.currentTimeMillis());
-
-		String gestionsss = String.valueOf(d).substring(0, 4);
-
-		// List<VReglement> c = this.findReglementByAdherent(idAdherent);
-		List<VReglement> c = this.findReglementBCByAdherent(idAdherent, gestion);
-		Long totalRegler = 0L;
-		for (VReglement element : c) {
-			// totalRegler += element.getMontantTotal();
-			totalRegler += element.getMontantReglement();
-		}
-		System.out.println("Le total Solder est :" + totalRegler + " F CFA");
-
-		return totalRegler;
-	}
-
-
-	public Long sommeReglerPC(Long idAdherent, String gestion) {
-		Timestamp d = new Timestamp(System.currentTimeMillis());
-
-		String gestionsss = String.valueOf(d).substring(0, 4);
-
-		// List<VReglement> c = this.findReglementByAdherent(idAdherent);
-		List<VReglement> c = this.findReglementPCByAdherent(idAdherent, gestion);
 		Long totalRegler = 0L;
 		for (VReglement element : c) {
 			// totalRegler += element.getMontantTotal();
@@ -256,12 +174,6 @@ public class ReglementMainServices extends ReglementDao {
 		return super.findById(id);
 	}
 
-	public VReglement findVRegById(Long id) {
-		 VReglement c = con.connection().selectFrom(V_REGLEMENT).where(V_REGLEMENT.ID.eq(id)).fetchOneInto(VReglement.class);
-		con.connection().close();
-		return c;
-	}
-
 	public List<VAdherentAyantDroit> getAdherentAndAyantByAdherent(Long idAdherent) {
 		List<VAdherentAyantDroit> vad = con.connection().selectFrom(V_ADHERENT_AYANT_DROIT)
 				.where(V_ADHERENT_AYANT_DROIT.ID_ADHERENT.eq(idAdherent)).fetchInto(VAdherentAyantDroit.class);
@@ -292,49 +204,6 @@ public class ReglementMainServices extends ReglementDao {
 		return lites;
 	}
 	
-	/**
-	 * Récupère les bons de commande non confirmés pour un adhérent
-	 * Filtre les bons où is_confirmed_bon = false ou null
-	 * 
-	 * @param idAdherent L'ID de l'adhérent
-	 * @param gestion L'année de gestion
-	 * @return Liste des bons non confirmés
-	 */
-	public List<VReglement> findReglementNonConfirmesByAdherent(Long idAdherent, String gestion) {
-		System.out.println(">>> Recherche bons non confirmés - Adhérent: " + idAdherent + ", Gestion: " + gestion);
-		
-		List<VReglement> bons = con.connection()
-			.selectFrom(V_REGLEMENT)
-			.where(V_REGLEMENT.ON_DELETED.isFalse())
-			.and(V_REGLEMENT.ID_ADHERENT.eq(idAdherent))
-			.and(V_REGLEMENT.ANNEE.eq(gestion))
-			.and(V_REGLEMENT.IS_CONFIRMED_BON.isFalse()
-				.or(V_REGLEMENT.IS_CONFIRMED_BON.isNull()))
-			.fetchInto(VReglement.class);
-		
-		con.connection().close();
-		
-		System.out.println(">>> Nombre de bons non confirmés trouvés: " + bons.size());
-		return bons;
-	}
-
-	public  String normaliserNumeroNiger(String telephone) {
-
-    if (telephone == null || telephone.trim().isEmpty()) {
-				throw new IllegalArgumentException("Le numéro de téléphone est vide ou null");
-			}
-
-			// Nettoyage : suppression des espaces, tirets, etc.
-			telephone = telephone.replaceAll("[^0-9]", "");
-
-			// Si le numéro commence déjà par 227 → on laisse
-			if (telephone.startsWith("227")) {
-				return telephone;
-			}
-
-			// Sinon on ajoute 227
-			return "227" + telephone;
-		}
-
+	
 
 }

@@ -1,37 +1,26 @@
-@import java.text.NumberFormat
-@import java.util.Locale
 @import java.time.LocalDateTime
-@import java.time.temporal.ChronoUnit
-@import java.sql.Timestamp
 @import helper._
 @import java.util
 @import utils._
-@(viewMode: String, typeOP: String,
+@(viewMode: String,
   reglements: List[models.tables.pojos.VReglement],
   reglement: models.tables.pojos.Reglement,
-  adherent: models.tables.pojos.VAdherent,
+  adherent: models.tables.pojos.Adherent,
   structures: List[models.tables.pojos.StructurePartenaire],
   totalRegler: Long,
-  totalReglerBC: Long,
-  totalReglerPC: Long,
   plafondAnnuel: Long,
   typePrestations: List[models.tables.pojos.TypePrestation],
   ayantDroits: List[models.tables.pojos.VAdherentAyantDroit]
 )(implicit request: Http.Request)
 
-@main("Bon de Commande") {
+@main("Remboursement") {
 
 <!-- Content Header -->
 <section class="content-header">
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        @if(typeOP.equals("BC")){
-          <h1>Gestion des Bons de Commande</h1>
-        } else{
-          <h1>Gestion des Prises en Charge</h1>
-        }
-        
+        <h1>Gestion des Remboursements</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -60,26 +49,16 @@
               @if(
                 request.session.get("droit").isPresent &&
                 (request.session.get("droit").get() == "Admin" ||
-                 request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur")
+                 request.session.get("droit").get() == "SuperAdmin" ||
+                 request.session.get("droit").get() == "Agent Saisie" ||
+                 request.session.get("droit").get() == "Comptable")
               ) {
-                @if(totalRegler >= adherent.getTotalCreditAConsomer()){
-                  <div class="info-box bg-danger">
-                  <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
-                  <div class="info-box-content">
-                    <span class="info-box-text"> Impossible d'ajouter un nouveau bon </span>
-                    <span class="info-box-number"> Adhérent suspendu!!!</span>
-                  </div>
-                </div>
-                 
-                } else{
-                  <button type="button" 
+              <button type="button" 
                       class="btn btn-success btn-sm" 
                       data-toggle="modal" 
                       data-target="#reglementModal">
-                <i class="fas fa-plus"></i> @if(typeOP.equals("BC")){Nouveau Bon de Commande} else{Nouvelle prise en charge}
+                <i class="fas fa-plus"></i> Nouveau Remboursement
               </button>
-                }
-              
               }
             </div>
           </div>
@@ -96,290 +75,127 @@
                 </h5>
               </div>
             </div>
-       @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "Admin" )) {
-           
-              @defining(NumberFormat.getInstance(Locale.FRANCE)) { fmt =>
-            <div class="row mt-3">
-              <div class="col-md-12">
-                <div class="info-box bg-primary info-box bg-primary text-center" style="display:flex; align-items:center; justify-content:center;">
-                  <span class="info-box-icon"><i class="fas fa-money-bill-wave"></i></span>
-                  <div class="info-box-content">
-                    <span class="info-box-text">Total des consommations (Bon de Commandes & Prise en charge)</span>
-                    <span class="info-box-number">@fmt.format(totalRegler) F CFA</span>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <div class="row mt-3">
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="info-box bg-success">
                   <span class="info-box-icon"><i class="fas fa-money-bill-wave"></i></span>
                   <div class="info-box-content">
-                    <span class="info-box-text">Total consommations @if(typeOP.equals("BC")){des Bons}else{Prise en charge}</span>
-                    <span class="info-box-number">@if(typeOP.equals("BC")){ @fmt.format(totalReglerBC)}else{@fmt.format(totalReglerPC)} F CFA</span>
+                    <span class="info-box-text">Total des paiements</span>
+                    <span class="info-box-number">@totalRegler F CFA</span>
                   </div>
                 </div>
               </div>
 
-              <div class="col-md-4">
-                <div class="info-box bg-warning">
-                  <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
-                  <div class="info-box-content">
-                    <span class="info-box-text">Seuil d'Alerte des consommations </span>
-                    <span class="info-box-number">@fmt.format(adherent.getTotalCreditAnnuelle()) F CFA</span>
-                  </div>
-                </div>
-              </div>
-             
-              <div class="col-md-4">
+              @if(totalRegler > plafondAnnuel) {
+              <div class="col-md-6">
                 <div class="info-box bg-danger">
                   <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
                   <div class="info-box-content">
-                    <span class="info-box-text">Plafond Annuelle des consommations a ne pas dépasser </span>
-                    <span class="info-box-number">@fmt.format(adherent.getTotalCreditAConsomer()) F CFA</span>
+                    <span class="info-box-text">Dépassement - Montant à rembourser</span>
+                    <span class="info-box-number">@(totalRegler - plafondAnnuel) F CFA</span>
                   </div>
                 </div>
               </div>
-              
+              }
             </div>
-          }
-        }
           </div>
         </div>
       </div>
     </div>
     }
 
-    @* ================== LISTE DES Bon de commande ================== *@
+    @* ================== LISTE DES REGLEMENTS ================== *@
     <div class="row">
       <div class="col-12">
         <div class="card card-primary">
           <div class="card-header">
             <h3 class="card-title">
-              <i class="fas fa-list"></i> Liste des Bon de Commande
+              <i class="fas fa-list"></i> Liste des règlements
             </h3>
           </div>
           <div class="card-body">
-            <div class="table-responsive">
-              <table id="reglementTable" class="table table-bordered table-hover table-striped" style="width:100%">
-                <thead>
-                  <tr>
-                    <th>N°BC</th>
-                    <th>Montant Total</th>
-                    <th>Montant Couvert</th>
-                    <th>Montant à Payer</th>
-                    <th>Structure</th>
-                    <th>Date Délivré</th>
-                    <th>Date Expiration</th>
-                    <th>Remboursement</th>
-                    <th>Temps Restant</th>
-                    <th>Statut</th>
-                    <th class="text-center">Actions</th>
-                  </tr>
-                </thead>
-             <tbody>
-        @for(c <- reglements) {
-        @defining({
-          val datePayement = c.getDatePayement().toLocalDateTime()
-          val dateExpiration = c.getDateExpiration().toLocalDateTime()
-          val now = LocalDateTime.now()
-          val joursRestants = ChronoUnit.DAYS.between(now, dateExpiration)
-          val isConfirmedValue = c.getIsConfirmedBon()
-          val isConfirmed: Boolean = (isConfirmedValue != null && isConfirmedValue == true)
-          val estExpire: Boolean = joursRestants <= 0
-          val isRembValue = c.getIsRemboursement()
-          val isRemboursement: Boolean = (isRembValue != null && isRembValue == true)
-          (datePayement, dateExpiration, joursRestants, isConfirmed, estExpire, isRemboursement)
-        }) { case (datePayement, dateExpiration, joursRestants, isConfirmed, estExpire, isRemboursement) =>
+            <table id="example2" class="table table-bordered table-hover table-striped">
+              <thead>
+                <tr>
+                  <th>Ref Facture</th>
+                  <th>Montant Total</th>
+                  <th>Montant Couvert</th>
+                  <th>Montant à Payer</th>
+                  <th>Structure</th>
+                  <th>Date Règlement</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(c <- reglements) {
+                <tr>
+                  <td>@c.getRefFacture()</td>
+                  <td>@c.getMontantTotal() F CFA</td>
+                  <td class="text-success"><strong>@c.getMontantReglement() F CFA</strong></td>
+                  <td class="text-warning"><strong>@c.getMontantPaye() F CFA</strong></td>
+                  <td>@c.getStructure()</td>
+                  <td>@c.getDatePayement().format("dd/MM/yyyy")</td>
+                  <td class="text-center">
+                    <div class="btn-group">
+                      <!-- Voir détails -->
+                      <button type="button"
+                              class="btn btn-info btn-sm"
+                              data-toggle="modal"
+                              data-target="#detailModal@c.getId()"
+                              title="Voir détails">
+                        <i class="fas fa-eye"></i>
+                      </button>
 
-  <tr>
-    <td>@c.getId()</td>
-    <td>@c.getMontantTotal() F CFA</td>
-    <td class="text-success"><strong>@c.getMontantReglement() F CFA</strong></td>
-    <td class="text-warning"><strong>@c.getMontantPaye() F CFA</strong></td>
-    <td>@c.getStructure()</td>
-    <td>@datePayement.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</td>
-    <td class="text-danger"><strong>@dateExpiration.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</strong></td>
-    
-    @* Colonne Remboursement *@
-    <td class="text-center">
-      @if(isRemboursement) {
-        <span class="badge badge-info">
-          <i class="fas fa-hand-holding-usd"></i> Oui
-        </span>
-      } else {
-        <span class="badge badge-secondary">
-          <i class="fas fa-times"></i> Non
-        </span>
-      }
-    </td>
-    
-    @* Colonne Temps Restant - Afficher "Consommé" si confirmé *@
-    <td data-order="@if(isConfirmed){-999}else{@joursRestants}">
-      @if(isConfirmed) {
-        <span class="badge badge-secondary">
-          <i class="fas fa-check-double"></i> Consommé
-        </span>
-      } else {
-        @if(joursRestants < 0) {
-          <span class="badge badge-danger">
-            <i class="fas fa-times-circle"></i> Expiré depuis @Math.abs(joursRestants) jour(s)
-          </span>
-        } else if(joursRestants == 0) {
-          <span class="badge badge-warning">
-            <i class="fas fa-exclamation-triangle"></i> Expire aujourd'hui
-          </span>
-        } else if(joursRestants <= 7) {
-          <span class="badge badge-warning">
-            <i class="fas fa-clock"></i> @joursRestants jour(s) restant(s)
-          </span>
-        } else {
-          <span class="badge badge-success">
-            <i class="fas fa-check-circle"></i> @joursRestants jour(s) restant(s)
-          </span>
-        }
-      }
-    </td>
-    
-    @* Colonne Statut *@
-    <td class="text-center" data-order="@if(isConfirmed){1}else{0}">
-      <div class="d-flex align-items-center justify-content-center">
-        @if(isConfirmed) {
-          <span class="badge badge-success mr-2">
-            <i class="fas fa-check-circle"></i> Confirmé
-          </span>
-        } else {
-          <span class="badge badge-warning mr-2">
-            <i class="fas fa-hourglass-half"></i> Non confirmé
-          </span>
-        }
-        
-        @if(!isConfirmed && !estExpire && request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Validateur")) {
-          <button type="button"
-                  class="btn btn-sm btn-primary"
-                  onclick="confirmerBon(@c.getId(), @c.getIdAdherent())"
-                  title="Confirmer le bon">
-            <i class="fas fa-check"></i>
-          </button>
-        }
-        
-        @if(!isConfirmed && estExpire) {
-          <span class="badge badge-danger ml-2">
-            <i class="fas fa-ban"></i> Impossible de confirmer
-          </span>
-        }
-      </div>
-    </td>
-    
-    @* Colonne Actions *@
-<td class="text-center">
-  <div class="btn-group" role="group">
-    <button type="button"
-            class="btn btn-info btn-sm"
-            data-toggle="modal"
-            data-target="#detailModal@c.getId()"
-            title="Voir détails">
-      <i class="fas fa-eye"></i>
-    </button>
+                      @if(
+                        request.session.get("droit").get() == "SuperAdmin" ||
+                        request.session.get("droit").get() == "Comptable" ||
+                        request.session.get("droit").get() == "Admin"
+                      ) {
+                      <!-- Modifier -->
+                      <a href='@controllers.routes.ReglementCtrl.show("EDIT", c.getId(), c.getIdAdherent())'
+                         class="btn btn-warning btn-sm"
+                         title="Modifier">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      }
 
-    @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin") ) {
-      @if(isConfirmed) {
-        <button type="button"
-                class="btn btn-warning btn-sm"
-                disabled
-                title="Modification impossible - Bon confirmé">
-          <i class="fas fa-lock"></i>
-        </button>
-      } else {
-        <button type="button"
-                class="btn btn-warning btn-sm btn-edit"
-                data-id="@c.getId()"
-                data-benef="@if(c.getAyantDroit() != null){@c.getAyantDroit()}else{@c.getIdAdherent()}"
-                data-structure="@c.getStructure()"
-                data-typeprestation="@c.getPrestation()"
-                data-remboursement="@if(c.getIsRemboursement() != null && c.getIsRemboursement()){true}else{false}"
-                title="Modifier">
-          <i class="fas fa-edit"></i>
-        </button>
-      }
-    }
+                      @if(
+                        request.session.get("droit").get() == "SuperAdmin" ||
+                        request.session.get("droit").get() == "Admin" ||
+                        request.session.get("droit").get() == "Agent Saisie" ||
+                        request.session.get("droit").get() == "Comptable"
+                      ) {
+                      <!-- Lignes -->
+                      <a href='@controllers.routes.ReglementCtrl.reglementDetailForm("CREATE", c.getId(), c.getIdAdherent(), 0L)'
+                         class="btn btn-success btn-sm"
+                         title="Lignes de détail">
+                        <i class="fas fa-list"></i>
+                      </a>
+                      }
 
-    @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur")) {
-      @if(isConfirmed) {
-        <button type="button"
-                class="btn btn-success btn-sm"
-                disabled
-                title="Ligne Bond impossible - Bon confirmé">
-          <i class="fas fa-lock"></i>
-        </button>
-      } else {
-        <a href='@controllers.routes.ReglementCtrl.reglementDetailForm("CREATE", typeOP, c.getId(), c.getIdAdherent(), 0L)'
-           class="btn btn-success btn-sm"
-           title="Lignes de détail">
-          <i class="fas fa-list"></i>
-        </a>
-      }
-    }
-
-    @if(request.session.get("droit").isPresent && 
-        (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Validateur") && 
-        isConfirmed) {
-      <button type="button"
-              class="btn btn-secondary btn-sm"
-              onclick="reactualiserBon(@c.getId(), @c.getIdAdherent())"
-              title="Réactualiser le bon (remettre à non confirmé)">
-        <i class="fas fa-undo"></i>
-      </button>
-    }
-
-    @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "Admin") {
-      <button type="button"
-              class="btn btn-danger btn-sm btn-delete"
-              data-id="@c.getId()"
-              data-adherent="@c.getIdAdherent()"
-              title="Supprimer">
-        <i class="fas fa-trash"></i>
-      </button>
-    } 
-    
-    <a class="btn btn-secondary btn-sm"
-       title="Imprimer @if(typeOP.equals("BC")){ le Bon de commande}else{La prise en charge} "
-       href='@controllers.routes.ReglementCtrl.print(c.getId(), if(typeOP.equals("BC")){"bon_commande"}else{"bon_commande"})'
-       onclick="return(openPopup(this.href, 600, 600, 600, 600));">
-      <i class="fas fa-print"></i>
-    </a>
-  </div>
-</td>
-
-  </tr>
-  }
-  }
-</tbody>
-
-              </table>
-            </div>
+                      @if(request.session.get("droit").get() == "SuperAdmin") {
+                      <!-- Supprimer -->
+                      <button type="button"
+                              class="btn btn-danger btn-sm btn-delete"
+                              data-id="@c.getId()"
+                              data-adherent="@c.getIdAdherent()"
+                              title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
 
   </div>
-
-  <!-- Modal Loader -->
-<div class="modal fade" id="loadingModal" data-backdrop="static" data-keyboard="false" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content">
-      <div class="modal-body text-center">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-          <span class="sr-only">Chargement...</span>
-        </div>
-        <p class="mt-3 mb-0">Traitement en cours...</p>
-      </div>
-    </div>
-  </div>
-</div>
-
 </section>
 
 @* ================== MODAL FORMULAIRE REGLEMENT ================== *@
@@ -392,11 +208,10 @@
         <input type="hidden" id="formViewMode" name="viewMode" value="CREATE">
         <input type="hidden" name="adherent" value="@adherent.getId()">
         <input type="hidden" id="formReglementId" name="id" value="">
-        <input type="hidden" id="typeOP" name="typeOP" value="@typeOP">
-        
+
         <div class="modal-header bg-primary">
           <h5 class="modal-title text-white">
-            <i class="fas fa-file-invoice"></i>@if(typeOP.equals("BC")){Nouveau Bon de Commande} else{Nouvelle prise en charge}
+            <i class="fas fa-file-invoice"></i> Nouveau Remboursement
           </h5>
           <button type="button" class="close text-white" data-dismiss="modal">
             <span>&times;</span>
@@ -417,8 +232,24 @@
             <div class="card-body">
               <div class="row">
                 
+                <!-- Ref Facture -->
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>
+                      <i class="fas fa-file-alt"></i> Ref Facture 
+                      <span class="text-danger">*</span>
+                    </label>
+                    <input type="text"
+                           id="refFacture"
+                           name="refFacture"
+                           class="form-control"
+                           placeholder="Référence de la facture"
+                           required>
+                  </div>
+                </div>
+
                 <!-- Bénéficiaire -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <div class="form-group">
                     <label>
                       <i class="fas fa-user-check"></i> Bénéficiaire 
@@ -430,18 +261,27 @@
                         @adherent.getNomAd @adherent.getPrenomAd (Adhérent)
                       </option>
                       @for(c <- ayantDroits) {
-                        @defining(
-                          java.time.Period.between(
-                            c.getDateNaissAyantDroit().toLocalDateTime().toLocalDate(),
-                            java.time.LocalDate.now()
-                          ).getYears()
-                        ) { age =>
-                          @if(!(c.getLien() == "ENFANT" && age >= 25)) {
-                            <option value="@c.getIdAyantDroit()">
-                              @c.getNomAy (Ayant droit - @c.getLien() - @age ans)
-                            </option>
-                          }
-                        }
+                      <option value="@c.getIdAyantDroit()">
+                        @c.getNomAy (Ayant droit)
+                      </option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Type de Prestation -->
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>
+                      <i class="fas fa-briefcase-medical"></i> Type de prestation 
+                      <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-control select2" required id="tprestation" name="typePrestation">
+                      <option value="">Sélectionner le type</option>
+                      @for(c <- typePrestations) {
+                      <option value="@c.getId()">
+                        @c.getPrestation() - @c.getCouverture()%
+                      </option>
                       }
                     </select>
                   </div>
@@ -457,65 +297,66 @@
                     <select class="form-control select2" required id="structure" name="structure">
                       <option value="">Sélectionner la structure</option>
                       @for(c <- structures) {
-                        <option value="@c.getId()" data-statut="@c.getStatutStructure()">
-                          @c.getLibelle()
-                        </option>
+                      <option value="@c.getId()">
+                        @c.getLibelle()
+                      </option>
                       }
                     </select>
                   </div>
                 </div>
 
-                <!-- Type de prestation -->
+              </div>
+
+              <div class="row">
+                
+                <!-- Date de paiement -->
                 <div class="col-md-3">
                   <div class="form-group">
                     <label>
-                      <i class="fas fa-briefcase-medical"></i> Type de prestation 
+                      <i class="far fa-calendar-alt"></i> Date de paiement 
                       <span class="text-danger">*</span>
                     </label>
-                    <select class="form-control select2" required id="tprestation" name="typePrestation">
-                      <option value="">Sélectionner le type</option>
-                      @for(c <- typePrestations) {
-                        <option value="@c.getId()" 
-                                data-taux-public="@c.getTauxPublic()" 
-                                data-taux-prive="@c.getTauxPrive()"
-                                data-prestation="@c.getPrestation()">
-                          @c.getPrestation()
-                        </option>
-                      }
-                    </select>
+                    <input type="date" class="form-control" id="tmpDate" name="tmpDate" required>
                   </div>
                 </div>
 
-                <!-- Remboursement -->
-                <div class="col-md-2">
+              </div>
+            </div>
+          </div>
+
+          <!-- Informations Complémentaires -->
+          <div class="card card-secondary">
+            <div class="card-header">
+              <h3 class="card-title">Informations Complémentaires (Si remboursement en espèces)</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                
+                <!-- Structure Émettrice -->
+                <div class="col-md-6">
                   <div class="form-group">
                     <label>
-                      <i class="fas fa-hand-holding-usd"></i> Remboursement? 
-                      <span class="text-danger">*</span>
+                      <i class="fas fa-building"></i> Structure émettrice
                     </label>
-                    <div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input"
-                               type="radio"
-                               name="isRemboursement"
-                               id="remboursement_oui"
-                               value="true">
-                        <label class="form-check-label" for="remboursement_oui">
-                          <i class="fas fa-check text-success"></i> Oui
-                        </label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input"
-                               type="radio"
-                               name="isRemboursement"
-                               id="remboursement_non"
-                               value="false"
-                               checked>
-                        <label class="form-check-label" for="remboursement_non">
-                          <i class="fas fa-times text-secondary"></i> Non
-                        </label>
-                      </div>
-                    </div>
+                    <input type="text"
+                           id="structureEmettriceRembourssement"
+                           name="structureEmettriceRembourssement"
+                           class="form-control"
+                           placeholder="Nom de la structure émettrice">
+                  </div>
+                </div>
+
+                <!-- Téléphone Structure -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>
+                      <i class="fas fa-phone"></i> Numéro de téléphone
+                    </label>
+                    <input type="text"
+                           id="telStructureEmettrice"
+                           name="telStructureEmettrice"
+                           class="form-control"
+                           placeholder="Téléphone de la structure">
                   </div>
                 </div>
 
@@ -540,16 +381,6 @@
 
 @* ================== MODALES DE DÉTAILS ================== *@
 @for(c <- reglements) {
-@defining({
-  val datePayementDetail = c.getDatePayement().toLocalDateTime()
-  val dateExpirationDetail = c.getDateExpiration().toLocalDateTime()
-  val isConfirmedValue = c.getIsConfirmedBon()
-  val isConfirmedDetail: Boolean = (isConfirmedValue != null && isConfirmedValue == true)
-  val isRembValueDetail = c.getIsRemboursement()
-  val isRemboursementDetail: Boolean = (isRembValueDetail != null && isRembValueDetail == true)
-  (datePayementDetail, dateExpirationDetail, isConfirmedDetail, isRemboursementDetail)
-}) { case (datePayementDetail, dateExpirationDetail, isConfirmedDetail, isRemboursementDetail) =>
-
 <div class="modal fade" id="detailModal@c.getId()" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -592,40 +423,8 @@
             <td><strong>@c.getStructure()</strong></td>
           </tr>
           <tr>
-            <th>Remboursement</th>
-            <td>
-              @if(isRemboursementDetail) {
-                <span class="badge badge-info">
-                  <i class="fas fa-hand-holding-usd"></i> Oui
-                </span>
-              } else {
-                <span class="badge badge-secondary">
-                  <i class="fas fa-times"></i> Non
-                </span>
-              }
-            </td>
-          </tr>
-          <tr>
             <th>Date paiement</th>
-            <td><strong>@datePayementDetail.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</strong></td>
-          </tr>
-          <tr>
-            <th>Date expiration</th>
-            <td class="text-danger"><strong>@dateExpirationDetail.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</strong></td>
-          </tr>
-          <tr>
-            <th>Statut du Bon</th>
-            <td>
-              @if(isConfirmedDetail) {
-                <span class="badge badge-success">
-                  <i class="fas fa-check-circle"></i> Confirmé
-                </span>
-              } else {
-                <span class="badge badge-warning">
-                  <i class="fas fa-hourglass-half"></i> Non confirmé
-                </span>
-              }
-            </td>
+            <td><strong>@c.getDatePayement().format("dd/MM/yyyy")</strong></td>
           </tr>
           <tr>
             <th>Montant Total de la Facture</th>
@@ -650,500 +449,77 @@
   </div>
 </div>
 }
-}
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  
-  setTimeout(function() {
-    
-    if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
-      console.error('jQuery n\'est pas chargé !');
+$(function () {
+
+  // DataTable
+  $("#example2").DataTable({
+    "responsive": true,
+    "lengthChange": true,
+    "autoWidth": false,
+    "buttons": ["copy", "csv", "excel", "pdf", "print"],
+    "language": {
+      "sProcessing": "Traitement en cours...",
+      "sSearch": "Rechercher&nbsp;:",
+      "sLengthMenu": "Afficher _MENU_ éléments",
+      "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+      "sInfoEmpty": "Aucun élément",
+      "sZeroRecords": "Aucun élément à afficher",
+      "sEmptyTable": "Aucune donnée disponible",
+      "oPaginate": {
+        "sFirst": "Premier",
+        "sPrevious": "Précédent",
+        "sNext": "Suivant",
+        "sLast": "Dernier"
+      }
+    }
+  }).buttons().container().appendTo('#example2_wrapper .col-md-6:eq(0)');
+
+  // Select2
+  $('.select2').select2({
+    theme: 'bootstrap4',
+    width: '100%',
+    dropdownParent: $('#reglementModal')
+  });
+
+  // Réinitialiser le formulaire à la fermeture du modal
+  $('#reglementModal').on('hidden.bs.modal', function () {
+    $('#reglementForm')[0].reset();
+    $('.select2').val(null).trigger('change');
+  });
+
+  // Ouvrir automatiquement le modal si viewMode = CREATE
+  @if(viewMode.equals("CREATE")) {
+    $('#reglementModal').modal('show');
+  }
+
+  // ===== SUPPRESSION D'UN RÈGLEMENT (.btn-delete) =====
+  $(document).on('click', '.btn-delete', function () {
+    var id       = $(this).data('id');
+    var adherent = $(this).data('adherent');
+
+    if (!confirm('Voulez-vous vraiment supprimer ce règlement ?')) {
       return;
     }
 
-    console.log('✅ jQuery version:', $.fn.jquery);
-
-    // Fonction pour confirmer un bon
-    window.confirmerBon = function(bonId, adherentId) {
-      if (confirm('Voulez-vous vraiment confirmer ce bon de commande ?')) {
-        $('#loadingModal').modal('show');
-        
-        $.ajax({
-          url: '@controllers.routes.ReglementCtrl.confirmerBon(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
-          type: 'POST',
-          headers: {
-            'Csrf-Token': $('input[name="csrfToken"]').val()
-          },
-          success: function(response) {
-            $('#loadingModal').modal('hide');
-            alert('Bon de commande confirmé avec succès');
-            setTimeout(function() { location.reload(); }, 1000);
-          },
-          error: function(xhr, status, error) {
-            $('#loadingModal').modal('hide');
-            alert('Erreur lors de la confirmation du bon');
-            console.error('Erreur:', error);
-          }
-        });
-      }
-    };
-
-    // Fonction pour réactualiser un bon
-    window.reactualiserBon = function(bonId, adherentId) {
-      if (confirm('⚠️ ATTENTION ⚠️\n\nVoulez-vous vraiment réactualiser ce bon de commande ?\n\nCette action va remettre le statut du bon à "Non confirmé" et permettra de nouveau sa modification.\n\nÊtes-vous sûr de vouloir continuer ?')) {
-        $('#loadingModal').modal('show');
-        
-        $.ajax({
-          url: '@controllers.routes.ReglementCtrl.reactualiserBon(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
-          type: 'POST',
-          headers: {
-            'Csrf-Token': $('input[name="csrfToken"]').val()
-          },
-          success: function(response) {
-            $('#loadingModal').modal('hide');
-            alert('Bon de commande réactualisé avec succès');
-            setTimeout(function() { location.reload(); }, 1000);
-          },
-          error: function(xhr, status, error) {
-            $('#loadingModal').modal('hide');
-            alert('Erreur lors de la réactualisation du bon');
-            console.error('Erreur:', error);
-          }
-        });
-      }
-    };
-
-    // Fonction pour supprimer un bon
-    window.supprimerBon = function(bonId, adherentId) {
-      if (confirm('⚠️ ATTENTION ⚠️\n\nVoulez-vous vraiment supprimer ce règlement ?\n\nCette action est irréversible !\n\nÊtes-vous sûr de vouloir continuer ?')) {
-        console.log('🗑️ Suppression du bon ID:', bonId, 'Adhérent:', adherentId);
-        
-        // Créer un formulaire temporaire pour soumettre en POST
-        var form = $('<form>', {
-          'method': 'POST',
-          'action': '@controllers.routes.ReglementCtrl.save()'
-        });
-        
-        // Récupérer le token CSRF du formulaire existant
-        var csrfToken = $('#reglementForm input[name="csrfToken"]').val();
-        
-        // Ajouter le token CSRF
-        form.append($('<input>', {
-          'type': 'hidden',
-          'name': 'csrfToken',
-          'value': csrfToken
-        }));
-        
-        // Ajouter les champs nécessaires
-        form.append($('<input>', {
-          'type': 'hidden',
-          'name': 'viewMode',
-          'value': 'DELETE'
-        }));
-        
-        form.append($('<input>', {
-          'type': 'hidden',
-          'name': 'id',
-          'value': bonId
-        }));
-        
-        form.append($('<input>', {
-          'type': 'hidden',
-          'name': 'adherent',
-          'value': adherentId
-        }));
-        
-        form.append($('<input>', {
-          'type': 'hidden',
-          'name': 'typeOP',
-          'value': '@typeOP'
-        }));
-
-         form.append($('<input>', {
-          'type': 'hidden',
-          'name': 'benef',
-          'value': '0'
-        }));
-        
-        // Ajouter le formulaire au body et le soumettre
-        $('body').append(form);
-        form.submit();
-      }
-    };
-
-    // Gestionnaire d'événement pour le bouton de suppression
-    $(document).on('click', '.btn-delete', function() {
-      var bonId = $(this).data('id');
-      var adherentId = $(this).data('adherent');
-      
-      console.log('🗑️ Demande de suppression - Bon ID:', bonId, 'Adhérent:', adherentId);
-      
-      supprimerBon(bonId, adherentId);
-    });
-
-    // Fonction pour ouvrir le modal de modification
-$(document).on('click', '.btn-edit', function() {
-  var bonId = $(this).data('id');
-  var benef = $(this).data('benef');
-  var structure = $(this).data('structure');
-  var typePrestation = $(this).data('typeprestation');
-  var isRemboursement = $(this).data('remboursement');
-  
-  console.log('📝 Ouverture modal modification - Bon ID:', bonId);
-  
-  // Changer le mode du formulaire
-  $('#formViewMode').val('EDIT');
-  $('#formReglementId').val(bonId);
-  
-  // Changer le titre du modal
-  $('#reglementModal .modal-title').html('<i class="fas fa-edit"></i> Modifier le @if(typeOP.equals("BC")){Bon de Commande}else{Prise en charge} #' + bonId);
-  
-  // Pré-remplir les champs
-  $('#benef').val(benef).trigger('change');
-  $('#structure').val(structure).trigger('change');
-  
-  // Attendre que la structure soit chargée pour mettre à jour les prestations
-  setTimeout(function() {
-    $('#tprestation').val(typePrestation).trigger('change');
-  }, 300);
-  
-  // Cocher le bon radio pour remboursement
-  if (isRemboursement === true || isRemboursement === 'true') {
-    $('#remboursement_oui').prop('checked', true);
-  } else {
-    $('#remboursement_non').prop('checked', true);
-  }
-  
-  // Ouvrir le modal
-  $('#reglementModal').modal('show');
-});
-
-// Réinitialiser le modal à la fermeture
-$('#reglementModal').on('hidden.bs.modal', function () {
-  $('#reglementForm')[0].reset();
-  $('#formViewMode').val('CREATE');
-  $('#formReglementId').val('');
-  $('#remboursement_non').prop('checked', true);
-  $('#reglementModal .modal-title').html('<i class="fas fa-file-invoice"></i> @if(typeOP.equals("BC")){Nouveau Bon de Commande}else{Nouvelle prise en charge}');
-  
-  if (typeof $.fn.select2 !== 'undefined') {
-    $('.select2').val(null).trigger('change');
-  }
-});
-
-
-    // Configuration DataTable
-    var dtConfig = {
-      "responsive": true,
-      "lengthChange": true,
-      "autoWidth": false,
-      "pageLength": 10,
-      "order": [[8, "asc"]], // Changé de 7 à 8 car nouvelle colonne ajoutée
-      "columnDefs": [
-        {
-          "targets": 6,
-          "className": "text-danger font-weight-bold"
-        },
-        {
-          "targets": [7, 9, 10],
-          "orderable": true,
-          "searchable": false
-        }
-      ],
-      "language": {
-        "sProcessing": "Traitement en cours...",
-        "sSearch": "Rechercher&nbsp;:",
-        "sLengthMenu": "Afficher _MENU_ éléments",
-        "sInfo": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-        "sInfoEmpty": "Affichage de 0 à 0 sur 0 élément",
-        "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
-        "sInfoPostFix": "",
-        "sLoadingRecords": "Chargement...",
-        "sZeroRecords": "Aucun élément correspondant trouvé",
-        "sEmptyTable": "Aucune donnée disponible dans le tableau",
-        "oPaginate": {
-          "sFirst": "Premier",
-          "sPrevious": "Précédent",
-          "sNext": "Suivant",
-          "sLast": "Dernier"
-        },
-        "oAria": {
-          "sSortAscending": ": activer pour trier la colonne par ordre croissant",
-          "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
-        }
-      }
-    };
-
-    try {
-      var table = $("#reglementTable").DataTable(dtConfig);
-      console.log('✅ DataTable initialisé');
-    } catch(e) {
-      console.error('❌ Erreur DataTable:', e);
-    }
-
-    if (typeof $.fn.select2 !== 'undefined') {
-      try {
-        $('.select2').select2({
-          theme: 'bootstrap4',
-          width: '100%',
-          dropdownParent: $('#reglementModal')
-        });
-        console.log('✅ Select2 initialisé');
-      } catch(e) {
-        console.warn('⚠️ Select2 non disponible, utilisation des selects standards');
-      }
-    } else {
-      console.warn('⚠️ Select2 non chargé, utilisation des selects standards');
-      $('.select2').removeClass('select2');
-    }
-
-    // ========== GESTION DYNAMIQUE DES TAUX PUBLIC/PRIVÉ ==========
-    
-    function normalizeStatut(statut) {
-      if (!statut) return '';
-      var statutUpper = String(statut).toUpperCase().trim();
-      if (statutUpper === 'PUBLIC' || statutUpper === 'PUBLIQUE') {
-        return 'PUBLIC';
-      } else if (statutUpper.indexOf('PRIV') !== -1) {
-        return 'PRIVE';
-      }
-      return statutUpper;
-    }
-    
-    function updatePrestationOptions(statutStructure) {
-      var prestationSelect = $('#tprestation');
-      var statut = normalizeStatut(statutStructure);
-      
-      console.log('📋 Mise à jour prestations - Statut structure:', statut);
-      
-      var compteur = 0;
-      prestationSelect.find('option').each(function() {
-        var $option = $(this);
-        
-        if ($option.val() === '') return;
-        
-        var tauxPublic = $option.data('taux-public');
-        var tauxPrive = $option.data('taux-prive');
-        var prestation = $option.data('prestation');
-        
-        if (!tauxPublic || !tauxPrive || !prestation) {
-          console.warn('⚠️ Données manquantes pour option:', $option.val());
-          return;
-        }
-        
-        var tauxAffiche = (statut === 'PUBLIC') ? tauxPublic : tauxPrive;
-        $option.text(prestation + ' - ' + tauxAffiche + '%');
-        
-        console.log('  ✓', prestation, '→', tauxAffiche + '% (' + (statut === 'PUBLIC' ? 'Public' : 'Privé') + ')');
-        compteur++;
-      });
-      
-      console.log('✅', compteur, 'prestations mises à jour');
-      
-      if (typeof $.fn.select2 !== 'undefined') {
-        prestationSelect.trigger('change.select2');
-      }
-    }
-    
-    $('#structure').on('change', function() {
-      var $selectedOption = $(this).find('option:selected');
-      var statutStructure = $selectedOption.data('statut');
-      
-      console.log('🏥 Structure changée:', $selectedOption.text());
-      console.log('   Statut:', statutStructure);
-      
-      $('#tprestation').val('');
-      if (typeof $.fn.select2 !== 'undefined') {
-        $('#tprestation').trigger('change');
-      }
-      
-      if (statutStructure) {
-        updatePrestationOptions(statutStructure);
-      } else {
-        console.warn('⚠️ Pas de statut pour cette structure');
-      }
-    });
-    
-    var initialStructure = $('#structure').val();
-    if (initialStructure) {
-      var initialStatut = $('#structure').find('option:selected').data('statut');
-      console.log('🔄 Initialisation avec structure:', initialStructure, 'Statut:', initialStatut);
-      if (initialStatut) {
-        updatePrestationOptions(initialStatut);
-      }
-    } else {
-      console.log('ℹ️ Aucune structure sélectionnée au chargement');
-    }
-    
-    console.log('✅ Gestion dynamique des taux initialisée');
-
-    $('#reglementModal').on('hidden.bs.modal', function () {
-      $('#reglementForm')[0].reset();
-      // Remettre "Non" par défaut pour le remboursement
-      $('#remboursement_non').prop('checked', true);
-      if (typeof $.fn.select2 !== 'undefined') {
-        $('.select2').val(null).trigger('change');
-      }
-    });
-
-    console.log('✅ Initialisation complète terminée');
-
-  }, 200);
-  
+    // Redirection vers la route DELETE existante du contrôleur
+    window.location.href = '/Reglement/show/DELETE/?idOrd=' + id + '&idConsult=' + adherent;
+  });
 });
 </script>
 
 <style>
-/* Info boxes */
 .info-box-number { 
   font-size: 1.5rem; 
   font-weight: bold; 
 }
-
-/* Modal headers */
 .modal-header.bg-primary,
 .modal-header.bg-info { 
   color: white; 
 }
-
-/* Select2 */
 .select2-container { 
   z-index: 9999 !important; 
-}
-
-/* Table responsiveness */
-.table-responsive {
-  overflow-x: auto;
-}
-
-/* Date expiration styling */
-#reglementTable tbody tr td:nth-child(7) {
-  background-color: #ffe6e6;
-  font-weight: bold;
-  color: #dc3545 !important;
-}
-
-/* Badges styling */
-.badge {
-  font-size: 0.85rem;
-  padding: 0.4em 0.6em;
-}
-
-.badge i {
-  margin-right: 4px;
-}
-
-/* Badge remboursement */
-.badge-info {
-  background-color: #17a2b8 !important;
-}
-
-/* Button groups */
-.btn-group {
-  white-space: nowrap;
-}
-
-.btn-group .btn {
-  margin: 0 2px;
-}
-
-/* DataTable buttons */
-.dt-buttons {
-  margin-bottom: 15px;
-}
-
-.dt-buttons .btn {
-  margin-right: 5px;
-  margin-bottom: 5px;
-}
-
-/* Statut column styling */
-.d-flex {
-  display: flex !important;
-}
-
-.align-items-center {
-  align-items: center !important;
-}
-
-.justify-content-center {
-  justify-content: center !important;
-}
-
-.mr-2 {
-  margin-right: 0.5rem !important;
-}
-
-.ml-2 {
-  margin-left: 0.5rem !important;
-}
-
-/* Form check inline styling */
-.form-check-inline {
-  margin-right: 1rem;
-}
-
-.form-check-input {
-  margin-right: 0.3rem;
-}
-
-/* Responsive adjustments */
-@@media (max-width: 768px) {
-  .btn-group {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .btn-group .btn {
-    margin-bottom: 5px;
-    width: 100%;
-  }
-  
-  .d-flex {
-    flex-direction: column !important;
-  }
-  
-  .mr-2 {
-    margin-right: 0 !important;
-    margin-bottom: 0.5rem !important;
-  }
-}
-
-/* Bon consommé styling */
-.badge-secondary {
-  background-color: #6c757d !important;
-}
-
-/* Bouton désactivé styling */
-.btn-warning:disabled,
-.btn-warning.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: #ffc107;
-  border-color: #ffc107;
-}
-
-.btn-warning:disabled:hover,
-.btn-warning.disabled:hover {
-  background-color: #ffc107;
-  border-color: #ffc107;
-}
-
-/* Bouton réactualiser styling */
-.btn-secondary {
-  background-color: #6c757d;
-  border-color: #6c757d;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-  border-color: #545b62;
-}
-
-.btn-secondary:active {
-  transform: rotate(180deg);
-  transition: transform 0.3s ease;
 }
 </style>
 
