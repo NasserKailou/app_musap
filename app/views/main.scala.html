@@ -16,8 +16,9 @@
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="@routes.Assets.versioned("plugins/fontawesome-free/css/all.min.css")">
   
-  <!-- Ionicons -->
-  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Ionicons 
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"> -->
+  <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/ionicons.min.css")">
   
   <!-- AdminLTE Theme style -->
   <link rel="stylesheet" href="@routes.Assets.versioned("dist/css/adminlte.min.css")">
@@ -38,9 +39,12 @@
   
   <!-- Custom CSS -->
   <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/main.css")">
-  <!-- Select2 via CDN (solution temporaire) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@@4.1.0-rc.0/dist/css/select2.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@ttskch/select2-bootstrap4-theme@@1.5.2/dist/select2-bootstrap4.min.css">
+  <!-- Select2 via CDN (solution temporaire) 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@@4.1.0-rc.0/dist/css/select2.min.css"> -->
+ <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/cdnSelect.min.css")">
+ <!-- Select2 via CDN (solution temporaire)
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@ttskch/select2-bootstrap4-theme@@1.5.2/dist/select2-bootstrap4.min.css">  -->
+ <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/cdnSelect2-bootstrap4.min.css")">
 
 
 </head>
@@ -441,10 +445,14 @@
 <!-- Summernote -->
 <script src="@routes.Assets.versioned("plugins/summernote/summernote-bs4.min.js")"></script>
 
-<!-- Chart.js -->
+<!-- Chart.js
 <script src="https://cdn.jsdelivr.net/npm/chart.js@@2.9.4/dist/Chart.min.js"></script>
-<!-- Select2 via CDN -->
-<script src="https://cdn.jsdelivr.net/npm/select2@@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  --> 
+ <script src="@routes.Assets.versioned("javascripts/cdnChart.min.js")"></script>
+
+<!-- Select2 via CDN
+<script src="https://cdn.jsdelivr.net/npm/select2@@4.1.0-rc.0/dist/js/select2.min.js"></script> --> 
+<script src="@routes.Assets.versioned("javascripts/cdnSelect2.min.js")"></script>
 
 <!-- Custom Scripts -->
 <script src="@routes.Assets.versioned("javascripts/autocomplete.js")"></script>
