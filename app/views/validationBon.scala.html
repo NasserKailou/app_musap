@@ -117,6 +117,32 @@
       </div>
     }
 
+    @* ================== ALERTE BONS EXPIRÉS + VALIDATION EN MASSE ================== *@
+    @if(bonsExpires.nonEmpty && request.session.get("droit").isPresent &&
+        (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Validateur")) {
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+              <div>
+                <h5 class="mb-1"><i class="icon fas fa-exclamation-circle"></i> Bons Expirés Détectés</h5>
+                <span><strong>@bonsExpires.size bon@if(bonsExpires.size > 1){s}</strong> expiré@if(bonsExpires.size > 1){s} — validation possible malgré le délai dépassé.</span>
+              </div>
+              <div class="mt-2 mt-md-0">
+                <button type="button" class="btn btn-danger btn-sm font-weight-bold"
+                        id="btnValiderTousExpires" onclick="confirmerTousBonsExpires()">
+                  <i class="fas fa-check-double"></i> Valider tous les bons expirés (@bonsExpires.size)
+                </button>
+              </div>
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div id="bonsExpiresData" style="display:none;"
+               data-ids="@bonsExpires.map(r => r.getId().toString + '|' + r.getIdAdherent().toString).mkString(\",\")"></div>
+        </div>
+      </div>
+    }
+
     @* ================== LISTE DES Bon de commande NON CONFIRMÉS ================== *@
     <div class="row">
       <div class="col-12">
@@ -126,6 +152,9 @@
               <i class="fas fa-list"></i> Liste des Bons à valider
               @if(bonsEnInstance > 0) {
                 <span class="badge badge-warning ml-2">@bonsEnInstance en attente</span>
+              }
+              @if(bonsExpires.nonEmpty) {
+                <span class="badge badge-danger ml-2">@bonsExpires.size expiré@if(bonsExpires.size > 1){s}</span>
               }
             </h3>
           </div>
@@ -177,11 +206,14 @@
                         (datePayement, dateExpiration, joursRestants, estExpire, isRemboursement)
                       }) { case (datePayement, dateExpiration, joursRestants, estExpire, isRemboursement) =>
 
-                        <tr @if(!estExpire){class="table-warning-light"}>
+                        <tr @if(!estExpire){class="table-warning-light"}@if(estExpire){class="table-danger-light"}>
                           <td>
                             <strong>@c.getId()</strong>
                             @if(!estExpire) {
                               <span class="badge badge-warning badge-sm ml-1">À valider</span>
+                            }
+                            @if(estExpire) {
+                              <span class="badge badge-danger badge-sm ml-1">Expiré</span>
                             }
                           </td>
                           <td>@c.getMontantTotal() F CFA</td>
@@ -227,25 +259,32 @@
                           
                           @* Colonne Statut *@
                           <td class="text-center" data-order="0">
-                            <div class="d-flex align-items-center justify-content-center">
-                              <span class="badge badge-warning mr-2">
-                                <i class="fas fa-hourglass-half"></i> Non confirmé
+                            <div class="d-flex align-items-center justify-content-center flex-wrap">
+                              <span class="badge @if(estExpire){badge-danger}else{badge-warning} mr-2">
+                                @if(estExpire){
+                                  <i class="fas fa-clock"></i> Expiré non confirmé
+                                }else{
+                                  <i class="fas fa-hourglass-half"></i> Non confirmé
+                                }
                               </span>
-                              
-                              @if(!estExpire && request.session.get("droit").isPresent && 
+                              @if(!estExpire && request.session.get("droit").isPresent &&
                                   (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Validateur")) {
                                 <button type="button"
                                         class="btn btn-sm btn-primary"
                                         onclick="confirmerBon(@c.getId(), @c.getIdAdherent())"
                                         title="Confirmer le bon">
-                                  <i class="fas fa-check"></i>
+                                  <i class="fas fa-check"></i> Valider
                                 </button>
                               }
-                              
-                              @if(estExpire) {
-                                <span class="badge badge-danger ml-2">
-                                  <i class="fas fa-ban"></i> Impossible de confirmer
-                                </span>
+                              @* Bouton valider malgré expiration *@
+                              @if(estExpire && request.session.get("droit").isPresent &&
+                                  (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Validateur")) {
+                                <button type="button"
+                                        class="btn btn-sm btn-warning mt-1"
+                                        onclick="confirmerBonExpire(@c.getId(), @c.getIdAdherent())"
+                                        title="Valider ce bon même si expiré">
+                                  <i class="fas fa-exclamation-triangle"></i> Valider (expiré)
+                                </button>
                               }
                             </div>
                           </td>
@@ -732,6 +771,68 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     };
 
+    // ========== FONCTION CONFIRMER BON EXPIRÉ ==========
+    window.confirmerBonExpire = function(bonId, adherentId) {
+      if (confirm('⚠️ Ce bon est EXPIRÉ. Voulez-vous quand même le valider ?')) {
+        $('#loadingModal').modal('show');
+        var csrfToken = $('input[name="csrfToken"]').val();
+        $.ajax({
+          url: '@controllers.routes.ReglementCtrl.confirmerBon(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
+          type: 'POST',
+          data: { csrfToken: csrfToken },
+          success: function(response) {
+            $('#loadingModal').modal('hide');
+            alert('✅ Bon expiré validé avec succès');
+            setTimeout(function() { location.reload(); }, 500);
+          },
+          error: function(xhr) {
+            $('#loadingModal').modal('hide');
+            alert('❌ Erreur lors de la validation du bon expiré: ' + (xhr.responseText || xhr.status));
+          },
+          complete: function() { $('#loadingModal').modal('hide'); }
+        });
+      }
+    };
+
+    // ========== FONCTION CONFIRMER TOUS LES BONS EXPIRÉS ==========
+    window.confirmerTousBonsExpires = function() {
+      var dataEl = document.getElementById('bonsExpiresData');
+      if (!dataEl) { alert('Aucun bon expiré trouvé.'); return; }
+      var idsRaw = dataEl.getAttribute('data-ids');
+      if (!idsRaw || idsRaw.trim() === '') { alert('Aucun bon expiré à valider.'); return; }
+      var paires = idsRaw.split(',').filter(function(s){ return s.trim() !== ''; });
+      if (paires.length === 0) { alert('Aucun bon expiré à valider.'); return; }
+      if (!confirm('⚠️ Voulez-vous vraiment valider tous les ' + paires.length + ' bons expirés ?')) return;
+      $('#loadingModal').modal('show');
+      var csrfToken = $('input[name="csrfToken"]').val();
+      var total = paires.length;
+      var done = 0;
+      var errors = 0;
+      function processNext(index) {
+        if (index >= paires.length) {
+          $('#loadingModal').modal('hide');
+          if (errors > 0) {
+            alert('✅ ' + done + ' bon(s) validé(s). ❌ ' + errors + ' erreur(s).');
+          } else {
+            alert('✅ Tous les ' + done + ' bons expirés ont été validés avec succès !');
+          }
+          setTimeout(function() { location.reload(); }, 500);
+          return;
+        }
+        var parts = paires[index].trim().split('|');
+        var bonId = parts[0];
+        var adherentId = parts[1] || '0';
+        $.ajax({
+          url: '@controllers.routes.ReglementCtrl.confirmerBon(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
+          type: 'POST',
+          data: { csrfToken: csrfToken },
+          success: function() { done++; processNext(index + 1); },
+          error: function() { errors++; processNext(index + 1); }
+        });
+      }
+      processNext(0);
+    };
+
     // ========== INITIALISATION DATATABLE (uniquement si le tableau existe) ==========
     if ($('#reglementTable').length > 0) {
       var dtConfig = {
@@ -944,6 +1045,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .table-warning-light:hover {
   background-color: #ffe8a1 !important;
+}
+
+/* Ligne expirée */
+.table-danger-light {
+  background-color: #fde8e8 !important;
+}
+
+.table-danger-light:hover {
+  background-color: #f5c6cb !important;
 }
 
 /* Date expiration styling */

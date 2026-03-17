@@ -373,6 +373,56 @@ public Result printCarte(Request request, Long idAdherent, String fileName) {
 
 	}	
 
+	/**
+	 * Suppression logique d'un Adhérent : passe onDeleted à true.
+	 * Réservé à l'Admin uniquement.
+	 */
+	public Result softDeleteAdherent(Request request, Long idAdherent) {
+		try {
+			String droit = request.session().get("droit").orElse("");
+			if (!droit.equals("Admin")) {
+				return forbidden("Action réservée à l'administrateur");
+			}
+			Adherent ad = adherentService.findById(idAdherent);
+			if (ad == null) {
+				return notFound("Adhérent non trouvé");
+			}
+			ad.setOnDeleted(true);
+			ad.setWhenDone(new Timestamp(System.currentTimeMillis()));
+			ad.setWhoDone(request.session().get("login").orElse("Admin"));
+			adherentService.saveLogical(ad, false);
+			return ok("Adhérent supprimé logiquement avec succès");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return internalServerError("Erreur lors de la suppression logique de l'adhérent");
+		}
+	}
+
+	/**
+	 * Réactivation d'un Adhérent : passe onDeleted à false.
+	 * Réservé à l'Admin uniquement.
+	 */
+	public Result reactiverAdherent(Request request, Long idAdherent) {
+		try {
+			String droit = request.session().get("droit").orElse("");
+			if (!droit.equals("Admin")) {
+				return forbidden("Action réservée à l'administrateur");
+			}
+			Adherent ad = adherentService.findById(idAdherent);
+			if (ad == null) {
+				return notFound("Adhérent non trouvé");
+			}
+			ad.setOnDeleted(false);
+			ad.setWhenDone(new Timestamp(System.currentTimeMillis()));
+			ad.setWhoDone(request.session().get("login").orElse("Admin"));
+			adherentService.saveLogical(ad, false);
+			return ok("Adhérent réactivé avec succès");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return internalServerError("Erreur lors de la réactivation de l'adhérent");
+		}
+	}
+
 	public Result path(Request request, String path) {
 		return ok(new File(path));
 	}

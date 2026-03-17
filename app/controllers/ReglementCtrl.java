@@ -1109,6 +1109,54 @@ if (0 == idReglement) {
 	}
 
 
+	/**
+	 * Suppression logique d'un Règlement : passe onDeleted à true
+	 * Réservé à l'Admin uniquement
+	 */
+	public Result softDeleteReglement(Long bonId, Long adherentId, Request request) {
+		try {
+			String droit = request.session().get("droit").orElse("");
+			if (!droit.equals("Admin")) {
+				return forbidden("Action réservée à l'administrateur");
+			}
+			Reglement reglement = regServices.findById(bonId);
+			if (reglement == null) {
+				return notFound("Règlement non trouvé");
+			}
+			reglement.setOnDeleted(true);
+			regServices.update(reglement);
+			Logger.info("Règlement supprimé logiquement - ID: " + bonId + " par: " + request.session().get("login").orElse("?"));
+			return ok("Règlement supprimé logiquement avec succès");
+		} catch (Exception e) {
+			Logger.error("Erreur softDeleteReglement: " + e.getMessage(), e);
+			return internalServerError("Erreur lors de la suppression logique");
+		}
+	}
+
+	/**
+	 * Réactivation d'un Règlement : passe onDeleted à false
+	 * Réservé à l'Admin uniquement
+	 */
+	public Result reactiverReglement(Long bonId, Long adherentId, Request request) {
+		try {
+			String droit = request.session().get("droit").orElse("");
+			if (!droit.equals("Admin")) {
+				return forbidden("Action réservée à l'administrateur");
+			}
+			Reglement reglement = regServices.findById(bonId);
+			if (reglement == null) {
+				return notFound("Règlement non trouvé");
+			}
+			reglement.setOnDeleted(false);
+			regServices.update(reglement);
+			Logger.info("Règlement réactivé - ID: " + bonId + " par: " + request.session().get("login").orElse("?"));
+			return ok("Règlement réactivé avec succès");
+		} catch (Exception e) {
+			Logger.error("Erreur reactiverReglement: " + e.getMessage(), e);
+			return internalServerError("Erreur lors de la réactivation");
+		}
+	}
+
 	public Result print(Request request, Long numBon, String fileName) {
 
 		// String fileName = "recu";

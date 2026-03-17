@@ -19,7 +19,15 @@
   ayantDroits: List[models.tables.pojos.VAdherentAyantDroit]
 )(implicit request: Http.Request)
 
+@defining({
+  val reglementActifs = reglements.filter(r => r.getOnDeleted() == null || r.getOnDeleted() == false)
+  val reglementSupprimes = reglements.filter(r => r.getOnDeleted() != null && r.getOnDeleted() == true)
+  (reglementActifs, reglementSupprimes)
+}) { case (reglementActifs, reglementSupprimes) =>
+
 @main("Bon de Commande") {
+
+@helper.CSRF.formField
 
 <!-- Content Header -->
 <section class="content-header">
@@ -179,7 +187,7 @@
                   </tr>
                 </thead>
              <tbody>
-        @for(c <- reglements) {
+        @for(c <- reglementActifs) {
         @defining({
           val datePayement = c.getDatePayement().toLocalDateTime()
           val dateExpiration = c.getDateExpiration().toLocalDateTime()
@@ -335,11 +343,10 @@
 
     @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "Admin") {
       <button type="button"
-              class="btn btn-danger btn-sm btn-delete"
-              data-id="@c.getId()"
-              data-adherent="@c.getIdAdherent()"
-              title="Supprimer">
-        <i class="fas fa-trash"></i>
+              class="btn btn-danger btn-sm"
+              onclick="softDeleteReglement(@c.getId(), @c.getIdAdherent())"
+              title="Suppression logique (archiver)">
+        <i class="fas fa-archive"></i>
       </button>
     } 
     
@@ -365,6 +372,86 @@
     </div>
 
   </div>
+
+  @* ================== LISTE DES RÈGLEMENTS SUPPRIMÉS (onDeleted=true) ================== *@
+  @if(reglementSupprimes.nonEmpty) {
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card card-danger card-outline">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-archive"></i> Règlements archivés
+            <span class="badge badge-danger ml-2">@reglementSupprimes.size archivé@if(reglementSupprimes.size > 1){s}</span>
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table id="reglementTableSupp" class="table table-bordered table-hover table-sm" style="width:100%">
+              <thead class="table-danger">
+                <tr>
+                  <th>N°BC</th>
+                  <th>Montant Total</th>
+                  <th>Montant Couvert</th>
+                  <th>Structure</th>
+                  <th>Date Délivré</th>
+                  <th>Date Expiration</th>
+                  <th>Statut</th>
+                  @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "Admin") {
+                    <th class="text-center">Réactivation (Admin)</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+              @for(c <- reglementSupprimes) {
+                @defining({
+                  val datePayement = c.getDatePayement().toLocalDateTime()
+                  val dateExpiration = c.getDateExpiration().toLocalDateTime()
+                  val isConfirmedValue = c.getIsConfirmedBon()
+                  val isConfirmed: Boolean = (isConfirmedValue != null && isConfirmedValue == true)
+                  (datePayement, dateExpiration, isConfirmed)
+                }) { case (datePayement, dateExpiration, isConfirmed) =>
+                <tr class="table-secondary">
+                  <td><strong class="text-muted">@c.getId()</strong>
+                    <span class="badge badge-danger badge-sm ml-1"><i class="fas fa-archive"></i> Archivé</span>
+                  </td>
+                  <td class="text-muted">@c.getMontantTotal() F CFA</td>
+                  <td class="text-muted">@c.getMontantReglement() F CFA</td>
+                  <td class="text-muted">@c.getStructure()</td>
+                  <td class="text-muted">@datePayement.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</td>
+                  <td class="text-muted">@dateExpiration.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))</td>
+                  <td class="text-center">
+                    @if(isConfirmed) {
+                      <span class="badge badge-success"><i class="fas fa-check-circle"></i> Confirmé</span>
+                    } else {
+                      <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Non confirmé</span>
+                    }
+                  </td>
+                  @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "Admin") {
+                    <td class="text-center">
+                      <button type="button"
+                              class="btn btn-success btn-sm"
+                              onclick="reactiverReglement(@c.getId(), @c.getIdAdherent())"
+                              title="Réactiver ce règlement">
+                        <i class="fas fa-undo"></i> Réactiver
+                      </button>
+                    </td>
+                  }
+                </tr>
+                }
+              }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
 
   <!-- Modal Loader -->
 <div class="modal fade" id="loadingModal" data-backdrop="static" data-keyboard="false" tabindex="-1">
@@ -710,6 +797,52 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Erreur lors de la réactualisation du bon');
             console.error('Erreur:', error);
           }
+        });
+      }
+    };
+
+    // ========== SUPPRESSION LOGIQUE D'UN RÈGLEMENT ==========
+    window.softDeleteReglement = function(bonId, adherentId) {
+      if (confirm('⚠️ Voulez-vous archiver ce règlement ?\n\nCette action est réversible par un Administrateur.')) {
+        $('#loadingModal').modal('show');
+        var csrfToken = $('#reglementForm input[name="csrfToken"]').val();
+        $.ajax({
+          url: '@controllers.routes.ReglementCtrl.softDeleteReglement(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
+          type: 'POST',
+          headers: { 'Csrf-Token': csrfToken },
+          success: function(response) {
+            $('#loadingModal').modal('hide');
+            alert('✅ Règlement archivé avec succès');
+            setTimeout(function() { location.reload(); }, 500);
+          },
+          error: function(xhr) {
+            $('#loadingModal').modal('hide');
+            alert('❌ Erreur lors de l\'archivage: ' + (xhr.responseText || 'Erreur ' + xhr.status));
+          },
+          complete: function() { $('#loadingModal').modal('hide'); }
+        });
+      }
+    };
+
+    // ========== RÉACTIVATION D'UN RÈGLEMENT ARCHIVÉ ==========
+    window.reactiverReglement = function(bonId, adherentId) {
+      if (confirm('Voulez-vous réactiver ce règlement archivé ?')) {
+        $('#loadingModal').modal('show');
+        var csrfToken = $('#reglementForm input[name="csrfToken"]').val();
+        $.ajax({
+          url: '@controllers.routes.ReglementCtrl.reactiverReglement(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
+          type: 'POST',
+          headers: { 'Csrf-Token': csrfToken },
+          success: function(response) {
+            $('#loadingModal').modal('hide');
+            alert('✅ Règlement réactivé avec succès');
+            setTimeout(function() { location.reload(); }, 500);
+          },
+          error: function(xhr) {
+            $('#loadingModal').modal('hide');
+            alert('❌ Erreur lors de la réactivation: ' + (xhr.responseText || 'Erreur ' + xhr.status));
+          },
+          complete: function() { $('#loadingModal').modal('hide'); }
         });
       }
     };
@@ -1147,4 +1280,5 @@ $('#reglementModal').on('hidden.bs.modal', function () {
 }
 </style>
 
+}
 }

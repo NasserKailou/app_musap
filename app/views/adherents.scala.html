@@ -9,7 +9,15 @@
   cats: List[models.tables.pojos.Categorie],
   prgms: List[models.tables.pojos.Programme])(implicit request: Http.Request)
 
+@defining({
+  val adherentsActifs = adherents.filter(a => a.getOnDeleted() == null || a.getOnDeleted() == false)
+  val adherentsSupprimes = adherents.filter(a => a.getOnDeleted() != null && a.getOnDeleted() == true)
+  (adherentsActifs, adherentsSupprimes)
+}) { case (adherentsActifs, adherentsSupprimes) =>
+
 @main("Adherent") {
+
+@helper.CSRF.formField
 
 <script type="text/javascript">
   function openPopup(target, x, y, w, h) {
@@ -607,7 +615,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for(c <- adherents) {
+                  @for(c <- adherentsActifs) {
                     @defining({
                       val montantReglement = if(c.getMontantReglementCouvert() != null) c.getMontantReglementCouvert().doubleValue() else 0.0
                       val creditAnnuelle = if(c.getTotalCreditAnnuelle() != null) c.getTotalCreditAnnuelle().doubleValue() else 0.0
@@ -732,12 +740,12 @@
                               <i class="fas fa-edit"></i>
                             </button>
                             
-                            <a class="btn btn-danger btn-sm"
-                               title="Désactiver adhérent"
-                               href='@controllers.routes.AdherentCtrl.show("DELETE", c.getId())'
-                               onclick="return window.confirm('Voulez-vous vraiment désactiver cet adhérent ?');">
-                              <i class="fas fa-trash"></i>
-                            </a>
+                            <button type="button"
+                                    class="btn btn-danger btn-sm"
+                                    onclick="softDeleteAdherent(@c.getId())"
+                                    title="Archiver cet adhérent (suppression logique)">
+                              <i class="fas fa-user-slash"></i>
+                            </button>
                           }
 
                           @if(request.session.get("droit").isPresent &&(request.session.get("droit").get() == "Adherent")) {
@@ -814,8 +822,71 @@
       </div>
     </div>
 
+    @* ================== LISTE DES ADHÉRENTS ARCHIVÉS (onDeleted=true) ================== *@
+    @if(adherentsSupprimes.nonEmpty && request.session.get("droit").isPresent && request.session.get("droit").get() == "Admin") {
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card card-danger card-outline">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-user-slash"></i> Adhérents archivés
+              <span class="badge badge-danger ml-2">@adherentsSupprimes.size archivé@if(adherentsSupprimes.size > 1){s}</span>
+            </h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="adherentsTableSupp" class="table table-bordered table-sm text-center w-100">
+                <thead class="bg-danger text-white">
+                  <tr>
+                    <th>Photo</th>
+                    <th>Matricule</th>
+                    <th>Code Carnet</th>
+                    <th>Nom & Prénom</th>
+                    <th>Téléphone</th>
+                    <th>Réactivation (Admin)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for(c <- adherentsSupprimes) {
+                    <tr class="table-secondary">
+                      <td class="img-cell">
+                        <img src="@controllers.routes.AdherentCtrl.path(c.getPicture())"
+                             class="circle adherantImage" alt="Photo"
+                             style="opacity: 0.5;">
+                      </td>
+                      <td class="text-muted">@c.getMatricule()</td>
+                      <td class="text-muted">@c.getCodeCarnet()</td>
+                      <td class="text-muted">
+                        <s>@c.getNomAd() @c.getPrenomAd()</s>
+                        <span class="badge badge-danger badge-sm ml-1"><i class="fas fa-user-slash"></i> Archivé</span>
+                      </td>
+                      <td class="text-muted">@c.getTelephone()</td>
+                      <td class="text-center">
+                        <button type="button"
+                                class="btn btn-success btn-sm"
+                                onclick="reactiverAdherent(@c.getId())"
+                                title="Réactiver cet adhérent">
+                          <i class="fas fa-user-check"></i> Réactiver
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
     @* ================== MODALES DETAILS ADHERENT ================== *@
-    @for(c <- adherents) {
+    @for(c <- adherentsActifs) {
       @defining({
         val montantReglement = if(c.getMontantReglementCouvert() != null) c.getMontantReglementCouvert().doubleValue() else 0.0
         val creditAnnuelle = if(c.getTotalCreditAnnuelle() != null) c.getTotalCreditAnnuelle().doubleValue() else 0.0
@@ -918,7 +989,7 @@ function cleanString(str) {
 // Données des adhérents - chargées de manière sécurisée
 const adherentsData = {};
 
-@defining(adherents) { adherentsList =>
+@defining(adherentsActifs) { adherentsList =>
   @for(c <- adherentsList) {
     try {
       adherentsData['@c.getId()'] = {
@@ -1046,6 +1117,42 @@ function setValueById(id, value) {
   }
 }
 
+// ========== SUPPRESSION LOGIQUE D'UN ADHÉRENT ==========
+window.softDeleteAdherent = function(adherentId) {
+  if (!confirm("⚠️ Voulez-vous archiver cet adhérent ?\n\nToutes ses fonctionnalités (bons, etc.) seront désactivées.\nCette action est réversible par un Administrateur.")) return;
+  var csrfToken = $("input[name=\"csrfToken\"]").first().val();
+  $.ajax({
+    url: "@controllers.routes.AdherentCtrl.softDeleteAdherent(0)".replace("/0", "/" + adherentId),
+    type: "POST",
+    headers: { "Csrf-Token": csrfToken },
+    success: function(response) {
+      alert("✅ Adhérent archivé avec succès");
+      setTimeout(function() { location.reload(); }, 500);
+    },
+    error: function(xhr) {
+      alert("❌ Erreur lors de l'archivage: " + (xhr.responseText || "Erreur " + xhr.status));
+    }
+  });
+};
+
+// ========== RÉACTIVATION D'UN ADHÉRENT ARCHIVÉ ==========
+window.reactiverAdherent = function(adherentId) {
+  if (!confirm("Voulez-vous réactiver cet adhérent ?")) return;
+  var csrfToken = $("input[name=\"csrfToken\"]").first().val();
+  $.ajax({
+    url: "@controllers.routes.AdherentCtrl.reactiverAdherent(0)".replace("/0", "/" + adherentId),
+    type: "POST",
+    headers: { "Csrf-Token": csrfToken },
+    success: function(response) {
+      alert("✅ Adhérent réactivé avec succès");
+      setTimeout(function() { location.reload(); }, 500);
+    },
+    error: function(xhr) {
+      alert("❌ Erreur lors de la réactivation: " + (xhr.responseText || "Erreur " + xhr.status));
+    }
+  });
+};
+
 // === INITIALISATION ===
 document.addEventListener('DOMContentLoaded', function () {
   console.log('=== Init Page ===');
@@ -1171,4 +1278,5 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+}
 }
