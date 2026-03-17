@@ -811,7 +811,7 @@ if (0 == idReglement) {
 		c.setWhoDone(String.valueOf(request.session().get("login").get()));
 		c.setDatePayement(new Timestamp(System.currentTimeMillis()));
 		c.setTypeReglement(typeOperation);
-		long thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000;
+		long thirtyDaysInMillis = 46L * 24 * 60 * 60 * 1000;
 		Timestamp dateExpiration = new Timestamp((new Timestamp(System.currentTimeMillis())).getTime() + thirtyDaysInMillis);
 		c.setDateExpiration(dateExpiration);
 		c.setIsConfirmedBon(false);

@@ -56,7 +56,7 @@ public class AdherentMainServices extends AdherentDao {
 	 */
 	public List<VAdherent> listeAdherents() {
 		List<VAdherent> c = con.connection().selectFrom(models.Tables.V_ADHERENT)
-				.where(models.Tables.V_ADHERENT.ON_DELETED.isFalse()).orderBy(models.Tables.V_ADHERENT.ID.desc())
+				.where(models.Tables.V_ADHERENT.ON_DELETED.isFalse()).or(models.Tables.V_ADHERENT.ON_DELETED.isTrue()).orderBy(models.Tables.V_ADHERENT.ID.desc())
 				.fetchInto(VAdherent.class);
 		con.connection().close();
 		return c;

@@ -96,7 +96,7 @@ public class ReglementMainServices extends ReglementDao {
 		// String gestion = String.valueOf(d).substring(0, 4);
 		//System.out.println("la date est :" + d + " gestion :" + gestion);
 
-		List<VReglement> c = con.connection().selectFrom(V_REGLEMENT).where(V_REGLEMENT.ON_DELETED.isFalse())
+		List<VReglement> c = con.connection().selectFrom(V_REGLEMENT).where((V_REGLEMENT.ON_DELETED.isFalse()).or(V_REGLEMENT.ON_DELETED.isTrue()))
 				.and(V_REGLEMENT.ID_ADHERENT.eq(idAdherent)).and(V_REGLEMENT.ANNEE.eq(gestion)).and(V_REGLEMENT.TYPE_STRUCTURE.eq("PHARMACIE"))//
 				.fetchInto(VReglement.class);
 		con.connection().close();
@@ -109,7 +109,7 @@ public class ReglementMainServices extends ReglementDao {
 		// String gestion = String.valueOf(d).substring(0, 4);
 		//System.out.println("la date est :" + d + " gestion :" + gestion);
 
-		List<VReglement> c = con.connection().selectFrom(V_REGLEMENT).where(V_REGLEMENT.ON_DELETED.isFalse())
+		List<VReglement> c = con.connection().selectFrom(V_REGLEMENT).where((V_REGLEMENT.ON_DELETED.isFalse()).or(V_REGLEMENT.ON_DELETED.isTrue()))
 				.and(V_REGLEMENT.ID_ADHERENT.eq(idAdherent)).and(V_REGLEMENT.ANNEE.eq(gestion))
 				.and(V_REGLEMENT.TYPE_STRUCTURE.eq("HOPITAL").or(V_REGLEMENT.TYPE_STRUCTURE.eq("CLINIQUE")).or(V_REGLEMENT.TYPE_STRUCTURE.eq("LABORATOIRE")))//
 				.fetchInto(VReglement.class);
