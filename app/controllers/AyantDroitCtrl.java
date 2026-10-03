@@ -7,11 +7,14 @@ import java.time.format.DateTimeFormatter;
 
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import models.tables.pojos.Adherent;
 import models.tables.pojos.AyantDroit;
 import play.data.Form;
 import play.data.FormFactory;
 import play.libs.Files.TemporaryFile;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Http.Request;
@@ -358,9 +361,16 @@ public class AyantDroitCtrl extends Controller {
 			ayantDroitService.saveLogical(c, false);
 
 			String r = imageService.isok2(path, id, extension, file);
-			return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, ay.getAdherent()));
+
+			ObjectNode json = Json.newObject();
+			json.put("success", true);
+			json.put("picture", path + id + "." + extension);
+			return ok(json);
 		} else {
-			return badRequest().flashing("error", "Missing file");
+			ObjectNode json = Json.newObject();
+			json.put("success", false);
+			json.put("message", "Fichier manquant");
+			return badRequest(json);
 		}
 
 	}

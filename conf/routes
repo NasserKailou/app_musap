@@ -40,6 +40,7 @@ GET			/Adherent/profil-photo/    		controllers.AdherentCtrl.formProfil(request:R
 POST			/Adherent/profil-photo/save    		controllers.AdherentCtrl.formProfilSave(request:Request)
 GET			/Adherent/profil-photo-path/    		controllers.AdherentCtrl.path( request:Request, path: String)
 GET			/Adherents/SitutationView/    		controllers.AdherentCtrl.showSituationView(request:Request)
+GET			/Adherents/SituationFamiliale/    		controllers.AdherentCtrl.showSituationFamiliale(request:Request)
 GET			/impression-situation-adherent/    	 controllers.AdherentCtrl.print(request:Request,numeroMatricule: String, fileName:String)
 GET			/impression-carte-adherent/    	 controllers.AdherentCtrl.printCarte(request:Request,idAdherent: Long, fileName:String)
 POST			/impression-situation-adh-betewenne/    	 controllers.AdherentCtrl.rapportAdhBetwenne(request:Request)

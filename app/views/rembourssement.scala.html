@@ -70,7 +70,7 @@
                 (request.session.get("droit").get() == "Admin" ||
                  request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur")
               ) {
-                @if(totalRegler >= adherent.getTotalCreditAConsomer()){
+                @if(totalRegler >= adherent.getTotalCreditAConsomer() || (adherent.getTotalCreditAConsomer() - totalRegler) <= 5000){
                   <div class="info-box bg-danger">
                   <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
                   <div class="info-box-content">

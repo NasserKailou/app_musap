@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import models.tables.pojos.Users;
 import models.tables.pojos.Adherent;
@@ -23,12 +24,14 @@ import models.tables.pojos.VAdherent;
 import play.data.Form;
 import play.data.FormFactory;
 import play.filters.csrf.AddCSRFToken;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import play.mvc.Security;
 import services.AdherentMainServices;
+import services.AyantDroitMainServices;
 import services.CategorieMainServices;
 import services.ImageService;
 import services.ProgrammeMainService;
@@ -47,6 +50,7 @@ public class AdherentCtrl extends Controller {
 
 	FormFactory formFactory;
 	AdherentMainServices adherentService;
+	AyantDroitMainServices ayantDroitService;
 	ImageService imageService;
 	CategorieMainServices catService;
 	ProgrammeMainService progService;
@@ -54,20 +58,22 @@ public class AdherentCtrl extends Controller {
 	UserService userService;
 	Long coutConsultation = 0L;
 
-	
+
 	@Inject
-	public AdherentCtrl(FormFactory formFactory, AdherentMainServices adherentService, ImageService imageService,
+	public AdherentCtrl(FormFactory formFactory, AdherentMainServices adherentService,
+			AyantDroitMainServices ayantDroitService, ImageService imageService,
 			CategorieMainServices catService, ProgrammeMainService progService, CallJasperReport jasper,
 			UserService userService) {
 		//super();
 		this.formFactory = formFactory;
 		this.adherentService = adherentService;
+		this.ayantDroitService = ayantDroitService;
 		this.imageService = imageService;
 		this.catService = catService;
 		this.progService = progService;
 		this.jasper = jasper;
 		this.userService = userService;
-		
+
 	}
 
 	public Result show(Request request, String subAction, Long idAd) {
@@ -104,6 +110,18 @@ public class AdherentCtrl extends Controller {
 
 	public Result showSituationView(Request request) {
 		return ok(views.html.rapports.render(request));
+	}
+
+	/**
+	 * Rapport : liste des adhérents avec leur taux de cotisation et le détail
+	 * des personnes à charge (femmes, enfants, pères, mères), pour permettre
+	 * une confrontation avec la paie.
+	 */
+	public Result showSituationFamiliale(Request request) {
+		return ok(views.html.situationFamiliale.render(
+				adherentService.listeAdherents(),
+				ayantDroitService.findAll(),
+				request));
 	}
 //	public Result restaure(Request request, Long idConsul) {
 //		Adherent c = adherentService.findById(idConsul);
@@ -237,15 +255,23 @@ public class AdherentCtrl extends Controller {
 				adherentService.saveLogical(c, false);
 				String r = imageService.isok(path, matricule, extension, file);
 
-			return redirect(routes.AdherentCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L));
+				ObjectNode json = Json.newObject();
+				json.put("success", true);
+				json.put("picture", path + matricule + "." + extension);
+				return ok(json);
 			} catch(Exception e){
-				
-				return redirect(routes.AdherentCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L)).flashing("error","Erreur lors du chargement , le matricule:"+ e.getMessage()+" ou est déja affecté a un autre agent");
+				ObjectNode json = Json.newObject();
+				json.put("success", false);
+				json.put("message", "Erreur lors du chargement, le matricule:" + e.getMessage() + " ou est déja affecté a un autre agent");
+				return badRequest(json);
 			}
 			//renseigne is_ok_for_printing pour l'impression des carte
-			
+
 		} else {
-			return badRequest().flashing("error", "Missing file");
+			ObjectNode json = Json.newObject();
+			json.put("success", false);
+			json.put("message", "Fichier manquant");
+			return badRequest(json);
 		}
 
 	}

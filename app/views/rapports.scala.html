@@ -273,8 +273,7 @@
       }
 
       @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "AGENT_CARD_ID" || request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Admin")){
-        
-        <!-- 
+
         <div class="row">
           <div class="col-md-12">
             <div class="card card-purple">
@@ -284,12 +283,12 @@
                   Impression des Cartes d'Accès MAINS
                 </h3>
               </div>
-              <form method="POST" 
-                    name="form" 
-                    action="@controllers.routes.AdherentCtrl.impressionCarteMainsGlobal()" 
+              <form method="POST"
+                    name="form"
+                    action="@controllers.routes.AdherentCtrl.impressionCarteMainsGlobal()"
                     class="form-horizontal">
                 @helper.CSRF.formField
-                
+
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-10">
@@ -298,9 +297,9 @@
                           <i class="fas fa-list"></i> Type de Carte
                           <span class="text-danger">*</span>
                         </label>
-                        <select class="form-control" 
-                                required 
-                                id="libelleCarte" 
+                        <select class="form-control"
+                                required
+                                id="libelleCarte"
                                 name="libelleCarte">
                           <option value="">Sélectionner le type de carte...</option>
                           <option value="badge_principale">
@@ -312,11 +311,11 @@
                         </select>
                       </div>
                     </div>
-                    
+
                     <div class="col-md-2">
                       <label>&nbsp;</label>
-                      <button class="btn btn-purple btn-block" 
-                              type="submit" 
+                      <button class="btn btn-purple btn-block"
+                              type="submit"
                               style="background-color: #6f42c1; border-color: #6f42c1; color: white;">
                         <i class="fas fa-print mr-1"></i> Imprimer
                       </button>
@@ -327,7 +326,6 @@
             </div>
           </div>
         </div>
-      -->
       }
 
     </div>

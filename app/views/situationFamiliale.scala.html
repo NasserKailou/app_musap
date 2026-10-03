@@ -1,0 +1,224 @@
+@import java.text.NumberFormat
+@import java.util.Locale
+@(adherents: List[models.tables.pojos.VAdherent],
+  ayantDroits: List[models.tables.pojos.AyantDroit]
+)(implicit request: Http.Request)
+
+@defining({
+  val adherentsActifs = adherents.filter(a => a.getOnDeleted() == null || a.getOnDeleted() == false)
+  val ayantDroitsActifs = ayantDroits.filter(a => a.getOnDeleted() == null || a.getOnDeleted() == false)
+  (adherentsActifs, ayantDroitsActifs)
+}) { case (adherentsActifs, ayantDroitsActifs) =>
+
+@main("Situation Familiale et Cotisations") {
+
+<!-- Content Header -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1><i class="fas fa-users-cog"></i> Liste des Adhérents - Taux de Cotisation &amp; Personnes à Charge</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+          <li class="breadcrumb-item"><a href="#">Rapports</a></li>
+          <li class="breadcrumb-item active">Situation Familiale</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-list"></i> Liste des adhérents
+              <span class="badge badge-light ml-2">@adherentsActifs.size adhérent(s)</span>
+            </h3>
+            <div class="card-tools">
+              <div id="situationFamilialeExportBtns" class="btn-group mr-2"></div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.print();">
+                <i class="fas fa-print"></i> Imprimer
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle"></i>
+              Ce rapport permet une confrontation à tout moment avec la paie : taux de cotisation retenu par
+              adhérent et détail des personnes à charge (femmes, enfants, pères, mères).
+            </div>
+
+            @if(adherentsActifs.isEmpty) {
+              <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <p class="text-muted">Aucun adhérent enregistré</p>
+              </div>
+            } else {
+              @defining(NumberFormat.getInstance(Locale.FRANCE)) { fmt =>
+              <div class="table-responsive">
+                <table id="situationFamilialeTable" class="table table-bordered table-hover table-striped text-center" style="width:100%">
+                  <thead class="thead-light">
+                    <tr>
+                      <th rowspan="2" class="align-middle">N°</th>
+                      <th rowspan="2" class="align-middle">Matricule</th>
+                      <th rowspan="2" class="align-middle">Nom et Prénom Adhérents</th>
+                      <th rowspan="2" class="align-middle">Téléphone</th>
+                      <th rowspan="2" class="align-middle">Taux Cotisation</th>
+                      <th rowspan="2" class="align-middle">Montant Cotisation</th>
+                      <th colspan="4">Personnes à Charge</th>
+                      <th rowspan="2" class="align-middle">Total PAC</th>
+                    </tr>
+                    <tr>
+                      <th>Femmes</th>
+                      <th>Enfants</th>
+                      <th>Pères</th>
+                      <th>Mères</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for((c, index) <- adherentsActifs.zipWithIndex) {
+                      @defining({
+                        val mesAyants = ayantDroitsActifs.filter(a => a.getAdherent() != null && a.getAdherent().equals(c.getId()))
+                        val nbFemmes = mesAyants.count(a => a.getLien() != null && a.getLien().equals("CONJOINT"))
+                        val nbEnfants = mesAyants.count(a => a.getLien() != null && a.getLien().equals("ENFANT"))
+                        val nbPeres = mesAyants.count(a => a.getLien() != null && a.getLien().equals("PARENT") && a.getGenre() != null && a.getGenre().equals("MASCULIN"))
+                        val nbMeres = mesAyants.count(a => a.getLien() != null && a.getLien().equals("PARENT") && a.getGenre() != null && a.getGenre().equals("FEMININ"))
+                        val totalPAC = nbFemmes + nbEnfants + nbPeres + nbMeres
+                        (nbFemmes, nbEnfants, nbPeres, nbMeres, totalPAC)
+                      }) { case (nbFemmes, nbEnfants, nbPeres, nbMeres, totalPAC) =>
+                        <tr>
+                          <td>@(index + 1)</td>
+                          <td>@c.getMatricule()</td>
+                          <td class="text-left"><strong>@c.getNomAd() @c.getPrenomAd()</strong></td>
+                          <td>@c.getTelephone()</td>
+                          <td>@if(c.getPourcentageTotalRetenue() != null) { @fmt.format(c.getPourcentageTotalRetenue()) % } else { 0 % }</td>
+                          <td>@if(c.getTotalCotisationAgent() != null) { @fmt.format(c.getTotalCotisationAgent()) F CFA } else { 0 F CFA }</td>
+                          <td>@("%02d".format(nbFemmes))</td>
+                          <td>@("%02d".format(nbEnfants))</td>
+                          <td>@("%02d".format(nbPeres))</td>
+                          <td>@("%02d".format(nbMeres))</td>
+                          <td><strong>@totalPAC</strong></td>
+                        </tr>
+                      }
+                    }
+                  </tbody>
+                  <tfoot>
+                    @defining({
+                      val totFemmes = adherentsActifs.map(c => ayantDroitsActifs.count(a => a.getAdherent() != null && a.getAdherent().equals(c.getId()) && a.getLien() != null && a.getLien().equals("CONJOINT"))).sum
+                      val totEnfants = adherentsActifs.map(c => ayantDroitsActifs.count(a => a.getAdherent() != null && a.getAdherent().equals(c.getId()) && a.getLien() != null && a.getLien().equals("ENFANT"))).sum
+                      val totPeres = adherentsActifs.map(c => ayantDroitsActifs.count(a => a.getAdherent() != null && a.getAdherent().equals(c.getId()) && a.getLien() != null && a.getLien().equals("PARENT") && a.getGenre() != null && a.getGenre().equals("MASCULIN"))).sum
+                      val totMeres = adherentsActifs.map(c => ayantDroitsActifs.count(a => a.getAdherent() != null && a.getAdherent().equals(c.getId()) && a.getLien() != null && a.getLien().equals("PARENT") && a.getGenre() != null && a.getGenre().equals("FEMININ"))).sum
+                      val totCotisation = adherentsActifs.map(c => if(c.getTotalCotisationAgent() != null) c.getTotalCotisationAgent().doubleValue() else 0.0).sum
+                      (totFemmes, totEnfants, totPeres, totMeres, totCotisation)
+                    }) { case (totFemmes, totEnfants, totPeres, totMeres, totCotisation) =>
+                      <tr class="table-secondary">
+                        <th colspan="5" class="text-right">TOTAUX</th>
+                        <th>@fmt.format(totCotisation) F CFA</th>
+                        <th>@totFemmes</th>
+                        <th>@totEnfants</th>
+                        <th>@totPeres</th>
+                        <th>@totMeres</th>
+                        <th>@(totFemmes + totEnfants + totPeres + totMeres)</th>
+                      </tr>
+                    }
+                  </tfoot>
+                </table>
+              </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Librairies nécessaires à l'export Excel (DataTables Buttons) -->
+<script src="@routes.Assets.versioned("plugins/jszip/jszip.min.js")"></script>
+<script src="@routes.Assets.versioned("plugins/pdfmake/pdfmake.min.js")"></script>
+<script src="@routes.Assets.versioned("plugins/pdfmake/vfs_fonts.js")"></script>
+<script src="@routes.Assets.versioned("plugins/datatables-buttons/js/buttons.html5.min.js")"></script>
+<script src="@routes.Assets.versioned("plugins/datatables-buttons/js/buttons.bootstrap4.min.js")"></script>
+
+<script type="text/javascript">
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof jQuery === 'undefined') {
+      console.error('jQuery non chargé, DataTable non initialisé');
+      return;
+    }
+    jQuery(function($) {
+      try {
+        if ($('#situationFamilialeTable').length > 0 && !$.fn.DataTable.isDataTable('#situationFamilialeTable')) {
+          var table = $('#situationFamilialeTable').DataTable({
+            "responsive": true,
+            "lengthChange": true,
+            "autoWidth": false,
+            "pageLength": 25,
+            "order": [[2, 'asc']],
+            "buttons": [
+              {
+                extend: 'excelHtml5',
+                text: '<i class="fas fa-file-excel"></i> Exporter Excel',
+                className: 'btn btn-success btn-sm',
+                title: 'Situation_Familiale_Cotisations',
+                exportOptions: { columns: ':visible' }
+              }
+            ],
+            "language": {
+              "search": "Rechercher un adhérent&nbsp;:",
+              "lengthMenu": "Afficher _MENU_ éléments",
+              "info": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+              "infoEmpty": "Aucun élément",
+              "infoFiltered": "(filtré de _MAX_ éléments)",
+              "zeroRecords": "Aucun adhérent trouvé",
+              "emptyTable": "Aucune donnée disponible",
+              "paginate": {
+                "first": "Premier",
+                "previous": "Précédent",
+                "next": "Suivant",
+                "last": "Dernier"
+              }
+            }
+          });
+
+          table.buttons().container().appendTo('#situationFamilialeExportBtns');
+        }
+      } catch (e) {
+        console.error('Erreur DataTable situationFamilialeTable:', e);
+      }
+    });
+  });
+</script>
+
+<style>
+#situationFamilialeTable thead th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+@@media print {
+  .card-tools,
+  .btn,
+  .breadcrumb,
+  .alert-info,
+  .main-sidebar,
+  .main-header,
+  .content-wrapper .content-header {
+    display: none !important;
+  }
+}
+</style>
+
+}
+}

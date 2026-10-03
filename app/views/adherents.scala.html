@@ -30,7 +30,7 @@
   
   // Fonction pour déterminer le status
   function getStatus(montantReglement, totalCreditAnnuelle, totalCreditAConsomer) {
-    if (montantReglement >= totalCreditAConsomer) {
+    if (montantReglement >= totalCreditAConsomer || (totalCreditAConsomer - montantReglement) <= 5000) {
       return { label: 'Suspendu', class: 'badge-danger' };
     } else if (montantReglement >= totalCreditAnnuelle) {
       return { label: 'Avertissement', class: 'badge-warning' };
@@ -621,7 +621,7 @@
                       val creditAnnuelle = if(c.getTotalCreditAnnuelle() != null) c.getTotalCreditAnnuelle().doubleValue() else 0.0
                       val creditAConsomer = if(c.getTotalCreditAConsomer() != null) c.getTotalCreditAConsomer().doubleValue() else 0.0
                       
-                      if (montantReglement >= creditAConsomer) {
+                      if (montantReglement >= creditAConsomer || (creditAConsomer - montantReglement) <= 5000) {
                         ("Suspendu", "badge-danger")
                       } else if (montantReglement >= creditAnnuelle) {
                         ("Avertissement", "badge-warning")
@@ -634,6 +634,7 @@
                       <td class="img-cell">
                         <img src="@controllers.routes.AdherentCtrl.path(c.getPicture())"
                              class="circle adherantImage"
+                             data-id="@c.getId()"
                              alt="Photo">
                       </td>
 
@@ -672,11 +673,11 @@
                           </a>
                         </td>
                         <td class="text-center">
-                          <a class="btn btn-info btn-sm"
+                          <button type="button" class="btn btn-info btn-sm btn-open-photo-modal"
                              title="Insérer photo profil"
-                             href='@controllers.routes.AdherentCtrl.formProfil(c.getId())'>
+                             data-id="@c.getId()">
                             <i class="fas fa-camera"></i>
-                          </a>
+                          </button>
                         </td>
                       }
                 
@@ -707,11 +708,11 @@
                           </a>
                         </td>
                         <td class="text-center">
-                          <a class="btn btn-info btn-sm"
+                          <button type="button" class="btn btn-info btn-sm btn-open-photo-modal"
                              title="Insérer photo profil"
-                             href='@controllers.routes.AdherentCtrl.formProfil(c.getId())'>
+                             data-id="@c.getId()">
                             <i class="fas fa-camera"></i>
-                          </a>
+                          </button>
                         </td>
                       }
                    @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Adherent") ) {
@@ -769,12 +770,12 @@
                           }
 
                           @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
-                         <!--   <a class="btn btn-info btn-sm"
+                         <a class="btn btn-info btn-sm"
                                title="Imprimer la carte d'adhérent"
                                href='@controllers.routes.AdherentCtrl.printCarte(c.getId(), "badge_adherent")'
                                onclick="return(openPopup(this.href, 600, 600, 600, 600));">
                               <i class="fas fa-id-card"></i>
-                            </a> /.container-fluid --> 
+                            </a> 
                           }
                         </div>
                       </td>
@@ -892,7 +893,7 @@
         val creditAnnuelle = if(c.getTotalCreditAnnuelle() != null) c.getTotalCreditAnnuelle().doubleValue() else 0.0
         val creditAConsomer = if(c.getTotalCreditAConsomer() != null) c.getTotalCreditAConsomer().doubleValue() else 0.0
         
-        if (montantReglement >= creditAConsomer) {
+        if (montantReglement >= creditAConsomer || (creditAConsomer - montantReglement) <= 5000) {
           ("Suspendu", "badge-danger")
         } else if (montantReglement >= creditAnnuelle) {
           ("Avertissement", "badge-warning")
@@ -1275,6 +1276,105 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   
   console.log('=== Init terminée ===');
+});
+</script>
+
+@* ================== MODAL : INSERTION PHOTO DE PROFIL (adhérent) ================== *@
+<div class="modal fade" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="photoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info">
+        <h5 class="modal-title text-white" id="photoModalLabel">
+          <i class="fas fa-camera"></i> Insérer une photo de profil
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fermer">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="photoModalBody">
+        <div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+        <button type="button" class="btn btn-success" id="btnSavePhoto">
+          <i class="fas fa-save"></i> Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof jQuery === 'undefined') {
+    console.error('jQuery manquant, popup photo indisponible');
+    return;
+  }
+  jQuery(function ($) {
+
+    var photoFormUrlTemplate = '@controllers.routes.AdherentCtrl.formProfil(0L)';
+    var photoPathUrlTemplate = '@controllers.routes.AdherentCtrl.path("PLACEHOLDER")';
+
+    $(document).on('click', '.btn-open-photo-modal', function () {
+      var id = $(this).data('id');
+      $('#photoModalBody').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x"></i></div>');
+      $('#photoModal').modal('show');
+
+      $.ajax({
+        url: photoFormUrlTemplate.replace('idAdherant=0', 'idAdherant=' + id),
+        method: 'GET',
+        success: function (html) {
+          $('#photoModalBody').html(html);
+        },
+        error: function () {
+          $('#photoModalBody').html('<div class="alert alert-danger">Erreur lors du chargement du formulaire.</div>');
+        }
+      });
+    });
+
+    $('#btnSavePhoto').on('click', function () {
+      var $form = $('#photoModalBody').find('#photoForm');
+      if ($form.length === 0) return;
+      if (!$form[0].checkValidity()) {
+        $form[0].reportValidity();
+        return;
+      }
+
+      var formData = new FormData($form[0]);
+      var $btn = $(this);
+      var originalHtml = $btn.html();
+      $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Enregistrement...');
+
+      $.ajax({
+        url: $form.attr('action'),
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          $btn.prop('disabled', false).html(originalHtml);
+          if (data && data.success) {
+            var idAdherent = $form.find('input[name="idAdherent"]').val();
+            var $img = $('img.adherantImage[data-id="' + idAdherent + '"]');
+            if ($img.length && data.picture) {
+              $img.attr('src', photoPathUrlTemplate.replace('PLACEHOLDER', encodeURIComponent(data.picture)) + '&t=' + new Date().getTime());
+            }
+            $('#photoModal').modal('hide');
+          } else {
+            var msg = (data && data.message) ? data.message : "Erreur lors de l'enregistrement.";
+            $form.find('#photoFormError').removeClass('d-none').text(msg);
+          }
+        },
+        error: function (xhr) {
+          $btn.prop('disabled', false).html(originalHtml);
+          var msg = "Erreur lors de l'enregistrement.";
+          try { var j = JSON.parse(xhr.responseText); if (j && j.message) msg = j.message; } catch (e) {}
+          $form.find('#photoFormError').removeClass('d-none').text(msg);
+        }
+      });
+    });
+
+  });
 });
 </script>
 

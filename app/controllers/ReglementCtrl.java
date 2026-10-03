@@ -46,15 +46,12 @@ import utils.Secured;
 import utils.ViewMode;
 
 /**
- * 
+ *
  * @author nasser
  *
  */
 @Security.Authenticated(Secured.class)
 public class ReglementCtrl extends Controller {
-
-	// private static final Long PLAFOND_REGLEMENT_ANNUELLE = 350000L;
-	// private static final Long sommeReg = 0L;
 
 	FormFactory formFactory;
 	ReglementMainServices regServices;
@@ -95,6 +92,10 @@ public class ReglementCtrl extends Controller {
 		this.messagesServices = messagesServices;
 	}
 
+	// =====================================================================
+	// OTP - Authentification par code à usage unique
+	// =====================================================================
+
 	// 1. Demander un OTP
 	public Result requestOtp(Http.Request request) {
 		String phone = request.getQueryString("phone"); // ex: 2279XXXXXXX
@@ -116,68 +117,9 @@ public class ReglementCtrl extends Controller {
 		}
 	}
 
-	/**
-	 * public Result show(String subAction, String typeOP, Long idReglement, Long
-	 * idAdherent, Request request) {
-	 * 
-	 * String viewMode;
-	 * Reglement c;
-	 * List<StructurePartenaire> listesPartenaires = new ArrayList<>();
-	 * List<TypePrestation> listeTypePrestation = new ArrayList<>();
-	 * List<VReglement> listeReg = new ArrayList<>();
-	 * 
-	 * if (typeOP.equals("BC")) {
-	 * listesPartenaires =
-	 * structureService.findAllPharmacieByRegion(Long.valueOf(request.session().get("region").get()));
-	 * listeTypePrestation = typePresta.findOrdonnance();
-	 * listeReg = regServices.findReglementBCByAdherent(idAdherent,
-	 * request.session().get("gestion").get());
-	 * } else {
-	 * listesPartenaires =
-	 * structureService.findAllHopitauxByRegion(Long.valueOf(request.session().get("region").get()));
-	 * listeTypePrestation = typePresta.findOthers();
-	 * listeReg = regServices.findReglementPCByAdherent(idAdherent,
-	 * request.session().get("gestion").get());
-	 * }
-	 * 
-	 * List<VAdherentAyantDroit> vad =
-	 * regServices.getAdherentAndAyantByAdherent(idAdherent);
-	 * 
-	 * if (0 == idReglement) {
-	 * c = new Reglement();
-	 * viewMode = ViewMode.VIEW_MODE_CREATE;
-	 * } else if (ViewMode.VIEW_MODE_EDIT.equals(subAction)) {
-	 * c = regServices.findById(idReglement);
-	 * viewMode = ViewMode.VIEW_MODE_EDIT;
-	 * } else if (ViewMode.VIEW_MODE_TRAITE.equals(subAction)) {
-	 * c = regServices.findById(idReglement);
-	 * viewMode = ViewMode.VIEW_MODE_TRAITE;
-	 * } else if (ViewMode.VIEW_MODE_DELETE.equals(subAction)) {
-	 * c = regServices.findById(idReglement);
-	 * viewMode = ViewMode.VIEW_MODE_DELETE;
-	 * } else {
-	 * viewMode = ViewMode.VIEW_MODE_VIEW;
-	 * c = regServices.findById(idReglement);
-	 * }
-	 * 
-	 * return ok(views.html.rembourssement.render(
-	 * viewMode,
-	 * typeOP,
-	 * listeReg,
-	 * c,
-	 * adherentService.getVAdherentById(idAdherent),
-	 * listesPartenaires,
-	 * regServices.sommeRegler(idAdherent, request.session().get("gestion").get()),
-	 * regServices.sommeReglerBC(idAdherent,
-	 * request.session().get("gestion").get()),
-	 * regServices.sommeReglerPC(idAdherent,
-	 * request.session().get("gestion").get()),
-	 * Long.valueOf(request.session().get("plafond").get()),
-	 * listeTypePrestation,
-	 * vad,
-	 * request));
-	 * }
-	 **/
+	// =====================================================================
+	// Affichage des règlements (Bons de commande / Prises en charge)
+	// =====================================================================
 
 	public Result show(String subAction, String typeOP, Long idReglement, Long idAdherent, Request request) {
 
@@ -267,7 +209,6 @@ public class ReglementCtrl extends Controller {
 				listeTypePrestation,
 				vad,
 				request));
-		// ... reste du code inchangé
 	}
 
 	// @AddCSRFToken // ✅ Ajouter cette annotation
@@ -293,7 +234,7 @@ public class ReglementCtrl extends Controller {
 	 * Affiche la liste des bons de commande non confirmés pour confirmation
 	 * (Bouton VERT) Cette méthode affiche les bons avec is_confirmed_bon = false ou
 	 * null
-	 * 
+	 *
 	 * @param subAction  Le mode d'action
 	 * @param idAdherent L'ID de l'adhérent
 	 * @param request    La requête HTTP
@@ -326,6 +267,178 @@ public class ReglementCtrl extends Controller {
 				request));
 	}
 
+	// =====================================================================
+	// Gestion des règlements (CRUD, cycle de vie du bon)
+	// =====================================================================
+
+	public Result save(Request request) {
+
+		final String viewMode = formFactory.form().bindFromRequest(request).get("viewMode");
+
+		Form<Reglement> uForm = formFactory.form(Reglement.class).bindFromRequest(request);
+		String dateReglement = formFactory.form().bindFromRequest(request).get("tmpDate");
+		String typeOperation = formFactory.form().bindFromRequest(request).get("typeOP");
+		System.out.println("Date reglement :" + dateReglement + " #################");
+		Long benef = Long.parseLong(formFactory.form().bindFromRequest(request).get("benef"));
+
+		Long sommeReg = 0L;
+		Reglement c = uForm.get();
+		c.setWhenDone(new Timestamp(System.currentTimeMillis()));
+		c.setOnDeleted(false);
+		c.setWhoDone(String.valueOf(request.session().get("login").get()));
+		c.setDatePayement(new Timestamp(System.currentTimeMillis()));
+		c.setTypeReglement(typeOperation);
+		long thirtyDaysInMillis = 46L * 24 * 60 * 60 * 1000;
+		Timestamp dateExpiration = new Timestamp(
+				(new Timestamp(System.currentTimeMillis())).getTime() + thirtyDaysInMillis);
+		c.setDateExpiration(dateExpiration);
+		c.setIsConfirmedBon(false);
+
+		/**
+		 * if (!String.valueOf(dateReglement.substring(0, 4))
+		 * .equals(String.valueOf(request.session().get("gestion").get()))) {
+		 * c.setDatePayement(regServices.getDateT(request.session().get("gestion").get()
+		 * + "-12-31"));
+		 * } else {
+		 * // c.setDatePayement(regServices.getDateT(dateReglement));
+		 * }
+		 */
+
+		System.out.println("total regler :" + sommeReg + " F CFA");
+
+		Double totalCreditAnnuelle = adherentService.getVAdherentById(c.getAdherent()).getTotalCreditAnnuelle();
+		Double totalCreditAConsomer = adherentService.getVAdherentById(c.getAdherent()).getTotalCreditAConsomer();
+		Long totalConsommation = regServices.sommeRegler(c.getAdherent(), request.session().get("gestion").get());
+
+		if (!benef.equals(c.getAdherent())) {
+			c.setAyantDroit(benef);
+		}
+
+		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE)) {
+			// en cas de seuil atteint
+
+			if (totalConsommation >= totalCreditAnnuelle) {
+				Long diff = totalConsommation - totalCreditAnnuelle.longValue();
+				otpService.sendAlerteSeuil(adherentService.findById(c.getAdherent()).getTelephone(), diff);
+				if (regServices.saveLogical(c, true).equals("ok")) {
+
+					return redirect(routes.ReglementCtrl.show(
+							ViewMode.VIEW_MODE_CREATE,
+							typeOperation,
+							0L,
+							c.getAdherent())).flashing("warning",
+									" Bon ajouter avec succèss, seuil d'alerte Atteint, penser a moderer votre consommation");
+
+				} else {
+					System.out.println("msg :" + regServices.saveLogical(c, true));
+					return redirect(routes.ReglementCtrl.show(
+							ViewMode.VIEW_MODE_CREATE,
+							typeOperation,
+							0L,
+							c.getAdherent())).flashing(
+									"error",
+									" Reglement non ajouter ");
+				}
+
+			}
+
+			// plafond des dépense atteint, impossible d'ajouter un nouveau Bon
+			if (totalConsommation >= totalCreditAConsomer) {
+				otpService.sendSuspension(adherentService.findById(c.getAdherent()).getTelephone());
+				return redirect(routes.ReglementCtrl.show(
+						ViewMode.VIEW_MODE_CREATE,
+						typeOperation,
+						0L,
+						c.getAdherent())).flashing(
+								"error",
+								" Impossible d'jouter un nouveau bon, vous avez déja atteint le plafond de vos crédits annuelle !!!!");
+			}
+			if (regServices.saveLogical(c, true).equals("ok")) {
+
+				return redirect(
+						routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, typeOperation, 0L, c.getAdherent()))
+						.flashing("success", " Opération effectuée avec succès  ");
+
+			} else {
+				System.out.println("msg :" + regServices.saveLogical(c, true));
+				return redirect(routes.ReglementCtrl.show(
+						ViewMode.VIEW_MODE_CREATE,
+						typeOperation,
+						0L,
+						c.getAdherent())).flashing(
+								"error",
+								" Reglement non ajouter ");
+			}
+
+		} else if (viewMode.equals(ViewMode.VIEW_MODE_EDIT)) {
+
+			if (regServices.saveLogical(c, false).equals("ok")) {
+				return redirect(routes.ReglementCtrl.show(
+						ViewMode.VIEW_MODE_CREATE,
+						typeOperation,
+						0L,
+						c.getAdherent())).flashing(
+								"success",
+								" Reglement  modifier avec success");
+			} else {
+				return redirect(routes.ReglementCtrl.show(
+						ViewMode.VIEW_MODE_CREATE,
+						typeOperation,
+						0L,
+						c.getAdherent())).flashing(
+								"error",
+								"Reglement  non modifier");
+			}
+
+		} else if (viewMode.equals(ViewMode.VIEW_MODE_TRAITE)) {
+
+			if (regServices.saveLogical(c, false).equals("ok")) {
+				return redirect(routes.ReglementCtrl.show(
+						ViewMode.VIEW_MODE_CREATE,
+						typeOperation,
+						0L,
+						c.getAdherent())).flashing(
+								"success",
+								" Reglement  traiter avec success");
+			} else {
+				return redirect(routes.ReglementCtrl.show(
+						ViewMode.VIEW_MODE_CREATE,
+						typeOperation,
+						0L,
+						c.getAdherent())).flashing(
+								"error",
+								"Echec lors du traitement du Reglement");
+			}
+
+		} else if (viewMode.equals(ViewMode.VIEW_MODE_DELETE)) {
+
+			c.setOnDeleted(true);
+			if (regServices.saveLogical(c, false).equals("ok")) {
+				return redirect(routes.ReglementCtrl.show(
+						ViewMode.VIEW_MODE_CREATE,
+						typeOperation,
+						0L,
+						c.getAdherent())).flashing(
+								"success",
+								" Reglement  Supprimer avec success");
+			} else {
+				return redirect(routes.ReglementCtrl.show(
+						ViewMode.VIEW_MODE_CREATE,
+						typeOperation,
+						0L,
+						c.getAdherent())).flashing(
+								"error",
+								" Reglement  non supprimer");
+			}
+		}
+
+		return redirect(routes.ReglementCtrl.show(
+				ViewMode.VIEW_MODE_CREATE,
+				typeOperation,
+				0L,
+				c.getAdherent()));
+	}
+
 	public Result restaure(Long idPart, Request request) {
 		Reglement c = regServices.findById(idPart);
 		c.setOnDeleted(false);
@@ -336,6 +449,110 @@ public class ReglementCtrl extends Controller {
 				0L,
 				c.getAdherent()));
 	}
+
+	// Route pour la confirmation
+	// @RequiresCSRFCheck(false)
+	public Result confirmerBon(Long bonId, Long adherentId) {
+		try {
+			Reglement reglement = regServices.findById(bonId);
+
+			if (reglement == null) {
+				return notFound("Bon de commande non trouvé");
+			}
+
+			reglement.setIsConfirmedBon(true);
+			regServices.update(reglement);
+
+			return ok("Bon confirmé avec succès");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return internalServerError("Erreur lors de la confirmation");
+		}
+	}
+
+	/**
+	 * Réactualiser un bon de commande (remettre isConfirmedBon à false) Réservé aux
+	 * SuperAdmin uniquement
+	 */
+	public Result reactualiserBon(Long bonId, Long adherentId) {
+		try {
+			// String droit = session("droit");
+
+			Reglement reglement = regServices.findById(bonId);
+
+			if (reglement == null) {
+				return notFound("Bon de commande non trouvé");
+			}
+
+			if (!reglement.getIsConfirmedBon()) {
+				return badRequest("Le bon n'est pas confirmé");
+			}
+
+			reglement.setIsConfirmedBon(false);
+			regServices.update(reglement);
+
+			Logger.info("Bon de commande réactualisé - ID: " + bonId + " par SuperAdmin: ");
+
+			return ok("Bon réactualisé avec succès");
+
+		} catch (Exception e) {
+			Logger.error("Erreur lors de la réactualisation du bon: " + e.getMessage(), e);
+			return internalServerError("Erreur lors de la réactualisation");
+		}
+	}
+
+	/**
+	 * Suppression logique d'un Règlement : passe onDeleted à true
+	 * Réservé à l'Admin uniquement
+	 */
+	public Result softDeleteReglement(Long bonId, Long adherentId, Request request) {
+		try {
+			String droit = request.session().get("droit").orElse("");
+			if (!droit.equals("Admin")) {
+				return forbidden("Action réservée à l'administrateur");
+			}
+			Reglement reglement = regServices.findById(bonId);
+			if (reglement == null) {
+				return notFound("Règlement non trouvé");
+			}
+			reglement.setOnDeleted(true);
+			regServices.update(reglement);
+			Logger.info("Règlement supprimé logiquement - ID: " + bonId + " par: "
+					+ request.session().get("login").orElse("?"));
+			return ok("Règlement supprimé logiquement avec succès");
+		} catch (Exception e) {
+			Logger.error("Erreur softDeleteReglement: " + e.getMessage(), e);
+			return internalServerError("Erreur lors de la suppression logique");
+		}
+	}
+
+	/**
+	 * Réactivation d'un Règlement : passe onDeleted à false
+	 * Réservé à l'Admin uniquement
+	 */
+	public Result reactiverReglement(Long bonId, Long adherentId, Request request) {
+		try {
+			String droit = request.session().get("droit").orElse("");
+			if (!droit.equals("Admin")) {
+				return forbidden("Action réservée à l'administrateur");
+			}
+			Reglement reglement = regServices.findById(bonId);
+			if (reglement == null) {
+				return notFound("Règlement non trouvé");
+			}
+			reglement.setOnDeleted(false);
+			regServices.update(reglement);
+			Logger.info("Règlement réactivé - ID: " + bonId + " par: " + request.session().get("login").orElse("?"));
+			return ok("Règlement réactivé avec succès");
+		} catch (Exception e) {
+			Logger.error("Erreur reactiverReglement: " + e.getMessage(), e);
+			return internalServerError("Erreur lors de la réactivation");
+		}
+	}
+
+	// =====================================================================
+	// Détails de règlement (lignes de prestation)
+	// =====================================================================
 
 	public Result reglementDetailForm(
 			String action,
@@ -669,6 +886,10 @@ public class ReglementCtrl extends Controller {
 				rd.getId()));
 	}
 
+	// =====================================================================
+	// Alertes et notifications par e-mail
+	// =====================================================================
+
 	public Result showAlerteView(Request request) {
 		return ok(views.html.alerteMail.render(0, request));
 	}
@@ -811,173 +1032,9 @@ public class ReglementCtrl extends Controller {
 		}
 	}
 
-	public Result save(Request request) {
-
-		final String viewMode = formFactory.form().bindFromRequest(request).get("viewMode");
-
-		Form<Reglement> uForm = formFactory.form(Reglement.class).bindFromRequest(request);
-		String dateReglement = formFactory.form().bindFromRequest(request).get("tmpDate");
-		String typeOperation = formFactory.form().bindFromRequest(request).get("typeOP");
-		System.out.println("Date reglement :" + dateReglement + " #################");
-		Long benef = Long.parseLong(formFactory.form().bindFromRequest(request).get("benef"));
-
-		Long sommeReg = 0L;
-		Reglement c = uForm.get();
-		c.setWhenDone(new Timestamp(System.currentTimeMillis()));
-		c.setOnDeleted(false);
-		c.setWhoDone(String.valueOf(request.session().get("login").get()));
-		c.setDatePayement(new Timestamp(System.currentTimeMillis()));
-		c.setTypeReglement(typeOperation);
-		long thirtyDaysInMillis = 46L * 24 * 60 * 60 * 1000;
-		Timestamp dateExpiration = new Timestamp(
-				(new Timestamp(System.currentTimeMillis())).getTime() + thirtyDaysInMillis);
-		c.setDateExpiration(dateExpiration);
-		c.setIsConfirmedBon(false);
-
-		/**
-		 * if (!String.valueOf(dateReglement.substring(0, 4))
-		 * .equals(String.valueOf(request.session().get("gestion").get()))) {
-		 * c.setDatePayement(regServices.getDateT(request.session().get("gestion").get()
-		 * + "-12-31"));
-		 * } else {
-		 * // c.setDatePayement(regServices.getDateT(dateReglement));
-		 * }
-		 */
-
-		System.out.println("total regler :" + sommeReg + " F CFA");
-
-		Double totalCreditAnnuelle = adherentService.getVAdherentById(c.getAdherent()).getTotalCreditAnnuelle();
-		Double totalCreditAConsomer = adherentService.getVAdherentById(c.getAdherent()).getTotalCreditAConsomer();
-		Long totalConsommation = regServices.sommeRegler(c.getAdherent(), request.session().get("gestion").get());
-
-		if (!benef.equals(c.getAdherent())) {
-			c.setAyantDroit(benef);
-		}
-
-		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE)) {
-			// en cas de seuil atteint
-
-			if (totalConsommation >= totalCreditAnnuelle) {
-				Long diff = totalConsommation - totalCreditAnnuelle.longValue();
-				otpService.sendAlerteSeuil(adherentService.findById(c.getAdherent()).getTelephone(), diff);
-				if (regServices.saveLogical(c, true).equals("ok")) {
-
-					return redirect(routes.ReglementCtrl.show(
-							ViewMode.VIEW_MODE_CREATE,
-							typeOperation,
-							0L,
-							c.getAdherent())).flashing("warning",
-									" Bon ajouter avec succèss, seuil d'alerte Atteint, penser a moderer votre consommation");
-
-				} else {
-					System.out.println("msg :" + regServices.saveLogical(c, true));
-					return redirect(routes.ReglementCtrl.show(
-							ViewMode.VIEW_MODE_CREATE,
-							typeOperation,
-							0L,
-							c.getAdherent())).flashing(
-									"error",
-									" Reglement non ajouter ");
-				}
-
-			}
-
-			// plafond des dépense atteint, impossible d'ajouter un nouveau Bon
-			if (totalConsommation >= totalCreditAConsomer) {
-				otpService.sendSuspension(adherentService.findById(c.getAdherent()).getTelephone());
-				return redirect(routes.ReglementCtrl.show(
-						ViewMode.VIEW_MODE_CREATE,
-						typeOperation,
-						0L,
-						c.getAdherent())).flashing(
-								"error",
-								" Impossible d'jouter un nouveau bon, vous avez déja atteint le plafond de vos crédits annuelle !!!!");
-			}
-			if (regServices.saveLogical(c, true).equals("ok")) {
-
-				return redirect(
-						routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, typeOperation, 0L, c.getAdherent()))
-						.flashing("success", " Opération effectuée avec succès  ");
-
-			} else {
-				System.out.println("msg :" + regServices.saveLogical(c, true));
-				return redirect(routes.ReglementCtrl.show(
-						ViewMode.VIEW_MODE_CREATE,
-						typeOperation,
-						0L,
-						c.getAdherent())).flashing(
-								"error",
-								" Reglement non ajouter ");
-			}
-
-		} else if (viewMode.equals(ViewMode.VIEW_MODE_EDIT)) {
-
-			if (regServices.saveLogical(c, false).equals("ok")) {
-				return redirect(routes.ReglementCtrl.show(
-						ViewMode.VIEW_MODE_CREATE,
-						typeOperation,
-						0L,
-						c.getAdherent())).flashing(
-								"success",
-								" Reglement  modifier avec success");
-			} else {
-				return redirect(routes.ReglementCtrl.show(
-						ViewMode.VIEW_MODE_CREATE,
-						typeOperation,
-						0L,
-						c.getAdherent())).flashing(
-								"error",
-								"Reglement  non modifier");
-			}
-
-		} else if (viewMode.equals(ViewMode.VIEW_MODE_TRAITE)) {
-
-			if (regServices.saveLogical(c, false).equals("ok")) {
-				return redirect(routes.ReglementCtrl.show(
-						ViewMode.VIEW_MODE_CREATE,
-						typeOperation,
-						0L,
-						c.getAdherent())).flashing(
-								"success",
-								" Reglement  traiter avec success");
-			} else {
-				return redirect(routes.ReglementCtrl.show(
-						ViewMode.VIEW_MODE_CREATE,
-						typeOperation,
-						0L,
-						c.getAdherent())).flashing(
-								"error",
-								"Echec lors du traitement du Reglement");
-			}
-
-		} else if (viewMode.equals(ViewMode.VIEW_MODE_DELETE)) {
-
-			c.setOnDeleted(true);
-			if (regServices.saveLogical(c, false).equals("ok")) {
-				return redirect(routes.ReglementCtrl.show(
-						ViewMode.VIEW_MODE_CREATE,
-						typeOperation,
-						0L,
-						c.getAdherent())).flashing(
-								"success",
-								" Reglement  Supprimer avec success");
-			} else {
-				return redirect(routes.ReglementCtrl.show(
-						ViewMode.VIEW_MODE_CREATE,
-						typeOperation,
-						0L,
-						c.getAdherent())).flashing(
-								"error",
-								" Reglement  non supprimer");
-			}
-		}
-
-		return redirect(routes.ReglementCtrl.show(
-				ViewMode.VIEW_MODE_CREATE,
-				typeOperation,
-				0L,
-				c.getAdherent()));
-	}
+	// =====================================================================
+	// Rapports et impressions (Jasper)
+	// =====================================================================
 
 	public Result rapportAnnuel(Request request, String fileName) {
 
@@ -1028,150 +1085,6 @@ public class ReglementCtrl extends Controller {
 			System.out.println(e.getMessage() + "+++++++--**///////++++++++");
 			return ok(views.html.rapports.render(request))
 					.flashing("error", " Erreur d'impression");
-		}
-	}
-
-	public Result detailJson(Long id) {
-		ReglementDetail d = reDetailMainServices.findById(id);
-		if (d == null) {
-			return notFound("Détail introuvable");
-		}
-		ObjectNode json = Json.newObject();
-		json.put("id", d.getId());
-		json.put("intitule", d.getIntitule());
-		json.put("montant", d.getMontant());
-		return ok(json);
-	}
-
-	public Result getReglementJson(Long id) {
-		Reglement r = regServices.findById(id);
-		if (r == null) {
-			return notFound("Règlement introuvable");
-		}
-
-		ObjectNode json = Json.newObject();
-		json.put("id", r.getId());
-		json.put("adherent", r.getAdherent()); // id de l’adhérent
-
-		if (r.getAyantDroit() != null) {
-			json.put("ayantDroit", r.getAyantDroit());
-		}
-		if (r.getTypePrestation() != null) {
-			json.put("typePrestation", r.getTypePrestation());
-		}
-		if (r.getStructure() != null) {
-			json.put("structure", r.getStructure());
-		}
-		if (r.getDatePayement() != null) {
-			json.put("tmpDate", String.valueOf(r.getDatePayement()));
-		}
-		if (r.getStructureEmettriceRembourssement() != null) {
-			json.put("structureEmettriceRembourssement", r.getStructureEmettriceRembourssement());
-		}
-		if (r.getTelStructureEmettrice() != null) {
-			json.put("telStructureEmettrice", r.getTelStructureEmettrice());
-		}
-
-		return ok(json);
-	}
-
-	// Route pour la confirmation
-	// @RequiresCSRFCheck(false)
-	public Result confirmerBon(Long bonId, Long adherentId) {
-		try {
-			Reglement reglement = regServices.findById(bonId);
-
-			if (reglement == null) {
-				return notFound("Bon de commande non trouvé");
-			}
-
-			reglement.setIsConfirmedBon(true);
-			regServices.update(reglement);
-
-			return ok("Bon confirmé avec succès");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return internalServerError("Erreur lors de la confirmation");
-		}
-	}
-
-	/**
-	 * Réactualiser un bon de commande (remettre isConfirmedBon à false) Réservé aux
-	 * SuperAdmin uniquement
-	 */
-	public Result reactualiserBon(Long bonId, Long adherentId) {
-		try {
-			// String droit = session("droit");
-
-			Reglement reglement = regServices.findById(bonId);
-
-			if (reglement == null) {
-				return notFound("Bon de commande non trouvé");
-			}
-
-			if (!reglement.getIsConfirmedBon()) {
-				return badRequest("Le bon n'est pas confirmé");
-			}
-
-			reglement.setIsConfirmedBon(false);
-			regServices.update(reglement);
-
-			Logger.info("Bon de commande réactualisé - ID: " + bonId + " par SuperAdmin: ");
-
-			return ok("Bon réactualisé avec succès");
-
-		} catch (Exception e) {
-			Logger.error("Erreur lors de la réactualisation du bon: " + e.getMessage(), e);
-			return internalServerError("Erreur lors de la réactualisation");
-		}
-	}
-
-	/**
-	 * Suppression logique d'un Règlement : passe onDeleted à true
-	 * Réservé à l'Admin uniquement
-	 */
-	public Result softDeleteReglement(Long bonId, Long adherentId, Request request) {
-		try {
-			String droit = request.session().get("droit").orElse("");
-			if (!droit.equals("Admin")) {
-				return forbidden("Action réservée à l'administrateur");
-			}
-			Reglement reglement = regServices.findById(bonId);
-			if (reglement == null) {
-				return notFound("Règlement non trouvé");
-			}
-			reglement.setOnDeleted(true);
-			regServices.update(reglement);
-			Logger.info("Règlement supprimé logiquement - ID: " + bonId + " par: "
-					+ request.session().get("login").orElse("?"));
-			return ok("Règlement supprimé logiquement avec succès");
-		} catch (Exception e) {
-			Logger.error("Erreur softDeleteReglement: " + e.getMessage(), e);
-			return internalServerError("Erreur lors de la suppression logique");
-		}
-	}
-
-	/**
-	 * Réactivation d'un Règlement : passe onDeleted à false
-	 * Réservé à l'Admin uniquement
-	 */
-	public Result reactiverReglement(Long bonId, Long adherentId, Request request) {
-		try {
-			String droit = request.session().get("droit").orElse("");
-			if (!droit.equals("Admin")) {
-				return forbidden("Action réservée à l'administrateur");
-			}
-			Reglement reglement = regServices.findById(bonId);
-			if (reglement == null) {
-				return notFound("Règlement non trouvé");
-			}
-			reglement.setOnDeleted(false);
-			regServices.update(reglement);
-			Logger.info("Règlement réactivé - ID: " + bonId + " par: " + request.session().get("login").orElse("?"));
-			return ok("Règlement réactivé avec succès");
-		} catch (Exception e) {
-			Logger.error("Erreur reactiverReglement: " + e.getMessage(), e);
-			return internalServerError("Erreur lors de la réactivation");
 		}
 	}
 
@@ -1235,5 +1148,53 @@ public class ReglementCtrl extends Controller {
 			return redirect(routes.AdherentCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L)).flashing("error",
 					"Erreur d'impression");
 		}
+	}
+
+	// =====================================================================
+	// API JSON
+	// =====================================================================
+
+	public Result detailJson(Long id) {
+		ReglementDetail d = reDetailMainServices.findById(id);
+		if (d == null) {
+			return notFound("Détail introuvable");
+		}
+		ObjectNode json = Json.newObject();
+		json.put("id", d.getId());
+		json.put("intitule", d.getIntitule());
+		json.put("montant", d.getMontant());
+		return ok(json);
+	}
+
+	public Result getReglementJson(Long id) {
+		Reglement r = regServices.findById(id);
+		if (r == null) {
+			return notFound("Règlement introuvable");
+		}
+
+		ObjectNode json = Json.newObject();
+		json.put("id", r.getId());
+		json.put("adherent", r.getAdherent()); // id de l’adhérent
+
+		if (r.getAyantDroit() != null) {
+			json.put("ayantDroit", r.getAyantDroit());
+		}
+		if (r.getTypePrestation() != null) {
+			json.put("typePrestation", r.getTypePrestation());
+		}
+		if (r.getStructure() != null) {
+			json.put("structure", r.getStructure());
+		}
+		if (r.getDatePayement() != null) {
+			json.put("tmpDate", String.valueOf(r.getDatePayement()));
+		}
+		if (r.getStructureEmettriceRembourssement() != null) {
+			json.put("structureEmettriceRembourssement", r.getStructureEmettriceRembourssement());
+		}
+		if (r.getTelStructureEmettrice() != null) {
+			json.put("telStructureEmettrice", r.getTelStructureEmettrice());
+		}
+
+		return ok(json);
 	}
 }
