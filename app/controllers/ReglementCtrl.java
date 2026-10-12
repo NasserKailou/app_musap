@@ -41,6 +41,7 @@ import services.MessageServiceImpl;
 import services.OtpService;
 import services.ReglementDetailMainServices;
 import services.RapportOperationsServices;
+import services.RetraiteServices;
 import services.ReglementMainServices;
 import services.StructureMainServices;
 import services.TypePrestationMainService;
@@ -72,6 +73,7 @@ public class ReglementCtrl extends Controller {
 	MessageServiceImpl messagesServices;
 
 	private final RapportOperationsServices rapportOperations;
+	private final RetraiteServices retraite;
 
 	@Inject
 	public ReglementCtrl(
@@ -85,10 +87,11 @@ public class ReglementCtrl extends Controller {
 			Mail email,
 			EmailManagerServices emailServices,
 			OtpService otpService, MessageServiceImpl messagesServices,
-			RapportOperationsServices rapportOperations) {
+			RapportOperationsServices rapportOperations, RetraiteServices retraite) {
 
 		super();
 		this.rapportOperations = rapportOperations;
+		this.retraite = retraite;
 		this.formFactory = formFactory;
 		this.regServices = regServices;
 		this.reDetailMainServices = reDetailMainServices;
@@ -329,6 +332,14 @@ public class ReglementCtrl extends Controller {
 
 		if (!benef.equals(c.getAdherent())) {
 			c.setAyantDroit(benef);
+		}
+
+		// retraite : fin de couverture à 65 ans, ayants droit non couverts à partir de 60 ans
+		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE)) {
+			String refus = retraite.verifierPrestation(c.getAdherent(), c.getAyantDroit());
+			if (refus != null)
+				return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE, typeOperation, 0L, c.getAdherent()))
+						.flashing("error", refus);
 		}
 
 		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE)) {
@@ -644,6 +655,14 @@ public class ReglementCtrl extends Controller {
 			return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, typeOperation,
 					idReglement, ad, 0L)).flashing("error",
 							"Plafond de consommation non défini pour cet adhérent, enregistrement impossible");
+		}
+		// retraite : aucune nouvelle ligne pour un adhérent en fin de couverture ou un ayant droit non couvert
+		if (!viewMode.equals(ViewMode.VIEW_MODE_DELETE)) {
+			Reglement bon = regServices.findById(idReglement);
+			String refus = retraite.verifierPrestation(bon.getAdherent(), bon.getAyantDroit());
+			if (refus != null)
+				return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, typeOperation,
+						idReglement, ad, 0L)).flashing("error", refus);
 		}
 		final Double totalCreditAConsomer = vAdherent.getTotalCreditAConsomer();
 		// seuil d'alerte facultatif : sans seuil, pas d'alerte

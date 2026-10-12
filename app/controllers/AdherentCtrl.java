@@ -34,6 +34,7 @@ import services.AdherentMainServices;
 import services.AyantDroitMainServices;
 import services.CategorieMainServices;
 import services.CotisationServices;
+import services.RetraiteServices;
 import services.ImageService;
 import services.ProgrammeMainService;
 import services.UserService;
@@ -61,6 +62,7 @@ public class AdherentCtrl extends Controller {
 	CallJasperReport jasper;
 	UserService userService;
 	CotisationServices cotisationServices;
+	RetraiteServices retraite;
 	Long coutConsultation = 0L;
 
 
@@ -68,7 +70,7 @@ public class AdherentCtrl extends Controller {
 	public AdherentCtrl(FormFactory formFactory, AdherentMainServices adherentService,
 			AyantDroitMainServices ayantDroitService, ImageService imageService,
 			CategorieMainServices catService, ProgrammeMainService progService, CallJasperReport jasper,
-			UserService userService, CotisationServices cotisationServices) {
+			UserService userService, CotisationServices cotisationServices, RetraiteServices retraite) {
 		//super();
 		this.formFactory = formFactory;
 		this.adherentService = adherentService;
@@ -79,6 +81,7 @@ public class AdherentCtrl extends Controller {
 		this.jasper = jasper;
 		this.userService = userService;
 		this.cotisationServices = cotisationServices;
+		this.retraite = retraite;
 
 	}
 
@@ -318,6 +321,9 @@ public class AdherentCtrl extends Controller {
 
 	@Permission(Permissions.BON_CREER)
 	public Result addRembourssement(Request request, Long idAdherent, String typeOP) {
+		String refus = retraite.verifierPrestation(idAdherent, null);
+		if (refus != null)
+			return redirect(routes.AdherentCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L)).flashing("error", refus);
 
 		return redirect(routes.ReglementCtrl.show(ViewMode.VIEW_MODE_CREATE,typeOP, 0L, idAdherent));
 

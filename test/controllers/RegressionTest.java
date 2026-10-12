@@ -272,6 +272,23 @@ public class RegressionTest extends WithApplication {
 	}
 
 	@Test
+	public void tableauDeBord_population_retraites_et_archives_hors_total() {
+		Result stats = route(app, get("/api/stats/reglements-structure?annee=ALL&refresh=1", "Admin"));
+		assertEquals(200, stats.status());
+		com.fasterxml.jackson.databind.JsonNode d = play.libs.Json.parse(contentAsString(stats));
+		long couverts = d.get("totalAdherents").asLong();
+		assertEquals("couverts = actifs + pré-retraite + retraités", couverts,
+				d.get("adherentsActifs").asLong() + d.get("adherentsPreRetraite").asLong() + d.get("adherentsRetraites").asLong());
+		long tousAdherents = db().connection().fetchOne("select count(*) from adherent").get(0, Long.class);
+		assertEquals("archivés et fins de couverture hors total", tousAdherents,
+				couverts + d.get("adherentsArchives").asLong() + d.get("adherentsFinCouverture").asLong());
+		long tousAyants = db().connection().fetchOne("select count(*) from ayant_droit").get(0, Long.class);
+		assertEquals(tousAyants, d.get("totalAyantsDroit").asLong() + d.get("ayantsDroitArchives").asLong()
+				+ d.get("ayantsDroitNonCouverts").asLong());
+		assertEquals(60, d.get("ageRetraite").asInt());
+	}
+
+	@Test
 	public void tableauDeBord_interdit_hors_admin() {
 		assertEquals(403, route(app, get("/api/stats/reglements-structure", "saisie")).status());
 	}
@@ -283,7 +300,9 @@ public class RegressionTest extends WithApplication {
 		assertEquals(303, route(app, get("/accueil", "Percepteur")).status());
 		assertEquals(200, route(app, get("/laboratoire/caisse", "Percepteur")).status());
 		assertEquals(200, route(app, get("/laboratoire/recu/nouveau", "Percepteur")).status());
-		assertEquals(200, route(app, get("/laboratoire/types-examen/CREATE/?idExamen=0", "Percepteur")).status());
+		// dépend des permissions réellement accordées au rôle (modifiables dans l'écran des rôles)
+		int attendu = roles().peut("Percepteur", utils.Permissions.LABO_EXAMENS) ? 200 : 303;
+		assertEquals(attendu, route(app, get("/laboratoire/types-examen/CREATE/?idExamen=0", "Percepteur")).status());
 		Result json = route(app, get("/laboratoire/json/beneficiaires?q=ab", "Percepteur"));
 		assertEquals(200, json.status());
 		assertTrue(contentAsString(json).contains("\"options\""));
@@ -419,14 +438,16 @@ public class RegressionTest extends WithApplication {
 
 	@Test
 	public void cotisation_nouveau_calcul_identique_aux_valeurs_enregistrees() {
-		// le calcul paramétré doit reproduire exactement les taux existants (aucun écart)
-		assertTrue(cotisations().controler().isEmpty());
+		// le calcul paramétré reproduit exactement les taux existants des adhérents actifs (moins de 55 ans) ;
+		// seuls les adhérents en pré-retraite / retraite ont une cotisation à mettre à jour
+		for (dto.EcartCotisation e : cotisations().controler())
+			assertTrue("écart inattendu pour un adhérent actif : " + e.getNom(), !"ACTIF".equals(e.getStatut()));
 	}
 
 	@Test
 	public void cotisation_ajout_puis_suppression_ayant_droit() {
-		Record ad = db().connection().fetchOne("select id from adherent"
-				+ " where coalesce(on_deleted,false) = false order by id desc limit 1");
+		Record ad = db().connection().fetchOne("select id from adherent where coalesce(on_deleted,false) = false"
+				+ " and date_part('year', age(current_date, date_naiss::date)) < 55 order by id desc limit 1");
 		Assume.assumeTrue(ad != null);
 		Long idAdherent = ad.get("id", Long.class);
 		double avant = cotisations().detail(idAdherent).getTotal();
@@ -585,6 +606,137 @@ public class RegressionTest extends WithApplication {
 		assertEquals(303, res.status());
 		assertTrue(res.redirectLocation().get().startsWith("/rapports/annulations"));
 		assertTrue(res.flash().get("error").isPresent());
+	}
+
+	// ===================== Retraites =====================
+
+	private services.RetraiteServices retraiteSrv() {
+		return app.injector().instanceOf(services.RetraiteServices.class);
+	}
+
+	private static final String AGE_SQL = "date_part('year', age(current_date, date_naiss::date))";
+
+	private Record adherentAge(String condition) {
+		return db().connection().fetchOne("select id, telephone from adherent where coalesce(on_deleted,false) = false and "
+				+ condition + " order by id limit 1");
+	}
+
+	@Test
+	public void retraite_statut_selon_l_age() {
+		dto.ParametreRetraite p = new dto.ParametreRetraite();
+		assertEquals("ACTIF", p.statut(54));
+		assertEquals("PRE_RETRAITE", p.statut(55));
+		assertEquals("PRE_RETRAITE", p.statut(59));
+		assertEquals("RETRAITE", p.statut(60));
+		assertEquals("RETRAITE", p.statut(64));
+		assertEquals("FIN_COUVERTURE", p.statut(65));
+	}
+
+	@Test
+	public void retraite_cotisation_et_plafond_selon_l_age() {
+		Record pre = adherentAge(AGE_SQL + " between 55 and 59");
+		if (pre != null) {
+			dto.CotisationAdherent c = cotisations().detail(pre.get("id", Long.class));
+			assertEquals(5.0, c.getBase(), 0.0001);
+			double parts = 0;
+			for (dto.CotisationAdherent.Ligne l : c.getLignes())
+				parts += l.getTaux();
+			assertEquals("ayants droit toujours couverts avant 60 ans", 5.0 + parts, c.getTotal(), 0.0001);
+		}
+		Record retraite = adherentAge(AGE_SQL + " between 60 and 64");
+		Assume.assumeTrue(retraite != null);
+		dto.CotisationAdherent c = cotisations().detail(retraite.get("id", Long.class));
+		assertEquals(0.0, c.getTotal(), 0.0001);
+		for (dto.CotisationAdherent.Ligne l : c.getLignes())
+			assertFalse("ayants droit non couverts après 60 ans", l.isCompte());
+		assertEquals(500000.0, db().connection().fetchOne("select total_credit_a_consomer from v_adherent where id = ?",
+				retraite.get("id")).get(0, Double.class), 0.01);
+
+		// moins de 55 ans : plafond identique à l'ancienne formule (salaire x taux enregistré x 60)
+		Record actif = db().connection().fetchOne("select v.total_credit_a_consomer, ad.salaire_net * ad.pourcentage_total_retenue"
+				+ " / 100 * 60 as ancien from v_adherent v join adherent ad on ad.id = v.id where v.age < 55"
+				+ " and ad.salaire_net > 0 order by v.id limit 1");
+		Assume.assumeTrue(actif != null);
+		assertEquals(actif.get("ancien", Double.class), actif.get("total_credit_a_consomer", Double.class), 0.01);
+	}
+
+	@Test
+	public void retraite_prestations_bloquees() {
+		Record fin = adherentAge(AGE_SQL + " >= 65");
+		if (fin != null) {
+			assertTrue(retraiteSrv().verifierPrestation(fin.get("id", Long.class), null).contains("fin de couverture"));
+			// formulaire de bon refusé
+			Result r = route(app, get("/Adherent-add-rembourssement/show?idConsult=" + fin.get("id") + "&typeOP=BC", "Admin"));
+			assertEquals(303, r.status());
+			assertTrue(r.flash().get("error").get().contains("aucune prestation"));
+		}
+		Record ay = db().connection().fetchOne("select ay.id, ay.adherent from ayant_droit ay join adherent ad on ad.id = ay.adherent"
+				+ " where coalesce(ay.on_deleted,false) = false and coalesce(ad.on_deleted,false) = false"
+				+ " and date_part('year', age(current_date, ad.date_naiss::date)) between 60 and 64 limit 1");
+		if (ay != null) {
+			assertTrue(retraiteSrv().verifierPrestation(ay.get("adherent", Long.class), ay.get("id", Long.class))
+					.contains("ayants droit ne le sont plus"));
+			assertTrue(retraiteSrv().verifierPrestation(ay.get("adherent", Long.class), null) == null);
+			// laboratoire : l'ayant droit d'un retraité n'est plus couvert
+			Result labo = route(app, post("/laboratoire/recu/save", form("typePatient", "AYANT_DROIT",
+					"idAdherent", String.valueOf(ay.get("adherent")), "idAyantDroit", String.valueOf(ay.get("id")),
+					"examens[]", "999999", "modePaiement", "ESPECES"), "Percepteur"));
+			assertTrue(labo.flash().get("error").get().contains("personne externe"));
+		}
+		Record jeune = adherentAge(AGE_SQL + " < 55");
+		Assume.assumeTrue(jeune != null);
+		assertTrue(retraiteSrv().verifierPrestation(jeune.get("id", Long.class), null) == null);
+	}
+
+	@Test
+	public void retraite_pas_de_nouvel_ayant_droit() {
+		Record retraite = adherentAge(AGE_SQL + " between 60 and 64");
+		Assume.assumeTrue(retraite != null);
+		long avant = db().connection().fetchOne("select count(*) from ayant_droit where adherent = ?", retraite.get("id"))
+				.get(0, Long.class);
+		Result r = route(app, post("/AyantDroit/save", form("viewMode", "CREATE", "nomAy", "TEST-REGRESSION-AY",
+				"lien", "ENFANT", "genre", "MASCULIN", "adherent", String.valueOf(retraite.get("id")), "tmpDate", "2015-05-10"),
+				"Admin"));
+		assertEquals(303, r.status());
+		assertTrue(r.flash().get("error").get().contains("aucun ayant droit"));
+		assertEquals(avant, (long) db().connection().fetchOne("select count(*) from ayant_droit where adherent = ?",
+				retraite.get("id")).get(0, Long.class));
+	}
+
+	@Test
+	public void retraite_ecran_et_application_complete_puis_restauration() {
+		assertEquals(200, route(app, get("/adherents/retraites", "Admin")).status());
+		assertEquals(303, route(app, get("/adherents/retraites", "saisie")).status());
+
+		long finAttendues = db().connection().fetchOne("select count(*) from adherent where coalesce(on_deleted,false) = false"
+				+ " and " + AGE_SQL + " >= 65").get(0, Long.class);
+		long finApercu = retraiteSrv().apercu().stream().filter(t -> "FIN_COUVERTURE".equals(t.getAction())).count();
+		assertEquals(finAttendues, finApercu);
+
+		// sauvegarde exacte de l'état avant application
+		org.jooq.Result<Record> adherents = db().connection().fetch("select id, on_deleted, pourcentage_total_retenue from adherent");
+		org.jooq.Result<Record> ayants = db().connection().fetch("select id, on_deleted, pourcentage_retenue from ayant_droit");
+		long journalAvant = db().connection().fetchOne("select coalesce(max(id),0) from retraite_journal").get(0, Long.class);
+		try {
+			Result res = route(app, post("/adherents/retraites/appliquer", form(), "Admin"));
+			assertEquals(303, res.status());
+			assertTrue(res.flash().get("success").isPresent());
+			assertEquals(0L, (long) db().connection().fetchOne("select count(*) from adherent where coalesce(on_deleted,false) = false"
+					+ " and " + AGE_SQL + " >= 65").get(0, Long.class));
+			assertEquals(0L, (long) db().connection().fetchOne("select count(*) from ayant_droit ay join adherent ad on ad.id = ay.adherent"
+					+ " where coalesce(ay.on_deleted,false) = false and date_part('year', age(current_date, ad.date_naiss::date)) >= 60")
+					.get(0, Long.class));
+			assertTrue("plus aucun changement en attente", retraiteSrv().apercu().isEmpty());
+			assertTrue("plus aucun écart de cotisation", cotisations().controler().isEmpty());
+		} finally {
+			for (Record r : adherents)
+				db().connection().execute("update adherent set on_deleted = ?, pourcentage_total_retenue = ? where id = ?",
+						r.get("on_deleted"), r.get("pourcentage_total_retenue"), r.get("id"));
+			for (Record r : ayants)
+				db().connection().execute("update ayant_droit set on_deleted = ?, pourcentage_retenue = ? where id = ?",
+						r.get("on_deleted"), r.get("pourcentage_retenue"), r.get("id"));
+			db().connection().execute("delete from retraite_journal where id > ?", journalAvant);
+		}
 	}
 
 	@Test

@@ -24,6 +24,7 @@ import services.AdherentMainServices;
 import services.AyantDroitMainServices;
 import services.CotisationServices;
 import services.ImageService;
+import services.RetraiteServices;
 import utils.Acces;
 import utils.CallJasperReport;
 import utils.Permission;
@@ -45,10 +46,12 @@ public class AyantDroitCtrl extends Controller {
 	AdherentMainServices adherentService;
 	CallJasperReport jasper;
 	CotisationServices cotisationServices;
+	RetraiteServices retraite;
 
 	@Inject
 	public AyantDroitCtrl(FormFactory formFactory, AyantDroitMainServices ayantDroitService, ImageService imageService,
-			AdherentMainServices adherentService, CallJasperReport jasper, CotisationServices cotisationServices) {
+			AdherentMainServices adherentService, CallJasperReport jasper, CotisationServices cotisationServices,
+			RetraiteServices retraite) {
 		super();
 		this.formFactory = formFactory;
 		this.ayantDroitService = ayantDroitService;
@@ -56,6 +59,7 @@ public class AyantDroitCtrl extends Controller {
 		this.adherentService = adherentService;
 		this.jasper = jasper;
 		this.cotisationServices = cotisationServices;
+		this.retraite = retraite;
 	}
 
 	@Permission({ Permissions.AYANT_DROIT_CONSULTER, Permissions.AYANT_DROIT_GERER })
@@ -101,6 +105,10 @@ public class AyantDroitCtrl extends Controller {
 		if (c == null) {
 			return redirect(routes.HomeController.acceuil()).flashing("error", "Ayant droit introuvable");
 		}
+		String refus = retraite.verifierAjoutAyantDroit(c.getAdherent());
+		if (refus != null)
+			return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent())).flashing("error",
+					refus);
 		c.setOnDeleted(false);
 		ayantDroitService.update(c);
 		// la réactivation n'était pas prise en compte dans la cotisation
@@ -133,6 +141,11 @@ public class AyantDroitCtrl extends Controller {
 		// La part de cotisation de chaque ayant droit et le total de l'adhérent sont
 		// recalculés intégralement après l'enregistrement (CotisationServices).
 		if (ViewMode.VIEW_MODE_CREATE.equals(viewMode)) {
+			// à partir de l'âge de la retraite, seul l'adhérent est couvert
+			String refus = retraite.verifierAjoutAyantDroit(ad.getId());
+			if (refus != null)
+				return redirect(routes.AyantDroitCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L, c.getAdherent()))
+						.flashing("error", refus);
 			c.setDateNaiss(ayantDroitService.getDateT(dateNaiss));
 			c.setPourcentageRetenue(0.0);
 

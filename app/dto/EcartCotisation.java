@@ -13,6 +13,11 @@ public class EcartCotisation {
 	private Double enregistre;
 	private double calcule;
 	private int nbAyantsDroit;
+	private String statut = ParametreRetraite.ACTIF;
+
+	public String getStatut() { return statut; }
+	public void setStatut(String statut) { this.statut = statut; }
+	public String getLibelleStatut() { return ParametreRetraite.libelleStatut(statut); }
 
 	public Long getIdAdherent() { return idAdherent; }
 	public void setIdAdherent(Long idAdherent) { this.idAdherent = idAdherent; }

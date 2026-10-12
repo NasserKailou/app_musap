@@ -37,6 +37,8 @@ public class CotisationAdherent {
 	}
 
 	private Long idAdherent;
+	private Integer age;
+	private String statut = ParametreRetraite.ACTIF;
 	private double base;
 	private double total;
 	private Double totalEnregistre;
@@ -45,6 +47,13 @@ public class CotisationAdherent {
 
 	public Long getIdAdherent() { return idAdherent; }
 	public void setIdAdherent(Long idAdherent) { this.idAdherent = idAdherent; }
+
+	public Integer getAge() { return age; }
+	public void setAge(Integer age) { this.age = age; }
+
+	public String getStatut() { return statut; }
+	public void setStatut(String statut) { this.statut = statut; }
+	public String getLibelleStatut() { return ParametreRetraite.libelleStatut(statut); }
 
 	public double getBase() { return base; }
 	public void setBase(double base) { this.base = base; }

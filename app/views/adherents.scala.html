@@ -622,7 +622,13 @@
 
                       <td>@c.getMatricule()</td>
                       <td>@c.getCodeCarnet()</td>
-                      <td>@c.getNomAd() @c.getPrenomAd()</td>
+                      <td>@c.getNomAd() @c.getPrenomAd()
+                        @defining(services.RetraiteServices.statut(c.getAge())) { st =>
+                          @if(st == "PRE_RETRAITE") { <span class="badge badge-info" title="Cotisation de pré-retraite">Pré-retraite</span> }
+                          @if(st == "RETRAITE") { <span class="badge badge-primary" title="Seul l'adhérent est couvert">Retraité</span> }
+                          @if(st == "FIN_COUVERTURE") { <span class="badge badge-danger" title="Aucune prestation possible">Fin de couverture</span> }
+                        }
+                      </td>
                       <td>@c.getTelephone()</td>
                       <td>
                         <span class="badge @statusClass badge-status">

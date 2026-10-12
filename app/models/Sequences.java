@@ -149,6 +149,11 @@ public class Sequences {
     public static final Sequence<Long> REGLEMENT_ID_SEQ = new SequenceImpl<Long>("reglement_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
 
     /**
+     * The sequence <code>public.retraite_journal_id_seq</code>
+     */
+    public static final Sequence<Long> RETRAITE_JOURNAL_ID_SEQ = new SequenceImpl<Long>("retraite_journal_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
+
+    /**
      * The sequence <code>public.service_id_seq</code>
      */
     public static final Sequence<Long> SERVICE_ID_SEQ = new SequenceImpl<Long>("service_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));

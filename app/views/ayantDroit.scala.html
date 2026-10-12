@@ -40,6 +40,17 @@
 <section class="content">
   <div class="container-fluid">
 
+    @if(cotisation != null && (cotisation.getStatut == "RETRAITE" || cotisation.getStatut == "FIN_COUVERTURE")) {
+      <div class="alert @if(cotisation.getStatut == "RETRAITE") { alert-info } else { alert-danger }">
+        <h5 class="mb-1"><i class="fas fa-user-clock"></i> @cotisation.getLibelleStatut (@cotisation.getAge ans)</h5>
+        @if(cotisation.getStatut == "RETRAITE") {
+          Seul l'adhérent est couvert : ses ayants droit ne bénéficient plus des services de la mutuelle
+          et aucun ayant droit ne peut être ajouté.
+        } else {
+          Fin de couverture : l'adhérent est archivé et aucune prestation (bon ou prise en charge) n'est possible.
+        }
+      </div>
+    }
     @if(cotisation != null) {
     <div class="row">
       <div class="col-12">
@@ -49,6 +60,7 @@
               <i class="fas fa-percentage"></i> Cotisation de l'adhérent :
               <b>@pct(cotisation.getTotal) % du salaire</b>
               <small class="text-muted ml-2">(@cotisation.getLignes.size ayant(s) droit actif(s))</small>
+              @if(cotisation.getStatut != "ACTIF") { <span class="badge badge-info ml-1">@cotisation.getLibelleStatut</span> }
             </h3>
             <div class="card-tools">
               <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
@@ -78,7 +90,13 @@
                     <td>@l.getNom</td>
                     <td>
                       <span class="badge badge-info">@l.getLien</span>
-                      @if(!l.isCompte) { <span class="badge badge-secondary" title="Nombre maximum d'ayants droit pris en compte atteint pour ce lien">non compté (maximum atteint)</span> }
+                      @if(!l.isCompte) {
+                        @if(cotisation.getStatut == "RETRAITE" || cotisation.getStatut == "FIN_COUVERTURE") {
+                          <span class="badge badge-secondary" title="À partir de la retraite, seul l'adhérent est couvert">non couvert (retraite)</span>
+                        } else {
+                          <span class="badge badge-secondary" title="Nombre maximum d'ayants droit pris en compte atteint pour ce lien">non compté (maximum atteint)</span>
+                        }
+                      }
                     </td>
                     <td class="text-right">+ @pct(l.getTaux) %</td>
                   </tr>
@@ -117,7 +135,7 @@
 
               <div class="btn-toolbar mt-2 mt-md-0">
                     @* ✅ NOUVEAU BOUTON QUI OUVRE LE MODAL DIRECTEMENT *@
-                    @if(Acces.peut(request, Permissions.AYANT_DROIT_GERER)) {
+                    @if(Acces.peut(request, Permissions.AYANT_DROIT_GERER) && (cotisation == null || cotisation.getStatut == "ACTIF" || cotisation.getStatut == "PRE_RETRAITE")) {
                     <button type="button"
                             class="btn btn-success btn-sm mr-2"
                             onclick="openCreateModal()">

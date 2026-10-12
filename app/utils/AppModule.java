@@ -21,6 +21,8 @@ public class AppModule extends AbstractModule {
 		bind(utils.ConnectionProvider.class);
 		// rôles & permissions chargés au démarrage (utilisés par les menus des vues)
 		bind(services.RoleServices.class).asEagerSingleton();
+		// règles de retraite : vue v_adherent et statut affiché dans les listes
+		bind(services.RetraiteServices.class).asEagerSingleton();
 		// bind(controllers.util.Helpers.class).asEagerSingleton();
 
 	}

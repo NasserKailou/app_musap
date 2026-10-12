@@ -136,6 +136,11 @@ GET     /rapports/annulations                     controllers.RapportOperationsC
 GET     /rapports/export                          controllers.RapportOperationsCtrl.exporter(request:Request, rapport: String ?= "operations", periode: String ?= "", date: String ?= "", mois: String ?= "", debut: String ?= "", fin: String ?= "", type: String ?= "", region: String ?= "")
 POST    /rapports/annulations/restaurer/:id       controllers.RapportOperationsCtrl.restaurer(request:Request, id: Long)
 
+# Retraites
+GET     /adherents/retraites                      controllers.RetraiteCtrl.index(request:Request)
+POST    /adherents/retraites/appliquer            controllers.RetraiteCtrl.appliquer(request:Request)
+POST    /parametres/cotisations/retraite          controllers.CotisationCtrl.saveRetraite(request:Request)
+
 # Rôles & permissions
 GET     /parametres/roles                         controllers.RoleCtrl.index(request:Request, code: String ?= "")
 POST    /parametres/roles/save                    controllers.RoleCtrl.saveRole(request:Request)

@@ -67,11 +67,13 @@ public class LaboratoireServices {
 			+ " left join ayant_droit ay on ay.id = r.ayant_droit";
 
 	private final IConnectionHelper con;
+	private final RetraiteServices retraite;
 	private volatile boolean schemaOk = false;
 
 	@Inject
-	public LaboratoireServices(IConnectionHelper con) {
+	public LaboratoireServices(IConnectionHelper con, RetraiteServices retraite) {
 		this.con = con;
+		this.retraite = retraite;
 		ensureSchema();
 	}
 
@@ -281,6 +283,12 @@ public class LaboratoireServices {
 		}
 		recu.setTypePatient(type);
 		boolean membre = !LaboUtils.TYPE_EXTERNE.equals(type);
+		if (membre) {
+			// retraite : fin de couverture à 65 ans, ayants droit non couverts à partir de 60 ans
+			String refus = retraite.verifierPrestation(recu.getAdherent(), recu.getAyantDroit());
+			if (refus != null)
+				throw new IllegalArgumentException(refus + ". Enregistrez le patient comme personne externe.");
+		}
 
 		// ---- Calcul des lignes à partir des tarifs en base ----
 		Map<Long, TypeExamen> tarifs = new HashMap<>();

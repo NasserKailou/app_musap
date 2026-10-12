@@ -29,6 +29,7 @@ import models.tables.EtudeConsommations;
 import models.tables.JournalEcriture;
 import models.tables.Notification;
 import models.tables.OtpMessage;
+import models.tables.ParametreRetraite;
 import models.tables.Params;
 import models.tables.Personnel;
 import models.tables.Programme;
@@ -38,6 +39,7 @@ import models.tables.Region;
 import models.tables.Reglement;
 import models.tables.ReglementAnnulation;
 import models.tables.ReglementDetail;
+import models.tables.RetraiteJournal;
 import models.tables.Service;
 import models.tables.StructurePartenaire;
 import models.tables.TauxCotisation;
@@ -102,7 +104,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 460362537;
+    private static final long serialVersionUID = -732083881;
 
     /**
      * The reference instance of <code>public</code>
@@ -205,6 +207,11 @@ public class Public extends SchemaImpl {
     public final OtpMessage OTP_MESSAGE = models.tables.OtpMessage.OTP_MESSAGE;
 
     /**
+     * The table <code>public.parametre_retraite</code>.
+     */
+    public final ParametreRetraite PARAMETRE_RETRAITE = models.tables.ParametreRetraite.PARAMETRE_RETRAITE;
+
+    /**
      * The table <code>public.params</code>.
      */
     public final Params PARAMS = models.tables.Params.PARAMS;
@@ -248,6 +255,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.reglement_detail</code>.
      */
     public final ReglementDetail REGLEMENT_DETAIL = models.tables.ReglementDetail.REGLEMENT_DETAIL;
+
+    /**
+     * The table <code>public.retraite_journal</code>.
+     */
+    public final RetraiteJournal RETRAITE_JOURNAL = models.tables.RetraiteJournal.RETRAITE_JOURNAL;
 
     /**
      * The table <code>public.service</code>.
@@ -519,6 +531,7 @@ public class Public extends SchemaImpl {
             Sequences.REGLEMENT_ANNULATION_ID_SEQ,
             Sequences.REGLEMENT_DETAIL_ID_SEQ,
             Sequences.REGLEMENT_ID_SEQ,
+            Sequences.RETRAITE_JOURNAL_ID_SEQ,
             Sequences.SERVICE_ID_SEQ,
             Sequences.STRUCTURE_PARTENAIRE_ID_SEQ,
             Sequences.TYPE_EXAMEN_ID_SEQ,
@@ -555,6 +568,7 @@ public class Public extends SchemaImpl {
             JournalEcriture.JOURNAL_ECRITURE,
             Notification.NOTIFICATION,
             OtpMessage.OTP_MESSAGE,
+            ParametreRetraite.PARAMETRE_RETRAITE,
             Params.PARAMS,
             Personnel.PERSONNEL,
             Programme.PROGRAMME,
@@ -564,6 +578,7 @@ public class Public extends SchemaImpl {
             Reglement.REGLEMENT,
             ReglementAnnulation.REGLEMENT_ANNULATION,
             ReglementDetail.REGLEMENT_DETAIL,
+            RetraiteJournal.RETRAITE_JOURNAL,
             Service.SERVICE,
             StructurePartenaire.STRUCTURE_PARTENAIRE,
             TauxCotisation.TAUX_COTISATION,

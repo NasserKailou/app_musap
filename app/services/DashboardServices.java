@@ -173,19 +173,50 @@ public class DashboardServices {
 		result.put("tauxConfirmation", total > 0 ? Math.round(confirmes * 1000.0 / total) / 10.0 : 0);
 
 		// ===== 2) Population (indépendante de l'année) =====
-		Record p = con.connection().fetchOne("select"
-				+ " (select count(*) from adherent where coalesce(on_deleted,false) = false) as adherents,"
-				+ " (select count(*) from ayant_droit ay join adherent ad on ad.id = ay.adherent"
-				+ "    where coalesce(ay.on_deleted,false) = false and coalesce(ad.on_deleted,false) = false) as ayants,"
-				+ " (select count(*) from structure_partenaire where coalesce(is_deleted,false) = false) as structures");
-		result.put("totalAdherents", l(p, "adherents"));
-		result.put("totalAyantsDroit", l(p, "ayants"));
-		result.put("totalStructuresPartenaires", l(p, "structures"));
+		// Population couverte : adhérents non archivés de moins de l'âge de fin de couverture et
+		// ayants droit actifs d'adhérents non retraités. Archivés, fins de couverture et ayants
+		// droit des retraités sont affichés à part, hors total.
+		String regles = "(select coalesce(max(age_pre_retraite),55) as apr, coalesce(max(age_retraite),60) as ar,"
+				+ " coalesce(max(age_fin_couverture),65) as af from parametre_retraite) p";
+		Record pa = con.connection().fetchOne("select"
+				+ " count(*) filter (where not a.arch and coalesce(a.age,0) < p.af) as couverts,"
+				+ " count(*) filter (where not a.arch and coalesce(a.age,0) < p.apr) as actifs,"
+				+ " count(*) filter (where not a.arch and a.age >= p.apr and a.age < p.ar) as pre_retraite,"
+				+ " count(*) filter (where not a.arch and a.age >= p.ar and a.age < p.af) as retraites,"
+				+ " count(*) filter (where not a.arch and a.age >= p.af) as fin_couverture,"
+				+ " count(*) filter (where a.arch) as archives,"
+				+ " max(p.apr) as age_pre_retraite, max(p.ar) as age_retraite, max(p.af) as age_fin_couverture"
+				+ " from (select coalesce(on_deleted,false) as arch, date_part('year', age(current_date, date_naiss::date)) as age"
+				+ " from adherent) a cross join " + regles);
+		Record py = con.connection().fetchOne("select"
+				+ " count(*) filter (where not y.arch and coalesce(y.age_ad,0) < p.ar) as couverts,"
+				+ " count(*) filter (where not y.arch and y.age_ad >= p.ar) as non_couverts,"
+				+ " count(*) filter (where y.arch) as archives"
+				+ " from (select coalesce(ay.on_deleted,false) or coalesce(ad.on_deleted,false) as arch,"
+				+ " date_part('year', age(current_date, ad.date_naiss::date)) as age_ad"
+				+ " from ayant_droit ay join adherent ad on ad.id = ay.adherent) y cross join " + regles);
+		Record ps = con.connection().fetchOne(
+				"select count(*) from structure_partenaire where coalesce(is_deleted,false) = false");
+		result.put("totalAdherents", l(pa, "couverts"));
+		result.put("totalAyantsDroit", l(py, "couverts"));
+		result.put("totalStructuresPartenaires", ps.get(0, Long.class));
+		result.put("adherentsActifs", l(pa, "actifs"));
+		result.put("adherentsPreRetraite", l(pa, "pre_retraite"));
+		result.put("adherentsRetraites", l(pa, "retraites"));
+		result.put("adherentsFinCouverture", l(pa, "fin_couverture"));
+		result.put("adherentsArchives", l(pa, "archives"));
+		result.put("ayantsDroitNonCouverts", l(py, "non_couverts"));
+		result.put("ayantsDroitArchives", l(py, "archives"));
+		result.put("agePreRetraite", l(pa, "age_pre_retraite"));
+		result.put("ageRetraite", l(pa, "age_retraite"));
+		result.put("ageFinCouverture", l(pa, "age_fin_couverture"));
 
 		ArrayNode sexeLabels = Json.newArray();
 		ArrayNode sexeValues = Json.newArray();
 		for (Record r : con.connection().fetch("select coalesce(nullif(trim(upper(sexe)),''),'N/R') as sexe, count(*) as nb"
-				+ " from adherent where coalesce(on_deleted,false) = false group by 1 order by 2 desc")) {
+				+ " from adherent where coalesce(on_deleted,false) = false"
+				+ " and coalesce(date_part('year', age(current_date, date_naiss::date)),0) < " + l(pa, "age_fin_couverture")
+				+ " group by 1 order by 2 desc")) {
 			sexeLabels.add(r.get("sexe", String.class));
 			sexeValues.add(l(r, "nb"));
 		}

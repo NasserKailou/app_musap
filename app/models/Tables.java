@@ -25,6 +25,7 @@ import models.tables.EtudeConsommations;
 import models.tables.JournalEcriture;
 import models.tables.Notification;
 import models.tables.OtpMessage;
+import models.tables.ParametreRetraite;
 import models.tables.Params;
 import models.tables.Personnel;
 import models.tables.Programme;
@@ -34,6 +35,7 @@ import models.tables.Region;
 import models.tables.Reglement;
 import models.tables.ReglementAnnulation;
 import models.tables.ReglementDetail;
+import models.tables.RetraiteJournal;
 import models.tables.Service;
 import models.tables.StructurePartenaire;
 import models.tables.TauxCotisation;
@@ -189,6 +191,11 @@ public class Tables {
     public static final OtpMessage OTP_MESSAGE = models.tables.OtpMessage.OTP_MESSAGE;
 
     /**
+     * The table <code>public.parametre_retraite</code>.
+     */
+    public static final ParametreRetraite PARAMETRE_RETRAITE = models.tables.ParametreRetraite.PARAMETRE_RETRAITE;
+
+    /**
      * The table <code>public.params</code>.
      */
     public static final Params PARAMS = models.tables.Params.PARAMS;
@@ -232,6 +239,11 @@ public class Tables {
      * The table <code>public.reglement_detail</code>.
      */
     public static final ReglementDetail REGLEMENT_DETAIL = models.tables.ReglementDetail.REGLEMENT_DETAIL;
+
+    /**
+     * The table <code>public.retraite_journal</code>.
+     */
+    public static final RetraiteJournal RETRAITE_JOURNAL = models.tables.RetraiteJournal.RETRAITE_JOURNAL;
 
     /**
      * The table <code>public.service</code>.

@@ -8,7 +8,9 @@ import play.mvc.Controller;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import play.mvc.Security;
+import dto.ParametreRetraite;
 import services.CotisationServices;
+import services.RetraiteServices;
 import utils.Permission;
 import utils.Permissions;
 import utils.Secured;
@@ -25,15 +27,18 @@ public class CotisationCtrl extends Controller {
 
 	private final CotisationServices cotisationServices;
 	private final FormFactory formFactory;
+	private final RetraiteServices retraite;
 
 	@Inject
-	public CotisationCtrl(CotisationServices cotisationServices, FormFactory formFactory) {
+	public CotisationCtrl(CotisationServices cotisationServices, FormFactory formFactory, RetraiteServices retraite) {
 		this.cotisationServices = cotisationServices;
 		this.formFactory = formFactory;
+		this.retraite = retraite;
 	}
 
 	public Result index(Request request) {
-		return ok(views.html.cotisations.render(cotisationServices.listTaux(), cotisationServices.controler(), request));
+		return ok(views.html.cotisations.render(cotisationServices.listTaux(), cotisationServices.controler(),
+				cotisationServices.parametresRetraite(), request));
 	}
 
 	public Result saveTaux(Request request) {
@@ -43,6 +48,24 @@ public class CotisationCtrl extends Controller {
 		if ("ok".equals(res))
 			return redirect(routes.CotisationCtrl.index()).flashing("success", "Taux enregistré. Vérifiez les écarts"
 					+ " puis appliquez le recalcul pour mettre à jour les adhérents.");
+		return redirect(routes.CotisationCtrl.index()).flashing("error", res);
+	}
+
+	public Result saveRetraite(Request request) {
+		DynamicForm f = formFactory.form().bindFromRequest(request);
+		ParametreRetraite p = new ParametreRetraite();
+		p.setAgePreRetraite(parseInt(f.get("agePreRetraite")));
+		p.setAgeRetraite(parseInt(f.get("ageRetraite")));
+		p.setAgeFinCouverture(parseInt(f.get("ageFinCouverture")));
+		Integer plafond = parseInt(f.get("plafondRetraite"));
+		Integer seuil = parseInt(f.get("seuilAlerteRetraite"));
+		p.setPlafondRetraite(plafond == null ? null : plafond.longValue());
+		p.setSeuilAlerteRetraite(seuil == null ? null : seuil.longValue());
+		String res = cotisationServices.enregistrerParametresRetraite(p, request.session().get("login").orElse(""));
+		retraite.viderCache();
+		if ("ok".equals(res))
+			return redirect(routes.CotisationCtrl.index()).flashing("success",
+					"Règles de retraite enregistrées. Appliquez les changements depuis Adhérents > Retraites.");
 		return redirect(routes.CotisationCtrl.index()).flashing("error", res);
 	}
 

@@ -1,0 +1,175 @@
+@(transitions: List[dto.TransitionRetraite], journal: List[java.util.Map[String, Object]], regles: dto.ParametreRetraite)(implicit request: Http.Request)
+
+@import helper._
+@import scala.jdk.CollectionConverters._
+
+@nombre(action: String) = @{ transitions.asScala.count(_.getAction == action) }
+@dt(o: Object) = @{ if (o == null) "" else new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(o.asInstanceOf[java.util.Date]) }
+@fmt(v: java.lang.Long) = @{ if (v == null) "0" else "%,d".format(v).replace(',', ' ') }
+
+@main("Retraites") {
+
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-7">
+          <h1 class="m-0"><i class="fas fa-user-clock"></i> Prise en charge des retraités</h1>
+        </div>
+        <div class="col-sm-5">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/accueil">Accueil</a></li>
+            <li class="breadcrumb-item">Adhérents</li>
+            <li class="breadcrumb-item active">Retraites</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+
+      <!-- Règles en vigueur -->
+      <div class="row">
+        <div class="col-md-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-info"><i class="fas fa-percentage"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Dès @regles.getAgePreRetraite ans</span>
+              <span class="info-box-number">Cotisation de base majorée</span>
+              <small class="text-muted">finance la couverture après la retraite</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-primary"><i class="fas fa-user-tie"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Dès @regles.getAgeRetraite ans : retraité</span>
+              <span class="info-box-number">Plafond @fmt(regles.getPlafondRetraite) / an</span>
+              <small class="text-muted">seul l'adhérent est couvert</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-warning"><i class="fas fa-users-slash"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Ayants droit des retraités</span>
+              <span class="info-box-number">Archivés</span>
+              <small class="text-muted">plus d'accès aux services</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-danger"><i class="fas fa-ban"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Dès @regles.getAgeFinCouverture ans</span>
+              <span class="info-box-number">Fin de couverture</span>
+              <small class="text-muted">adhérent archivé, aucune prestation</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info small">
+        <i class="fas fa-info-circle"></i>
+        Les blocages s'appliquent automatiquement selon l'âge : aucun bon ni prise en charge à partir de @regles.getAgeFinCouverture ans,
+        aucune prestation pour les ayants droit d'un retraité, plafond de @fmt(regles.getPlafondRetraite) pour les retraités.
+        Cet écran applique en plus l'archivage effectif et la mise à jour des cotisations (retenues sur salaire).
+        Les âges, le plafond et les taux se règlent dans <a href="@controllers.routes.CotisationCtrl.index()">Paramètrages &gt; Taux de cotisation</a>.
+      </div>
+
+      <!-- Changements à appliquer -->
+      <div class="card card-outline @if(transitions.isEmpty) { card-success } else { card-warning }">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-tasks"></i> Changements à appliquer
+            @if(transitions.isEmpty) { <span class="badge badge-success">à jour</span> } else {
+              <span class="badge badge-danger">@nombre("FIN_COUVERTURE") fin(s) de couverture</span>
+              <span class="badge badge-warning">@nombre("ARCHIVAGE_AYANTS_DROIT") retraité(s) avec ayants droit</span>
+              <span class="badge badge-info">@nombre("COTISATION") cotisation(s)</span>
+            }
+          </h3>
+        </div>
+        @if(transitions.isEmpty) {
+          <div class="card-body text-success"><i class="fas fa-check-circle"></i> La situation de tous les adhérents est conforme aux règles de retraite.</div>
+        } else {
+          <div class="card-body p-0 table-responsive">
+            <table class="table table-sm table-striped mb-0" id="tableTransitions">
+              <thead class="thead-light">
+                <tr><th>Adhérent</th><th>Matricule</th><th class="text-center">Âge</th><th>Statut</th><th>Changement</th></tr>
+              </thead>
+              <tbody>
+                @for(t <- transitions) {
+                  <tr>
+                    <td><a href="@controllers.routes.AyantDroitCtrl.show("CREATE", 0L, t.getIdAdherent)">@t.getNom</a></td>
+                    <td>@t.getMatricule</td>
+                    <td class="text-center">@if(t.getAge != null) { @t.getAge }</td>
+                    <td>
+                      @if(t.getStatut == "FIN_COUVERTURE") {
+                        <span class="badge badge-danger">@t.getLibelleStatut</span>
+                      } else if(t.getStatut == "RETRAITE") {
+                        <span class="badge badge-primary">@t.getLibelleStatut</span>
+                      } else {
+                        <span class="badge badge-info">@t.getLibelleStatut</span>
+                      }
+                    </td>
+                    <td>@t.getDetail</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer">
+            <form method="POST" action="@controllers.routes.RetraiteCtrl.appliquer()" id="formAppliquer">
+              @CSRF.formField
+              <button type="submit" class="btn btn-warning"><i class="fas fa-check-double"></i> Appliquer les @transitions.size changement(s)</button>
+            </form>
+          </div>
+        }
+      </div>
+
+      <!-- Historique -->
+      <div class="card card-outline card-secondary collapsed-card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-history"></i> Historique des changements <span class="badge badge-secondary">@journal.size</span></h3>
+          <div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i></button></div>
+        </div>
+        <div class="card-body p-0 table-responsive">
+          <table class="table table-sm mb-0">
+            <thead class="thead-light"><tr><th>Date</th><th>Adhérent</th><th>Changement</th><th>Par</th></tr></thead>
+            <tbody>
+              @for(j <- journal) {
+                <tr>
+                  <td>@dt(j.get("date"))</td>
+                  <td>@j.get("nom") <small class="text-muted">@j.get("matricule")</small></td>
+                  <td>@j.get("details")</td>
+                  <td>@j.get("auteur")</td>
+                </tr>
+              }
+              @if(journal.isEmpty) { <tr><td colspan="4" class="text-center text-muted">Aucun changement appliqué</td></tr> }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+
+<script>
+$(function() {
+  if ($('#tableTransitions').length) {
+    $('#tableTransitions').DataTable({ pageLength: 25, order: [[2, 'desc']], autoWidth: false,
+      language: { sSearch: "Rechercher :", sLengthMenu: "Afficher _MENU_", sInfo: "_START_ à _END_ sur _TOTAL_",
+        sZeroRecords: "Aucune ligne", oPaginate: { sPrevious: "Précédent", sNext: "Suivant" } } });
+  }
+  $('#formAppliquer').on('submit', function() {
+    return confirm('Appliquer les changements ?\n\n'
+      + '- les adhérents de @regles.getAgeFinCouverture ans et plus seront archivés ;\n'
+      + '- les ayants droit des retraités seront archivés ;\n'
+      + '- les cotisations (retenues sur salaire) seront mises à jour.\n\n'
+      + 'Chaque changement est tracé dans l\'historique.');
+  });
+});
+</script>

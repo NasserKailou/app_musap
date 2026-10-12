@@ -25,6 +25,7 @@ import models.tables.EtudeConsommations;
 import models.tables.JournalEcriture;
 import models.tables.Notification;
 import models.tables.OtpMessage;
+import models.tables.ParametreRetraite;
 import models.tables.Params;
 import models.tables.Programme;
 import models.tables.RecuLabo;
@@ -33,6 +34,7 @@ import models.tables.Region;
 import models.tables.Reglement;
 import models.tables.ReglementAnnulation;
 import models.tables.ReglementDetail;
+import models.tables.RetraiteJournal;
 import models.tables.Service;
 import models.tables.StructurePartenaire;
 import models.tables.TauxCotisation;
@@ -59,6 +61,7 @@ import models.tables.records.EtudeConsommationsRecord;
 import models.tables.records.JournalEcritureRecord;
 import models.tables.records.NotificationRecord;
 import models.tables.records.OtpMessageRecord;
+import models.tables.records.ParametreRetraiteRecord;
 import models.tables.records.ParamsRecord;
 import models.tables.records.ProgrammeRecord;
 import models.tables.records.RecuLaboDetailRecord;
@@ -67,6 +70,7 @@ import models.tables.records.RegionRecord;
 import models.tables.records.ReglementAnnulationRecord;
 import models.tables.records.ReglementDetailRecord;
 import models.tables.records.ReglementRecord;
+import models.tables.records.RetraiteJournalRecord;
 import models.tables.records.ServiceRecord;
 import models.tables.records.StructurePartenaireRecord;
 import models.tables.records.TauxCotisationRecord;
@@ -124,6 +128,7 @@ public class Keys {
     public static final Identity<ReglementRecord, Long> IDENTITY_REGLEMENT = Identities0.IDENTITY_REGLEMENT;
     public static final Identity<ReglementAnnulationRecord, Long> IDENTITY_REGLEMENT_ANNULATION = Identities0.IDENTITY_REGLEMENT_ANNULATION;
     public static final Identity<ReglementDetailRecord, Long> IDENTITY_REGLEMENT_DETAIL = Identities0.IDENTITY_REGLEMENT_DETAIL;
+    public static final Identity<RetraiteJournalRecord, Long> IDENTITY_RETRAITE_JOURNAL = Identities0.IDENTITY_RETRAITE_JOURNAL;
     public static final Identity<ServiceRecord, Long> IDENTITY_SERVICE = Identities0.IDENTITY_SERVICE;
     public static final Identity<StructurePartenaireRecord, Long> IDENTITY_STRUCTURE_PARTENAIRE = Identities0.IDENTITY_STRUCTURE_PARTENAIRE;
     public static final Identity<TypeExamenRecord, Long> IDENTITY_TYPE_EXAMEN = Identities0.IDENTITY_TYPE_EXAMEN;
@@ -157,6 +162,7 @@ public class Keys {
     public static final UniqueKey<JournalEcritureRecord> JOURNAL_ECRITURE_PKEY = UniqueKeys0.JOURNAL_ECRITURE_PKEY;
     public static final UniqueKey<JournalEcritureRecord> UNIK_JOURNAL_KEY = UniqueKeys0.UNIK_JOURNAL_KEY;
     public static final UniqueKey<OtpMessageRecord> OTP_MESSAGE_PKEY = UniqueKeys0.OTP_MESSAGE_PKEY;
+    public static final UniqueKey<ParametreRetraiteRecord> PARAMETRE_RETRAITE_PKEY = UniqueKeys0.PARAMETRE_RETRAITE_PKEY;
     public static final UniqueKey<ParamsRecord> PARAMS_PKEY = UniqueKeys0.PARAMS_PKEY;
     public static final UniqueKey<ProgrammeRecord> PROGRAMME_PKEY = UniqueKeys0.PROGRAMME_PKEY;
     public static final UniqueKey<ProgrammeRecord> CODE_PRGM = UniqueKeys0.CODE_PRGM;
@@ -167,6 +173,7 @@ public class Keys {
     public static final UniqueKey<ReglementRecord> REGLEMENT_PKEY = UniqueKeys0.REGLEMENT_PKEY;
     public static final UniqueKey<ReglementAnnulationRecord> REGLEMENT_ANNULATION_PKEY = UniqueKeys0.REGLEMENT_ANNULATION_PKEY;
     public static final UniqueKey<ReglementDetailRecord> REGLEMENT_DETAIL_PKEY = UniqueKeys0.REGLEMENT_DETAIL_PKEY;
+    public static final UniqueKey<RetraiteJournalRecord> RETRAITE_JOURNAL_PKEY = UniqueKeys0.RETRAITE_JOURNAL_PKEY;
     public static final UniqueKey<ServiceRecord> SERVICE_PKEY = UniqueKeys0.SERVICE_PKEY;
     public static final UniqueKey<StructurePartenaireRecord> STRUCTURE_PARTENAIRE_PKEY = UniqueKeys0.STRUCTURE_PARTENAIRE_PKEY;
     public static final UniqueKey<TauxCotisationRecord> TAUX_COTISATION_PKEY = UniqueKeys0.TAUX_COTISATION_PKEY;
@@ -196,6 +203,7 @@ public class Keys {
     public static final ForeignKey<ReglementRecord, TypePrestationRecord> REGLEMENT__REGLEMENT_TYPE_PRESTATION_FKEY = ForeignKeys0.REGLEMENT__REGLEMENT_TYPE_PRESTATION_FKEY;
     public static final ForeignKey<ReglementRecord, AyantDroitRecord> REGLEMENT__REGLEMENT_AYANT_DROIT_FKEY = ForeignKeys0.REGLEMENT__REGLEMENT_AYANT_DROIT_FKEY;
     public static final ForeignKey<ReglementAnnulationRecord, ReglementRecord> REGLEMENT_ANNULATION__REGLEMENT_ANNULATION_REGLEMENT_FKEY = ForeignKeys0.REGLEMENT_ANNULATION__REGLEMENT_ANNULATION_REGLEMENT_FKEY;
+    public static final ForeignKey<RetraiteJournalRecord, AdherentRecord> RETRAITE_JOURNAL__RETRAITE_JOURNAL_ADHERENT_FKEY = ForeignKeys0.RETRAITE_JOURNAL__RETRAITE_JOURNAL_ADHERENT_FKEY;
     public static final ForeignKey<ServiceRecord, DivisionRecord> SERVICE__SERVICE_FKY = ForeignKeys0.SERVICE__SERVICE_FKY;
     public static final ForeignKey<StructurePartenaireRecord, RegionRecord> STRUCTURE_PARTENAIRE__FK_REGION = ForeignKeys0.STRUCTURE_PARTENAIRE__FK_REGION;
 
@@ -229,6 +237,7 @@ public class Keys {
         public static Identity<ReglementRecord, Long> IDENTITY_REGLEMENT = createIdentity(Reglement.REGLEMENT, Reglement.REGLEMENT.ID);
         public static Identity<ReglementAnnulationRecord, Long> IDENTITY_REGLEMENT_ANNULATION = createIdentity(ReglementAnnulation.REGLEMENT_ANNULATION, ReglementAnnulation.REGLEMENT_ANNULATION.ID);
         public static Identity<ReglementDetailRecord, Long> IDENTITY_REGLEMENT_DETAIL = createIdentity(ReglementDetail.REGLEMENT_DETAIL, ReglementDetail.REGLEMENT_DETAIL.ID);
+        public static Identity<RetraiteJournalRecord, Long> IDENTITY_RETRAITE_JOURNAL = createIdentity(RetraiteJournal.RETRAITE_JOURNAL, RetraiteJournal.RETRAITE_JOURNAL.ID);
         public static Identity<ServiceRecord, Long> IDENTITY_SERVICE = createIdentity(Service.SERVICE, Service.SERVICE.ID);
         public static Identity<StructurePartenaireRecord, Long> IDENTITY_STRUCTURE_PARTENAIRE = createIdentity(StructurePartenaire.STRUCTURE_PARTENAIRE, StructurePartenaire.STRUCTURE_PARTENAIRE.ID);
         public static Identity<TypeExamenRecord, Long> IDENTITY_TYPE_EXAMEN = createIdentity(TypeExamen.TYPE_EXAMEN, TypeExamen.TYPE_EXAMEN.ID);
@@ -260,6 +269,7 @@ public class Keys {
         public static final UniqueKey<JournalEcritureRecord> JOURNAL_ECRITURE_PKEY = createUniqueKey(JournalEcriture.JOURNAL_ECRITURE, "journal_ecriture_pkey", JournalEcriture.JOURNAL_ECRITURE.ID);
         public static final UniqueKey<JournalEcritureRecord> UNIK_JOURNAL_KEY = createUniqueKey(JournalEcriture.JOURNAL_ECRITURE, "unik_journal_key", JournalEcriture.JOURNAL_ECRITURE.NUM_JOURNAL);
         public static final UniqueKey<OtpMessageRecord> OTP_MESSAGE_PKEY = createUniqueKey(OtpMessage.OTP_MESSAGE, "otp_message_pkey", OtpMessage.OTP_MESSAGE.ID);
+        public static final UniqueKey<ParametreRetraiteRecord> PARAMETRE_RETRAITE_PKEY = createUniqueKey(ParametreRetraite.PARAMETRE_RETRAITE, "parametre_retraite_pkey", ParametreRetraite.PARAMETRE_RETRAITE.ID);
         public static final UniqueKey<ParamsRecord> PARAMS_PKEY = createUniqueKey(Params.PARAMS, "params_pkey", Params.PARAMS.ID);
         public static final UniqueKey<ProgrammeRecord> PROGRAMME_PKEY = createUniqueKey(Programme.PROGRAMME, "programme_pkey", Programme.PROGRAMME.ID);
         public static final UniqueKey<ProgrammeRecord> CODE_PRGM = createUniqueKey(Programme.PROGRAMME, "code_prgm", Programme.PROGRAMME.CODE);
@@ -270,6 +280,7 @@ public class Keys {
         public static final UniqueKey<ReglementRecord> REGLEMENT_PKEY = createUniqueKey(Reglement.REGLEMENT, "reglement_pkey", Reglement.REGLEMENT.ID);
         public static final UniqueKey<ReglementAnnulationRecord> REGLEMENT_ANNULATION_PKEY = createUniqueKey(ReglementAnnulation.REGLEMENT_ANNULATION, "reglement_annulation_pkey", ReglementAnnulation.REGLEMENT_ANNULATION.ID);
         public static final UniqueKey<ReglementDetailRecord> REGLEMENT_DETAIL_PKEY = createUniqueKey(ReglementDetail.REGLEMENT_DETAIL, "reglement_detail_pkey", ReglementDetail.REGLEMENT_DETAIL.ID);
+        public static final UniqueKey<RetraiteJournalRecord> RETRAITE_JOURNAL_PKEY = createUniqueKey(RetraiteJournal.RETRAITE_JOURNAL, "retraite_journal_pkey", RetraiteJournal.RETRAITE_JOURNAL.ID);
         public static final UniqueKey<ServiceRecord> SERVICE_PKEY = createUniqueKey(Service.SERVICE, "service_pkey", Service.SERVICE.ID);
         public static final UniqueKey<StructurePartenaireRecord> STRUCTURE_PARTENAIRE_PKEY = createUniqueKey(StructurePartenaire.STRUCTURE_PARTENAIRE, "structure_partenaire_pkey", StructurePartenaire.STRUCTURE_PARTENAIRE.ID);
         public static final UniqueKey<TauxCotisationRecord> TAUX_COTISATION_PKEY = createUniqueKey(TauxCotisation.TAUX_COTISATION, "taux_cotisation_pkey", TauxCotisation.TAUX_COTISATION.CODE);
@@ -297,6 +308,7 @@ public class Keys {
         public static final ForeignKey<ReglementRecord, TypePrestationRecord> REGLEMENT__REGLEMENT_TYPE_PRESTATION_FKEY = createForeignKey(models.Keys.TYPE_PRESTATION_PKEY, Reglement.REGLEMENT, "reglement__reglement_type_prestation_fkey", Reglement.REGLEMENT.TYPE_PRESTATION);
         public static final ForeignKey<ReglementRecord, AyantDroitRecord> REGLEMENT__REGLEMENT_AYANT_DROIT_FKEY = createForeignKey(models.Keys.AYANT_DROIT_PKEY, Reglement.REGLEMENT, "reglement__reglement_ayant_droit_fkey", Reglement.REGLEMENT.AYANT_DROIT);
         public static final ForeignKey<ReglementAnnulationRecord, ReglementRecord> REGLEMENT_ANNULATION__REGLEMENT_ANNULATION_REGLEMENT_FKEY = createForeignKey(models.Keys.REGLEMENT_PKEY, ReglementAnnulation.REGLEMENT_ANNULATION, "reglement_annulation__reglement_annulation_reglement_fkey", ReglementAnnulation.REGLEMENT_ANNULATION.REGLEMENT);
+        public static final ForeignKey<RetraiteJournalRecord, AdherentRecord> RETRAITE_JOURNAL__RETRAITE_JOURNAL_ADHERENT_FKEY = createForeignKey(models.Keys.ADHERENT_PKEY, RetraiteJournal.RETRAITE_JOURNAL, "retraite_journal__retraite_journal_adherent_fkey", RetraiteJournal.RETRAITE_JOURNAL.ADHERENT);
         public static final ForeignKey<ServiceRecord, DivisionRecord> SERVICE__SERVICE_FKY = createForeignKey(models.Keys.DIVISION_PKEY, Service.SERVICE, "service__service_fky", Service.SERVICE.DIVISION);
         public static final ForeignKey<StructurePartenaireRecord, RegionRecord> STRUCTURE_PARTENAIRE__FK_REGION = createForeignKey(models.Keys.REGION_PKEY, StructurePartenaire.STRUCTURE_PARTENAIRE, "structure_partenaire__fk_region", StructurePartenaire.STRUCTURE_PARTENAIRE.REGION);
     }

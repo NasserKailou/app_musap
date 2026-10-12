@@ -38,6 +38,7 @@ public final class Permissions {
 	public static final String PHOTO_GERER = "PHOTO_GERER";
 	public static final String AYANT_DROIT_CONSULTER = "AYANT_DROIT_CONSULTER";
 	public static final String AYANT_DROIT_GERER = "AYANT_DROIT_GERER";
+	public static final String RETRAITE_GERER = "RETRAITE_GERER";
 
 	// ---- Bons de commande / prises en charge
 	public static final String BON_CREER = "BON_CREER";
@@ -120,6 +121,9 @@ public final class Permissions {
 				"Adherent");
 		def(AYANT_DROIT_GERER, adh, "Gérer les ayants droit",
 				"Ajouter, modifier, supprimer un ayant droit (recalcule la cotisation)");
+
+		def(RETRAITE_GERER, adh, "Retraites",
+				"Appliquer les règles de retraite : archivage à 65 ans, ayants droit des retraités, cotisations");
 
 		def(BON_CREER, bon, "Créer bons et prises en charge", "Créer un bon et saisir ses lignes", "saisie",
 				"Validateur");

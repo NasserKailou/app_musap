@@ -10,6 +10,10 @@ package dto;
 public class TauxCotisation {
 
 	public static final String CODE_ADHERENT = "ADHERENT";
+	/** part de base de 55 à 59 ans (financement de la couverture après la retraite) */
+	public static final String CODE_PRE_RETRAITE = "PRE_RETRAITE";
+	/** part de base à partir de 60 ans (retraité, sans salaire) */
+	public static final String CODE_RETRAITE = "RETRAITE";
 
 	private String code;
 	private String libelle;
@@ -32,5 +36,8 @@ public class TauxCotisation {
 	public Integer getOrdre() { return ordre; }
 	public void setOrdre(Integer ordre) { this.ordre = ordre; }
 
-	public boolean estBase() { return CODE_ADHERENT.equals(code); }
+	/** part de base de l'adhérent (selon l'âge), par opposition aux liens d'ayants droit */
+	public boolean estBase() {
+		return CODE_ADHERENT.equals(code) || CODE_PRE_RETRAITE.equals(code) || CODE_RETRAITE.equals(code);
+	}
 }
