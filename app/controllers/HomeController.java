@@ -19,10 +19,13 @@ import play.db.Database;
 import play.mvc.*;
 import play.mvc.Http.Request;
 import services.AdherentMainServices;
+import services.DashboardServices;
 import services.ParamsServices;
 import services.ReglementMainServices;
 import services.StructureMainServices;
+import utils.Acces;
 import utils.Login;
+import utils.Permissions;
 import utils.ViewMode;
 import models.tables.pojos.Reglement;
 import models.tables.pojos.StructurePartenaire;
@@ -52,12 +55,16 @@ public class HomeController extends Controller {
 	AyantDroitMainServices ayantDroitServices;
 	TypePrestationMainService typePrestationServices;
 	VBonDeCommandeServices bonDeCommandeServices;
+	DashboardServices dashboardServices;
+
+	private static final play.Logger.ALogger logger = play.Logger.of(HomeController.class);
 	
 	@Inject
 	public HomeController(FormFactory formatFactory, AdherentMainServices consultationServices,
 			ParamsServices paramsService, ReglementMainServices reglementServices,
 			StructureMainServices structureServices, AyantDroitMainServices ayantDroitServices,
-			TypePrestationMainService typePrestationServices, VBonDeCommandeServices bonDeCommandeServices) {
+			TypePrestationMainService typePrestationServices, VBonDeCommandeServices bonDeCommandeServices,
+			DashboardServices dashboardServices) {
 
 		this.formatFactory = formatFactory;
 		this.consultationServices = consultationServices;
@@ -67,6 +74,7 @@ public class HomeController extends Controller {
 		this.ayantDroitServices = ayantDroitServices;
 		this.typePrestationServices = typePrestationServices;
 		this.bonDeCommandeServices = bonDeCommandeServices;
+		this.dashboardServices = dashboardServices;
 		
 
 	}
@@ -81,27 +89,35 @@ public class HomeController extends Controller {
 		//System.out.println("les sessions sont login:" +request.session().get("login") +" droit :"+ request.session().get("droit") +" nonUser :" + request.session().get("nomUser"));
 		//System.out.println("Con url:" +db.getUrl() +" Con Name :"+db.getName() +" Con other connexion:" + db.getConnection()+" Con others datasources" + db.getDataSource());
 		
-		if (request.session().get("login") == null) {
+		if (!request.session().get("login").isPresent() || !request.session().get("droit").isPresent()) {
 			return ok(views.html.index.render(paramsService.listesParams(),request));
-		} else {
-			System.out.println("Droit apres connexion :"+ request.session().get("droit").get());
-			 
-			if(request.session().get("droit").get().equals("Validateur")) {
-			 // System.out.println("les elemensts sont :" + element);
-				return redirect(routes.ReglementCtrl.showBonToValidate());
-			} else{
-				if(request.session().get("droit").get().equals("Admin")) {
-			 // System.out.println("les elemensts sont :" + element);
-				return ok(views.html.acceuil.render(reglementServices.findAllVReg(),structureServices.findAll(), request));
-			} else{
-				return redirect(routes.AdherentCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L));
-			}
-                  
-			}
-
-			   
-			
 		}
+		// page d'accueil = première fonctionnalité autorisée par le rôle (même ordre qu'avant :
+		// Admin -> tableau de bord, Validateur -> bons en instance, Percepteur -> caisse...)
+		if (Acces.peut(request, Permissions.TABLEAU_BORD)) {
+			String anneeCourante = String.valueOf(java.time.LocalDate.now().getYear());
+			return ok(views.html.acceuil.render(dashboardServices.listAnnees(), anneeCourante, request));
+		}
+		if (Acces.peut(request, Permissions.BON_VALIDER))
+			return redirect(routes.ReglementCtrl.showBonToValidate());
+		if (Acces.peut(request, Permissions.LABO_CAISSE))
+			return redirect(routes.LaboratoireCtrl.caisse("", ""));
+		if (Acces.peut(request, Permissions.LABO_RECU))
+			return redirect(routes.LaboratoireCtrl.nouveauRecu());
+		if (Acces.peut(request, Permissions.ADHERENT_LISTE, Permissions.ADHERENT_ESPACE))
+			return redirect(routes.AdherentCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L));
+		if (Acces.peut(request, Permissions.RAPPORT_SITUATION_PERSONNEL))
+			return redirect(routes.ReglementCtrl.showRapSynthese());
+		if (Acces.peut(request, Permissions.RAPPORT_SUPERVISION))
+			return redirect(routes.ReglementCtrl.showRapSuperviseur());
+		if (Acces.peut(request, Permissions.UTILISATEURS_GERER))
+			return redirect(routes.UserCtrl.index());
+		if (Acces.peut(request, Permissions.ROLES_GERER))
+			return redirect(routes.RoleCtrl.index(""));
+		if (Acces.peut(request, Permissions.LABO_EXAMENS))
+			return redirect(routes.LaboratoireCtrl.typesExamen(ViewMode.VIEW_MODE_CREATE, 0L));
+		return redirect(controllers.routes.AuthenticationCtrl.login()).withNewSession().flashing("error",
+				"Aucune fonctionnalité n'est attribuée à votre profil, contactez l'administrateur");
 	}
 	/**
 	 * Déconnexion d'un utilisateur
@@ -138,110 +154,45 @@ public class HomeController extends Controller {
 	}
 	
 	/**
-	 * API pour récupérer les statistiques des bons de commande par structure partenaire
-	 * Utilise la vue VBonDeCommande qui contient toutes les données consolidées
-	 * @param request
-	 * @return JSON avec les données pour le graphique
+	 * API des statistiques du tableau de bord, filtrables par année.
+	 * Paramètres (query string) : annee=YYYY|ALL, refresh=1 pour ignorer le cache.
+	 * Les agrégations sont faites en base et mises en cache (voir DashboardServices).
 	 */
 	public Result getStatsReglementsByStructure(Request request) {
+		if (!isAdmin(request)) {
+			return forbidden(Json.newObject().put("error", "Accès non autorisé"));
+		}
 		try {
-			// Récupérer tous les bons de commande depuis la vue VBonDeCommande
-			List<VBonDeCommande> bonsDeCommande = bonDeCommandeServices.findAll();
-			
-			// Récupérer les adhérents et ayants droit pour les totaux
-			List<Adherent> adherents = consultationServices.findAll();
-			List<AyantDroit> ayantsDroit = ayantDroitServices.findAll();
-			
-			// Map pour regrouper par structure (utilise le nom de la structure)
-			Map<String, Integer> bonsConfirmesCount = new HashMap<>();
-			Map<String, Integer> bonsNonConfirmesCount = new HashMap<>();
-			Map<String, Long> structureIds = new HashMap<>();
-			
-			// Map pour compter les bons par type de prestation
-			Map<String, Integer> bonsByTypePrestation = new HashMap<>();
-			
-			// Compter les bons de commande confirmés et non confirmés par structure
-			int totalBonsConfirmes = 0;
-			int totalBonsNonConfirmes = 0;
-			
-			for (VBonDeCommande bon : bonsDeCommande) {
-				String structureName = bon.getStructure();
-				if (structureName != null) {
-					// Stocker l'ID de la structure
-					if (!structureIds.containsKey(structureName) && bon.getIdStructure() != null) {
-						structureIds.put(structureName, bon.getIdStructure());
-					}
-					
-					// Initialiser les compteurs pour cette structure si nécessaire
-					if (!bonsConfirmesCount.containsKey(structureName)) {
-						bonsConfirmesCount.put(structureName, 0);
-						bonsNonConfirmesCount.put(structureName, 0);
-					}
-					
-					// Vérifier si le bon est confirmé
-					if (bon.getIsConfirmedBon() != null && bon.getIsConfirmedBon()) {
-						// Bon confirmé (consommé)
-						bonsConfirmesCount.put(structureName, 
-							bonsConfirmesCount.get(structureName) + 1);
-						totalBonsConfirmes++;
-					} else {
-						// Bon non confirmé (isConfirmedBon est false ou null)
-						bonsNonConfirmesCount.put(structureName, 
-							bonsNonConfirmesCount.get(structureName) + 1);
-						totalBonsNonConfirmes++;
-					}
-				}
-				
-				// Compter par type de prestation
-				String prestationName = bon.getPrestation();
-				if (prestationName != null && !prestationName.trim().isEmpty()) {
-					bonsByTypePrestation.put(prestationName, 
-						bonsByTypePrestation.getOrDefault(prestationName, 0) + 1);
-				}
-			}
-			
-			// Construire le JSON de réponse
-			ArrayNode structuresArray = Json.newArray();
-			ArrayNode bonsConfirmesArray = Json.newArray();
-			ArrayNode bonsNonConfirmesArray = Json.newArray();
-			
-			// Ajouter les données pour chaque structure qui a des bons
-			for (String structureName : bonsConfirmesCount.keySet()) {
-				structuresArray.add(structureName);
-				bonsConfirmesArray.add(bonsConfirmesCount.get(structureName));
-				bonsNonConfirmesArray.add(bonsNonConfirmesCount.get(structureName));
-			}
-			
-			// Construire les données par type de prestation
-			ArrayNode typePrestationsArray = Json.newArray();
-			ArrayNode bonsByTypePrestationArray = Json.newArray();
-			
-			for (Map.Entry<String, Integer> entry : bonsByTypePrestation.entrySet()) {
-				if (entry.getValue() > 0) { // N'inclure que les prestations avec des bons
-					typePrestationsArray.add(entry.getKey());
-					bonsByTypePrestationArray.add(entry.getValue());
-				}
-			}
-			
-			ObjectNode result = Json.newObject();
-			result.set("structures", structuresArray);
-			result.set("bonsConfirmes", bonsConfirmesArray);
-			result.set("bonsNonConfirmes", bonsNonConfirmesArray);
-			result.put("totalAdherents", adherents.size());
-			result.put("totalAyantsDroit", ayantsDroit.size());
-			result.put("totalBonsConfirmes", totalBonsConfirmes);
-			result.put("totalBonsNonConfirmes", totalBonsNonConfirmes);
-			result.put("totalStructures", structureIds.size());
-			result.set("typePrestations", typePrestationsArray);
-			result.set("bonsByTypePrestation", bonsByTypePrestationArray);
-			
-			return ok(result);
-			
+			String annee = request.getQueryString("annee");
+			boolean refresh = "1".equals(request.getQueryString("refresh"));
+			return ok(dashboardServices.statistiques(annee, refresh));
 		} catch (Exception e) {
+			logger.error("Erreur lors du calcul des statistiques du tableau de bord", e);
 			ObjectNode error = Json.newObject();
 			error.put("error", "Erreur lors de la récupération des statistiques: " + e.getMessage());
-			e.printStackTrace();
 			return internalServerError(error);
 		}
+	}
+
+	/**
+	 * Liste des bons (confirmés / non confirmés) d'une année, chargée à l'ouverture des fenêtres de détail.
+	 */
+	public Result getBonsDashboard(Request request) {
+		if (!isAdmin(request)) {
+			return forbidden(Json.newObject().put("error", "Accès non autorisé"));
+		}
+		try {
+			boolean confirmes = !"0".equals(request.getQueryString("confirmes"));
+			ObjectNode result = Json.newObject();
+			result.set("data", dashboardServices.listBons(request.getQueryString("annee"), confirmes));
+			return ok(result);
+		} catch (Exception e) {
+			logger.error("Erreur lors du chargement des bons du tableau de bord", e);
+			return internalServerError(Json.newObject().put("error", e.getMessage()));
+		}
+	}
+
+	private boolean isAdmin(Request request) {
+		return Acces.peut(request, Permissions.TABLEAU_BORD);
 	}
 }

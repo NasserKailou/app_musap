@@ -1,7 +1,9 @@
 @import helper._
 @(adherent: models.tables.pojos.Adherent)(implicit request: Http.Request)
+@import _root_.utils.Acces
+@import _root_.utils.Permissions
 
-@if(request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "AGENT_CARD_ID" || request.session.get("droit").get() == "Adherent" || request.session.get("droit").get() == "SuperAdmin"){
+@if(Acces.peut(request, Permissions.PHOTO_GERER)){
 	<form method="POST" name="photoForm" id="photoForm"
 	      action="@controllers.routes.AdherentCtrl.formProfilSave()"
 	      class="form-horizontal" role="form" enctype="multipart/form-data">

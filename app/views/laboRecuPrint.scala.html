@@ -1,0 +1,211 @@
+@(recu: dto.RecuLaboVue, details: List[models.tables.pojos.RecuLaboDetail], autoPrint: Boolean)(implicit request: Http.Request)
+
+@import _root_.utils.LaboUtils
+
+@fmt(v: java.lang.Long) = @{ if (v == null) "0" else "%,d".format(v).replace(',', ' ') }
+@dateRecu = @{ if (recu.getDateRecu == null) "" else new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(recu.getDateRecu) }
+@qualite = @{
+  if (recu.getTypePatient == LaboUtils.TYPE_AYANT_DROIT) {
+    val lien = if (recu.getLien == null) "Ayant droit" else recu.getLien.toLowerCase.capitalize
+    lien + (if (recu.getAdherentPrincipal != null && recu.getAdherentPrincipal.nonEmpty) " de " + recu.getAdherentPrincipal else "")
+  } else LaboUtils.libelleTypePatient(recu.getTypePatient)
+}
+
+<!DOCTYPE html>
+<html lang="fr" class="format-auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reçu @recu.getNumeroRecu | MUSAPOSTE</title>
+  <script>
+    // format mémorisé par poste (chaque poste a sa propre imprimante) : appliqué avant l'affichage
+    (function() {
+      var f = 'auto';
+      try { f = localStorage.getItem('musaposte.formatRecu') || 'auto'; } catch (e) {}
+      document.documentElement.className = 'format-' + f + ((f === 't80' || f === 't58') ? ' ticket' : '');
+    })();
+  </script>
+  <link rel="stylesheet" href="@routes.Assets.versioned("plugins/fontawesome-free/css/all.min.css")">
+  <link rel="stylesheet" href="@routes.Assets.versioned("dist/css/adminlte.min.css")">
+  <style id="stylePage">@@page { margin: 6mm; }</style>
+  <style>
+    body { background: #f4f6f9; }
+    .recu { background: #fff; max-width: 148mm; margin: 20px auto; padding: 10mm; border: 1px solid #dee2e6; position: relative; font-size: 13px; }
+    .recu h4 { font-weight: 700; letter-spacing: 1px; }
+    .recu .entete { border-bottom: 2px solid #333; padding-bottom: 6px; margin-bottom: 10px; }
+    .recu table td, .recu table th { padding: 4px 6px; }
+    .recu .total { font-size: 16px; font-weight: 700; }
+    .filigrane { position: absolute; top: 40%; left: 0; right: 0; text-align: center; font-size: 60px; font-weight: 900;
+                 color: rgba(220,53,69,.25); transform: rotate(-25deg); pointer-events: none; }
+    .signature { height: 50px; }
+    .vue-ticket { display: none; }
+    .barre-outils { max-width: 600px; margin: 0 auto; }
+    .ligne-ticket { border-bottom: 1px dotted #999; padding: 2px 0; }
+    .separateur { border-top: 1px dashed #000; margin: 4px 0; }
+
+    /* ===== Disposition ticket (imprimantes thermiques 58 / 80 mm) ===== */
+    html.ticket .recu { max-width: 76mm; padding: 2mm; font-family: "Courier New", Courier, monospace; font-size: 11.5px; }
+    html.format-t58 .recu { max-width: 54mm; font-size: 10.5px; }
+    html.ticket .entete { display: block !important; text-align: center; border-bottom: 1px dashed #000; }
+    html.ticket .entete img { height: 34px; display: block; margin: 0 auto 2px; filter: grayscale(1); }
+    html.ticket .entete .text-right { text-align: center !important; }
+    html.ticket .entete h4 { font-size: 14px; margin-top: 4px; }
+    html.ticket .vue-a5 { display: none; }
+    html.ticket .vue-ticket { display: block; }
+    html.ticket .recu .total { font-size: 13px; }
+    html.ticket .signatures { display: block !important; }
+    html.ticket .signature { height: 22px; }
+    html.ticket .filigrane { font-size: 30px; }
+
+    @@media print {
+      body { background: #fff; }
+      .no-print { display: none !important; }
+      .recu { border: none; margin: 0 auto; padding: 0; }
+    }
+
+    /* Mode automatique : si le papier de l'imprimante est étroit (ticket), disposition ticket */
+    @@media print and (max-width: 100mm) {
+      html.format-auto .recu { max-width: none; font-family: "Courier New", Courier, monospace; font-size: 11px; }
+      html.format-auto .entete { display: block !important; text-align: center; border-bottom: 1px dashed #000; }
+      html.format-auto .entete img { height: 30px; display: block; margin: 0 auto 2px; filter: grayscale(1); }
+      html.format-auto .entete .text-right { text-align: center !important; }
+      html.format-auto .vue-a5 { display: none; }
+      html.format-auto .vue-ticket { display: block; }
+      html.format-auto .recu .total { font-size: 12px; }
+      html.format-auto .signatures { display: block !important; }
+      html.format-auto .signature { height: 22px; }
+      html.format-auto .filigrane { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print barre-outils text-center my-3">
+    @if(request.flash.get("success").isPresent()) {
+      <div class="alert alert-success"><i class="fas fa-check"></i> @request.flash.get("success").get()</div>
+    }
+    <div class="form-inline justify-content-center mb-2">
+      <label for="formatRecu" class="mr-2"><i class="fas fa-print"></i>&nbsp;Format :</label>
+      <select id="formatRecu" class="form-control form-control-sm mr-2">
+        <option value="auto">Automatique (selon l'imprimante)</option>
+        <option value="t80">Ticket 80 mm</option>
+        <option value="t58">Ticket 58 mm</option>
+        <option value="a5">Papier A5</option>
+      </select>
+      <small class="text-muted">mémorisé sur ce poste</small>
+    </div>
+    <button class="btn btn-primary" id="btnImprimer"><i class="fas fa-print"></i> Imprimer</button>
+    <a class="btn btn-success" href="@controllers.routes.LaboratoireCtrl.nouveauRecu()"><i class="fas fa-plus"></i> Nouveau reçu</a>
+    <a class="btn btn-secondary" href="@controllers.routes.LaboratoireCtrl.caisse("", "")"><i class="fas fa-cash-register"></i> Caisse</a>
+  </div>
+
+  <div class="recu">
+    @if(LaboUtils.estAnnule(recu)) { <div class="filigrane">ANNULÉ</div> }
+
+    <div class="entete d-flex align-items-center">
+      <img src="@routes.Assets.versioned("images/logo.png")" alt="Logo" height="55" class="mr-3">
+      <div class="flex-grow-1">
+        <div class="font-weight-bold">MUTUELLE DE SANTÉ DE LA POSTE — MUSAPOSTE</div>
+        <div>Service Laboratoire</div>
+      </div>
+      <div class="text-right">
+        <h4 class="mb-0">REÇU</h4>
+        <div><b>N° @recu.getNumeroRecu</b></div>
+        <small>@dateRecu</small>
+      </div>
+    </div>
+
+    <table class="w-100 mb-2">
+      <tr><td style="width: 35%;">Patient :</td><td><b>@recu.getNomPatient</b></td></tr>
+      <tr><td>Qualité :</td><td>@qualite</td></tr>
+      @if(recu.getMatricule != null) {
+        <tr><td>Matricule :</td><td><b>@recu.getMatricule</b></td></tr>
+      }
+      @if(recu.getStructureOrigine != null && recu.getTypePatient == LaboUtils.TYPE_EXTERNE) {
+        <tr><td>Structure :</td><td>@recu.getStructureOrigine</td></tr>
+      }
+      @if(recu.getTelephone != null) {
+        <tr><td>Téléphone :</td><td>@recu.getTelephone</td></tr>
+      }
+    </table>
+
+    <!-- Lignes : tableau (A5) -->
+    <table class="table table-bordered table-sm mb-2 vue-a5">
+      <thead class="thead-light">
+        <tr><th>Examen</th><th class="text-right">P.U.</th><th class="text-center">Qté</th><th class="text-right">Montant</th></tr>
+      </thead>
+      <tbody>
+        @for(d <- details) {
+          <tr>
+            <td>@d.getLibelleExamen</td>
+            <td class="text-right">@fmt(d.getPrixUnitaire)</td>
+            <td class="text-center">@d.getQuantite</td>
+            <td class="text-right">@fmt(d.getMontant)</td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr><th colspan="3" class="text-right total">TOTAL PAYÉ</th><th class="text-right total">@fmt(recu.getMontantTotal) CFA</th></tr>
+      </tfoot>
+    </table>
+
+    <!-- Lignes : liste compacte (ticket) -->
+    <div class="vue-ticket mb-2">
+      <div class="separateur"></div>
+      @for(d <- details) {
+        <div class="ligne-ticket">
+          <div>@d.getLibelleExamen</div>
+          <div class="d-flex justify-content-between">
+            <span>@d.getQuantite x @fmt(d.getPrixUnitaire)</span><b>@fmt(d.getMontant)</b>
+          </div>
+        </div>
+      }
+      <div class="separateur"></div>
+      <div class="d-flex justify-content-between total"><span>TOTAL PAYÉ</span><span>@fmt(recu.getMontantTotal) CFA</span></div>
+      <div class="separateur"></div>
+    </div>
+
+    <div>Mode de paiement : <b>@recu.getModePaiement</b></div>
+    @if(LaboUtils.estAnnule(recu)) {
+      <div class="text-danger mt-1"><b>Reçu annulé</b> par @recu.getWhoAnnule : @recu.getMotifAnnulation</div>
+    }
+
+    <div class="d-flex justify-content-between mt-3 signatures">
+      <div>Le percepteur : <b>@recu.getWhoDone</b><div class="signature"></div></div>
+      <div class="text-right">Le patient<div class="signature"></div></div>
+    </div>
+    <div class="text-center text-muted" style="font-size: 11px;">Merci de conserver ce reçu. Il sera exigé pour le retrait des résultats.</div>
+  </div>
+
+  <script>
+    (function() {
+      var PAGES = {
+        auto: '@@page { margin: 4mm; }',
+        t80: '@@page { size: 80mm auto; margin: 2mm 3mm; }',
+        t58: '@@page { size: 58mm auto; margin: 1mm 2mm; }',
+        a5: '@@page { size: A5 portrait; margin: 8mm; }'
+      };
+      var select = document.getElementById('formatRecu');
+
+      function appliquer(f) {
+        if (!PAGES[f]) f = 'auto';
+        document.documentElement.className = 'format-' + f + ((f === 't80' || f === 't58') ? ' ticket' : '');
+        document.getElementById('stylePage').textContent = PAGES[f];
+        select.value = f;
+        try { localStorage.setItem('musaposte.formatRecu', f); } catch (e) {}
+      }
+
+      var initial = 'auto';
+      try { initial = localStorage.getItem('musaposte.formatRecu') || 'auto'; } catch (e) {}
+      appliquer(initial);
+      select.addEventListener('change', function() { appliquer(this.value); });
+      document.getElementById('btnImprimer').addEventListener('click', function() { window.print(); });
+
+      @if(autoPrint && !LaboUtils.estAnnule(recu)) {
+      // impression automatique après l'enregistrement, au format du poste
+      window.addEventListener('load', function() { setTimeout(function() { window.print(); }, 300); });
+      }
+    })();
+  </script>
+</body>
+</html>

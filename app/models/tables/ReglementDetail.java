@@ -40,7 +40,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class ReglementDetail extends TableImpl<ReglementDetailRecord> {
 
-    private static final long serialVersionUID = -880486887;
+    private static final long serialVersionUID = 1325037444;
 
     /**
      * The reference instance of <code>public.reglement_detail</code>
@@ -147,7 +147,7 @@ public class ReglementDetail extends TableImpl<ReglementDetailRecord> {
      */
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.REGLEMENT_DETAIL_PKEY);
+        return Arrays.<Index>asList(Indexes.IDX_REGLEMENT_DETAIL_REGLEMENT, Indexes.REGLEMENT_DETAIL_PKEY);
     }
 
     /**

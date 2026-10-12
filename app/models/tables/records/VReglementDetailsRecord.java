@@ -26,7 +26,7 @@ import org.jooq.impl.TableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRecord> {
 
-    private static final long serialVersionUID = 169044703;
+    private static final long serialVersionUID = 295552046;
 
     /**
      * Setter for <code>public.v_reglement_details.id</code>.
@@ -323,87 +323,115 @@ public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRe
     }
 
     /**
-     * Setter for <code>public.v_reglement_details.lien</code>.
-     */
-    public void setLien(String value) {
-        set(21, value);
-    }
-
-    /**
-     * Getter for <code>public.v_reglement_details.lien</code>.
-     */
-    public String getLien() {
-        return (String) get(21);
-    }
-
-    /**
      * Setter for <code>public.v_reglement_details.is_confirmed_bon</code>.
      */
     public void setIsConfirmedBon(Boolean value) {
-        set(22, value);
+        set(21, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.is_confirmed_bon</code>.
      */
     public Boolean getIsConfirmedBon() {
-        return (Boolean) get(22);
+        return (Boolean) get(21);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.when_confirmed_bon</code>.
      */
     public void setWhenConfirmedBon(Timestamp value) {
-        set(23, value);
+        set(22, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.when_confirmed_bon</code>.
      */
     public Timestamp getWhenConfirmedBon() {
-        return (Timestamp) get(23);
+        return (Timestamp) get(22);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.date_expiration</code>.
      */
     public void setDateExpiration(Timestamp value) {
-        set(24, value);
+        set(23, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.date_expiration</code>.
      */
     public Timestamp getDateExpiration() {
-        return (Timestamp) get(24);
+        return (Timestamp) get(23);
+    }
+
+    /**
+     * Setter for <code>public.v_reglement_details.ayant_droit</code>.
+     */
+    public void setAyantDroit(Long value) {
+        set(24, value);
+    }
+
+    /**
+     * Getter for <code>public.v_reglement_details.ayant_droit</code>.
+     */
+    public Long getAyantDroit() {
+        return (Long) get(24);
+    }
+
+    /**
+     * Setter for <code>public.v_reglement_details.nom_ay</code>.
+     */
+    public void setNomAy(String value) {
+        set(25, value);
+    }
+
+    /**
+     * Getter for <code>public.v_reglement_details.nom_ay</code>.
+     */
+    public String getNomAy() {
+        return (String) get(25);
+    }
+
+    /**
+     * Setter for <code>public.v_reglement_details.lien</code>.
+     */
+    public void setLien(String value) {
+        set(26, value);
+    }
+
+    /**
+     * Getter for <code>public.v_reglement_details.lien</code>.
+     */
+    public String getLien() {
+        return (String) get(26);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.total_couvert</code>.
      */
     public void setTotalCouvert(Long value) {
-        set(25, value);
+        set(27, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.total_couvert</code>.
      */
     public Long getTotalCouvert() {
-        return (Long) get(25);
+        return (Long) get(27);
     }
 
     /**
      * Setter for <code>public.v_reglement_details.total_restant</code>.
      */
     public void setTotalRestant(Long value) {
-        set(26, value);
+        set(28, value);
     }
 
     /**
      * Getter for <code>public.v_reglement_details.total_restant</code>.
      */
     public Long getTotalRestant() {
-        return (Long) get(26);
+        return (Long) get(28);
     }
 
     // -------------------------------------------------------------------------
@@ -420,7 +448,7 @@ public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRe
     /**
      * Create a detached, initialised VReglementDetailsRecord
      */
-    public VReglementDetailsRecord(Long id, Long reglement, String intitule, Long montant, Long quantite, Long prixUnitaire, String codeCarnet, String whoDone, Timestamp whenDone, Boolean onDeleted, Timestamp lastUpdate, String refFacture, String typeReglement, Long idBon, String nomAd, String prenomAd, String matricule, String structure, Long tauxEffectif, Timestamp datePayement, String prestation, String lien, Boolean isConfirmedBon, Timestamp whenConfirmedBon, Timestamp dateExpiration, Long totalCouvert, Long totalRestant) {
+    public VReglementDetailsRecord(Long id, Long reglement, String intitule, Long montant, Long quantite, Long prixUnitaire, String codeCarnet, String whoDone, Timestamp whenDone, Boolean onDeleted, Timestamp lastUpdate, String refFacture, String typeReglement, Long idBon, String nomAd, String prenomAd, String matricule, String structure, Long tauxEffectif, Timestamp datePayement, String prestation, Boolean isConfirmedBon, Timestamp whenConfirmedBon, Timestamp dateExpiration, Long ayantDroit, String nomAy, String lien, Long totalCouvert, Long totalRestant) {
         super(VReglementDetails.V_REGLEMENT_DETAILS);
 
         set(0, id);
@@ -444,11 +472,13 @@ public class VReglementDetailsRecord extends TableRecordImpl<VReglementDetailsRe
         set(18, tauxEffectif);
         set(19, datePayement);
         set(20, prestation);
-        set(21, lien);
-        set(22, isConfirmedBon);
-        set(23, whenConfirmedBon);
-        set(24, dateExpiration);
-        set(25, totalCouvert);
-        set(26, totalRestant);
+        set(21, isConfirmedBon);
+        set(22, whenConfirmedBon);
+        set(23, dateExpiration);
+        set(24, ayantDroit);
+        set(25, nomAy);
+        set(26, lien);
+        set(27, totalCouvert);
+        set(28, totalRestant);
     }
 }

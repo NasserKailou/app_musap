@@ -17,6 +17,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
 
+@utils.Permission(utils.Permissions.CONSOMMATIONS_IMPORTER)
 public class EtudeConsommationCtrl extends Controller {
 
     private final ImportExcelClassServiceImpl etudeDao;

@@ -10,6 +10,7 @@ POST    /login                  	controllers.HomeController.authentification(req
 GET     /logout                 	controllers.HomeController.deconnecter(request:Request)
 GET     /acceuil                    controllers.HomeController.acceuil(request:Request)
 GET     /api/stats/reglements-structure    controllers.HomeController.getStatsReglementsByStructure(request:Request)
+GET     /api/stats/bons                    controllers.HomeController.getBonsDashboard(request:Request)
 
 
 
@@ -128,6 +129,34 @@ POST		/impression-journals-betewenne/    	 controllers.OperationComptableCtrl.pr
 GET     /json-ayantDroit                        controllers.ServerJson.jsonAyantDroit(query:String?="")
 GET     /json-CompteComptable                     controllers.ServerJson.jsonCompte(query:String?="")
 GET     /json-CompteBudget                    	 controllers.ServerJson.jsonCompteB(query:String?="")
+
+# Rapports des opérations et des annulations
+GET     /rapports/operations                      controllers.RapportOperationsCtrl.operations(request:Request, periode: String ?= "", date: String ?= "", mois: String ?= "", debut: String ?= "", fin: String ?= "", type: String ?= "", region: String ?= "")
+GET     /rapports/annulations                     controllers.RapportOperationsCtrl.annulations(request:Request, periode: String ?= "", date: String ?= "", mois: String ?= "", debut: String ?= "", fin: String ?= "", type: String ?= "", region: String ?= "")
+GET     /rapports/export                          controllers.RapportOperationsCtrl.exporter(request:Request, rapport: String ?= "operations", periode: String ?= "", date: String ?= "", mois: String ?= "", debut: String ?= "", fin: String ?= "", type: String ?= "", region: String ?= "")
+POST    /rapports/annulations/restaurer/:id       controllers.RapportOperationsCtrl.restaurer(request:Request, id: Long)
+
+# Rôles & permissions
+GET     /parametres/roles                         controllers.RoleCtrl.index(request:Request, code: String ?= "")
+POST    /parametres/roles/save                    controllers.RoleCtrl.saveRole(request:Request)
+POST    /parametres/roles/permissions             controllers.RoleCtrl.savePermissions(request:Request)
+POST    /parametres/roles/delete                  controllers.RoleCtrl.deleteRole(request:Request)
+
+# Taux de cotisation
+GET     /parametres/cotisations                   controllers.CotisationCtrl.index(request:Request)
+POST    /parametres/cotisations/save              controllers.CotisationCtrl.saveTaux(request:Request)
+POST    /parametres/cotisations/delete            controllers.CotisationCtrl.deleteTaux(request:Request)
+POST    /parametres/cotisations/recalculer        controllers.CotisationCtrl.recalculer(request:Request)
+
+# Laboratoire (profil Percepteur)
+GET     /laboratoire/caisse                       controllers.LaboratoireCtrl.caisse(request:Request, debut: String ?= "", fin: String ?= "")
+GET     /laboratoire/types-examen/:subAction/     controllers.LaboratoireCtrl.typesExamen(request:Request, subAction: String, idExamen: Long)
+POST    /laboratoire/types-examen/save            controllers.LaboratoireCtrl.saveTypeExamen(request:Request)
+GET     /laboratoire/recu/nouveau                 controllers.LaboratoireCtrl.nouveauRecu(request:Request)
+POST    /laboratoire/recu/save                    controllers.LaboratoireCtrl.saveRecu(request:Request)
+GET     /laboratoire/recu/imprimer/:id            controllers.LaboratoireCtrl.imprimerRecu(request:Request, id: Long, auto: Boolean ?= false)
+POST    /laboratoire/recu/annuler/:id             controllers.LaboratoireCtrl.annulerRecu(request:Request, id: Long)
+GET     /laboratoire/json/beneficiaires           controllers.LaboratoireCtrl.jsonBeneficiaires(request:Request, q: String ?= "")
 
 # Import Étude Consommations
 GET     /etude-consommations/import        controllers.EtudeConsommationCtrl.showImportForm(request:Request)

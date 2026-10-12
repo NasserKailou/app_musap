@@ -31,7 +31,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementGlobal extends TableImpl<VReglementGlobalRecord> {
 
-    private static final long serialVersionUID = 1841032495;
+    private static final long serialVersionUID = -1068316847;
 
     /**
      * The reference instance of <code>public.v_reglement_global</code>
@@ -60,6 +60,11 @@ public class VReglementGlobal extends TableImpl<VReglementGlobalRecord> {
      * The column <code>public.v_reglement_global.prenom_ad</code>.
      */
     public final TableField<VReglementGlobalRecord, String> PRENOM_AD = createField("prenom_ad", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement_global.code_carnet</code>.
+     */
+    public final TableField<VReglementGlobalRecord, String> CODE_CARNET = createField("code_carnet", org.jooq.impl.SQLDataType.VARCHAR, this, "");
 
     /**
      * The column <code>public.v_reglement_global.total_annuel</code>.

@@ -1,0 +1,275 @@
+@(recus: List[dto.RecuLaboVue], debut: String, fin: String, statsJson: String)(implicit request: Http.Request)
+
+@import helper._
+@import _root_.utils.LaboUtils
+
+@fmt(v: java.lang.Long) = @{ if (v == null) "0" else "%,d".format(v).replace(',', ' ') }
+@dt(t: java.sql.Timestamp) = @{ if (t == null) "" else new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(t) }
+
+@main("Caisse laboratoire") {
+
+  <div class="content-header no-print">
+    <div class="container-fluid">
+      <div class="row mb-2 align-items-center">
+        <div class="col-md-5">
+          <h1 class="m-0"><i class="fas fa-cash-register"></i> Caisse laboratoire</h1>
+        </div>
+        <div class="col-md-7 text-md-right">
+          <a href="@controllers.routes.LaboratoireCtrl.nouveauRecu()" class="btn btn-success"><i class="fas fa-plus"></i> Nouveau reçu</a>
+          <a href="@controllers.routes.LaboratoireCtrl.typesExamen("CREATE", 0L)" class="btn btn-outline-primary"><i class="fas fa-vials"></i> Types d'examens</a>
+          <button type="button" class="btn btn-outline-secondary" onclick="window.print();"><i class="fas fa-print"></i> Imprimer le journal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+
+      <!-- Filtre période -->
+      <div class="card card-outline card-primary no-print">
+        <div class="card-body py-2">
+          <form method="GET" action="@controllers.routes.LaboratoireCtrl.caisse("", "")" class="form-inline" id="formPeriode">
+            <label class="mr-2" for="debut">Du</label>
+            <input type="date" class="form-control form-control-sm mr-2" id="debut" name="debut" value="@debut">
+            <label class="mr-2" for="fin">au</label>
+            <input type="date" class="form-control form-control-sm mr-2" id="fin" name="fin" value="@fin">
+            <button type="submit" class="btn btn-primary btn-sm mr-3"><i class="fas fa-search"></i> Afficher</button>
+            <div class="btn-group btn-group-sm">
+              <button type="button" class="btn btn-outline-secondary periode" data-p="jour">Aujourd'hui</button>
+              <button type="button" class="btn btn-outline-secondary periode" data-p="semaine">7 jours</button>
+              <button type="button" class="btn btn-outline-secondary periode" data-p="mois">Ce mois</button>
+              <button type="button" class="btn btn-outline-secondary periode" data-p="annee">Cette année</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <h4 class="print-only">Journal de caisse laboratoire du @debut au @fin</h4>
+
+      <!-- KPIs -->
+      <div class="row">
+        <div class="col-6 col-lg-3">
+          <div class="small-box bg-success">
+            <div class="inner"><h3 id="kTotal">-</h3><p>Recette encaissée (CFA)</p></div>
+            <div class="icon"><i class="fas fa-coins"></i></div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="small-box bg-info">
+            <div class="inner"><h3 id="kNb">-</h3><p>Reçus valides</p></div>
+            <div class="icon"><i class="fas fa-receipt"></i></div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="small-box bg-primary">
+            <div class="inner"><h3 id="kMembres">-</h3><p>Adhérents / ayants droit (CFA)</p></div>
+            <div class="icon"><i class="fas fa-user-check"></i></div>
+            <span class="small-box-footer"><span id="kNbMembres">-</span> reçu(s) &middot; externes : <span id="kExternes">-</span> CFA (<span id="kNbExternes">-</span>)</span>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="small-box bg-danger">
+            <div class="inner"><h3 id="kNbAnnules">-</h3><p>Reçus annulés</p></div>
+            <div class="icon"><i class="fas fa-ban"></i></div>
+            <span class="small-box-footer"><span id="kTotalAnnules">-</span> CFA</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="card card-outline card-success">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-vials"></i> Recette par examen</h3></div>
+            <div class="card-body p-0 table-responsive">
+              <table class="table table-sm table-striped mb-0" id="tParExamen">
+                <thead class="thead-light"><tr><th>Examen</th><th class="text-center">Nombre</th><th class="text-right">Montant</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card card-outline card-warning">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-money-check-alt"></i> Par mode de paiement</h3></div>
+            <div class="card-body p-0 table-responsive">
+              <table class="table table-sm table-striped mb-0" id="tParMode">
+                <thead class="thead-light"><tr><th>Mode</th><th class="text-center">Reçus</th><th class="text-right">Montant</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card card-outline card-info no-print" id="cardJours">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-bar"></i> Recette par jour</h3></div>
+            <div class="card-body"><div style="position: relative; height: 200px;"><canvas id="chartJours"></canvas></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Liste des reçus -->
+      <div class="card">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-list"></i> Reçus de la période <span class="badge badge-primary">@recus.size</span></h3></div>
+        <div class="card-body">
+          <table class="table table-bordered table-striped table-sm w-100" id="tableRecus">
+            <thead>
+              <tr>
+                <th>N° reçu</th>
+                <th>Date</th>
+                <th>Patient</th>
+                <th>Qualité</th>
+                <th class="text-right">Montant</th>
+                <th>Paiement</th>
+                <th>Percepteur</th>
+                <th class="text-center">Statut</th>
+                <th class="text-center no-print">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for(r <- recus) {
+                <tr @if(LaboUtils.estAnnule(r)) { class="text-muted" }>
+                  <td><strong>@r.getNumeroRecu</strong></td>
+                  <td data-order="@r.getId">@dt(r.getDateRecu)</td>
+                  <td>@r.getNomPatient @if(r.getMatricule != null) { <small class="text-muted">(@r.getMatricule)</small> }</td>
+                  <td>
+                    @if(r.getTypePatient == "EXTERNE") {
+                      <span class="badge badge-warning">Externe</span> <small>@r.getStructureOrigine</small>
+                    } else {
+                      <span class="badge badge-info">@LaboUtils.libelleTypePatient(r.getTypePatient)</span>
+                    }
+                  </td>
+                  <td class="text-right" data-order="@r.getMontantTotal">@if(LaboUtils.estAnnule(r)) { <del>@fmt(r.getMontantTotal)</del> } else { <b>@fmt(r.getMontantTotal)</b> }</td>
+                  <td>@r.getModePaiement</td>
+                  <td>@r.getWhoDone</td>
+                  <td class="text-center">
+                    @if(LaboUtils.estAnnule(r)) {
+                      <span class="badge badge-danger" title="@r.getMotifAnnulation">Annulé</span>
+                    } else {
+                      <span class="badge badge-success">Valide</span>
+                    }
+                  </td>
+                  <td class="text-center text-nowrap no-print">
+                    <a href="@controllers.routes.LaboratoireCtrl.imprimerRecu(r.getId, false)" class="btn btn-xs btn-primary" title="Voir / imprimer"><i class="fas fa-print"></i></a>
+                    @if(!LaboUtils.estAnnule(r)) {
+                      <button type="button" class="btn btn-xs btn-danger btn-annuler" title="Annuler le reçu"
+                              data-url="@controllers.routes.LaboratoireCtrl.annulerRecu(r.getId)" data-numero="@r.getNumeroRecu">
+                        <i class="fas fa-ban"></i>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Modal annulation -->
+  <div class="modal fade" id="modalAnnuler" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <form method="POST" id="formAnnuler" class="modal-content">
+        @CSRF.formField
+        <input type="hidden" name="debut" value="@debut">
+        <input type="hidden" name="fin" value="@fin">
+        <div class="modal-header bg-danger">
+          <h5 class="modal-title"><i class="fas fa-ban"></i> Annuler le reçu <span id="numAnnuler"></span></h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="motif">Motif de l'annulation <span class="text-danger">*</span></label>
+            <textarea class="form-control" id="motif" name="motif" rows="3" maxlength="500" required></textarea>
+          </div>
+          <small class="text-muted">Le reçu sera conservé mais marqué comme annulé et exclu de la recette.</small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+          <button type="submit" class="btn btn-danger"><i class="fas fa-ban"></i> Confirmer l'annulation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<style>
+.print-only { display: none; }
+@@media print {
+  .no-print, .main-header, .main-sidebar, .main-footer, .dataTables_filter, .dataTables_length, .dataTables_paginate, .dataTables_info { display: none !important; }
+  .print-only { display: block; }
+  .content-wrapper { margin-left: 0 !important; }
+}
+</style>
+
+<script>
+$(function() {
+  var stats = @Html(statsJson);
+
+  function nf(v) { return (Number(v) || 0).toLocaleString('fr-FR'); }
+  function esc(s) { return $('<div>').text(s == null ? '' : s).html(); }
+  function iso(d) { var z = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return z.toISOString().substring(0, 10); }
+
+  // Raccourcis de période
+  $('.periode').on('click', function() {
+    var now = new Date(), d = new Date(now), p = $(this).data('p');
+    if (p === 'semaine') d.setDate(now.getDate() - 6);
+    if (p === 'mois') d = new Date(now.getFullYear(), now.getMonth(), 1);
+    if (p === 'annee') d = new Date(now.getFullYear(), 0, 1);
+    $('#debut').val(iso(d)); $('#fin').val(iso(now));
+    $('#formPeriode').submit();
+  });
+
+  if (stats && stats.disponible) {
+    $('#kTotal').text(nf(stats.total));
+    $('#kNb').text(nf(stats.nb));
+    $('#kMembres').text(nf(stats.totalMembres));
+    $('#kNbMembres').text(nf(stats.nbMembres));
+    $('#kExternes').text(nf(stats.totalExternes));
+    $('#kNbExternes').text(nf(stats.nbExternes));
+    $('#kNbAnnules').text(nf(stats.nbAnnules));
+    $('#kTotalAnnules').text(nf(stats.totalAnnules));
+
+    var r1 = '';
+    $.each(stats.parExamen, function(i, e) {
+      r1 += '<tr><td>' + esc(e.examen) + '</td><td class="text-center">' + nf(e.quantite) + '</td><td class="text-right">' + nf(e.montant) + '</td></tr>';
+    });
+    $('#tParExamen tbody').html(r1 || '<tr><td colspan="3" class="text-center text-muted">Aucun examen</td></tr>');
+
+    var r2 = '';
+    $.each(stats.parModePaiement, function(i, m) {
+      r2 += '<tr><td>' + esc(m.mode) + '</td><td class="text-center">' + nf(m.nb) + '</td><td class="text-right">' + nf(m.montant) + '</td></tr>';
+    });
+    $('#tParMode tbody').html(r2 || '<tr><td colspan="3" class="text-center text-muted">Aucun paiement</td></tr>');
+
+    if (stats.parJour.length > 1) {
+      new Chart(document.getElementById('chartJours').getContext('2d'), {
+        type: 'bar',
+        data: { labels: $.map(stats.parJour, function(j) { return j.jour; }),
+                datasets: [{ label: 'Recette', data: $.map(stats.parJour, function(j) { return j.montant; }), backgroundColor: 'rgba(23,162,184,.7)' }] },
+        options: { responsive: true, maintainAspectRatio: false, legend: { display: false },
+          scales: { yAxes: [{ ticks: { beginAtZero: true, callback: function(v) { return nf(v); } } }] },
+          tooltips: { callbacks: { label: function(it) { return nf(it.yLabel) + ' CFA'; } } } }
+      });
+    } else {
+      $('#cardJours').addClass('d-none');
+    }
+  } else {
+    $('#cardJours').addClass('d-none');
+  }
+
+  $('#tableRecus').DataTable({
+    pageLength: 25, order: [[1, 'desc']], autoWidth: false,
+    language: { sSearch: "Rechercher :", sLengthMenu: "Afficher _MENU_", sInfo: "_START_ à _END_ sur _TOTAL_ reçus",
+      sInfoEmpty: "0 reçu", sZeroRecords: "Aucun reçu", sEmptyTable: "Aucun reçu sur la période",
+      oPaginate: { sPrevious: "Précédent", sNext: "Suivant" } }
+  });
+
+  $('#tableRecus').on('click', '.btn-annuler', function() {
+    $('#formAnnuler').attr('action', $(this).data('url'));
+    $('#numAnnuler').text($(this).data('numero'));
+    $('#motif').val('');
+    $('#modalAnnuler').modal('show');
+  });
+});
+</script>

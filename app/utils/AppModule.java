@@ -19,6 +19,8 @@ public class AppModule extends AbstractModule {
 		bind(DSLContext.class).toProvider(DSLContextProvider.class).in(Scopes.SINGLETON);
 		bind(utils.IConnectionHelper.class).toProvider(ConnectionHelperAppImp.class);
 		bind(utils.ConnectionProvider.class);
+		// rôles & permissions chargés au démarrage (utilisés par les menus des vues)
+		bind(services.RoleServices.class).asEagerSingleton();
 		// bind(controllers.util.Helpers.class).asEagerSingleton();
 
 	}

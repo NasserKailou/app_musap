@@ -4,6 +4,8 @@
 package models.tables;
 
 
+import java.sql.Timestamp;
+
 import javax.annotation.Generated;
 
 import models.Public;
@@ -31,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementGlobale extends TableImpl<VReglementGlobaleRecord> {
 
-    private static final long serialVersionUID = 883708520;
+    private static final long serialVersionUID = 1955777602;
 
     /**
      * The reference instance of <code>public.v_reglement_globale</code>
@@ -60,6 +62,16 @@ public class VReglementGlobale extends TableImpl<VReglementGlobaleRecord> {
      * The column <code>public.v_reglement_globale.prenom_ad</code>.
      */
     public final TableField<VReglementGlobaleRecord, String> PRENOM_AD = createField("prenom_ad", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement_globale.code_carnet</code>.
+     */
+    public final TableField<VReglementGlobaleRecord, String> CODE_CARNET = createField("code_carnet", org.jooq.impl.SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>public.v_reglement_globale.when_done</code>.
+     */
+    public final TableField<VReglementGlobaleRecord, Timestamp> WHEN_DONE = createField("when_done", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
     /**
      * The column <code>public.v_reglement_globale.total_annuel</code>.

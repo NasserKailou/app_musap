@@ -29,6 +29,7 @@ import utils.ViewMode;
  *
  */
 @Security.Authenticated(Secured.class)
+@utils.Permission(utils.Permissions.PRESTATIONS_GERER)
 public class PrestationCtrl extends Controller {
 
     TypePrestationMainService prestaService;

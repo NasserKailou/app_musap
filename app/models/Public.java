@@ -12,6 +12,8 @@ import javax.annotation.Generated;
 
 import models.tables.Adherent;
 import models.tables.AdherentTmp;
+import models.tables.AppRole;
+import models.tables.AppRolePermission;
 import models.tables.AyantDroit;
 import models.tables.Budget;
 import models.tables.Categorie;
@@ -30,11 +32,16 @@ import models.tables.OtpMessage;
 import models.tables.Params;
 import models.tables.Personnel;
 import models.tables.Programme;
+import models.tables.RecuLabo;
+import models.tables.RecuLaboDetail;
 import models.tables.Region;
 import models.tables.Reglement;
+import models.tables.ReglementAnnulation;
 import models.tables.ReglementDetail;
 import models.tables.Service;
 import models.tables.StructurePartenaire;
+import models.tables.TauxCotisation;
+import models.tables.TypeExamen;
 import models.tables.TypePrestation;
 import models.tables.Users;
 import models.tables.VAdherent;
@@ -62,6 +69,7 @@ import models.tables.VPharmacie;
 import models.tables.VRegBonCommande;
 import models.tables.VRegPriseEnCharge;
 import models.tables.VReglement;
+import models.tables.VReglementByEmmetteur;
 import models.tables.VReglementDetails;
 import models.tables.VReglementGlobal;
 import models.tables.VReglementGlobalByAdherent;
@@ -94,7 +102,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 498108155;
+    private static final long serialVersionUID = 460362537;
 
     /**
      * The reference instance of <code>public</code>
@@ -110,6 +118,16 @@ public class Public extends SchemaImpl {
      * The table <code>public.adherent_tmp</code>.
      */
     public final AdherentTmp ADHERENT_TMP = models.tables.AdherentTmp.ADHERENT_TMP;
+
+    /**
+     * The table <code>public.app_role</code>.
+     */
+    public final AppRole APP_ROLE = models.tables.AppRole.APP_ROLE;
+
+    /**
+     * The table <code>public.app_role_permission</code>.
+     */
+    public final AppRolePermission APP_ROLE_PERMISSION = models.tables.AppRolePermission.APP_ROLE_PERMISSION;
 
     /**
      * The table <code>public.ayant_droit</code>.
@@ -202,6 +220,16 @@ public class Public extends SchemaImpl {
     public final Programme PROGRAMME = models.tables.Programme.PROGRAMME;
 
     /**
+     * The table <code>public.recu_labo</code>.
+     */
+    public final RecuLabo RECU_LABO = models.tables.RecuLabo.RECU_LABO;
+
+    /**
+     * The table <code>public.recu_labo_detail</code>.
+     */
+    public final RecuLaboDetail RECU_LABO_DETAIL = models.tables.RecuLaboDetail.RECU_LABO_DETAIL;
+
+    /**
      * The table <code>public.region</code>.
      */
     public final Region REGION = models.tables.Region.REGION;
@@ -210,6 +238,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.reglement</code>.
      */
     public final Reglement REGLEMENT = models.tables.Reglement.REGLEMENT;
+
+    /**
+     * The table <code>public.reglement_annulation</code>.
+     */
+    public final ReglementAnnulation REGLEMENT_ANNULATION = models.tables.ReglementAnnulation.REGLEMENT_ANNULATION;
 
     /**
      * The table <code>public.reglement_detail</code>.
@@ -225,6 +258,16 @@ public class Public extends SchemaImpl {
      * The table <code>public.structure_partenaire</code>.
      */
     public final StructurePartenaire STRUCTURE_PARTENAIRE = models.tables.StructurePartenaire.STRUCTURE_PARTENAIRE;
+
+    /**
+     * The table <code>public.taux_cotisation</code>.
+     */
+    public final TauxCotisation TAUX_COTISATION = models.tables.TauxCotisation.TAUX_COTISATION;
+
+    /**
+     * The table <code>public.type_examen</code>.
+     */
+    public final TypeExamen TYPE_EXAMEN = models.tables.TypeExamen.TYPE_EXAMEN;
 
     /**
      * The table <code>public.type_prestation</code>.
@@ -367,6 +410,11 @@ public class Public extends SchemaImpl {
     public final VReglement_2 V_REGLEMENT_2 = models.tables.VReglement_2.V_REGLEMENT_2;
 
     /**
+     * The table <code>public.v_reglement_by_emmetteur</code>.
+     */
+    public final VReglementByEmmetteur V_REGLEMENT_BY_EMMETTEUR = models.tables.VReglementByEmmetteur.V_REGLEMENT_BY_EMMETTEUR;
+
+    /**
      * The table <code>public.v_reglement_details</code>.
      */
     public final VReglementDetails V_REGLEMENT_DETAILS = models.tables.VReglementDetails.V_REGLEMENT_DETAILS;
@@ -465,11 +513,15 @@ public class Public extends SchemaImpl {
             Sequences.OTP_MESSAGE_ID_SEQ,
             Sequences.PARAMS_ID_SEQ,
             Sequences.PROGRAMME_ID_SEQ,
+            Sequences.RECU_LABO_DETAIL_ID_SEQ,
+            Sequences.RECU_LABO_ID_SEQ,
             Sequences.REGION_ID_SEQ,
+            Sequences.REGLEMENT_ANNULATION_ID_SEQ,
             Sequences.REGLEMENT_DETAIL_ID_SEQ,
             Sequences.REGLEMENT_ID_SEQ,
             Sequences.SERVICE_ID_SEQ,
             Sequences.STRUCTURE_PARTENAIRE_ID_SEQ,
+            Sequences.TYPE_EXAMEN_ID_SEQ,
             Sequences.TYPE_PRESTATION_ID_SEQ,
             Sequences.USERS_ID_SEQ,
             Sequences.ZIMBRA_ID_SEQ);
@@ -486,6 +538,8 @@ public class Public extends SchemaImpl {
         return Arrays.<Table<?>>asList(
             Adherent.ADHERENT,
             AdherentTmp.ADHERENT_TMP,
+            AppRole.APP_ROLE,
+            AppRolePermission.APP_ROLE_PERMISSION,
             AyantDroit.AYANT_DROIT,
             Budget.BUDGET,
             Categorie.CATEGORIE,
@@ -504,11 +558,16 @@ public class Public extends SchemaImpl {
             Params.PARAMS,
             Personnel.PERSONNEL,
             Programme.PROGRAMME,
+            RecuLabo.RECU_LABO,
+            RecuLaboDetail.RECU_LABO_DETAIL,
             Region.REGION,
             Reglement.REGLEMENT,
+            ReglementAnnulation.REGLEMENT_ANNULATION,
             ReglementDetail.REGLEMENT_DETAIL,
             Service.SERVICE,
             StructurePartenaire.STRUCTURE_PARTENAIRE,
+            TauxCotisation.TAUX_COTISATION,
+            TypeExamen.TYPE_EXAMEN,
             TypePrestation.TYPE_PRESTATION,
             Users.USERS,
             VAdherent.V_ADHERENT,
@@ -537,6 +596,7 @@ public class Public extends SchemaImpl {
             VRegPriseEnCharge.V_REG_PRISE_EN_CHARGE,
             VReglement.V_REGLEMENT,
             VReglement_2.V_REGLEMENT_2,
+            VReglementByEmmetteur.V_REGLEMENT_BY_EMMETTEUR,
             VReglementDetails.V_REGLEMENT_DETAILS,
             VReglementGlobal.V_REGLEMENT_GLOBAL,
             VReglementGlobalByAdherent.V_REGLEMENT_GLOBAL_BY_ADHERENT,

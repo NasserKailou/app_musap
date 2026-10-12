@@ -21,6 +21,7 @@ import utils.ViewMode;
  *
  */
 @Security.Authenticated(Secured.class)
+@utils.Permission(utils.Permissions.COMPTABILITE)
 public class JournalEcritureCtrl extends Controller{
 
 	JournalServicesImpl journalServices;

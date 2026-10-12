@@ -1,0 +1,329 @@
+@(mode: String, ops: List[dto.OperationVue], f: dto.FiltreRapport, regions: List[java.util.Map[String, Object]])(implicit request: Http.Request)
+
+@import helper._
+@import scala.jdk.CollectionConverters._
+@import _root_.utils.Acces
+@import _root_.utils.Permissions
+@import services.RapportOperationsServices
+
+@annulations = @{ mode == "annulations" }
+@fmt(v: Long) = @{ "%,d".format(v).replace(',', ' ') }
+@dt(t: java.sql.Timestamp) = @{ if (t == null) "" else new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(t) }
+@parType = @{ RapportOperationsServices.regrouper(ops, (o: dto.OperationVue) => o.getTypeLibelle) }
+@parRegion = @{ RapportOperationsServices.regrouper(ops, (o: dto.OperationVue) => o.getRegion) }
+@parEmetteur = @{ RapportOperationsServices.regrouper(ops, (o: dto.OperationVue) => o.getEmetteur) }
+@compte(cle: String) = @{ if (parType.containsKey(cle)) parType.get(cle)(0) else 0L }
+@montantTotal = @{ parType.values.asScala.map(v => v(1)).sum }
+@actionUrl = @{ if (annulations) controllers.routes.RapportOperationsCtrl.annulations("", "", "", "", "", "", "").url.split("\\?")(0) else controllers.routes.RapportOperationsCtrl.operations("", "", "", "", "", "", "").url.split("\\?")(0) }
+@exportUrl = @{ controllers.routes.RapportOperationsCtrl.exporter(mode, "", "", "", "", "", "", "").url.split("\\?")(0) + "?rapport=" + mode + "&" + f.query() }
+
+@main(if (annulations) "Bons & PEC annulés" else "Rapport des opérations") {
+
+  <div class="content-header no-print">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-7">
+          <h1 class="m-0">
+            @if(annulations) { <i class="fas fa-ban text-danger"></i> Bons &amp; prises en charge annulés } else { <i class="fas fa-file-medical-alt"></i> Rapport des opérations }
+          </h1>
+        </div>
+        <div class="col-sm-5">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/accueil">Accueil</a></li>
+            <li class="breadcrumb-item">Rapports</li>
+            <li class="breadcrumb-item active">@if(annulations) { Annulations } else { Opérations }</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+
+      <!-- ===== Filtres ===== -->
+      <div class="card card-outline card-primary no-print">
+        <div class="card-body py-2">
+          <form method="GET" action="@actionUrl" id="formFiltre" class="form-row align-items-end">
+            <input type="hidden" name="periode" id="periode" value="@f.getPeriode">
+            <div class="col-auto mb-2">
+              <label class="d-block small mb-1">Période</label>
+              <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-primary choix-periode @if(f.getPeriode == "jour") { active }" data-p="jour">Journée</button>
+                <button type="button" class="btn btn-outline-primary choix-periode @if(f.getPeriode == "mois") { active }" data-p="mois">Mois</button>
+                <button type="button" class="btn btn-outline-primary choix-periode @if(f.getPeriode == "periode") { active }" data-p="periode">Période</button>
+              </div>
+            </div>
+            <div class="col-auto mb-2 champ-periode" data-p="jour">
+              <label class="small mb-1" for="date">Date</label>
+              <input type="date" class="form-control form-control-sm" id="date" name="date" value="@f.getDate">
+            </div>
+            <div class="col-auto mb-2 champ-periode" data-p="mois">
+              <label class="small mb-1" for="mois">Mois</label>
+              <input type="month" class="form-control form-control-sm" id="mois" name="mois" value="@f.getMois">
+            </div>
+            <div class="col-auto mb-2 champ-periode" data-p="periode">
+              <label class="small mb-1" for="debut">Du</label>
+              <input type="date" class="form-control form-control-sm" id="debut" name="debut" value="@f.getDebut">
+            </div>
+            <div class="col-auto mb-2 champ-periode" data-p="periode">
+              <label class="small mb-1" for="fin">Au</label>
+              <input type="date" class="form-control form-control-sm" id="fin" name="fin" value="@f.getFin">
+            </div>
+            <div class="col-auto mb-2">
+              <label class="small mb-1" for="type">Type</label>
+              <select class="form-control form-control-sm" id="type" name="type">
+                <option value="">Tous</option>
+                <option value="BC" @if(f.getType == "BC") { selected }>Bons</option>
+                <option value="PC" @if(f.getType == "PC") { selected }>Prises en charge</option>
+              </select>
+            </div>
+            <div class="col-auto mb-2">
+              <label class="small mb-1" for="region">Région de l'émetteur</label>
+              <select class="form-control form-control-sm" id="region" name="region">
+                <option value="">Toutes</option>
+                @for(r <- regions) {
+                  <option value="@r.get("id")" @if(f.getRegion != null && f.getRegion == r.get("id")) { selected }>@r.get("libelle")</option>
+                }
+              </select>
+            </div>
+            <div class="col-auto mb-2">
+              <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Afficher</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="btnImprimer"><i class="fas fa-print"></i> Imprimer</button>
+              <a class="btn btn-outline-success btn-sm" href="@exportUrl"><i class="fas fa-file-excel"></i> Excel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Titre (repris à l'impression) -->
+      <div class="text-center mb-3">
+        <h4 class="mb-0 font-weight-bold">
+          @if(annulations) { LISTE DES BONS ET PRISES EN CHARGE ANNULÉS } else { OPÉRATIONS : @f.getLibelleType.toUpperCase }
+        </h4>
+        <div class="text-muted">
+          @f.getLibellePeriode
+          @if(f.getLibelleRegion != null) { — Région : <b>@f.getLibelleRegion</b> }
+        </div>
+      </div>
+
+      <!-- ===== Indicateurs ===== -->
+      <div class="row">
+        <div class="col-6 col-lg-3">
+          <div class="small-box @if(annulations) { bg-danger } else { bg-info }">
+            <div class="inner"><h3>@ops.size</h3><p>@if(annulations) { Annulation(s) } else { Opération(s) }</p></div>
+            <div class="icon"><i class="fas @if(annulations) { fa-ban } else { fa-list-ol }"></i></div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="small-box bg-primary">
+            <div class="inner"><h3>@compte("BON")</h3><p>Bons</p></div>
+            <div class="icon"><i class="fas fa-file-invoice"></i></div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="small-box bg-success">
+            <div class="inner"><h3>@compte("PRISE EN CHARGE")</h3><p>Prises en charge</p></div>
+            <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="small-box bg-secondary">
+            <div class="inner"><h3 style="font-size:1.6rem">@fmt(montantTotal)</h3><p>Montant total (CFA)</p></div>
+            <div class="icon"><i class="fas fa-coins"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Synthèses ===== -->
+      @if(!ops.isEmpty) {
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card card-outline card-info">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-map-marked-alt"></i> Par région de l'émetteur</h3>
+              <div class="card-tools no-print"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div>
+            </div>
+            <div class="card-body p-0">
+              <table class="table table-sm mb-0">
+                <thead class="thead-light"><tr><th>Région</th><th class="text-center">Nombre</th><th class="text-right">Montant</th></tr></thead>
+                <tbody>
+                  @for(e <- parRegion.entrySet.asScala) {
+                    <tr><td>@e.getKey</td><td class="text-center">@e.getValue()(0)</td><td class="text-right">@fmt(e.getValue()(1))</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card card-outline card-info">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-user-edit"></i> Par émetteur</h3>
+              <div class="card-tools no-print"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div>
+            </div>
+            <div class="card-body p-0" style="max-height: 260px; overflow-y: auto;">
+              <table class="table table-sm mb-0">
+                <thead class="thead-light"><tr><th>Émetteur</th><th class="text-center">Nombre</th><th class="text-right">Montant</th></tr></thead>
+                <tbody>
+                  @for(e <- parEmetteur.entrySet.asScala) {
+                    <tr><td>@e.getKey</td><td class="text-center">@e.getValue()(0)</td><td class="text-right">@fmt(e.getValue()(1))</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- ===== Liste ===== -->
+      <div class="card">
+        <div class="card-body">
+          @if(ops.isEmpty) {
+            <div class="text-center text-muted py-4">
+              <i class="fas fa-inbox fa-2x mb-2"></i><br>
+              @if(annulations) { Aucun bon ni prise en charge annulé sur la période. } else { Aucune opération sur la période. }
+            </div>
+          } else {
+          <table class="table table-bordered table-striped table-sm w-100" id="tableOperations">
+            <thead>
+              <tr>
+                <th class="text-center">N°</th>
+                <th>TYPES PRESTATION</th>
+                <th>EMETTEUR</th>
+                <th>REGION</th>
+                <th>BENEFICIAIRE</th>
+                <th>Date</th>
+                <th>Structure</th>
+                <th class="text-right">Montant</th>
+                @if(annulations) {
+                  <th>Annulé par / le</th>
+                  <th>Motif</th>
+                  @if(Acces.peut(request, Permissions.BON_ARCHIVER)) { <th class="text-center no-print">Action</th> }
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for((o, i) <- ops.asScala.zipWithIndex) {
+                <tr>
+                  <td class="text-center">@(i + 1)</td>
+                  <td>
+                    @if(o.getTypeReglement == "PC") { <span class="badge badge-success">PRISE EN CHARGE</span> } else { <span class="badge badge-primary">BON</span> }
+                    <small class="d-block text-muted">n° @o.getId</small>
+                  </td>
+                  <td>@o.getEmetteur</td>
+                  <td>@o.getRegion</td>
+                  <td>
+                    <b>@o.getBeneficiaire</b>
+                    <small class="d-block text-muted">@o.getQualiteLibelle @if(o.getMatricule != null) { · @o.getMatricule }</small>
+                  </td>
+                  <td data-order="@if(o.getDateOperation != null) {@o.getDateOperation.getTime}">@dt(o.getDateOperation)</td>
+                  <td><small>@o.getStructure</small><small class="d-block text-muted">@o.getPrestation</small></td>
+                  <td class="text-right" data-order="@o.getMontant">@fmt(if (o.getMontant == null) 0L else o.getMontant.longValue)</td>
+                  @if(annulations) {
+                    <td>
+                      @if(o.getAnnulePar != null) { @o.getAnnulePar <small class="d-block text-muted">@dt(o.getAnnuleLe)</small> } else { <small class="text-muted">non tracé (annulation antérieure au journal)</small> }
+                    </td>
+                    <td><small>@o.getMotif</small></td>
+                    @if(Acces.peut(request, Permissions.BON_ARCHIVER)) {
+                      <td class="text-center no-print">
+                        <button type="button" class="btn btn-sm btn-success btn-restaurer" data-id="@o.getId"
+                                data-libelle="@o.getTypeLibelle n° @o.getId — @o.getBeneficiaire">
+                          <i class="fas fa-undo"></i> Restaurer
+                        </button>
+                      </td>
+                    }
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+          }
+        </div>
+      </div>
+
+      <div class="d-none d-print-block mt-3 small text-muted">Édité le @dt(new java.sql.Timestamp(System.currentTimeMillis())) par @request.session.get("nomUser").orElse("")</div>
+    </div>
+  </section>
+
+  @if(annulations && Acces.peut(request, Permissions.BON_ARCHIVER)) {
+  <div class="modal fade" id="modalRestaurer" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <form method="POST" id="formRestaurer" class="modal-content">
+        @CSRF.formField
+        <input type="hidden" name="retour" value="@f.query()">
+        <div class="modal-header bg-success">
+          <h5 class="modal-title"><i class="fas fa-undo"></i> Restaurer <span id="libelleRestaurer"></span></h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <p>Le bon redeviendra actif et sera de nouveau compté dans la consommation de l'adhérent.</p>
+          <div class="form-group mb-0">
+            <label for="motifRestauration">Motif de la restauration</label>
+            <textarea class="form-control" id="motifRestauration" name="motif" rows="2" maxlength="500"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-success"><i class="fas fa-undo"></i> Restaurer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
+}
+
+<style>
+@@media print {
+  .no-print, .main-header, .main-sidebar, .main-footer, .dataTables_filter, .dataTables_length,
+  .dataTables_paginate, .dataTables_info, .dt-buttons { display: none !important; }
+  .content-wrapper { margin-left: 0 !important; }
+  .small-box .icon { display: none; }
+  @@page { size: A4 landscape; margin: 10mm; }
+}
+</style>
+
+<script>
+$(function() {
+  function afficherChamps() {
+    var p = $('#periode').val();
+    $('.champ-periode').each(function() { $(this).toggle($(this).data('p') === p); });
+  }
+  $('.choix-periode').on('click', function() {
+    $('.choix-periode').removeClass('active');
+    $(this).addClass('active');
+    $('#periode').val($(this).data('p'));
+    afficherChamps();
+  });
+  afficherChamps();
+
+  var table = null;
+  if ($('#tableOperations').length) {
+    table = $('#tableOperations').DataTable({
+      pageLength: 50, order: [[0, 'asc']], autoWidth: false,
+      language: { sSearch: "Rechercher :", sLengthMenu: "Afficher _MENU_", sInfo: "_START_ à _END_ sur _TOTAL_",
+        sInfoEmpty: "0 ligne", sZeroRecords: "Aucune ligne", oPaginate: { sPrevious: "Précédent", sNext: "Suivant" } }
+    });
+  }
+
+  // impression de toutes les lignes (pas seulement la page affichée)
+  $('#btnImprimer').on('click', function() {
+    if (table) {
+      var longueur = table.page.len();
+      table.page.len(-1).draw();
+      setTimeout(function() { window.print(); table.page.len(longueur).draw(); }, 200);
+    } else {
+      window.print();
+    }
+  });
+
+  $(document).on('click', '.btn-restaurer', function() {
+    var id = $(this).data('id');
+    $('#formRestaurer').attr('action', '@controllers.routes.RapportOperationsCtrl.restaurer(0L)'.replace(/\/0$/, '/' + id));
+    $('#libelleRestaurer').text($(this).data('libelle'));
+    $('#motifRestauration').val('');
+    $('#modalRestaurer').modal('show');
+  });
+});
+</script>

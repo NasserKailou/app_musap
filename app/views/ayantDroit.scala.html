@@ -5,8 +5,13 @@
 @(viewMode:String,
   ayantDroits: List[models.tables.pojos.VAyantDroit],
   ayantDroit: models.tables.pojos.AyantDroit,
-  adherent: models.tables.pojos.Adherent
+  adherent: models.tables.pojos.Adherent,
+  cotisation: dto.CotisationAdherent,
+  liens: List[dto.TauxCotisation]
 )(implicit request: Http.Request)
+@import _root_.utils.Acces
+@import _root_.utils.Permissions
+@pct(v: Double) = @{ "%.2f".format(v).replace('.', ',') }
 
 @main("Ayants Droits") {
 
@@ -35,6 +40,60 @@
 <section class="content">
   <div class="container-fluid">
 
+    @if(cotisation != null) {
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-outline @if(cotisation.aUnEcart()) { card-warning } else { card-success }">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-percentage"></i> Cotisation de l'adhérent :
+              <b>@pct(cotisation.getTotal) % du salaire</b>
+              <small class="text-muted ml-2">(@cotisation.getLignes.size ayant(s) droit actif(s))</small>
+            </h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            @if(cotisation.aUnEcart()) {
+              <div class="alert alert-warning m-2 mb-0">
+                <i class="fas fa-exclamation-triangle"></i>
+                Taux enregistré : <b>@if(cotisation.getTotalEnregistre != null) { @pct(cotisation.getTotalEnregistre.doubleValue) % } else { non renseigné }</b>,
+                taux calculé : <b>@pct(cotisation.getTotal) %</b>. Il sera corrigé au prochain enregistrement d'un ayant droit
+                (ou depuis Paramètrages &gt; Taux de cotisation).
+              </div>
+            }
+            <table class="table table-sm table-striped mb-0">
+              <thead class="thead-light">
+                <tr><th>Bénéficiaire</th><th>Qualité</th><th class="text-right">Part de cotisation</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>@adherent.getNomAd @adherent.getPrenomAd</b></td>
+                  <td><span class="badge badge-primary">Adhérent (part de base)</span></td>
+                  <td class="text-right">@pct(cotisation.getBase) %</td>
+                </tr>
+                @for(l <- cotisation.getLignes) {
+                  <tr @if(!l.isCompte) { class="text-muted" }>
+                    <td>@l.getNom</td>
+                    <td>
+                      <span class="badge badge-info">@l.getLien</span>
+                      @if(!l.isCompte) { <span class="badge badge-secondary" title="Nombre maximum d'ayants droit pris en compte atteint pour ce lien">non compté (maximum atteint)</span> }
+                    </td>
+                    <td class="text-right">+ @pct(l.getTaux) %</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="bg-light"><th colspan="2" class="text-right">Total retenu sur le salaire</th><th class="text-right">@pct(cotisation.getTotal) %</th></tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
     <div class="row">
       <div class="col-12">
         <div class="card card-primary card-outline">
@@ -58,11 +117,13 @@
 
               <div class="btn-toolbar mt-2 mt-md-0">
                     @* ✅ NOUVEAU BOUTON QUI OUVRE LE MODAL DIRECTEMENT *@
+                    @if(Acces.peut(request, Permissions.AYANT_DROIT_GERER)) {
                     <button type="button"
                             class="btn btn-success btn-sm mr-2"
                             onclick="openCreateModal()">
                       <i class="fas fa-user-plus"></i> Nouvel ayant droit
                     </button>
+                    }
 
                     <button type="button"
                             class="btn btn-outline-secondary btn-sm"
@@ -171,15 +232,16 @@
                         </td>
                         <td>
                           <div class="btn-group btn-group-sm" role="group">
+                            @if(Acces.peut(request, Permissions.AYANT_DROIT_GERER)) {
                             <a id="btnReadWrite"
                                class="btn btn-primary btn-sm"
                                title="Modification"
                                href='@controllers.routes.AyantDroitCtrl.show("EDIT", c.getId(), c.getAdherent())'>
                               <i class="fas fa-edit"></i>
                             </a>
+                            }
 
-                            @if(request.session.get("droit").get() == "Admin"
-                                || request.session.get("droit").get() == "SuperAdmin") {
+                            @if(Acces.peut(request, Permissions.AYANT_DROIT_GERER)) {
                               
                               <a id="btnDelete"
                                  class="btn btn-danger btn-sm"
@@ -197,9 +259,7 @@
                               </a>
                             }
 
-                            @if(request.session.get("droit").get() == "AGENT_CARD_ID"
-                                || request.session.get("droit").get() == "SuperAdmin"
-                                || request.session.get("droit").get() == "Admin") {
+                            @if(Acces.peut(request, Permissions.ADHERENT_IMPRIMER)) {
                               
                               <a class="btn btn-success btn-sm"
                                  type="button"
@@ -335,10 +395,12 @@
                             name="lien"
                             @if(viewMode.equals("DELETE")) { disabled }>
                       <option value="">Sélectionner le lien</option>
-                      <option value="CONJOINT" @if(ayantDroit.getLien() == "CONJOINT") { selected="selected" }>CONJOINT(E)</option>
-                      <option value="ENFANT"   @if(ayantDroit.getLien() == "ENFANT")   { selected="selected" }>ENFANT</option>
-                       <option value="PARENT"   @if(ayantDroit.getLien() == "PARENT")   { selected="selected" }>PARENT</option>
+                      @for(t <- liens) {
+                        <option value="@t.getCode" data-taux="@t.getTaux" data-max="@if(t.getNombreMax != null) {@t.getNombreMax}"
+                          @if(ayantDroit.getLien() != null && ayantDroit.getLien().trim().equalsIgnoreCase(t.getCode)) { selected="selected" }>@t.getLibelle (+@pct(t.getTaux.doubleValue) %)</option>
+                      }
                     </select>
+                    <small class="form-text text-info" id="apercuCotisation"></small>
                   </div>
 
                   <!-- Date de Naissance -->
@@ -384,8 +446,7 @@
               </button>
 
               @if(viewMode.equals("CREATE")) {
-                @if(request.session.get("droit").get() == "Admin"
-                    || request.session.get("droit").get() == "SuperAdmin") {
+                @if(Acces.peut(request, Permissions.AYANT_DROIT_GERER)) {
                   <button class="btn btn-success"
                           type="submit"
                           id="valider"
@@ -817,6 +878,35 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
   });
+});
+</script>
+<script>
+$(function() {
+  @if(cotisation != null) {
+  var cotisationActuelle = @cotisation.getTotal;
+  var nombreParLien = @Html(cotisation.nombreParLienJson());
+  function fmt(v) { return v.toFixed(2).replace('.', ','); }
+  function apercu() {
+    var mode = $('input[name="viewMode"]').val();
+    var $opt = $('#lien option:selected');
+    if (!$opt.val()) { $('#apercuCotisation').text(''); return; }
+    if (mode !== 'CREATE') {
+      $('#apercuCotisation').text('La cotisation sera recalculée automatiquement à l\'enregistrement.');
+      return;
+    }
+    var taux = parseFloat($opt.attr('data-taux')) || 0;
+    var max = parseInt($opt.attr('data-max'), 10);
+    var deja = nombreParLien[$opt.val()] || 0;
+    var compte = isNaN(max) || deja < max;
+    var nouveau = cotisationActuelle + (compte ? taux : 0);
+    $('#apercuCotisation').html(compte
+      ? 'Cotisation de l\'adhérent : ' + fmt(cotisationActuelle) + ' % &rarr; <b>' + fmt(nouveau) + ' %</b> après ajout'
+      : 'Nombre maximum pris en compte atteint pour ce lien : la cotisation reste à ' + fmt(cotisationActuelle) + ' %');
+  }
+  $(document).on('change', '#lien', apercu);
+  $(document).on('shown.bs.modal', apercu);
+  apercu();
+  }
 });
 </script>
 

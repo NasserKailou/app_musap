@@ -24,6 +24,8 @@ import models.tables.pojos.VAdherentAyantDroit;
 import models.tables.pojos.VReglementGlobalByAdherent;
 import play.Logger;
 import play.data.Form;
+import play.data.DynamicForm;
+import models.tables.pojos.VAdherent;
 import play.data.FormFactory;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -38,10 +40,14 @@ import services.Mail;
 import services.MessageServiceImpl;
 import services.OtpService;
 import services.ReglementDetailMainServices;
+import services.RapportOperationsServices;
 import services.ReglementMainServices;
 import services.StructureMainServices;
 import services.TypePrestationMainService;
 import utils.CallJasperReport;
+import utils.Acces;
+import utils.Permission;
+import utils.Permissions;
 import utils.Secured;
 import utils.ViewMode;
 
@@ -65,6 +71,8 @@ public class ReglementCtrl extends Controller {
 	OtpService otpService;
 	MessageServiceImpl messagesServices;
 
+	private final RapportOperationsServices rapportOperations;
+
 	@Inject
 	public ReglementCtrl(
 			FormFactory formFactory,
@@ -76,9 +84,11 @@ public class ReglementCtrl extends Controller {
 			CallJasperReport jasper,
 			Mail email,
 			EmailManagerServices emailServices,
-			OtpService otpService, MessageServiceImpl messagesServices) {
+			OtpService otpService, MessageServiceImpl messagesServices,
+			RapportOperationsServices rapportOperations) {
 
 		super();
+		this.rapportOperations = rapportOperations;
 		this.formFactory = formFactory;
 		this.regServices = regServices;
 		this.reDetailMainServices = reDetailMainServices;
@@ -121,6 +131,7 @@ public class ReglementCtrl extends Controller {
 	// Affichage des règlements (Bons de commande / Prises en charge)
 	// =====================================================================
 
+	@Permission({ Permissions.BON_CREER, Permissions.BON_VALIDER, Permissions.BON_MODIFIER, Permissions.BON_ARCHIVER })
 	public Result show(String subAction, String typeOP, Long idReglement, Long idAdherent, Request request) {
 
 		String viewMode;
@@ -212,18 +223,21 @@ public class ReglementCtrl extends Controller {
 	}
 
 	// @AddCSRFToken // ✅ Ajouter cette annotation
+	@Permission(Permissions.BON_VALIDER)
 	public Result showBonToValidate(Request request) {
 		// return
 		// ok(views.html.validationBon.render(regServices.findBonToValidate(),request));
 		return ok(views.html.validationBon.render(regServices.findAllVReg(), request));
 	}
 
+	@Permission(Permissions.RAPPORT_SITUATION_PERSONNEL)
 	public Result showRapSynthese(Request request) {
 		// return
 		// ok(views.html.validationBon.render(regServices.findBonToValidate(),request));
 		return ok(views.html.rapSynthese.render(regServices.findAllVReg(), request));
 	}
 
+	@Permission(Permissions.RAPPORT_SUPERVISION)
 	public Result showRapSuperviseur(Request request) {
 		// return
 		// ok(views.html.validationBon.render(regServices.findBonToValidate(),request));
@@ -240,6 +254,7 @@ public class ReglementCtrl extends Controller {
 	 * @param request    La requête HTTP
 	 * @return La vue avec la liste des bons non confirmés
 	 */
+	@Permission(Permissions.BON_VALIDER)
 	public Result showConfirmBon(String subAction, Long idAdherent, Request request) {
 		System.out.println(">>> showConfirmBon - Adhérent ID: " + idAdherent);
 
@@ -261,6 +276,7 @@ public class ReglementCtrl extends Controller {
 				request));
 	}
 
+	@Permission(Permissions.RAPPORT_ETATS)
 	public Result showRegementGlobal(Request request) {
 		return ok(views.html.rembourssementGlobal.render(
 				regServices.getAllRegementByAdherent(),
@@ -271,6 +287,7 @@ public class ReglementCtrl extends Controller {
 	// Gestion des règlements (CRUD, cycle de vie du bon)
 	// =====================================================================
 
+	@Permission({ Permissions.BON_CREER, Permissions.BON_MODIFIER })
 	public Result save(Request request) {
 
 		final String viewMode = formFactory.form().bindFromRequest(request).get("viewMode");
@@ -439,10 +456,12 @@ public class ReglementCtrl extends Controller {
 				c.getAdherent()));
 	}
 
+	@Permission(Permissions.BON_ARCHIVER)
 	public Result restaure(Long idPart, Request request) {
 		Reglement c = regServices.findById(idPart);
-		c.setOnDeleted(false);
-		regServices.update(c);
+		if (c == null)
+			return redirect(routes.HomeController.acceuil()).flashing("error", "Bon introuvable");
+		rapportOperations.changerEtat(idPart, false, null, request.session().get("login").orElse(""));
 		return redirect(routes.ReglementCtrl.show(
 				ViewMode.VIEW_MODE_CREATE,
 				"",
@@ -452,6 +471,7 @@ public class ReglementCtrl extends Controller {
 
 	// Route pour la confirmation
 	// @RequiresCSRFCheck(false)
+	@Permission(Permissions.BON_VALIDER)
 	public Result confirmerBon(Long bonId, Long adherentId) {
 		try {
 			Reglement reglement = regServices.findById(bonId);
@@ -474,6 +494,7 @@ public class ReglementCtrl extends Controller {
 	 * Réactualiser un bon de commande (remettre isConfirmedBon à false) Réservé aux
 	 * SuperAdmin uniquement
 	 */
+	@Permission(Permissions.BON_REACTUALISER)
 	public Result reactualiserBon(Long bonId, Long adherentId) {
 		try {
 			// String droit = session("droit");
@@ -505,20 +526,23 @@ public class ReglementCtrl extends Controller {
 	 * Suppression logique d'un Règlement : passe onDeleted à true
 	 * Réservé à l'Admin uniquement
 	 */
+	@Permission(Permissions.BON_ARCHIVER)
 	public Result softDeleteReglement(Long bonId, Long adherentId, Request request) {
 		try {
-			String droit = request.session().get("droit").orElse("");
-			if (!droit.equals("Admin")) {
-				return forbidden("Action réservée à l'administrateur");
+			if (!Acces.peut(request, Permissions.BON_ARCHIVER)) {
+				return forbidden("Action non autorisée pour votre profil");
 			}
 			Reglement reglement = regServices.findById(bonId);
 			if (reglement == null) {
 				return notFound("Règlement non trouvé");
 			}
-			reglement.setOnDeleted(true);
-			regServices.update(reglement);
-			Logger.info("Règlement supprimé logiquement - ID: " + bonId + " par: "
-					+ request.session().get("login").orElse("?"));
+			// annulation tracée (qui, quand, motif) : alimente le rapport des annulations
+			String motif = request.body().asFormUrlEncoded() != null && request.body().asFormUrlEncoded().get("motif") != null
+					? request.body().asFormUrlEncoded().get("motif")[0] : null;
+			String res = rapportOperations.changerEtat(bonId, true, motif, request.session().get("login").orElse("?"));
+			if (!"ok".equals(res))
+				return badRequest(res);
+			Logger.info("Règlement annulé - ID: " + bonId + " par: " + request.session().get("login").orElse("?"));
 			return ok("Règlement supprimé logiquement avec succès");
 		} catch (Exception e) {
 			Logger.error("Erreur softDeleteReglement: " + e.getMessage(), e);
@@ -530,18 +554,19 @@ public class ReglementCtrl extends Controller {
 	 * Réactivation d'un Règlement : passe onDeleted à false
 	 * Réservé à l'Admin uniquement
 	 */
+	@Permission(Permissions.BON_ARCHIVER)
 	public Result reactiverReglement(Long bonId, Long adherentId, Request request) {
 		try {
-			String droit = request.session().get("droit").orElse("");
-			if (!droit.equals("Admin")) {
-				return forbidden("Action réservée à l'administrateur");
+			if (!Acces.peut(request, Permissions.BON_ARCHIVER)) {
+				return forbidden("Action non autorisée pour votre profil");
 			}
 			Reglement reglement = regServices.findById(bonId);
 			if (reglement == null) {
 				return notFound("Règlement non trouvé");
 			}
-			reglement.setOnDeleted(false);
-			regServices.update(reglement);
+			String res = rapportOperations.changerEtat(bonId, false, null, request.session().get("login").orElse("?"));
+			if (!"ok".equals(res))
+				return badRequest(res);
 			Logger.info("Règlement réactivé - ID: " + bonId + " par: " + request.session().get("login").orElse("?"));
 			return ok("Règlement réactivé avec succès");
 		} catch (Exception e) {
@@ -554,6 +579,7 @@ public class ReglementCtrl extends Controller {
 	// Détails de règlement (lignes de prestation)
 	// =====================================================================
 
+	@Permission({ Permissions.BON_CREER, Permissions.BON_MODIFIER, Permissions.BON_SUPPRIMER_LIGNE })
 	public Result reglementDetailForm(
 			String action,
 			String typeOP,
@@ -594,6 +620,7 @@ public class ReglementCtrl extends Controller {
 				request));
 	}
 
+	@Permission({ Permissions.BON_CREER, Permissions.BON_MODIFIER, Permissions.BON_SUPPRIMER_LIGNE })
 	public Result reglementDetailsave(Request request) {
 
 		Long sommeReg = 0L;
@@ -601,15 +628,34 @@ public class ReglementCtrl extends Controller {
 		Long montanTotal = 0L;
 		Long diff = 0L;
 
-		Long ad = Long.parseLong(formFactory.form().bindFromRequest(request).get("adh"));
-		final String viewMode = formFactory.form().bindFromRequest(request).get("viewMode");
-		String typeOperation = formFactory.form().bindFromRequest(request).get("typeOP");
-		Long idReglement = Long.parseLong(formFactory.form().bindFromRequest(request).get("reglement"));
+		DynamicForm requestData = formFactory.form().bindFromRequest(request);
+		Long ad = parseLongOrNull(requestData.get("adh"));
+		final String viewMode = requestData.get("viewMode") == null ? "" : requestData.get("viewMode");
+		String typeOperation = requestData.get("typeOP");
+		Long idReglement = parseLongOrNull(requestData.get("reglement"));
+
+		// Requête incomplète (session expirée, formulaire tronqué...) : on ne plante pas
+		if (ad == null || idReglement == null || regServices.findById(idReglement) == null) {
+			return redirect(routes.AdherentCtrl.show(ViewMode.VIEW_MODE_CREATE, 0L)).flashing("error",
+					"Bon de commande introuvable, veuillez recommencer la saisie");
+		}
+		VAdherent vAdherent = adherentService.getVAdherentById(regServices.findById(idReglement).getAdherent());
+		if (vAdherent == null || vAdherent.getTotalCreditAConsomer() == null) {
+			return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, typeOperation,
+					idReglement, ad, 0L)).flashing("error",
+							"Plafond de consommation non défini pour cet adhérent, enregistrement impossible");
+		}
+		final Double totalCreditAConsomer = vAdherent.getTotalCreditAConsomer();
+		// seuil d'alerte facultatif : sans seuil, pas d'alerte
+		final Double totalCreditAnnuelle = vAdherent.getTotalCreditAnnuelle() == null ? Double.MAX_VALUE
+				: vAdherent.getTotalCreditAnnuelle();
 
 		// Vérifier si c'est une saisie multiple (mode CREATE avec plusieurs lignes)
 		if (viewMode.equals(ViewMode.VIEW_MODE_CREATE)) {
 			// Récupérer les données du formulaire multiple
 			java.util.Map<String, String[]> formData = request.body().asFormUrlEncoded();
+			if (formData == null)
+				formData = new java.util.HashMap<>();
 
 			// Vérifier s'il y a des données de saisie multiple
 			boolean isSaisieMultiple = formData.containsKey("intitules[1]");
@@ -637,11 +683,18 @@ public class ReglementCtrl extends Controller {
 						try {
 							String intitule = intituleArray[0].trim();
 							Long quantite = (quantiteArray != null && quantiteArray.length > 0)
-									? Long.parseLong(quantiteArray[0])
-									: 1L;
+									? parseLongOrNull(quantiteArray[0])
+									: null;
+							if (quantite == null)
+								quantite = 1L;
 							Long prixUnitaire = (prixArray != null && prixArray.length > 0)
-									? Long.parseLong(prixArray[0])
-									: 0L;
+									? parseLongOrNull(prixArray[0])
+									: null;
+							if (prixUnitaire == null || prixUnitaire < 0 || quantite < 1) {
+								messagesErreurs.add("Ligne " + i + " (" + intitule + "): prix unitaire ou quantité invalide");
+								nombreLignesRejetees++;
+								continue;
+							}
 
 							// Créer une nouvelle ligne de détail
 							ReglementDetail rd = new ReglementDetail();
@@ -655,10 +708,6 @@ public class ReglementCtrl extends Controller {
 							rd.setOnDeleted(false);
 
 							// Vérifier les plafonds
-							Double totalCreditAnnuelle = adherentService.getVAdherentById(
-									regServices.findById(idReglement).getAdherent()).getTotalCreditAnnuelle();
-							Double totalCreditAConsomer = adherentService.getVAdherentById(
-									regServices.findById(idReglement).getAdherent()).getTotalCreditAConsomer();
 							Long totalConsommation = regServices.sommeRegler(
 									regServices.findById(idReglement).getAdherent(),
 									request.session().get("gestion").get());
@@ -727,21 +776,48 @@ public class ReglementCtrl extends Controller {
 		}
 
 		// Mode EDIT/DELETE ou saisie simple : traitement classique d'une seule ligne
-		Form<ReglementDetail> uForm = formFactory.form(ReglementDetail.class).bindFromRequest(request);
-		ReglementDetail rd = uForm.get();
+		// Cause de l'erreur NullPointerException en production : quantité ou prix
+		// unitaire vide => Long null => "rd.getPrixUnitaire() * rd.getQuantite()" plantait.
+		if (viewMode.equals(ViewMode.VIEW_MODE_DELETE) && !Acces.peut(request, Permissions.BON_SUPPRIMER_LIGNE)) {
+			return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, typeOperation,
+					idReglement, ad, 0L)).flashing("error", "Vous n'avez pas le droit de supprimer une ligne de bon");
+		}
+		Long idDetail = parseLongOrNull(requestData.get("id"));
+		ReglementDetail rd;
+		if (viewMode.equals(ViewMode.VIEW_MODE_EDIT) || viewMode.equals(ViewMode.VIEW_MODE_DELETE)) {
+			rd = idDetail == null ? null : reDetailMainServices.findById(idDetail);
+			// la ligne doit appartenir au bon traité
+			if (rd == null || !idReglement.equals(rd.getReglement())) {
+				return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, typeOperation,
+						idReglement, ad, 0L)).flashing("error", "Ligne de détail introuvable");
+			}
+		} else {
+			rd = new ReglementDetail();
+		}
+		rd.setReglement(idReglement);
+
+		if (!viewMode.equals(ViewMode.VIEW_MODE_DELETE)) {
+			String intitule = requestData.get("intitule");
+			Long quantite = parseLongOrNull(requestData.get("quantite"));
+			Long prixUnitaire = parseLongOrNull(requestData.get("prixUnitaire"));
+			if (intitule == null || intitule.trim().isEmpty() || quantite == null || quantite < 1
+					|| prixUnitaire == null || prixUnitaire < 0) {
+				return redirect(routes.ReglementCtrl.reglementDetailForm(ViewMode.VIEW_MODE_CREATE, typeOperation,
+						idReglement, ad, 0L)).flashing("error",
+								"Veuillez renseigner l'intitulé, une quantité (au moins 1) et un prix unitaire valides");
+			}
+			rd.setIntitule(intitule.trim());
+			rd.setQuantite(quantite);
+			rd.setPrixUnitaire(prixUnitaire);
+		}
 		rd.setWhenDone(new Timestamp(System.currentTimeMillis()));
-		rd.setWhoDone(String.valueOf(request.session().get("login").get()));
+		rd.setWhoDone(request.session().get("login").orElse(""));
 		rd.setOnDeleted(false);
 
-		montanTotal = rd.getPrixUnitaire() * rd.getQuantite();
+		montanTotal = (rd.getPrixUnitaire() == null ? 0L : rd.getPrixUnitaire())
+				* (rd.getQuantite() == null ? 0L : rd.getQuantite());
 		rd.setMontant(montanTotal);
-		System.out.println("envoi SMS.............");
 
-		System.out.println("la somme total des rembourssement est de : " + sommeReg + " F CFLA");
-		Double totalCreditAnnuelle = adherentService
-				.getVAdherentById(regServices.findById(rd.getReglement()).getAdherent()).getTotalCreditAnnuelle();
-		Double totalCreditAConsomer = adherentService
-				.getVAdherentById(regServices.findById(rd.getReglement()).getAdherent()).getTotalCreditAConsomer();
 		Long totalConsommation = regServices.sommeRegler(regServices.findById(rd.getReglement()).getAdherent(),
 				request.session().get("gestion").get());
 		Long totalAVailider = totalConsommation + montanTotal;
@@ -890,10 +966,12 @@ public class ReglementCtrl extends Controller {
 	// Alertes et notifications par e-mail
 	// =====================================================================
 
+	@Permission(Permissions.ALERTE_EMAIL)
 	public Result showAlerteView(Request request) {
 		return ok(views.html.alerteMail.render(0, request));
 	}
 
+	@Permission(Permissions.ALERTE_EMAIL)
 	public Result infoViaMail(Request request) {
 		Email mail = new Email();
 		Long diff = 0L;
@@ -1036,6 +1114,7 @@ public class ReglementCtrl extends Controller {
 	// Rapports et impressions (Jasper)
 	// =====================================================================
 
+	@Permission(Permissions.RAPPORT_ETATS)
 	public Result rapportAnnuel(Request request, String fileName) {
 
 		String annee = formFactory.form().bindFromRequest(request).get("annee");
@@ -1063,6 +1142,7 @@ public class ReglementCtrl extends Controller {
 		}
 	}
 
+	@Permission(Permissions.RAPPORT_ETATS)
 	public Result rapportBetwenne(Request request) {
 		String dateD1 = formFactory.form().bindFromRequest(request).get("tmpDate");
 		String dateD2 = formFactory.form().bindFromRequest(request).get("tmpDate2");
@@ -1088,6 +1168,7 @@ public class ReglementCtrl extends Controller {
 		}
 	}
 
+	@Permission(Permissions.BON_IMPRIMER)
 	public Result print(Request request, Long numBon, String fileName) {
 
 		// String fileName = "recu";
@@ -1154,6 +1235,7 @@ public class ReglementCtrl extends Controller {
 	// API JSON
 	// =====================================================================
 
+	@Permission({ Permissions.BON_CREER, Permissions.BON_VALIDER })
 	public Result detailJson(Long id) {
 		ReglementDetail d = reDetailMainServices.findById(id);
 		if (d == null) {
@@ -1166,6 +1248,7 @@ public class ReglementCtrl extends Controller {
 		return ok(json);
 	}
 
+	@Permission({ Permissions.BON_CREER, Permissions.BON_VALIDER })
 	public Result getReglementJson(Long id) {
 		Reglement r = regServices.findById(id);
 		if (r == null) {
@@ -1196,5 +1279,22 @@ public class ReglementCtrl extends Controller {
 		}
 
 		return ok(json);
+	}
+
+	/**
+	 * Convertit une saisie en Long sans lever d'exception (espaces et séparateurs
+	 * de milliers ignorés) ; renvoie null si la valeur est vide ou invalide.
+	 */
+	private static Long parseLongOrNull(String valeur) {
+		if (valeur == null)
+			return null;
+		String v = valeur.replaceAll("[\\s\\u00A0\\u202F]", "");
+		if (v.isEmpty())
+			return null;
+		try {
+			return Long.valueOf(v);
+		} catch (NumberFormatException e) {
+			return null;
+		}
 	}
 }

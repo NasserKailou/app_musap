@@ -8,6 +8,8 @@ import javax.annotation.Generated;
 
 import models.tables.Adherent;
 import models.tables.AdherentTmp;
+import models.tables.AppRole;
+import models.tables.AppRolePermission;
 import models.tables.AyantDroit;
 import models.tables.Budget;
 import models.tables.Categorie;
@@ -25,16 +27,23 @@ import models.tables.Notification;
 import models.tables.OtpMessage;
 import models.tables.Params;
 import models.tables.Programme;
+import models.tables.RecuLabo;
+import models.tables.RecuLaboDetail;
 import models.tables.Region;
 import models.tables.Reglement;
+import models.tables.ReglementAnnulation;
 import models.tables.ReglementDetail;
 import models.tables.Service;
 import models.tables.StructurePartenaire;
+import models.tables.TauxCotisation;
+import models.tables.TypeExamen;
 import models.tables.TypePrestation;
 import models.tables.Users;
 import models.tables.Zimbra;
 import models.tables.records.AdherentRecord;
 import models.tables.records.AdherentTmpRecord;
+import models.tables.records.AppRolePermissionRecord;
+import models.tables.records.AppRoleRecord;
 import models.tables.records.AyantDroitRecord;
 import models.tables.records.BudgetRecord;
 import models.tables.records.CategorieCompteRecord;
@@ -52,11 +61,16 @@ import models.tables.records.NotificationRecord;
 import models.tables.records.OtpMessageRecord;
 import models.tables.records.ParamsRecord;
 import models.tables.records.ProgrammeRecord;
+import models.tables.records.RecuLaboDetailRecord;
+import models.tables.records.RecuLaboRecord;
 import models.tables.records.RegionRecord;
+import models.tables.records.ReglementAnnulationRecord;
 import models.tables.records.ReglementDetailRecord;
 import models.tables.records.ReglementRecord;
 import models.tables.records.ServiceRecord;
 import models.tables.records.StructurePartenaireRecord;
+import models.tables.records.TauxCotisationRecord;
+import models.tables.records.TypeExamenRecord;
 import models.tables.records.TypePrestationRecord;
 import models.tables.records.UsersRecord;
 import models.tables.records.ZimbraRecord;
@@ -104,11 +118,15 @@ public class Keys {
     public static final Identity<OtpMessageRecord, Long> IDENTITY_OTP_MESSAGE = Identities0.IDENTITY_OTP_MESSAGE;
     public static final Identity<ParamsRecord, Long> IDENTITY_PARAMS = Identities0.IDENTITY_PARAMS;
     public static final Identity<ProgrammeRecord, Long> IDENTITY_PROGRAMME = Identities0.IDENTITY_PROGRAMME;
+    public static final Identity<RecuLaboRecord, Long> IDENTITY_RECU_LABO = Identities0.IDENTITY_RECU_LABO;
+    public static final Identity<RecuLaboDetailRecord, Long> IDENTITY_RECU_LABO_DETAIL = Identities0.IDENTITY_RECU_LABO_DETAIL;
     public static final Identity<RegionRecord, Long> IDENTITY_REGION = Identities0.IDENTITY_REGION;
     public static final Identity<ReglementRecord, Long> IDENTITY_REGLEMENT = Identities0.IDENTITY_REGLEMENT;
+    public static final Identity<ReglementAnnulationRecord, Long> IDENTITY_REGLEMENT_ANNULATION = Identities0.IDENTITY_REGLEMENT_ANNULATION;
     public static final Identity<ReglementDetailRecord, Long> IDENTITY_REGLEMENT_DETAIL = Identities0.IDENTITY_REGLEMENT_DETAIL;
     public static final Identity<ServiceRecord, Long> IDENTITY_SERVICE = Identities0.IDENTITY_SERVICE;
     public static final Identity<StructurePartenaireRecord, Long> IDENTITY_STRUCTURE_PARTENAIRE = Identities0.IDENTITY_STRUCTURE_PARTENAIRE;
+    public static final Identity<TypeExamenRecord, Long> IDENTITY_TYPE_EXAMEN = Identities0.IDENTITY_TYPE_EXAMEN;
     public static final Identity<TypePrestationRecord, Long> IDENTITY_TYPE_PRESTATION = Identities0.IDENTITY_TYPE_PRESTATION;
     public static final Identity<UsersRecord, Long> IDENTITY_USERS = Identities0.IDENTITY_USERS;
     public static final Identity<ZimbraRecord, Long> IDENTITY_ZIMBRA = Identities0.IDENTITY_ZIMBRA;
@@ -118,6 +136,8 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<AdherentRecord> ADHERENT_PKEY = UniqueKeys0.ADHERENT_PKEY;
+    public static final UniqueKey<AppRoleRecord> APP_ROLE_PKEY = UniqueKeys0.APP_ROLE_PKEY;
+    public static final UniqueKey<AppRolePermissionRecord> APP_ROLE_PERMISSION_PKEY = UniqueKeys0.APP_ROLE_PERMISSION_PKEY;
     public static final UniqueKey<AyantDroitRecord> AYANT_DROIT_PKEY = UniqueKeys0.AYANT_DROIT_PKEY;
     public static final UniqueKey<BudgetRecord> BUDGET_PKEY = UniqueKeys0.BUDGET_PKEY;
     public static final UniqueKey<BudgetRecord> UNIK_BUGET_ROW = UniqueKeys0.UNIK_BUGET_ROW;
@@ -140,11 +160,17 @@ public class Keys {
     public static final UniqueKey<ParamsRecord> PARAMS_PKEY = UniqueKeys0.PARAMS_PKEY;
     public static final UniqueKey<ProgrammeRecord> PROGRAMME_PKEY = UniqueKeys0.PROGRAMME_PKEY;
     public static final UniqueKey<ProgrammeRecord> CODE_PRGM = UniqueKeys0.CODE_PRGM;
+    public static final UniqueKey<RecuLaboRecord> RECU_LABO_PKEY = UniqueKeys0.RECU_LABO_PKEY;
+    public static final UniqueKey<RecuLaboRecord> RECU_LABO_NUMERO_RECU_KEY = UniqueKeys0.RECU_LABO_NUMERO_RECU_KEY;
+    public static final UniqueKey<RecuLaboDetailRecord> RECU_LABO_DETAIL_PKEY = UniqueKeys0.RECU_LABO_DETAIL_PKEY;
     public static final UniqueKey<RegionRecord> REGION_PKEY = UniqueKeys0.REGION_PKEY;
     public static final UniqueKey<ReglementRecord> REGLEMENT_PKEY = UniqueKeys0.REGLEMENT_PKEY;
+    public static final UniqueKey<ReglementAnnulationRecord> REGLEMENT_ANNULATION_PKEY = UniqueKeys0.REGLEMENT_ANNULATION_PKEY;
     public static final UniqueKey<ReglementDetailRecord> REGLEMENT_DETAIL_PKEY = UniqueKeys0.REGLEMENT_DETAIL_PKEY;
     public static final UniqueKey<ServiceRecord> SERVICE_PKEY = UniqueKeys0.SERVICE_PKEY;
     public static final UniqueKey<StructurePartenaireRecord> STRUCTURE_PARTENAIRE_PKEY = UniqueKeys0.STRUCTURE_PARTENAIRE_PKEY;
+    public static final UniqueKey<TauxCotisationRecord> TAUX_COTISATION_PKEY = UniqueKeys0.TAUX_COTISATION_PKEY;
+    public static final UniqueKey<TypeExamenRecord> TYPE_EXAMEN_PKEY = UniqueKeys0.TYPE_EXAMEN_PKEY;
     public static final UniqueKey<TypePrestationRecord> TYPE_PRESTATION_PKEY = UniqueKeys0.TYPE_PRESTATION_PKEY;
     public static final UniqueKey<UsersRecord> USERS_PKEY = UniqueKeys0.USERS_PKEY;
     public static final UniqueKey<ZimbraRecord> ZIMBRA_PKEY = UniqueKeys0.ZIMBRA_PKEY;
@@ -155,6 +181,7 @@ public class Keys {
 
     public static final ForeignKey<AdherentRecord, ProgrammeRecord> ADHERENT__PROGAM_FKY = ForeignKeys0.ADHERENT__PROGAM_FKY;
     public static final ForeignKey<AdherentRecord, CategorieRecord> ADHERENT__CATEGORIE_FKY = ForeignKeys0.ADHERENT__CATEGORIE_FKY;
+    public static final ForeignKey<AppRolePermissionRecord, AppRoleRecord> APP_ROLE_PERMISSION__APP_ROLE_PERMISSION_ROLE_CODE_FKEY = ForeignKeys0.APP_ROLE_PERMISSION__APP_ROLE_PERMISSION_ROLE_CODE_FKEY;
     public static final ForeignKey<AyantDroitRecord, AdherentRecord> AYANT_DROIT__ADHERENT_FKY = ForeignKeys0.AYANT_DROIT__ADHERENT_FKY;
     public static final ForeignKey<BudgetRecord, ParamsRecord> BUDGET__FKEY_GESTION_BUGET = ForeignKeys0.BUDGET__FKEY_GESTION_BUGET;
     public static final ForeignKey<BudgetRecord, ClassCompteRecord> BUDGET__FKEY_COMPTE_BUDGET = ForeignKeys0.BUDGET__FKEY_COMPTE_BUDGET;
@@ -163,9 +190,12 @@ public class Keys {
     public static final ForeignKey<EcritureRecord, ClassCompteRecord> ECRITURE__CMPT_FKEY = ForeignKeys0.ECRITURE__CMPT_FKEY;
     public static final ForeignKey<EcritureRecord, JournalEcritureRecord> ECRITURE__FKEY_JOURNAL = ForeignKeys0.ECRITURE__FKEY_JOURNAL;
     public static final ForeignKey<EcritureRecord, DepenseRecord> ECRITURE__FKEY_DEPENSE = ForeignKeys0.ECRITURE__FKEY_DEPENSE;
+    public static final ForeignKey<RecuLaboDetailRecord, RecuLaboRecord> RECU_LABO_DETAIL__RECU_LABO_DETAIL_RECU_LABO_FKEY = ForeignKeys0.RECU_LABO_DETAIL__RECU_LABO_DETAIL_RECU_LABO_FKEY;
+    public static final ForeignKey<RecuLaboDetailRecord, TypeExamenRecord> RECU_LABO_DETAIL__RECU_LABO_DETAIL_TYPE_EXAMEN_FKEY = ForeignKeys0.RECU_LABO_DETAIL__RECU_LABO_DETAIL_TYPE_EXAMEN_FKEY;
     public static final ForeignKey<ReglementRecord, StructurePartenaireRecord> REGLEMENT__STRUCTURE_FKY = ForeignKeys0.REGLEMENT__STRUCTURE_FKY;
     public static final ForeignKey<ReglementRecord, TypePrestationRecord> REGLEMENT__REGLEMENT_TYPE_PRESTATION_FKEY = ForeignKeys0.REGLEMENT__REGLEMENT_TYPE_PRESTATION_FKEY;
     public static final ForeignKey<ReglementRecord, AyantDroitRecord> REGLEMENT__REGLEMENT_AYANT_DROIT_FKEY = ForeignKeys0.REGLEMENT__REGLEMENT_AYANT_DROIT_FKEY;
+    public static final ForeignKey<ReglementAnnulationRecord, ReglementRecord> REGLEMENT_ANNULATION__REGLEMENT_ANNULATION_REGLEMENT_FKEY = ForeignKeys0.REGLEMENT_ANNULATION__REGLEMENT_ANNULATION_REGLEMENT_FKEY;
     public static final ForeignKey<ServiceRecord, DivisionRecord> SERVICE__SERVICE_FKY = ForeignKeys0.SERVICE__SERVICE_FKY;
     public static final ForeignKey<StructurePartenaireRecord, RegionRecord> STRUCTURE_PARTENAIRE__FK_REGION = ForeignKeys0.STRUCTURE_PARTENAIRE__FK_REGION;
 
@@ -193,11 +223,15 @@ public class Keys {
         public static Identity<OtpMessageRecord, Long> IDENTITY_OTP_MESSAGE = createIdentity(OtpMessage.OTP_MESSAGE, OtpMessage.OTP_MESSAGE.ID);
         public static Identity<ParamsRecord, Long> IDENTITY_PARAMS = createIdentity(Params.PARAMS, Params.PARAMS.ID);
         public static Identity<ProgrammeRecord, Long> IDENTITY_PROGRAMME = createIdentity(Programme.PROGRAMME, Programme.PROGRAMME.ID);
+        public static Identity<RecuLaboRecord, Long> IDENTITY_RECU_LABO = createIdentity(RecuLabo.RECU_LABO, RecuLabo.RECU_LABO.ID);
+        public static Identity<RecuLaboDetailRecord, Long> IDENTITY_RECU_LABO_DETAIL = createIdentity(RecuLaboDetail.RECU_LABO_DETAIL, RecuLaboDetail.RECU_LABO_DETAIL.ID);
         public static Identity<RegionRecord, Long> IDENTITY_REGION = createIdentity(Region.REGION, Region.REGION.ID);
         public static Identity<ReglementRecord, Long> IDENTITY_REGLEMENT = createIdentity(Reglement.REGLEMENT, Reglement.REGLEMENT.ID);
+        public static Identity<ReglementAnnulationRecord, Long> IDENTITY_REGLEMENT_ANNULATION = createIdentity(ReglementAnnulation.REGLEMENT_ANNULATION, ReglementAnnulation.REGLEMENT_ANNULATION.ID);
         public static Identity<ReglementDetailRecord, Long> IDENTITY_REGLEMENT_DETAIL = createIdentity(ReglementDetail.REGLEMENT_DETAIL, ReglementDetail.REGLEMENT_DETAIL.ID);
         public static Identity<ServiceRecord, Long> IDENTITY_SERVICE = createIdentity(Service.SERVICE, Service.SERVICE.ID);
         public static Identity<StructurePartenaireRecord, Long> IDENTITY_STRUCTURE_PARTENAIRE = createIdentity(StructurePartenaire.STRUCTURE_PARTENAIRE, StructurePartenaire.STRUCTURE_PARTENAIRE.ID);
+        public static Identity<TypeExamenRecord, Long> IDENTITY_TYPE_EXAMEN = createIdentity(TypeExamen.TYPE_EXAMEN, TypeExamen.TYPE_EXAMEN.ID);
         public static Identity<TypePrestationRecord, Long> IDENTITY_TYPE_PRESTATION = createIdentity(TypePrestation.TYPE_PRESTATION, TypePrestation.TYPE_PRESTATION.ID);
         public static Identity<UsersRecord, Long> IDENTITY_USERS = createIdentity(Users.USERS, Users.USERS.ID);
         public static Identity<ZimbraRecord, Long> IDENTITY_ZIMBRA = createIdentity(Zimbra.ZIMBRA, Zimbra.ZIMBRA.ID);
@@ -205,6 +239,8 @@ public class Keys {
 
     private static class UniqueKeys0 extends AbstractKeys {
         public static final UniqueKey<AdherentRecord> ADHERENT_PKEY = createUniqueKey(Adherent.ADHERENT, "adherent_pkey", Adherent.ADHERENT.ID);
+        public static final UniqueKey<AppRoleRecord> APP_ROLE_PKEY = createUniqueKey(AppRole.APP_ROLE, "app_role_pkey", AppRole.APP_ROLE.CODE);
+        public static final UniqueKey<AppRolePermissionRecord> APP_ROLE_PERMISSION_PKEY = createUniqueKey(AppRolePermission.APP_ROLE_PERMISSION, "app_role_permission_pkey", AppRolePermission.APP_ROLE_PERMISSION.ROLE_CODE, AppRolePermission.APP_ROLE_PERMISSION.PERMISSION);
         public static final UniqueKey<AyantDroitRecord> AYANT_DROIT_PKEY = createUniqueKey(AyantDroit.AYANT_DROIT, "ayant_droit_pkey", AyantDroit.AYANT_DROIT.ID);
         public static final UniqueKey<BudgetRecord> BUDGET_PKEY = createUniqueKey(Budget.BUDGET, "budget_pkey", Budget.BUDGET.ID);
         public static final UniqueKey<BudgetRecord> UNIK_BUGET_ROW = createUniqueKey(Budget.BUDGET, "unik_buget_row", Budget.BUDGET.GESTION, Budget.BUDGET.COMPTE, Budget.BUDGET.TYPE_BUGET);
@@ -227,11 +263,17 @@ public class Keys {
         public static final UniqueKey<ParamsRecord> PARAMS_PKEY = createUniqueKey(Params.PARAMS, "params_pkey", Params.PARAMS.ID);
         public static final UniqueKey<ProgrammeRecord> PROGRAMME_PKEY = createUniqueKey(Programme.PROGRAMME, "programme_pkey", Programme.PROGRAMME.ID);
         public static final UniqueKey<ProgrammeRecord> CODE_PRGM = createUniqueKey(Programme.PROGRAMME, "code_prgm", Programme.PROGRAMME.CODE);
+        public static final UniqueKey<RecuLaboRecord> RECU_LABO_PKEY = createUniqueKey(RecuLabo.RECU_LABO, "recu_labo_pkey", RecuLabo.RECU_LABO.ID);
+        public static final UniqueKey<RecuLaboRecord> RECU_LABO_NUMERO_RECU_KEY = createUniqueKey(RecuLabo.RECU_LABO, "recu_labo_numero_recu_key", RecuLabo.RECU_LABO.NUMERO_RECU);
+        public static final UniqueKey<RecuLaboDetailRecord> RECU_LABO_DETAIL_PKEY = createUniqueKey(RecuLaboDetail.RECU_LABO_DETAIL, "recu_labo_detail_pkey", RecuLaboDetail.RECU_LABO_DETAIL.ID);
         public static final UniqueKey<RegionRecord> REGION_PKEY = createUniqueKey(Region.REGION, "region_pkey", Region.REGION.ID);
         public static final UniqueKey<ReglementRecord> REGLEMENT_PKEY = createUniqueKey(Reglement.REGLEMENT, "reglement_pkey", Reglement.REGLEMENT.ID);
+        public static final UniqueKey<ReglementAnnulationRecord> REGLEMENT_ANNULATION_PKEY = createUniqueKey(ReglementAnnulation.REGLEMENT_ANNULATION, "reglement_annulation_pkey", ReglementAnnulation.REGLEMENT_ANNULATION.ID);
         public static final UniqueKey<ReglementDetailRecord> REGLEMENT_DETAIL_PKEY = createUniqueKey(ReglementDetail.REGLEMENT_DETAIL, "reglement_detail_pkey", ReglementDetail.REGLEMENT_DETAIL.ID);
         public static final UniqueKey<ServiceRecord> SERVICE_PKEY = createUniqueKey(Service.SERVICE, "service_pkey", Service.SERVICE.ID);
         public static final UniqueKey<StructurePartenaireRecord> STRUCTURE_PARTENAIRE_PKEY = createUniqueKey(StructurePartenaire.STRUCTURE_PARTENAIRE, "structure_partenaire_pkey", StructurePartenaire.STRUCTURE_PARTENAIRE.ID);
+        public static final UniqueKey<TauxCotisationRecord> TAUX_COTISATION_PKEY = createUniqueKey(TauxCotisation.TAUX_COTISATION, "taux_cotisation_pkey", TauxCotisation.TAUX_COTISATION.CODE);
+        public static final UniqueKey<TypeExamenRecord> TYPE_EXAMEN_PKEY = createUniqueKey(TypeExamen.TYPE_EXAMEN, "type_examen_pkey", TypeExamen.TYPE_EXAMEN.ID);
         public static final UniqueKey<TypePrestationRecord> TYPE_PRESTATION_PKEY = createUniqueKey(TypePrestation.TYPE_PRESTATION, "type_prestation_pkey", TypePrestation.TYPE_PRESTATION.ID);
         public static final UniqueKey<UsersRecord> USERS_PKEY = createUniqueKey(Users.USERS, "users_pkey", Users.USERS.ID);
         public static final UniqueKey<ZimbraRecord> ZIMBRA_PKEY = createUniqueKey(Zimbra.ZIMBRA, "zimbra_pkey", Zimbra.ZIMBRA.ID);
@@ -240,6 +282,7 @@ public class Keys {
     private static class ForeignKeys0 extends AbstractKeys {
         public static final ForeignKey<AdherentRecord, ProgrammeRecord> ADHERENT__PROGAM_FKY = createForeignKey(models.Keys.CODE_PRGM, Adherent.ADHERENT, "adherent__progam_fky", Adherent.ADHERENT.CODE_PROGRAMME);
         public static final ForeignKey<AdherentRecord, CategorieRecord> ADHERENT__CATEGORIE_FKY = createForeignKey(models.Keys.CODE, Adherent.ADHERENT, "adherent__categorie_fky", Adherent.ADHERENT.CATEGORIE);
+        public static final ForeignKey<AppRolePermissionRecord, AppRoleRecord> APP_ROLE_PERMISSION__APP_ROLE_PERMISSION_ROLE_CODE_FKEY = createForeignKey(models.Keys.APP_ROLE_PKEY, AppRolePermission.APP_ROLE_PERMISSION, "app_role_permission__app_role_permission_role_code_fkey", AppRolePermission.APP_ROLE_PERMISSION.ROLE_CODE);
         public static final ForeignKey<AyantDroitRecord, AdherentRecord> AYANT_DROIT__ADHERENT_FKY = createForeignKey(models.Keys.ADHERENT_PKEY, AyantDroit.AYANT_DROIT, "ayant_droit__adherent_fky", AyantDroit.AYANT_DROIT.ADHERENT);
         public static final ForeignKey<BudgetRecord, ParamsRecord> BUDGET__FKEY_GESTION_BUGET = createForeignKey(models.Keys.PARAMS_PKEY, Budget.BUDGET, "budget__fkey_gestion_buget", Budget.BUDGET.GESTION);
         public static final ForeignKey<BudgetRecord, ClassCompteRecord> BUDGET__FKEY_COMPTE_BUDGET = createForeignKey(models.Keys.NUM_COMPTE_UNIK, Budget.BUDGET, "budget__fkey_compte_budget", Budget.BUDGET.COMPTE);
@@ -248,9 +291,12 @@ public class Keys {
         public static final ForeignKey<EcritureRecord, ClassCompteRecord> ECRITURE__CMPT_FKEY = createForeignKey(models.Keys.CLASS_COMPTE_PKEY, Ecriture.ECRITURE, "ecriture__cmpt_fkey", Ecriture.ECRITURE.COMPTE);
         public static final ForeignKey<EcritureRecord, JournalEcritureRecord> ECRITURE__FKEY_JOURNAL = createForeignKey(models.Keys.JOURNAL_ECRITURE_PKEY, Ecriture.ECRITURE, "ecriture__fkey_journal", Ecriture.ECRITURE.JOURNAL);
         public static final ForeignKey<EcritureRecord, DepenseRecord> ECRITURE__FKEY_DEPENSE = createForeignKey(models.Keys.PRIMARY_DEPENSE, Ecriture.ECRITURE, "ecriture__fkey_depense", Ecriture.ECRITURE.DEPENSE);
+        public static final ForeignKey<RecuLaboDetailRecord, RecuLaboRecord> RECU_LABO_DETAIL__RECU_LABO_DETAIL_RECU_LABO_FKEY = createForeignKey(models.Keys.RECU_LABO_PKEY, RecuLaboDetail.RECU_LABO_DETAIL, "recu_labo_detail__recu_labo_detail_recu_labo_fkey", RecuLaboDetail.RECU_LABO_DETAIL.RECU_LABO);
+        public static final ForeignKey<RecuLaboDetailRecord, TypeExamenRecord> RECU_LABO_DETAIL__RECU_LABO_DETAIL_TYPE_EXAMEN_FKEY = createForeignKey(models.Keys.TYPE_EXAMEN_PKEY, RecuLaboDetail.RECU_LABO_DETAIL, "recu_labo_detail__recu_labo_detail_type_examen_fkey", RecuLaboDetail.RECU_LABO_DETAIL.TYPE_EXAMEN);
         public static final ForeignKey<ReglementRecord, StructurePartenaireRecord> REGLEMENT__STRUCTURE_FKY = createForeignKey(models.Keys.STRUCTURE_PARTENAIRE_PKEY, Reglement.REGLEMENT, "reglement__structure_fky", Reglement.REGLEMENT.STRUCTURE);
         public static final ForeignKey<ReglementRecord, TypePrestationRecord> REGLEMENT__REGLEMENT_TYPE_PRESTATION_FKEY = createForeignKey(models.Keys.TYPE_PRESTATION_PKEY, Reglement.REGLEMENT, "reglement__reglement_type_prestation_fkey", Reglement.REGLEMENT.TYPE_PRESTATION);
         public static final ForeignKey<ReglementRecord, AyantDroitRecord> REGLEMENT__REGLEMENT_AYANT_DROIT_FKEY = createForeignKey(models.Keys.AYANT_DROIT_PKEY, Reglement.REGLEMENT, "reglement__reglement_ayant_droit_fkey", Reglement.REGLEMENT.AYANT_DROIT);
+        public static final ForeignKey<ReglementAnnulationRecord, ReglementRecord> REGLEMENT_ANNULATION__REGLEMENT_ANNULATION_REGLEMENT_FKEY = createForeignKey(models.Keys.REGLEMENT_PKEY, ReglementAnnulation.REGLEMENT_ANNULATION, "reglement_annulation__reglement_annulation_reglement_fkey", ReglementAnnulation.REGLEMENT_ANNULATION.REGLEMENT);
         public static final ForeignKey<ServiceRecord, DivisionRecord> SERVICE__SERVICE_FKY = createForeignKey(models.Keys.DIVISION_PKEY, Service.SERVICE, "service__service_fky", Service.SERVICE.DIVISION);
         public static final ForeignKey<StructurePartenaireRecord, RegionRecord> STRUCTURE_PARTENAIRE__FK_REGION = createForeignKey(models.Keys.REGION_PKEY, StructurePartenaire.STRUCTURE_PARTENAIRE, "structure_partenaire__fk_region", StructurePartenaire.STRUCTURE_PARTENAIRE.REGION);
     }

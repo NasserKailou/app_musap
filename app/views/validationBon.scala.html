@@ -7,6 +7,8 @@
 @import java.util
 @import utils._
 @(reglements: List[models.tables.pojos.VReglement])(implicit request: Http.Request)
+@import _root_.utils.Acces
+@import _root_.utils.Permissions
 
 @defining({
   // Filtrer uniquement les bons non confirmés
@@ -118,8 +120,7 @@
     }
 
     @* ================== ALERTE BONS EXPIRÉS + VALIDATION EN MASSE ================== *@
-    @if(bonsExpires.nonEmpty && request.session.get("droit").isPresent &&
-        (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Validateur")) {
+    @if(bonsExpires.nonEmpty && Acces.peut(request, Permissions.BON_VALIDER)) {
       <div class="row mb-3">
         <div class="col-12">
           <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -267,8 +268,7 @@
                                   <i class="fas fa-hourglass-half"></i> Non confirmé
                                 }
                               </span>
-                              @if(!estExpire && request.session.get("droit").isPresent &&
-                                  (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Validateur")) {
+                              @if(!estExpire && Acces.peut(request, Permissions.BON_VALIDER)) {
                                 <button type="button"
                                         class="btn btn-sm btn-primary"
                                         onclick="confirmerBon(@c.getId(), @c.getIdAdherent())"
@@ -277,8 +277,7 @@
                                 </button>
                               }
                               @* Bouton valider malgré expiration *@
-                              @if(estExpire && request.session.get("droit").isPresent &&
-                                  (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Validateur")) {
+                              @if(estExpire && Acces.peut(request, Permissions.BON_VALIDER)) {
                                 <button type="button"
                                         class="btn btn-sm btn-warning mt-1"
                                         onclick="confirmerBonExpire(@c.getId(), @c.getIdAdherent())"

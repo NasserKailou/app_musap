@@ -3,8 +3,10 @@ package controllers;
 import com.google.inject.Inject;
 
 import models.tables.pojos.Connexion;
+import models.tables.pojos.Params;
 import models.tables.pojos.Users;
 import play.api.Configuration;
+import play.data.DynamicForm;
 import play.data.Form;
 import play.data.FormFactory;
 import play.mvc.Controller;
@@ -20,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 
 import services.ConnexionMainServices;
 import services.ParamsServices;
+import services.RoleServices;
 import services.UserService;
 import utils.BCryptHash;
 import utils.ViewMode;
@@ -36,17 +39,19 @@ public class AuthenticationCtrl extends Controller {
 	private final ParamsServices paramsService;
 	private final ConnexionMainServices connexion;
 	private final FormFactory formFactory;
+	private final RoleServices roleServices;
 
 	// @Inject
 	// private Helpers helpers;
 
 	@Inject
 	public AuthenticationCtrl(FormFactory formFactory, UserService userService, ParamsServices paramsService,
-			ConnexionMainServices connexion) {
+			ConnexionMainServices connexion, RoleServices roleServices) {
 		this.userService = userService;
 		this.paramsService = paramsService;
 		this.formFactory = formFactory;
 		this.connexion = connexion;
+		this.roleServices = roleServices;
 
 	}
 
@@ -59,71 +64,74 @@ public class AuthenticationCtrl extends Controller {
 
 		LocalDateTime now = LocalDateTime.now();
 		String now_string = now.format(DateTimeFormatter.ofPattern("MM"));
-
 		Integer a = Integer.valueOf(now_string);
-		// System.out.println(now_string +" + "+a);
-		Form<Users> form = formFactory.form(Users.class).bindFromRequest(request);
-		Users u = form.get();
-		Users us = new Users();
-
-		// recuperation de la gestion
-		final String gestion = formFactory.form().bindFromRequest(request).get("gestion").replace(" ", "");
-		System.out.println("Gestion exercice :" + gestion);
 
 		if (a >= 13) {
-			// flash("error", "Connexion Impossible, si ce problème persiste veillez
-			// contacter le service Informatique!!!");
 			return redirect(controllers.routes.AuthenticationCtrl.login()).flashing("error",
 					"Connexion Impossible, si ce problème persiste veillez contacter le service Informatique!!!");
-			// return TODO;
-		} else {
+		}
 
-			if (form.hasErrors() || userService.getUserByLogin(u.getLogin()) == null) {
-				// flash("error", " Erreur de saisie");
-				return redirect(controllers.routes.AuthenticationCtrl.login()).flashing("error", " Erreur de saisie");
-			} else {
+		// Lecture défensive : un champ absent ne doit jamais provoquer d'erreur 500
+		DynamicForm data = formFactory.form().bindFromRequest(request);
+		String login = data.get("login") == null ? "" : data.get("login").trim();
+		String passe = data.get("passe") == null ? "" : data.get("passe");
+		final String gestion = data.get("gestion") == null ? "" : data.get("gestion").replace(" ", "");
 
-				if (BCryptHash.checkPassword(u.getPasse(), userService.getUserByLogin(u.getLogin()).getPasse())) {
-					String password = userService.getUserByLogin(u.getLogin()).getPasse();
-					us = userService.authentification(u.getLogin(), password);
-				} else
-					us = null;
+		if (login.isEmpty() || passe.isEmpty()) {
+			return redirect(controllers.routes.AuthenticationCtrl.login()).flashing("error",
+					"Veuillez saisir votre identifiant et votre mot de passe");
+		}
+		Params params = gestion.isEmpty() ? null : paramsService.paramsByGestion(gestion);
+		if (params == null) {
+			return redirect(controllers.routes.AuthenticationCtrl.login()).flashing("error",
+					"Veuillez sélectionner une année de gestion valide");
+		}
 
-				if (us == null) {
-					// flash("error", "wrong email/password");
-					return redirect(controllers.routes.AuthenticationCtrl.login()).flashing("error",
-							" Erreur de saisie, Login ou Mot de Passe Incorrect!!!");
-				} else {
-					// System.out.println("Le User connecter est: "+ us);
-//					session("login", (us.getLogin()));
-//					session("droit", (us.getDroit()));
-//					session("nomUser", (us.getNomPrenom()));
-//					
-					if (us.getConnectFirst()) {
-						return redirect(controllers.routes.AuthenticationCtrl.returnFirtPageConnexion(us.getLogin()));
-						// return ok(views.html.changePassword.render(us, request));
-						// return TODO(request);
-					} else {
-						Connexion conn = new Connexion();
-						conn.setUser(us.getLogin() + " - " + us.getNomPrenom());
-						conn.setProfil(us.getDroit());
-						conn.setWhenDown(new Timestamp(System.currentTimeMillis()));
-						connexion.insert(conn);
-						return redirect(routes.HomeController.acceuil()).removingFromSession(request, "droit")
-								.addingToSession(request, "droit", us.getDroit()).removingFromSession(request, "login")
-								.addingToSession(request, "login", us.getLogin())
-								.removingFromSession(request, "nomUser")
-								.addingToSession(request, "nomUser", us.getNomPrenom())
-								.removingFromSession(request, "region")
-								.addingToSession(request, "region", String.valueOf(us.getRegionCode()))
-								.removingFromSession(request, "gestion").addingToSession(request, "gestion", gestion)
-								.removingFromSession(request, "plafond").addingToSession(request, "plafond",
-										String.valueOf(paramsService.paramsByGestion(gestion).getPlafond()))
-								.removingFromSession(request, "seuilAlerte").addingToSession(request, "seuilAlerte",
-										String.valueOf(paramsService.paramsByGestion(gestion).getSeuilAlerte()));
-					}
-				}
-			}
+		Users enBase = userService.getUserByLogin(login);
+		Users us = null;
+		if (enBase != null && motDePasseValide(passe, enBase.getPasse())) {
+			// vérifie aussi que le compte est actif (etat = true)
+			us = userService.authentification(login, enBase.getPasse());
+		}
+		if (us == null) {
+			return redirect(controllers.routes.AuthenticationCtrl.login()).flashing("error",
+					" Erreur de saisie, Login ou Mot de Passe Incorrect!!!");
+		}
+
+		if (!roleServices.estActif(us.getDroit())) {
+			return redirect(controllers.routes.AuthenticationCtrl.login()).flashing("error",
+					"Votre profil est désactivé, contactez l'administrateur");
+		}
+
+		if (Boolean.TRUE.equals(us.getConnectFirst())) {
+			return redirect(controllers.routes.AuthenticationCtrl.returnFirtPageConnexion(us.getLogin()));
+		}
+
+		Connexion conn = new Connexion();
+		conn.setUser(us.getLogin() + " - " + us.getNomPrenom());
+		conn.setProfil(us.getDroit());
+		conn.setWhenDown(new Timestamp(System.currentTimeMillis()));
+		connexion.insert(conn);
+		return redirect(routes.HomeController.acceuil()).removingFromSession(request, "droit")
+				.addingToSession(request, "droit", String.valueOf(us.getDroit())).removingFromSession(request, "login")
+				.addingToSession(request, "login", us.getLogin())
+				.removingFromSession(request, "nomUser")
+				.addingToSession(request, "nomUser", String.valueOf(us.getNomPrenom()))
+				.removingFromSession(request, "region")
+				.addingToSession(request, "region", String.valueOf(us.getRegionCode()))
+				.removingFromSession(request, "gestion").addingToSession(request, "gestion", gestion)
+				.removingFromSession(request, "plafond")
+				.addingToSession(request, "plafond", String.valueOf(params.getPlafond()))
+				.removingFromSession(request, "seuilAlerte")
+				.addingToSession(request, "seuilAlerte", String.valueOf(params.getSeuilAlerte()));
+	}
+
+	/** Vérification BCrypt sans exception (hash absent ou au mauvais format => refus) */
+	private static boolean motDePasseValide(String saisi, String hash) {
+		try {
+			return BCryptHash.checkPassword(saisi, hash);
+		} catch (Exception e) {
+			return false;
 		}
 	}
 

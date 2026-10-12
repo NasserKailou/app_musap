@@ -28,6 +28,7 @@ import utils.ViewMode;
  */
 
 @Security.Authenticated(Secured.class)
+@utils.Permission(utils.Permissions.COMPTABILITE)
 public class CompteCtrl extends Controller{
 
 	ClassComptaServicesImpl cptServices;

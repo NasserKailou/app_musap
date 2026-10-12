@@ -29,6 +29,7 @@ import utils.ViewMode;
  *
  */
 @Security.Authenticated(Secured.class)
+@utils.Permission(utils.Permissions.STRUCTURES_GERER)
 public class StructurePartenaireCtrl extends Controller {
 
 	StructureMainServices structureService;

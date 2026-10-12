@@ -1,0 +1,161 @@
+@(viewMode: String,
+  examens: List[models.tables.pojos.TypeExamen],
+  examen: models.tables.pojos.TypeExamen,
+  categories: List[String])(implicit request: Http.Request)
+
+@import helper._
+@import _root_.utils.LaboUtils
+
+@montant(v: java.lang.Long) = @{ if (v == null) "-" else "%,d".format(v) + " CFA" }
+
+@main("Types d'examens") {
+
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-vials"></i> Types d'examens de laboratoire</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/accueil">Accueil</a></li>
+            <li class="breadcrumb-item">Laboratoire</li>
+            <li class="breadcrumb-item active">Types d'examens</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+
+        <!-- Formulaire -->
+        <div class="col-lg-4">
+          <div class="card @if(viewMode == "DELETE") { card-danger } else { card-primary }">
+            <div class="card-header">
+              <h3 class="card-title">
+                @if(viewMode == "CREATE") { <i class="fas fa-plus-circle"></i> Nouvel examen }
+                @if(viewMode == "EDIT") { <i class="fas fa-edit"></i> Modifier l'examen }
+                @if(viewMode == "DELETE") { <i class="fas fa-trash"></i> Supprimer l'examen }
+              </h3>
+            </div>
+            <form method="POST" action="@controllers.routes.LaboratoireCtrl.saveTypeExamen()" autocomplete="off">
+              @CSRF.formField
+              <input type="hidden" name="viewMode" value="@viewMode">
+              <input type="hidden" name="id" value="@examen.getId">
+              <div class="card-body">
+                <div class="form-group">
+                  <label for="libelle">Libellé de l'examen <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="libelle" name="libelle" maxlength="255" required
+                         value="@examen.getLibelle" @if(viewMode == "DELETE") { readonly } placeholder="Ex : Numération formule sanguine">
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-5">
+                    <label for="code">Code</label>
+                    <input type="text" class="form-control" id="code" name="code" maxlength="30"
+                           value="@examen.getCode" @if(viewMode == "DELETE") { readonly } placeholder="Ex : NFS">
+                  </div>
+                  <div class="form-group col-7">
+                    <label for="categorie">Catégorie</label>
+                    <input type="text" class="form-control" id="categorie" name="categorie" maxlength="100" list="listeCategories"
+                           value="@examen.getCategorie" @if(viewMode == "DELETE") { readonly } placeholder="Ex : Hématologie">
+                    <datalist id="listeCategories">
+                      @for(c <- categories) { <option value="@c"> }
+                    </datalist>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="montant">Montant (tarif normal) <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="montant" name="montant" min="0" step="1" required
+                           value="@examen.getMontant" @if(viewMode == "DELETE") { readonly }>
+                    <div class="input-group-append"><span class="input-group-text">CFA</span></div>
+                  </div>
+                  <small class="text-muted">Appliqué aux personnes des autres structures.</small>
+                </div>
+                <div class="form-group">
+                  <label for="montantAdherent">Montant adhérent / ayant droit</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="montantAdherent" name="montantAdherent" min="0" step="1"
+                           value="@examen.getMontantAdherent" @if(viewMode == "DELETE") { readonly }>
+                    <div class="input-group-append"><span class="input-group-text">CFA</span></div>
+                  </div>
+                  <small class="text-muted">Laisser vide pour appliquer le tarif normal aux membres de la mutuelle.</small>
+                </div>
+              </div>
+              <div class="card-footer">
+                @if(viewMode == "DELETE") {
+                  <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Confirmer la suppression</button>
+                } else {
+                  <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+                }
+                @if(viewMode != "CREATE") {
+                  <a href="@controllers.routes.LaboratoireCtrl.typesExamen("CREATE", 0L)" class="btn btn-secondary float-right">
+                    <i class="fas fa-times"></i> Annuler
+                  </a>
+                }
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Liste -->
+        <div class="col-lg-8">
+          <div class="card card-outline card-primary">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-list"></i> Examens paramétrés <span class="badge badge-primary ml-1">@examens.size</span></h3>
+              <div class="card-tools">
+                <a href="@controllers.routes.LaboratoireCtrl.nouveauRecu()" class="btn btn-success btn-sm"><i class="fas fa-receipt"></i> Nouveau reçu</a>
+              </div>
+            </div>
+            <div class="card-body">
+              <table id="tableExamens" class="table table-bordered table-striped table-sm w-100">
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Libellé</th>
+                    <th>Catégorie</th>
+                    <th class="text-right">Tarif normal</th>
+                    <th class="text-right">Tarif adhérent</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for(e <- examens) {
+                    <tr>
+                      <td>@e.getCode</td>
+                      <td><strong>@e.getLibelle</strong></td>
+                      <td>@if(e.getCategorie != null) { <span class="badge badge-info">@e.getCategorie</span> }</td>
+                      <td class="text-right" data-order="@e.getMontant">@montant(e.getMontant)</td>
+                      <td class="text-right" data-order="@LaboUtils.tarif(e, true)">
+                        @if(e.getMontantAdherent != null) { <span class="text-success font-weight-bold">@montant(e.getMontantAdherent)</span> } else { <small class="text-muted">= tarif normal</small> }
+                      </td>
+                      <td class="text-center text-nowrap">
+                        <a href="@controllers.routes.LaboratoireCtrl.typesExamen("EDIT", e.getId)" class="btn btn-xs btn-warning" title="Modifier"><i class="fas fa-edit"></i></a>
+                        <a href="@controllers.routes.LaboratoireCtrl.typesExamen("DELETE", e.getId)" class="btn btn-xs btn-danger" title="Supprimer"><i class="fas fa-trash"></i></a>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+}
+
+<script>
+$(function() {
+  $('#tableExamens').DataTable({
+    pageLength: 25, order: [[2, 'asc'], [1, 'asc']], autoWidth: false,
+    language: { sSearch: "Rechercher :", sLengthMenu: "Afficher _MENU_", sInfo: "_START_ à _END_ sur _TOTAL_",
+      sInfoEmpty: "0 examen", sZeroRecords: "Aucun examen", sEmptyTable: "Aucun examen paramétré",
+      oPaginate: { sPrevious: "Précédent", sNext: "Suivant" } }
+  });
+});
+</script>

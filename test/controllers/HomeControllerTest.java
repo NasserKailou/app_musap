@@ -16,7 +16,9 @@ public class HomeControllerTest extends WithApplication {
 
     @Override
     protected Application provideApplication() {
-        return new GuiceApplicationBuilder().build();
+        return new GuiceApplicationBuilder()
+				.configure("play.filters.hosts.allowed", java.util.Collections.singletonList(".")) // hôte "localhost" des tests
+				.build();
     }
 
     @Test

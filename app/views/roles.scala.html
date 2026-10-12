@@ -1,0 +1,293 @@
+@(roles: List[dto.RoleVue],
+  selection: dto.RoleVue,
+  modules: java.util.Map[String, java.util.List[_root_.utils.Permissions.Definition]])(implicit request: Http.Request)
+
+@import helper._
+
+@main("Rôles & permissions") {
+
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-user-shield"></i> Rôles &amp; permissions</h1>
+          <small class="text-muted">Créez des rôles et choisissez les fonctionnalités auxquelles ils donnent accès.</small>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/accueil">Accueil</a></li>
+            <li class="breadcrumb-item">Paramètrages</li>
+            <li class="breadcrumb-item active">Rôles &amp; permissions</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+
+        <!-- ===== Liste des rôles ===== -->
+        <div class="col-lg-4">
+          <div class="card card-primary card-outline">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-list"></i> Rôles <span class="badge badge-primary">@roles.size</span></h3>
+              <div class="card-tools">
+                <a href="@controllers.routes.RoleCtrl.index("__nouveau")" class="btn btn-success btn-sm">
+                  <i class="fas fa-plus"></i> Nouveau rôle
+                </a>
+              </div>
+            </div>
+            <div class="list-group list-group-flush">
+              @for(r <- roles) {
+                <a href="@controllers.routes.RoleCtrl.index(r.getCode)"
+                   class="list-group-item list-group-item-action @if(selection != null && selection.getCode == r.getCode) { active }">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>@r.getLibelle</strong>
+                      <small class="d-block @if(selection != null && selection.getCode == r.getCode) { text-white-50 } else { text-muted }">@r.getCode</small>
+                    </div>
+                    <div class="text-right">
+                      @if(r.estSysteme()) { <span class="badge badge-warning" title="Rôle système">Système</span> }
+                      @if(!r.estActif()) { <span class="badge badge-secondary">Désactivé</span> }
+                      <span class="badge badge-light" title="Utilisateurs"><i class="fas fa-users"></i> @r.getNbUtilisateurs</span>
+                      <span class="badge badge-info" title="Permissions">@r.getPermissions.size</span>
+                    </div>
+                  </div>
+                </a>
+              }
+            </div>
+          </div>
+          <div class="callout callout-info small">
+            <i class="fas fa-info-circle"></i>
+            Le rôle <b>Administrateur</b> possède toujours toutes les permissions.
+            Les modifications de permissions s'appliquent immédiatement aux utilisateurs connectés.
+          </div>
+        </div>
+
+        <!-- ===== Détail du rôle ===== -->
+        <div class="col-lg-8">
+          @if(selection == null) {
+            <div class="card card-success">
+              <div class="card-header"><h3 class="card-title"><i class="fas fa-plus-circle"></i> Nouveau rôle</h3></div>
+              <form method="POST" action="@controllers.routes.RoleCtrl.saveRole()" autocomplete="off">
+                @CSRF.formField
+                <input type="hidden" name="mode" value="CREATE">
+                <div class="card-body">
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="code">Code <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" id="code" name="code" required maxlength="50"
+                             pattern="[A-Za-z0-9_\-]{2,50}" placeholder="Ex : Comptable">
+                      <small class="text-muted">Lettres, chiffres, - ou _ (non modifiable ensuite)</small>
+                    </div>
+                    <div class="form-group col-md-8">
+                      <label for="libelle">Libellé <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" id="libelle" name="libelle" required maxlength="100"
+                             placeholder="Ex : Comptable de la mutuelle">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="description">Description</label>
+                    <input type="text" class="form-control" id="description" name="description" maxlength="255">
+                  </div>
+                  <input type="hidden" name="actif" value="true">
+                </div>
+                <div class="card-footer">
+                  <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Créer le rôle</button>
+                </div>
+              </form>
+            </div>
+          } else {
+            <!-- Informations -->
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-id-badge"></i> @selection.getLibelle</h3>
+              </div>
+              <form method="POST" action="@controllers.routes.RoleCtrl.saveRole()" autocomplete="off">
+                @CSRF.formField
+                <input type="hidden" name="mode" value="EDIT">
+                <input type="hidden" name="code" value="@selection.getCode">
+                <div class="card-body">
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label>Code</label>
+                      <input type="text" class="form-control" value="@selection.getCode" readonly>
+                    </div>
+                    <div class="form-group col-md-8">
+                      <label for="libelle">Libellé <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" id="libelle" name="libelle" required maxlength="100" value="@selection.getLibelle">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="description">Description</label>
+                    <input type="text" class="form-control" id="description" name="description" maxlength="255" value="@selection.getDescription">
+                  </div>
+                  <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="actif" name="actif" value="true"
+                           @if(selection.estActif()) { checked } @if(selection.estSysteme()) { disabled }>
+                    <label class="custom-control-label" for="actif">Rôle actif
+                      <small class="text-muted">(un rôle désactivé ne permet plus de se connecter)</small></label>
+                    @if(selection.estSysteme()) { <input type="hidden" name="actif" value="true"> }
+                  </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                  <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+                  @if(!selection.estSysteme()) {
+                    <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#modalSupprimer"
+                            @if(selection.getNbUtilisateurs > 0) { disabled title="Des utilisateurs sont rattachés à ce rôle" }>
+                      <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                  }
+                </div>
+              </form>
+            </div>
+
+            <!-- Permissions -->
+            <div class="card card-outline card-success">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-key"></i> Fonctionnalités accordées
+                  <span class="badge badge-success" id="compteur">@selection.getPermissions.size</span></h3>
+              </div>
+              @if(selection.getCode == _root_.utils.Permissions.ROLE_ADMIN) {
+                <div class="card-body">
+                  <div class="alert alert-info mb-0"><i class="fas fa-lock"></i>
+                    Le rôle Administrateur possède toutes les fonctionnalités ; elles ne peuvent pas lui être retirées.</div>
+                </div>
+              } else {
+                <form method="POST" action="@controllers.routes.RoleCtrl.savePermissions()" id="formPermissions">
+                  @CSRF.formField
+                  <input type="hidden" name="code" value="@selection.getCode">
+                  <div class="card-body">
+                    <div class="form-row align-items-center mb-3">
+                      <div class="col-md-5 mb-2">
+                        <input type="search" class="form-control form-control-sm" id="filtre" placeholder="Rechercher une fonctionnalité...">
+                      </div>
+                      <div class="col-md-4 mb-2">
+                        <select class="form-control form-control-sm" id="copierDepuis">
+                          <option value="">Copier les permissions de...</option>
+                          @for(r <- roles) { @if(r.getCode != selection.getCode) { <option value="@r.getCode">@r.getLibelle</option> } }
+                        </select>
+                      </div>
+                      <div class="col-md-3 mb-2 text-md-right">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="toutCocher">Tout</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="toutDecocher">Aucune</button>
+                      </div>
+                    </div>
+
+                    @for(entry <- modules.entrySet) {
+                      <div class="module-permissions mb-3">
+                        <div class="d-flex align-items-center border-bottom pb-1 mb-2">
+                          <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input module-tout" id="mod-@entry.getKey.hashCode.abs">
+                            <label class="custom-control-label font-weight-bold" for="mod-@entry.getKey.hashCode.abs">@entry.getKey</label>
+                          </div>
+                        </div>
+                        <div class="row">
+                          @for(d <- entry.getValue) {
+                            <div class="col-md-6 permission-item" data-texte="@d.getLibelle.toLowerCase @d.getDescription.toLowerCase">
+                              <div class="custom-control custom-switch mb-2">
+                                <input type="checkbox" class="custom-control-input permission" name="permissions[]"
+                                       id="perm-@d.getCode" value="@d.getCode" @if(selection.aPermission(d.getCode)) { checked }>
+                                <label class="custom-control-label" for="perm-@d.getCode">
+                                  @d.getLibelle
+                                  <small class="d-block text-muted">@d.getDescription</small>
+                                </label>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  <div class="card-footer sticky-footer">
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Enregistrer les permissions</button>
+                    <span class="text-muted ml-2 small">Les utilisateurs de ce rôle verront leurs menus mis à jour à leur prochaine action.</span>
+                  </div>
+                </form>
+              }
+            </div>
+
+            @if(!selection.estSysteme()) {
+              <div class="modal fade" id="modalSupprimer" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                  <form method="POST" action="@controllers.routes.RoleCtrl.deleteRole()" class="modal-content">
+                    @CSRF.formField
+                    <input type="hidden" name="code" value="@selection.getCode">
+                    <div class="modal-header bg-danger">
+                      <h5 class="modal-title">Supprimer le rôle @selection.getLibelle ?</h5>
+                      <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body">Cette action est définitive.</div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                      <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Supprimer</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+}
+
+<style>
+.sticky-footer { position: sticky; bottom: 0; background: #fff; z-index: 5; border-top: 1px solid #dee2e6; }
+.permission-item small { font-size: .78rem; }
+</style>
+
+<script>
+$(function() {
+  var rolesPermissions = {
+    @for(r <- roles) {
+      "@r.getCode": [@for(p <- r.getPermissions) {"@p",}],
+    }
+  };
+
+  function majCompteurs() {
+    $('#compteur').text($('.permission:checked').length);
+    $('.module-permissions').each(function() {
+      var $p = $(this).find('.permission');
+      var n = $p.filter(':checked').length;
+      var $tout = $(this).find('.module-tout');
+      $tout.prop('checked', n === $p.length && n > 0).prop('indeterminate', n > 0 && n < $p.length);
+    });
+  }
+
+  $(document).on('change', '.permission', majCompteurs);
+  $(document).on('change', '.module-tout', function() {
+    $(this).closest('.module-permissions').find('.permission:visible').prop('checked', this.checked);
+    majCompteurs();
+  });
+  $('#toutCocher').on('click', function() { $('.permission').prop('checked', true); majCompteurs(); });
+  $('#toutDecocher').on('click', function() { $('.permission').prop('checked', false); majCompteurs(); });
+
+  $('#copierDepuis').on('change', function() {
+    var liste = rolesPermissions[$(this).val()];
+    if (!liste) return;
+    $('.permission').each(function() { this.checked = liste.indexOf(this.value) >= 0; });
+    majCompteurs();
+  });
+
+  $('#filtre').on('input', function() {
+    var t = $(this).val().toLowerCase().trim();
+    $('.permission-item').each(function() {
+      $(this).toggle(!t || $(this).attr('data-texte').indexOf(t) >= 0);
+    });
+    $('.module-permissions').each(function() {
+      $(this).toggle($(this).find('.permission-item:visible').length > 0);
+    });
+  });
+
+  // avertit si on quitte la page avec des changements non enregistrés
+  var modifie = false;
+  $('#formPermissions').on('change', 'input', function() { modifie = true; }).on('submit', function() { modifie = false; });
+  $(window).on('beforeunload', function() { if (modifie) return 'Des modifications ne sont pas enregistrées.'; });
+
+  majCompteurs();
+});
+</script>

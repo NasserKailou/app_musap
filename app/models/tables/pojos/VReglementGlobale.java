@@ -5,6 +5,7 @@ package models.tables.pojos;
 
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 import javax.annotation.Generated;
 
@@ -22,13 +23,15 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementGlobale implements Serializable {
 
-    private static final long serialVersionUID = 480759269;
+    private static final long serialVersionUID = 974362937;
 
-    private String matricule;
-    private String nomAd;
-    private String prenomAd;
-    private Long   totalAnnuel;
-    private String annee;
+    private String    matricule;
+    private String    nomAd;
+    private String    prenomAd;
+    private String    codeCarnet;
+    private Timestamp whenDone;
+    private Long      totalAnnuel;
+    private String    annee;
 
     public VReglementGlobale() {}
 
@@ -36,20 +39,26 @@ public class VReglementGlobale implements Serializable {
         this.matricule = value.matricule;
         this.nomAd = value.nomAd;
         this.prenomAd = value.prenomAd;
+        this.codeCarnet = value.codeCarnet;
+        this.whenDone = value.whenDone;
         this.totalAnnuel = value.totalAnnuel;
         this.annee = value.annee;
     }
 
     public VReglementGlobale(
-        String matricule,
-        String nomAd,
-        String prenomAd,
-        Long   totalAnnuel,
-        String annee
+        String    matricule,
+        String    nomAd,
+        String    prenomAd,
+        String    codeCarnet,
+        Timestamp whenDone,
+        Long      totalAnnuel,
+        String    annee
     ) {
         this.matricule = matricule;
         this.nomAd = nomAd;
         this.prenomAd = prenomAd;
+        this.codeCarnet = codeCarnet;
+        this.whenDone = whenDone;
         this.totalAnnuel = totalAnnuel;
         this.annee = annee;
     }
@@ -78,6 +87,22 @@ public class VReglementGlobale implements Serializable {
         this.prenomAd = prenomAd;
     }
 
+    public String getCodeCarnet() {
+        return this.codeCarnet;
+    }
+
+    public void setCodeCarnet(String codeCarnet) {
+        this.codeCarnet = codeCarnet;
+    }
+
+    public Timestamp getWhenDone() {
+        return this.whenDone;
+    }
+
+    public void setWhenDone(Timestamp whenDone) {
+        this.whenDone = whenDone;
+    }
+
     public Long getTotalAnnuel() {
         return this.totalAnnuel;
     }
@@ -101,6 +126,8 @@ public class VReglementGlobale implements Serializable {
         sb.append(matricule);
         sb.append(", ").append(nomAd);
         sb.append(", ").append(prenomAd);
+        sb.append(", ").append(codeCarnet);
+        sb.append(", ").append(whenDone);
         sb.append(", ").append(totalAnnuel);
         sb.append(", ").append(annee);
 

@@ -8,6 +8,8 @@
   adherent: models.tables.pojos.Adherent,
   cats: List[models.tables.pojos.Categorie],
   prgms: List[models.tables.pojos.Programme])(implicit request: Http.Request)
+@import _root_.utils.Acces
+@import _root_.utils.Permissions
 
 @defining({
   val adherentsActifs = adherents.filter(a => a.getOnDeleted() == null || a.getOnDeleted() == false)
@@ -90,7 +92,7 @@
         </ol>
       </div>
     </div>
-    @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin") && !viewMode.equals("EDIT") && !viewMode.equals("DELETE")) {
+    @if(Acces.peut(request, Permissions.ADHERENT_CREER) && !viewMode.equals("EDIT") && !viewMode.equals("DELETE")) {
     <div class="row mt-3">
       <div class="col-12">
         <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modal-adherent-form">
@@ -107,7 +109,7 @@
   <div class="container-fluid">
 
     @* ================== FORMULAIRE ADHERENT DANS UN MODAL ================== *@
-    @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
+    @if(Acces.peut(request, Permissions.ADHERENT_CREER, Permissions.ADHERENT_MODIFIER, Permissions.ADHERENT_ESPACE)) {
 
       <div class="modal fade" id="modal-adherent-form" tabindex="-1" role="dialog" aria-labelledby="modalAdherentLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl" style="max-width: 95%;">
@@ -495,8 +497,7 @@
     }
 
     @* ================== FILTRE ================== *@
-    @if(
-      request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
+    @if(Acces.peut(request, Permissions.ADHERENT_LISTE)) {
 <!-- 
       <div class="row">
         <div class="col-12">
@@ -568,11 +569,7 @@
           <div class="card-header">
             <h3 class="card-title">
               <i class="fas fa-users"></i>
-              @if(
-                request.session.get("droit").isPresent &&
-                (request.session.get("droit").get() == "Admin"
-                  || request.session.get("droit").get() == "saisie")
-              ) {
+              @if(Acces.peut(request, Permissions.ADHERENT_LISTE)) {
                 Liste des adhérents
               } else {
                 Adhérent correspondant
@@ -590,28 +587,13 @@
                     <th>Nom & Prénom</th>
                     <th>Téléphone</th>
                     <th>Status</th>
-
-                    @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
+                    @if(Acces.peut(request, Permissions.BON_CREER)) {
                       <th>Bon de Commande</th>
                       <th>Prise en Charge</th>
-                      <th>Ayant droit</th>
-                      <th>Photo</th>
                     }
-
-                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur")){
-                      <th>Bon de Commande</th>
-                      <th>Prise en Charge</th>
-                      
-                    }
-
-                    @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Adherent")) {
-                      <th>Ayant droit</th>
-                      <th>Photo</th>
-                    }
-                @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
-                    
-                    <th>Actions</th>
-                  }
+                    @if(Acces.peut(request, Permissions.AYANT_DROIT_CONSULTER, Permissions.AYANT_DROIT_GERER)) { <th>Ayant droit</th> }
+                    @if(Acces.peut(request, Permissions.PHOTO_GERER)) { <th>Photo</th> }
+                    @if(Acces.peut(request, Permissions.ADHERENT_MODIFIER, Permissions.ADHERENT_ESPACE, Permissions.ADHERENT_ARCHIVER, Permissions.ADHERENT_IMPRIMER)) { <th>Actions</th> }
                   </tr>
                 </thead>
                 <tbody>
@@ -648,30 +630,34 @@
                         </span>
                       </td>
 
-                      @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
-                      <td class="text-center">
-                         @if(java.lang.Boolean.TRUE.equals(c.getIsMember())) {  
-                        <a class="btn btn-primary btn-sm"
+                      @if(Acces.peut(request, Permissions.BON_CREER)) {
+                        <td class="text-center">
+                          @if(java.lang.Boolean.TRUE.equals(c.getIsMember())) {
+                          <a class="btn btn-primary btn-sm"
                              title="Ajouter un Bon de commande"
                              href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId(),"BC")'>
                             <i class="fas fa-file-invoice"></i>
                           </a>}else{ <span class="badge @statusClass badge-status">@statusLabel</span>}
                         </td>
                         <td class="text-center">
-                           @if(java.lang.Boolean.TRUE.equals(c.getIsMember())) {
+                          @if(java.lang.Boolean.TRUE.equals(c.getIsMember())) {
                           <a class="btn btn-success btn-sm"
                              title="Prise En charge"
                              href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId(),"PC")'>
                             <i class="fas fa-money-bill-wave"></i>
                           </a>}else{ <span class="badge @statusClass badge-status">@statusLabel</span>}
                         </td>
+                      }
+                      @if(Acces.peut(request, Permissions.AYANT_DROIT_CONSULTER, Permissions.AYANT_DROIT_GERER)) {
                         <td class="text-center">
                           <a class="btn btn-warning btn-sm"
-                             title="Ajouter des ayants droit"
+                             title="Ayants droit et cotisation"
                              href='@controllers.routes.AdherentCtrl.addAyantDroit(c.getId())'>
                             <i class="fas fa-users"></i>
                           </a>
                         </td>
+                      }
+                      @if(Acces.peut(request, Permissions.PHOTO_GERER)) {
                         <td class="text-center">
                           <button type="button" class="btn btn-info btn-sm btn-open-photo-modal"
                              title="Insérer photo profil"
@@ -680,47 +666,10 @@
                           </button>
                         </td>
                       }
-                
-              @if(request.session.get("droit").isPresent && (request.session.get("droit").get().equals("saisie") || request.session.get("droit").get() == "Validateur")) {
-                <td class="text-center">
-                         @if(java.lang.Boolean.TRUE.equals(c.getIsMember())) {  
-                        <a class="btn btn-primary btn-sm"
-                             title="Ajouter un Bon de commande"
-                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId(),"BC")'>
-                            <i class="fas fa-file-invoice"></i>
-                          </a>}else{ <span class="badge @statusClass badge-status">@statusLabel</span>}
-                        </td>
-                        <td class="text-center">
-                           @if(java.lang.Boolean.TRUE.equals(c.getIsMember())) {
-                          <a class="btn btn-success btn-sm"
-                             title="Prise En charge"
-                             href='@controllers.routes.AdherentCtrl.addRembourssement(c.getId(),"PC")'>
-                            <i class="fas fa-money-bill-wave"></i>
-                          </a>}else{ <span class="badge @statusClass badge-status">@statusLabel</span>}
-                        </td>
-             }
-                      @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Adherent") ) {
-                        <td class="text-center">
-                          <a class="btn btn-warning btn-sm"
-                             title="Ajouter des ayants droit"
-                             href='@controllers.routes.AdherentCtrl.addAyantDroit(c.getId())'>
-                            <i class="fas fa-users"></i>
-                          </a>
-                        </td>
-                        <td class="text-center">
-                          <button type="button" class="btn btn-info btn-sm btn-open-photo-modal"
-                             title="Insérer photo profil"
-                             data-id="@c.getId()">
-                            <i class="fas fa-camera"></i>
-                          </button>
-                        </td>
-                      }
-                   @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Adherent") ) {
-                
+                      @if(Acces.peut(request, Permissions.ADHERENT_MODIFIER, Permissions.ADHERENT_ESPACE, Permissions.ADHERENT_ARCHIVER, Permissions.ADHERENT_IMPRIMER)) {
                       <td class="text-center">
                         <div class="btn-group">
                           <!-- Voir détails (modale) -->
-                   
                           <button type="button"
                                   class="btn btn-success btn-sm"
                                   data-toggle="modal"
@@ -728,11 +677,8 @@
                                   title="Voir les détails">
                             <i class="fas fa-eye"></i>
                           </button>
-                    
-                          @if(
-                            request.session.get("droit").isPresent &&
-                            request.session.get("droit").get() == "Admin"
-                          ) {
+
+                          @if(Acces.peut(request, Permissions.ADHERENT_MODIFIER, Permissions.ADHERENT_ESPACE)) {
                             <button type="button"
                                     class="btn btn-primary btn-sm"
                                     title="Modifier"
@@ -740,7 +686,9 @@
                                     data-adherent-id="@c.getId()">
                               <i class="fas fa-edit"></i>
                             </button>
-                            
+                          }
+
+                          @if(Acces.peut(request, Permissions.ADHERENT_ARCHIVER)) {
                             <button type="button"
                                     class="btn btn-danger btn-sm"
                                     onclick="softDeleteAdherent(@c.getId())"
@@ -749,37 +697,23 @@
                             </button>
                           }
 
-                          @if(request.session.get("droit").isPresent &&(request.session.get("droit").get() == "Adherent")) {
-                            <button type="button"
-                                class="btn btn-primary btn-sm"
-                                title="Modifier"
-                                onclick="openEditModal(@c.getId())"
-                                data-adherent-id="@c.getId()">
-                          <i class="fas fa-edit"></i>
-                        </button>
-
-                          }
-
-                          @if( request.session.get("droit").isPresent &&(request.session.get("droit").get() == "Admin")) {
+                          @if(Acces.peut(request, Permissions.ADHERENT_IMPRIMER)) {
                             <a class="btn btn-secondary btn-sm"
                                title="Imprimer la situation des paiements"
                                href='@controllers.routes.AdherentCtrl.print(c.getMatricule(), "situation_paiement_adherrent")'
                                onclick="return(openPopup(this.href, 600, 600, 600, 600));">
                               <i class="fas fa-print"></i>
                             </a>
-                          }
-
-                          @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin")) {
-                         <a class="btn btn-info btn-sm"
+                            <a class="btn btn-info btn-sm"
                                title="Imprimer la carte d'adhérent"
                                href='@controllers.routes.AdherentCtrl.printCarte(c.getId(), "badge_adherent")'
                                onclick="return(openPopup(this.href, 600, 600, 600, 600));">
                               <i class="fas fa-id-card"></i>
-                            </a> 
+                            </a>
                           }
                         </div>
                       </td>
-                    }
+                      }
                     </tr>
                     }
                   }
@@ -792,28 +726,13 @@
                     <th>Nom & Prénom</th>
                     <th>Téléphone</th>
                     <th>Status</th>
-
-                    @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
+                    @if(Acces.peut(request, Permissions.BON_CREER)) {
                       <th>Bon de Commande</th>
                       <th>Prise en Charge</th>
-                      <th>Ayant droit</th>
-                      <th>Photo</th>
                     }
-
-                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur")) {
-                      <th>Bon de Commande</th>
-                      <th>Prise en Charge</th>
-                      
-                    }
-
-                    @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Adherent")) {
-                      <th>Ayant droit</th>
-                      <th>Photo</th>
-                    }
-                @if( request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" )) {
-                    
-                    <th>Actions</th>
-                  }
+                    @if(Acces.peut(request, Permissions.AYANT_DROIT_CONSULTER, Permissions.AYANT_DROIT_GERER)) { <th>Ayant droit</th> }
+                    @if(Acces.peut(request, Permissions.PHOTO_GERER)) { <th>Photo</th> }
+                    @if(Acces.peut(request, Permissions.ADHERENT_MODIFIER, Permissions.ADHERENT_ESPACE, Permissions.ADHERENT_ARCHIVER, Permissions.ADHERENT_IMPRIMER)) { <th>Actions</th> }
                   </tr>
                 </tfoot>
               </table>
@@ -824,7 +743,7 @@
     </div>
 
     @* ================== LISTE DES ADHÉRENTS ARCHIVÉS (onDeleted=true) ================== *@
-    @if(adherentsSupprimes.nonEmpty && request.session.get("droit").isPresent && request.session.get("droit").get() == "Admin") {
+    @if(adherentsSupprimes.nonEmpty && Acces.peut(request, Permissions.ADHERENT_ARCHIVER)) {
     <div class="row mt-4">
       <div class="col-12">
         <div class="card card-danger card-outline">

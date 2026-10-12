@@ -1,5 +1,5 @@
 @(viewMode: String, users: List[models.tables.pojos.Users], regions: List[models.tables.pojos.Region],
- user: models.tables.pojos.Users)(implicit request: Http.Request)
+ user: models.tables.pojos.Users, roles: List[dto.RoleVue])(implicit request: Http.Request)
 
 @import helper._
 
@@ -147,7 +147,8 @@
                                      id="passe"
                                      class="form-control"
                                      name="passe"
-                                     value="@user.getPasse()"
+                                     value=""
+                                     minlength="4"
                                      required
                                      placeholder="••••••••"
                                      @if(viewMode.equals("VIEW")) { readonly }>
@@ -180,20 +181,11 @@
                                       required
                                       @if(viewMode.equals("VIEW")) { disabled="disabled" }>
                                 <option value="">Sélectionner un rôle...</option>
-                                <option value="saisie"
-                                  @if(user.getDroit() != null && user.getDroit().equals("saisie")) { selected="selected" }>
-                                  Agent Saisie
-                                </option>
-                                <option value="Validateur"
-                                  @if(user.getDroit() != null && user.getDroit().equals("Validateur")) { selected="selected" }>
-                                  Validateur
-                                </option>
-
-                                @if(request.session.get("droit").get() == "Admin") {
-                                  <option value="Admin"
-                                    @if(user.getDroit() != null && user.getDroit().equals("Admin")) { selected="selected" }>
-                                    Admin
-                                  </option>
+                                @for(r <- roles) {
+                                  @if(r.estActif()) {
+                                    <option value="@r.getCode" title="@r.getDescription"
+                                      @if(user.getDroit() != null && user.getDroit().equals(r.getCode)) { selected="selected" }>@r.getLibelle</option>
+                                  }
                                 }
                               </select>
                             </div>
@@ -514,9 +506,10 @@
                                id="passeEdit"
                                class="form-control"
                                name="passe"
-                               value="@user.getPasse()"
-                               required
-                               placeholder="Mot de passe"
+                               value=""
+                               minlength="4"
+                               autocomplete="new-password"
+                               placeholder="Laisser vide pour conserver le mot de passe actuel"
                                @if(viewMode.equals("VIEW")) { readonly }>
                       </div>
                     </div>
@@ -539,18 +532,12 @@
                                 required
                                 @if(viewMode.equals("VIEW")) { disabled="disabled" }>
                           <option value="">Sélectionner un rôle...</option>
-                          <option value="Admin"
-                            @if(user.getDroit() != null && user.getDroit().equals("Admin")) { selected="selected" }>
-                            Admin
-                          </option>
-                          <option value="saisie"
-                            @if(user.getDroit() != null && user.getDroit().equals("saisie")) { selected="selected" }>
-                            Agent Saisie
-                          </option>
-                          <option value="Adherent"
-                            @if(user.getDroit() != null && user.getDroit().equals("Adherent")) { selected="selected" }>
-                            Adhérent
-                          </option>
+                          @for(r <- roles) {
+                            @if(r.estActif() || (user.getDroit() != null && user.getDroit().equals(r.getCode))) {
+                              <option value="@r.getCode" title="@r.getDescription"
+                                @if(user.getDroit() != null && user.getDroit().equals(r.getCode)) { selected="selected" }>@r.getLibelle@if(!r.estActif()) { (désactivé)}</option>
+                            }
+                          }
                         </select>
                       </div>
                     </div>
@@ -726,13 +713,17 @@
                           <span class="badge badge-info">
                             <i class="fas fa-keyboard"></i> Agent Saisie
                           </span>
+                        } else if(d.getDroit() != null && d.getDroit().equals("Percepteur")) {
+                          <span class="badge badge-success">
+                            <i class="fas fa-cash-register"></i> Percepteur
+                          </span>
                         } else if(d.getDroit() != null && d.getDroit().equals("Adherent")) {
                           <span class="badge badge-primary">
                             <i class="fas fa-user"></i> Adhérent
                           </span>
                         } else {
                           <span class="badge badge-secondary">
-                            <i class="fas fa-question"></i> @d.getDroit()
+                            <i class="fas fa-user-tag"></i> @roles.stream().filter(r => r.getCode == d.getDroit()).findFirst().map[String](r => r.getLibelle).orElse(d.getDroit())
                           </span>
                         }
                       </td>

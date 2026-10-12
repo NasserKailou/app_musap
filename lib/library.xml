@@ -4,7 +4,7 @@
   <jdbc>
     <driver>org.postgresql.Driver</driver>
 
-    <url>jdbc:postgresql://localhost:5432/mutuel_poste</url>
+    <url>jdbc:postgresql://localhost:5432/musaposte20260918</url>
 
     <user>postgres</user>
     <password>admin</password>

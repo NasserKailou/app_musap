@@ -119,9 +119,24 @@ public class Sequences {
     public static final Sequence<Long> PROGRAMME_ID_SEQ = new SequenceImpl<Long>("programme_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
 
     /**
+     * The sequence <code>public.recu_labo_detail_id_seq</code>
+     */
+    public static final Sequence<Long> RECU_LABO_DETAIL_ID_SEQ = new SequenceImpl<Long>("recu_labo_detail_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
+
+    /**
+     * The sequence <code>public.recu_labo_id_seq</code>
+     */
+    public static final Sequence<Long> RECU_LABO_ID_SEQ = new SequenceImpl<Long>("recu_labo_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
+
+    /**
      * The sequence <code>public.region_id_seq</code>
      */
     public static final Sequence<Long> REGION_ID_SEQ = new SequenceImpl<Long>("region_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
+
+    /**
+     * The sequence <code>public.reglement_annulation_id_seq</code>
+     */
+    public static final Sequence<Long> REGLEMENT_ANNULATION_ID_SEQ = new SequenceImpl<Long>("reglement_annulation_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
 
     /**
      * The sequence <code>public.reglement_detail_id_seq</code>
@@ -142,6 +157,11 @@ public class Sequences {
      * The sequence <code>public.structure_partenaire_id_seq</code>
      */
     public static final Sequence<Long> STRUCTURE_PARTENAIRE_ID_SEQ = new SequenceImpl<Long>("structure_partenaire_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
+
+    /**
+     * The sequence <code>public.type_examen_id_seq</code>
+     */
+    public static final Sequence<Long> TYPE_EXAMEN_ID_SEQ = new SequenceImpl<Long>("type_examen_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
 
     /**
      * The sequence <code>public.type_prestation_id_seq</code>

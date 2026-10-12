@@ -15,6 +15,8 @@ adherent: models.tables.pojos.VAdherent,
   totalRegler: Long,
   plafondAnnuel: Long
 )(implicit request: Http.Request)
+@import _root_.utils.Acces
+@import _root_.utils.Permissions
 
 @main("Remboursement Détail") {
 
@@ -46,7 +48,7 @@ adherent: models.tables.pojos.VAdherent,
                               <i class="fas fa-print">Impression du Bon</i>
                             </a>
 
-          @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur") ) {
+          @if(Acces.peut(request, Permissions.BON_CREER) ) {
           <button type="button"
                   class="btn btn-success"
                   onclick="openDetailModal('CREATE', null)">
@@ -92,7 +94,7 @@ adherent: models.tables.pojos.VAdherent,
               </div>
             </div>
 
-            @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "Admin" )) { 
+            @if(Acces.peut(request, Permissions.BON_SYNTHESE)) { 
               @defining(NumberFormat.getInstance(Locale.FRANCE)) { fmt =>
             <div class="row">
               <div class="col-md-4">
@@ -161,7 +163,7 @@ adherent: models.tables.pojos.VAdherent,
                   <th style="width: 10%">Quantité</th>
                   <th style="width: 15%">Prix Unitaire</th>
                   <th style="width: 15%">Montant (F CFA)</th>
-                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur") ) {
+                  @if( Acces.peut(request, Permissions.BON_CREER, Permissions.BON_MODIFIER, Permissions.BON_SUPPRIMER_LIGNE) ) {
                   <th class="text-center" style="width: 15%">Actions</th>
                   }
                 </tr>
@@ -204,7 +206,7 @@ adherent: models.tables.pojos.VAdherent,
                         <i class="fas fa-edit"></i>
                       </button>
 
-                      @if(request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Admin") {
+                      @if(Acces.peut(request, Permissions.BON_SUPPRIMER_LIGNE)) {
                       <button type="button"
                               class="btn btn-danger btn-sm"
                               onclick="deleteDetail('@c.getId()')"
@@ -228,7 +230,7 @@ adherent: models.tables.pojos.VAdherent,
                       @reglementDetails.foldLeft(0L)((sum, detail) => sum + detail.getMontant()) F CFA
                     </span>
                   </th>
-                  @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" )) {
+                  @if( Acces.peut(request, Permissions.BON_CREER, Permissions.BON_MODIFIER, Permissions.BON_SUPPRIMER_LIGNE)) {
                   <th></th>
                   }
                 </tr>
@@ -598,6 +600,12 @@ adherent: models.tables.pojos.VAdherent,
     
     // Définir le mode
     document.getElementById('formViewMode').value = mode;
+
+    // Champs de la saisie simple obligatoires uniquement en modification
+    // (un champ vide provoquait une erreur serveur à l'enregistrement)
+    ['intitule', 'quantite', 'prixUnitaire'].forEach(function(id) {
+      document.getElementById(id).required = (mode === 'EDIT');
+    });
     
     let modalTitle = '';
     let btnClass = 'btn-success';
@@ -660,9 +668,16 @@ adherent: models.tables.pojos.VAdherent,
    */
   window.deleteDetail = function(detailId) {
     if (confirm('Voulez-vous vraiment supprimer ce détail de règlement ?')) {
-      var url = '/Reglement-detail/form?subAction=DELETE&idReglement=@idReglement&idAdherent=@adherent.getId()&idDetails=' + detailId;
-      console.log('Redirecting to:', url);
-      window.location.href = url;
+      // Envoi direct du formulaire en mode DELETE (auparavant la page était
+      // seulement rechargée en mode suppression, sans rien supprimer)
+      var form = document.getElementById('form-detail');
+      form.reset();
+      document.getElementById('formViewMode').value = 'DELETE';
+      document.getElementById('formDetailId').value = detailId;
+      ['intitule', 'quantite', 'prixUnitaire'].forEach(function(id) {
+        document.getElementById(id).required = false;
+      });
+      form.submit();
     }
   };
 
@@ -708,7 +723,7 @@ adherent: models.tables.pojos.VAdherent,
         "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
       },
       "columnDefs": [
-        { "orderable": false, "targets": @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Comptable" || request.session.get("droit").get() == "Admin")){5}else{-1} }
+        { "orderable": false, "targets": @if(Acces.peut(request, Permissions.BON_CREER, Permissions.BON_MODIFIER, Permissions.BON_SUPPRIMER_LIGNE)){5}else{-1} }
       ]
     }).buttons().container().appendTo('#reglementDetailsTable_wrapper .col-md-6:eq(0)');
 

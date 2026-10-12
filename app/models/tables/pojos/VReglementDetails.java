@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VReglementDetails implements Serializable {
 
-    private static final long serialVersionUID = 753326709;
+    private static final long serialVersionUID = -1557180838;
 
     private Long      id;
     private Long      reglement;
@@ -46,10 +46,12 @@ public class VReglementDetails implements Serializable {
     private Long      tauxEffectif;
     private Timestamp datePayement;
     private String    prestation;
-    private String    lien;
     private Boolean   isConfirmedBon;
     private Timestamp whenConfirmedBon;
     private Timestamp dateExpiration;
+    private Long      ayantDroit;
+    private String    nomAy;
+    private String    lien;
     private Long      totalCouvert;
     private Long      totalRestant;
 
@@ -77,10 +79,12 @@ public class VReglementDetails implements Serializable {
         this.tauxEffectif = value.tauxEffectif;
         this.datePayement = value.datePayement;
         this.prestation = value.prestation;
-        this.lien = value.lien;
         this.isConfirmedBon = value.isConfirmedBon;
         this.whenConfirmedBon = value.whenConfirmedBon;
         this.dateExpiration = value.dateExpiration;
+        this.ayantDroit = value.ayantDroit;
+        this.nomAy = value.nomAy;
+        this.lien = value.lien;
         this.totalCouvert = value.totalCouvert;
         this.totalRestant = value.totalRestant;
     }
@@ -107,10 +111,12 @@ public class VReglementDetails implements Serializable {
         Long      tauxEffectif,
         Timestamp datePayement,
         String    prestation,
-        String    lien,
         Boolean   isConfirmedBon,
         Timestamp whenConfirmedBon,
         Timestamp dateExpiration,
+        Long      ayantDroit,
+        String    nomAy,
+        String    lien,
         Long      totalCouvert,
         Long      totalRestant
     ) {
@@ -135,10 +141,12 @@ public class VReglementDetails implements Serializable {
         this.tauxEffectif = tauxEffectif;
         this.datePayement = datePayement;
         this.prestation = prestation;
-        this.lien = lien;
         this.isConfirmedBon = isConfirmedBon;
         this.whenConfirmedBon = whenConfirmedBon;
         this.dateExpiration = dateExpiration;
+        this.ayantDroit = ayantDroit;
+        this.nomAy = nomAy;
+        this.lien = lien;
         this.totalCouvert = totalCouvert;
         this.totalRestant = totalRestant;
     }
@@ -311,14 +319,6 @@ public class VReglementDetails implements Serializable {
         this.prestation = prestation;
     }
 
-    public String getLien() {
-        return this.lien;
-    }
-
-    public void setLien(String lien) {
-        this.lien = lien;
-    }
-
     public Boolean getIsConfirmedBon() {
         return this.isConfirmedBon;
     }
@@ -341,6 +341,30 @@ public class VReglementDetails implements Serializable {
 
     public void setDateExpiration(Timestamp dateExpiration) {
         this.dateExpiration = dateExpiration;
+    }
+
+    public Long getAyantDroit() {
+        return this.ayantDroit;
+    }
+
+    public void setAyantDroit(Long ayantDroit) {
+        this.ayantDroit = ayantDroit;
+    }
+
+    public String getNomAy() {
+        return this.nomAy;
+    }
+
+    public void setNomAy(String nomAy) {
+        this.nomAy = nomAy;
+    }
+
+    public String getLien() {
+        return this.lien;
+    }
+
+    public void setLien(String lien) {
+        this.lien = lien;
     }
 
     public Long getTotalCouvert() {
@@ -384,10 +408,12 @@ public class VReglementDetails implements Serializable {
         sb.append(", ").append(tauxEffectif);
         sb.append(", ").append(datePayement);
         sb.append(", ").append(prestation);
-        sb.append(", ").append(lien);
         sb.append(", ").append(isConfirmedBon);
         sb.append(", ").append(whenConfirmedBon);
         sb.append(", ").append(dateExpiration);
+        sb.append(", ").append(ayantDroit);
+        sb.append(", ").append(nomAy);
+        sb.append(", ").append(lien);
         sb.append(", ").append(totalCouvert);
         sb.append(", ").append(totalRestant);
 

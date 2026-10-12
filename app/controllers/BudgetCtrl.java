@@ -23,6 +23,7 @@ import utils.ViewMode;
  *
  */
 @Security.Authenticated(Secured.class)
+@utils.Permission(utils.Permissions.COMPTABILITE)
 public class BudgetCtrl extends Controller {
 
 	BudgetMainServices budgetServices;

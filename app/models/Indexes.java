@@ -7,6 +7,8 @@ package models;
 import javax.annotation.Generated;
 
 import models.tables.Adherent;
+import models.tables.AppRole;
+import models.tables.AppRolePermission;
 import models.tables.AyantDroit;
 import models.tables.Budget;
 import models.tables.Categorie;
@@ -23,11 +25,16 @@ import models.tables.JournalEcriture;
 import models.tables.OtpMessage;
 import models.tables.Params;
 import models.tables.Programme;
+import models.tables.RecuLabo;
+import models.tables.RecuLaboDetail;
 import models.tables.Region;
 import models.tables.Reglement;
+import models.tables.ReglementAnnulation;
 import models.tables.ReglementDetail;
 import models.tables.Service;
 import models.tables.StructurePartenaire;
+import models.tables.TauxCotisation;
+import models.tables.TypeExamen;
 import models.tables.TypePrestation;
 import models.tables.Users;
 import models.tables.Zimbra;
@@ -55,6 +62,8 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     public static final Index ADHERENT_PKEY = Indexes0.ADHERENT_PKEY;
+    public static final Index APP_ROLE_PKEY = Indexes0.APP_ROLE_PKEY;
+    public static final Index APP_ROLE_PERMISSION_PKEY = Indexes0.APP_ROLE_PERMISSION_PKEY;
     public static final Index AYANT_DROIT_PKEY = Indexes0.AYANT_DROIT_PKEY;
     public static final Index BUDGET_PKEY = Indexes0.BUDGET_PKEY;
     public static final Index UNIK_BUGET_ROW = Indexes0.UNIK_BUGET_ROW;
@@ -82,11 +91,22 @@ public class Indexes {
     public static final Index PARAMS_PKEY = Indexes0.PARAMS_PKEY;
     public static final Index CODE_PRGM = Indexes0.CODE_PRGM;
     public static final Index PROGRAMME_PKEY = Indexes0.PROGRAMME_PKEY;
+    public static final Index IDX_RECU_LABO_DATE = Indexes0.IDX_RECU_LABO_DATE;
+    public static final Index RECU_LABO_NUMERO_RECU_KEY = Indexes0.RECU_LABO_NUMERO_RECU_KEY;
+    public static final Index RECU_LABO_PKEY = Indexes0.RECU_LABO_PKEY;
+    public static final Index IDX_RECU_LABO_DETAIL_RECU = Indexes0.IDX_RECU_LABO_DETAIL_RECU;
+    public static final Index RECU_LABO_DETAIL_PKEY = Indexes0.RECU_LABO_DETAIL_PKEY;
     public static final Index REGION_PKEY = Indexes0.REGION_PKEY;
+    public static final Index IDX_REGLEMENT_DATE_PAYEMENT = Indexes0.IDX_REGLEMENT_DATE_PAYEMENT;
     public static final Index REGLEMENT_PKEY = Indexes0.REGLEMENT_PKEY;
+    public static final Index IDX_REGLEMENT_ANNULATION_REGLEMENT = Indexes0.IDX_REGLEMENT_ANNULATION_REGLEMENT;
+    public static final Index REGLEMENT_ANNULATION_PKEY = Indexes0.REGLEMENT_ANNULATION_PKEY;
+    public static final Index IDX_REGLEMENT_DETAIL_REGLEMENT = Indexes0.IDX_REGLEMENT_DETAIL_REGLEMENT;
     public static final Index REGLEMENT_DETAIL_PKEY = Indexes0.REGLEMENT_DETAIL_PKEY;
     public static final Index SERVICE_PKEY = Indexes0.SERVICE_PKEY;
     public static final Index STRUCTURE_PARTENAIRE_PKEY = Indexes0.STRUCTURE_PARTENAIRE_PKEY;
+    public static final Index TAUX_COTISATION_PKEY = Indexes0.TAUX_COTISATION_PKEY;
+    public static final Index TYPE_EXAMEN_PKEY = Indexes0.TYPE_EXAMEN_PKEY;
     public static final Index TYPE_PRESTATION_PKEY = Indexes0.TYPE_PRESTATION_PKEY;
     public static final Index USERS_PKEY = Indexes0.USERS_PKEY;
     public static final Index ZIMBRA_PKEY = Indexes0.ZIMBRA_PKEY;
@@ -97,6 +117,8 @@ public class Indexes {
 
     private static class Indexes0 extends AbstractKeys {
         public static Index ADHERENT_PKEY = createIndex("adherent_pkey", Adherent.ADHERENT, new OrderField[] { Adherent.ADHERENT.ID }, true);
+        public static Index APP_ROLE_PKEY = createIndex("app_role_pkey", AppRole.APP_ROLE, new OrderField[] { AppRole.APP_ROLE.CODE }, true);
+        public static Index APP_ROLE_PERMISSION_PKEY = createIndex("app_role_permission_pkey", AppRolePermission.APP_ROLE_PERMISSION, new OrderField[] { AppRolePermission.APP_ROLE_PERMISSION.ROLE_CODE, AppRolePermission.APP_ROLE_PERMISSION.PERMISSION }, true);
         public static Index AYANT_DROIT_PKEY = createIndex("ayant_droit_pkey", AyantDroit.AYANT_DROIT, new OrderField[] { AyantDroit.AYANT_DROIT.ID }, true);
         public static Index BUDGET_PKEY = createIndex("budget_pkey", Budget.BUDGET, new OrderField[] { Budget.BUDGET.ID }, true);
         public static Index UNIK_BUGET_ROW = createIndex("unik_buget_row", Budget.BUDGET, new OrderField[] { Budget.BUDGET.GESTION, Budget.BUDGET.COMPTE, Budget.BUDGET.TYPE_BUGET }, true);
@@ -124,11 +146,22 @@ public class Indexes {
         public static Index PARAMS_PKEY = createIndex("params_pkey", Params.PARAMS, new OrderField[] { Params.PARAMS.ID }, true);
         public static Index CODE_PRGM = createIndex("code_prgm", Programme.PROGRAMME, new OrderField[] { Programme.PROGRAMME.CODE }, true);
         public static Index PROGRAMME_PKEY = createIndex("programme_pkey", Programme.PROGRAMME, new OrderField[] { Programme.PROGRAMME.ID }, true);
+        public static Index IDX_RECU_LABO_DATE = createIndex("idx_recu_labo_date", RecuLabo.RECU_LABO, new OrderField[] { RecuLabo.RECU_LABO.DATE_RECU }, false);
+        public static Index RECU_LABO_NUMERO_RECU_KEY = createIndex("recu_labo_numero_recu_key", RecuLabo.RECU_LABO, new OrderField[] { RecuLabo.RECU_LABO.NUMERO_RECU }, true);
+        public static Index RECU_LABO_PKEY = createIndex("recu_labo_pkey", RecuLabo.RECU_LABO, new OrderField[] { RecuLabo.RECU_LABO.ID }, true);
+        public static Index IDX_RECU_LABO_DETAIL_RECU = createIndex("idx_recu_labo_detail_recu", RecuLaboDetail.RECU_LABO_DETAIL, new OrderField[] { RecuLaboDetail.RECU_LABO_DETAIL.RECU_LABO }, false);
+        public static Index RECU_LABO_DETAIL_PKEY = createIndex("recu_labo_detail_pkey", RecuLaboDetail.RECU_LABO_DETAIL, new OrderField[] { RecuLaboDetail.RECU_LABO_DETAIL.ID }, true);
         public static Index REGION_PKEY = createIndex("region_pkey", Region.REGION, new OrderField[] { Region.REGION.ID }, true);
+        public static Index IDX_REGLEMENT_DATE_PAYEMENT = createIndex("idx_reglement_date_payement", Reglement.REGLEMENT, new OrderField[] { Reglement.REGLEMENT.DATE_PAYEMENT }, false);
         public static Index REGLEMENT_PKEY = createIndex("reglement_pkey", Reglement.REGLEMENT, new OrderField[] { Reglement.REGLEMENT.ID }, true);
+        public static Index IDX_REGLEMENT_ANNULATION_REGLEMENT = createIndex("idx_reglement_annulation_reglement", ReglementAnnulation.REGLEMENT_ANNULATION, new OrderField[] { ReglementAnnulation.REGLEMENT_ANNULATION.REGLEMENT }, false);
+        public static Index REGLEMENT_ANNULATION_PKEY = createIndex("reglement_annulation_pkey", ReglementAnnulation.REGLEMENT_ANNULATION, new OrderField[] { ReglementAnnulation.REGLEMENT_ANNULATION.ID }, true);
+        public static Index IDX_REGLEMENT_DETAIL_REGLEMENT = createIndex("idx_reglement_detail_reglement", ReglementDetail.REGLEMENT_DETAIL, new OrderField[] { ReglementDetail.REGLEMENT_DETAIL.REGLEMENT }, false);
         public static Index REGLEMENT_DETAIL_PKEY = createIndex("reglement_detail_pkey", ReglementDetail.REGLEMENT_DETAIL, new OrderField[] { ReglementDetail.REGLEMENT_DETAIL.ID }, true);
         public static Index SERVICE_PKEY = createIndex("service_pkey", Service.SERVICE, new OrderField[] { Service.SERVICE.ID }, true);
         public static Index STRUCTURE_PARTENAIRE_PKEY = createIndex("structure_partenaire_pkey", StructurePartenaire.STRUCTURE_PARTENAIRE, new OrderField[] { StructurePartenaire.STRUCTURE_PARTENAIRE.ID }, true);
+        public static Index TAUX_COTISATION_PKEY = createIndex("taux_cotisation_pkey", TauxCotisation.TAUX_COTISATION, new OrderField[] { TauxCotisation.TAUX_COTISATION.CODE }, true);
+        public static Index TYPE_EXAMEN_PKEY = createIndex("type_examen_pkey", TypeExamen.TYPE_EXAMEN, new OrderField[] { TypeExamen.TYPE_EXAMEN.ID }, true);
         public static Index TYPE_PRESTATION_PKEY = createIndex("type_prestation_pkey", TypePrestation.TYPE_PRESTATION, new OrderField[] { TypePrestation.TYPE_PRESTATION.ID }, true);
         public static Index USERS_PKEY = createIndex("users_pkey", Users.USERS, new OrderField[] { Users.USERS.ID }, true);
         public static Index ZIMBRA_PKEY = createIndex("zimbra_pkey", Zimbra.ZIMBRA, new OrderField[] { Zimbra.ZIMBRA.ID }, true);

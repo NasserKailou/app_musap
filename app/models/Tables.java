@@ -8,6 +8,8 @@ import javax.annotation.Generated;
 
 import models.tables.Adherent;
 import models.tables.AdherentTmp;
+import models.tables.AppRole;
+import models.tables.AppRolePermission;
 import models.tables.AyantDroit;
 import models.tables.Budget;
 import models.tables.Categorie;
@@ -26,11 +28,16 @@ import models.tables.OtpMessage;
 import models.tables.Params;
 import models.tables.Personnel;
 import models.tables.Programme;
+import models.tables.RecuLabo;
+import models.tables.RecuLaboDetail;
 import models.tables.Region;
 import models.tables.Reglement;
+import models.tables.ReglementAnnulation;
 import models.tables.ReglementDetail;
 import models.tables.Service;
 import models.tables.StructurePartenaire;
+import models.tables.TauxCotisation;
+import models.tables.TypeExamen;
 import models.tables.TypePrestation;
 import models.tables.Users;
 import models.tables.VAdherent;
@@ -58,6 +65,7 @@ import models.tables.VPharmacie;
 import models.tables.VRegBonCommande;
 import models.tables.VRegPriseEnCharge;
 import models.tables.VReglement;
+import models.tables.VReglementByEmmetteur;
 import models.tables.VReglementDetails;
 import models.tables.VReglementGlobal;
 import models.tables.VReglementGlobalByAdherent;
@@ -94,6 +102,16 @@ public class Tables {
      * The table <code>public.adherent_tmp</code>.
      */
     public static final AdherentTmp ADHERENT_TMP = models.tables.AdherentTmp.ADHERENT_TMP;
+
+    /**
+     * The table <code>public.app_role</code>.
+     */
+    public static final AppRole APP_ROLE = models.tables.AppRole.APP_ROLE;
+
+    /**
+     * The table <code>public.app_role_permission</code>.
+     */
+    public static final AppRolePermission APP_ROLE_PERMISSION = models.tables.AppRolePermission.APP_ROLE_PERMISSION;
 
     /**
      * The table <code>public.ayant_droit</code>.
@@ -186,6 +204,16 @@ public class Tables {
     public static final Programme PROGRAMME = models.tables.Programme.PROGRAMME;
 
     /**
+     * The table <code>public.recu_labo</code>.
+     */
+    public static final RecuLabo RECU_LABO = models.tables.RecuLabo.RECU_LABO;
+
+    /**
+     * The table <code>public.recu_labo_detail</code>.
+     */
+    public static final RecuLaboDetail RECU_LABO_DETAIL = models.tables.RecuLaboDetail.RECU_LABO_DETAIL;
+
+    /**
      * The table <code>public.region</code>.
      */
     public static final Region REGION = models.tables.Region.REGION;
@@ -194,6 +222,11 @@ public class Tables {
      * The table <code>public.reglement</code>.
      */
     public static final Reglement REGLEMENT = models.tables.Reglement.REGLEMENT;
+
+    /**
+     * The table <code>public.reglement_annulation</code>.
+     */
+    public static final ReglementAnnulation REGLEMENT_ANNULATION = models.tables.ReglementAnnulation.REGLEMENT_ANNULATION;
 
     /**
      * The table <code>public.reglement_detail</code>.
@@ -209,6 +242,16 @@ public class Tables {
      * The table <code>public.structure_partenaire</code>.
      */
     public static final StructurePartenaire STRUCTURE_PARTENAIRE = models.tables.StructurePartenaire.STRUCTURE_PARTENAIRE;
+
+    /**
+     * The table <code>public.taux_cotisation</code>.
+     */
+    public static final TauxCotisation TAUX_COTISATION = models.tables.TauxCotisation.TAUX_COTISATION;
+
+    /**
+     * The table <code>public.type_examen</code>.
+     */
+    public static final TypeExamen TYPE_EXAMEN = models.tables.TypeExamen.TYPE_EXAMEN;
 
     /**
      * The table <code>public.type_prestation</code>.
@@ -349,6 +392,11 @@ public class Tables {
      * The table <code>public.v_reglement_2</code>.
      */
     public static final VReglement_2 V_REGLEMENT_2 = models.tables.VReglement_2.V_REGLEMENT_2;
+
+    /**
+     * The table <code>public.v_reglement_by_emmetteur</code>.
+     */
+    public static final VReglementByEmmetteur V_REGLEMENT_BY_EMMETTEUR = models.tables.VReglementByEmmetteur.V_REGLEMENT_BY_EMMETTEUR;
 
     /**
      * The table <code>public.v_reglement_details</code>.

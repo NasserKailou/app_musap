@@ -18,6 +18,8 @@
   typePrestations: List[models.tables.pojos.TypePrestation],
   ayantDroits: List[models.tables.pojos.VAdherentAyantDroit]
 )(implicit request: Http.Request)
+@import _root_.utils.Acces
+@import _root_.utils.Permissions
 
 @defining({
   val reglementActifs = reglements.filter(r => r.getOnDeleted() == null || r.getOnDeleted() == false)
@@ -66,9 +68,7 @@
             </h3>
             <div class="card-tools">
               @if(
-                request.session.get("droit").isPresent &&
-                (request.session.get("droit").get() == "Admin" ||
-                 request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur")
+                Acces.peut(request, Permissions.BON_CREER)
               ) {
                 @if(totalRegler >= adherent.getTotalCreditAConsomer() || (adherent.getTotalCreditAConsomer() - totalRegler) <= 5000){
                   <div class="info-box bg-danger">
@@ -104,7 +104,7 @@
                 </h5>
               </div>
             </div>
-       @if(request.session.get("droit").isPresent() && (request.session.get("droit").get() == "Admin" )) {
+       @if(Acces.peut(request, Permissions.BON_SYNTHESE)) {
            
               @defining(NumberFormat.getInstance(Locale.FRANCE)) { fmt =>
             <div class="row mt-3">
@@ -263,7 +263,7 @@
           </span>
         }
         
-        @if(!isConfirmed && !estExpire && request.session.get("droit").isPresent && ( request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Validateur")) {
+        @if(!isConfirmed && !estExpire && Acces.peut(request, Permissions.BON_VALIDER)) {
           <button type="button"
                   class="btn btn-sm btn-primary"
                   onclick="confirmerBon(@c.getId(), @c.getIdAdherent())"
@@ -291,7 +291,7 @@
       <i class="fas fa-eye"></i>
     </button>
 
-    @if(request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin") ) {
+    @if(Acces.peut(request, Permissions.BON_MODIFIER) ) {
       @if(isConfirmed) {
         <button type="button"
                 class="btn btn-warning btn-sm"
@@ -313,7 +313,7 @@
       }
     }
 
-    @if( request.session.get("droit").isPresent && (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "saisie" || request.session.get("droit").get() == "Validateur")) {
+    @if( Acces.peut(request, Permissions.BON_CREER)) {
       @if(isConfirmed) {
         <button type="button"
                 class="btn btn-success btn-sm"
@@ -330,8 +330,7 @@
       }
     }
 
-    @if(request.session.get("droit").isPresent && 
-        (request.session.get("droit").get() == "Admin" || request.session.get("droit").get() == "Validateur") && 
+    @if(Acces.peut(request, Permissions.BON_REACTUALISER) && 
         isConfirmed) {
       <button type="button"
               class="btn btn-secondary btn-sm"
@@ -341,7 +340,7 @@
       </button>
     }
 
-    @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "Admin") {
+    @if(Acces.peut(request, Permissions.BON_ARCHIVER)) {
       <button type="button"
               class="btn btn-danger btn-sm"
               onclick="softDeleteReglement(@c.getId(), @c.getIdAdherent())"
@@ -401,7 +400,7 @@
                   <th>Date Délivré</th>
                   <th>Date Expiration</th>
                   <th>Statut</th>
-                  @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "Admin") {
+                  @if(Acces.peut(request, Permissions.BON_ARCHIVER)) {
                     <th class="text-center">Réactivation (Admin)</th>
                   }
                 </tr>
@@ -431,7 +430,7 @@
                       <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Non confirmé</span>
                     }
                   </td>
-                  @if(request.session.get("droit").isPresent && request.session.get("droit").get() == "Admin") {
+                  @if(Acces.peut(request, Permissions.BON_ARCHIVER)) {
                     <td class="text-center">
                       <button type="button"
                               class="btn btn-success btn-sm"
@@ -803,16 +802,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========== SUPPRESSION LOGIQUE D'UN RÈGLEMENT ==========
     window.softDeleteReglement = function(bonId, adherentId) {
-      if (confirm('⚠️ Voulez-vous archiver ce règlement ?\n\nCette action est réversible par un Administrateur.')) {
+      // motif obligatoire : il apparaît dans le rapport des annulations
+      var motif = prompt('Motif de l\'annulation de ce bon / prise en charge (obligatoire) :\n\nL\'annulation est réversible depuis Rapports > Bons & PEC annulés.', '');
+      if (motif === null) return;
+      if (!motif.trim()) { alert('Le motif de l\'annulation est obligatoire.'); return; }
+      {
         $('#loadingModal').modal('show');
         var csrfToken = $('#reglementForm input[name="csrfToken"]').val();
         $.ajax({
           url: '@controllers.routes.ReglementCtrl.softDeleteReglement(0, 0)'.replace('/0/0', '/' + bonId + '/' + adherentId),
           type: 'POST',
+          data: { motif: motif.trim() },
           headers: { 'Csrf-Token': csrfToken },
           success: function(response) {
             $('#loadingModal').modal('hide');
-            alert('✅ Règlement archivé avec succès');
+            alert('✅ Bon annulé avec succès');
             setTimeout(function() { location.reload(); }, 500);
           },
           error: function(xhr) {

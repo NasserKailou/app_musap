@@ -15,10 +15,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="@routes.Assets.versioned("images/logo.png")">
 
   <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link rel="stylesheet" href="@routes.Assets.versioned("dist/css/googleapis.css")">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="@routes.Assets.versioned("plugins/fontawesome-free/css/all.min.css")">
-  
+
   <style>
     /* Variables CSS pour les couleurs */
     :root {
@@ -85,11 +85,11 @@
 
     /* Animations */
     @@keyframes float {
-      0%, 100% { 
-        transform: translateY(0px) translateX(0px) scale(1); 
+      0%, 100% {
+        transform: translateY(0px) translateX(0px) scale(1);
       }
-      50% { 
-        transform: translateY(-40px) translateX(30px) scale(1.1); 
+      50% {
+        transform: translateY(-40px) translateX(30px) scale(1.1);
       }
     }
 
@@ -116,12 +116,12 @@
     }
 
     @@keyframes pulse {
-      0%, 100% { 
-        transform: scale(1); 
+      0%, 100% {
+        transform: scale(1);
         opacity: 0.8;
       }
-      50% { 
-        transform: scale(1.1); 
+      50% {
+        transform: scale(1.1);
         opacity: 1;
       }
     }
@@ -482,6 +482,83 @@
       font-weight: 700;
     }
 
+    /* Libellés lus par les lecteurs d'écran uniquement */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+
+    /* Bouton afficher / masquer le mot de passe (accessible au clavier) */
+    .toggle-password {
+      background: transparent;
+      border: none;
+      padding: 4px;
+      line-height: 1;
+    }
+
+    .toggle-password:focus-visible {
+      outline: 2px solid #1E90FF;
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+
+    .password-wrapper .form-control {
+      padding-right: 50px;
+    }
+
+    /* Erreurs de saisie affichées sous le champ */
+    .form-control.is-invalid {
+      border-color: #ff6b6b;
+      box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+    }
+
+    .field-error {
+      display: none;
+      color: #e04f5f;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .field-error.show {
+      display: block;
+    }
+
+    .caps-warning {
+      display: none;
+      color: #b37400;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .caps-warning.show {
+      display: block;
+    }
+
+    .alert .alert-close {
+      float: right;
+      background: transparent;
+      border: none;
+      color: inherit;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.8;
+    }
+
+    .alert .alert-close:hover {
+      opacity: 1;
+    }
+
+    /* Respect des préférences « réduire les animations » */
+    @@media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
     /* Design Responsive */
     @@media (max-width: 576px) {
       .login-container {
@@ -547,7 +624,7 @@
       <!-- Header avec logo -->
       <div class="card-header">
         <div class="logo-container">
-          <img src="@routes.Assets.versioned("images/logo.jpg")" class="logo-img" alt="Logo Niger Poste" onerror="this.src='@routes.Assets.versioned("images/logo.png")'">
+          <img src="@routes.Assets.versioned("images/logo.jpg")" class="logo-img" alt="Logo Niger Poste" onerror="this.onerror=null;this.src='@routes.Assets.versioned("images/logo.png")'">
           <h1 class="app-title">Mutuelle Niger Poste</h1>
           <p class="app-subtitle">Mutuelle de santé des agents de Niger POSTE</p>
         </div>
@@ -562,16 +639,18 @@
         <!-- Messages Flash -->
         @if(request.flash.get("error").isPresent()) {
           <div class="alert alert-danger" role="alert">
+            <button type="button" class="alert-close" aria-label="Fermer">&times;</button>
             <i class="fas fa-exclamation-circle"></i>@request.flash.get("error").get()
           </div>
         }
         @if(request.flash.get("warning").isPresent()) {
           <div class="alert alert-warning" role="alert">
+            <button type="button" class="alert-close" aria-label="Fermer">&times;</button>
             <i class="fas fa-exclamation-triangle"></i>@request.flash.get("warning").get()
           </div>
         }
         @if(request.flash.get("success").isPresent()) {
-          <div class="alert alert-success" role="alert">
+          <div class="alert alert-success auto-hide" role="status">
             <i class="fas fa-check-circle"></i>@request.flash.get("success").get()
           </div>
         }
@@ -579,36 +658,44 @@
         <!-- Formulaire de connexion -->
         <form action="@CSRF(controllers.routes.AuthenticationCtrl.authentification())" method="post" id="loginForm" novalidate>
           @helper.CSRF.formField
-          
+
           <!-- Champ Login -->
           <div class="form-group">
+            <label for="login" class="sr-only">Identifiant</label>
             <div class="input-wrapper">
-              <input type="text" 
-                     class="form-control" 
+              <input type="text"
+                     class="form-control"
                      id="login"
-                     name="login" 
-                     placeholder="Identifiant" 
+                     name="login"
+                     placeholder="Identifiant"
                      required
                      autocomplete="username"
-                     aria-label="Identifiant">
+                     autocapitalize="off"
+                     spellcheck="false"
+                     aria-describedby="loginError">
               <i class="fas fa-user input-icon" aria-hidden="true"></i>
             </div>
+            <div class="field-error" id="loginError" role="alert">Veuillez saisir votre identifiant</div>
           </div>
 
           <!-- Champ Password -->
           <div class="form-group">
-            <div class="input-wrapper">
-              <input type="password" 
-                     class="form-control" 
+            <label for="password" class="sr-only">Mot de passe</label>
+            <div class="input-wrapper password-wrapper">
+              <input type="password"
+                     class="form-control"
                      id="password"
-                     name="passe" 
-                     placeholder="Mot de passe" 
+                     name="passe"
+                     placeholder="Mot de passe"
                      required
                      autocomplete="current-password"
-                     aria-label="Mot de passe">
+                     aria-describedby="passwordError capsWarning">
               <i class="fas fa-lock input-icon" aria-hidden="true"></i>
-              <i class="fas fa-eye toggle-password" id="togglePassword" aria-hidden="true" title="Afficher/Masquer le mot de passe"></i>
+              <button type="button" class="fas fa-eye toggle-password" id="togglePassword"
+                      title="Afficher le mot de passe" aria-label="Afficher le mot de passe" aria-pressed="false"></button>
             </div>
+            <div class="field-error" id="passwordError" role="alert">Veuillez saisir votre mot de passe</div>
+            <div class="caps-warning" id="capsWarning"><i class="fas fa-exclamation-triangle"></i> Verrouillage des majuscules activé</div>
           </div>
 
           <!-- Gestion / Année -->
@@ -617,16 +704,17 @@
               <i class="fas fa-calendar-alt"></i> Gestion (Année)
               <span class="required">*</span>
             </label>
-            <select id="gestion" 
-                    name="gestion" 
-                    class="form-control" 
+            <select id="gestion"
+                    name="gestion"
+                    class="form-control"
                     required
-                    aria-label="Sélectionner une année de gestion">
+                    aria-describedby="gestionError">
               <option value="">Sélectionner une année</option>
               @for(c <- params) {
                 <option value="@c.getGestion()">@c.getGestion()</option>
               }
             </select>
+            <div class="field-error" id="gestionError" role="alert">Veuillez sélectionner une année de gestion</div>
           </div>
 
           <!-- Bouton de connexion -->
@@ -636,11 +724,11 @@
         </form>
       </div>
 
-     
+
       <div class="card-footer">
        <!--  <p class="footer-text">
           © 2026 <strong>Niger Poste</strong> - Tous droits réservés
-        </p>Footer --> 
+        </p>Footer -->
       </div>
     </div>
   </div>
@@ -654,57 +742,114 @@
     (function() {
       'use strict';
 
-      console.log('✅ Page de connexion chargée');
+      var STORAGE_LOGIN = 'musaposte.dernierLogin';
+      var STORAGE_GESTION = 'musaposte.derniereGestion';
 
-      // Auto-hide alerts after 5 seconds
+      function lire(cle) { try { return window.localStorage.getItem(cle); } catch (e) { return null; } }
+      function ecrire(cle, val) { try { window.localStorage.setItem(cle, val); } catch (e) { /* stockage indisponible */ } }
+
+      var loginForm = document.getElementById('loginForm');
+      var btnLogin = document.getElementById('btnLogin');
+      var loginInput = document.getElementById('login');
+      var passwordInput = document.getElementById('password');
+      var gestionSelect = document.getElementById('gestion');
+      var togglePassword = document.getElementById('togglePassword');
+      var capsWarning = document.getElementById('capsWarning');
+      var libelleBouton = btnLogin ? btnLogin.innerHTML : '';
+
+      // Seul le message de succès disparaît automatiquement ; les erreurs restent lisibles
       setTimeout(function() {
-        $('.alert').fadeOut(500, function() {
-          $(this).remove();
-        });
+        $('.alert.auto-hide').fadeOut(500, function() { $(this).remove(); });
       }, 5000);
+      $(document).on('click', '.alert-close', function() {
+        $(this).closest('.alert').fadeOut(200, function() { $(this).remove(); });
+      });
 
-      // Form validation et animation
-      const loginForm = document.getElementById('loginForm');
-      const btnLogin = document.getElementById('btnLogin');
+      // Pré-sélection de la gestion : dernière utilisée, sinon année en cours, sinon la plus récente
+      if (gestionSelect && !gestionSelect.value) {
+        var options = Array.prototype.slice.call(gestionSelect.options).filter(function(o) { return o.value; });
+        var derniere = lire(STORAGE_GESTION);
+        var anneeCourante = String(new Date().getFullYear());
+        var cible = options.filter(function(o) { return o.value === derniere; })[0]
+                 || options.filter(function(o) { return o.value === anneeCourante; })[0]
+                 || options.sort(function(x, y) { return y.value.localeCompare(x.value); })[0];
+        if (cible) gestionSelect.value = cible.value;
+      }
+
+      // Identifiant mémorisé (jamais le mot de passe) : curseur directement sur le mot de passe
+      var dernierLogin = lire(STORAGE_LOGIN);
+      if (loginInput && !loginInput.value && dernierLogin) loginInput.value = dernierLogin;
+      if (loginInput && passwordInput) (loginInput.value ? passwordInput : loginInput).focus();
+
+      function marquer(champ, erreurId, invalide) {
+        champ.classList.toggle('is-invalid', invalide);
+        champ.setAttribute('aria-invalid', invalide ? 'true' : 'false');
+        document.getElementById(erreurId).classList.toggle('show', invalide);
+      }
+      [[loginInput, 'loginError'], [passwordInput, 'passwordError'], [gestionSelect, 'gestionError']].forEach(function(c) {
+        if (!c[0]) return;
+        c[0].addEventListener(c[0].tagName === 'SELECT' ? 'change' : 'input', function() {
+          if (c[0].value.trim()) marquer(c[0], c[1], false);
+        });
+      });
 
       if (loginForm && btnLogin) {
         loginForm.addEventListener('submit', function(e) {
-          const login = document.getElementById('login').value.trim();
-          const password = document.getElementById('password').value;
-          const gestion = document.getElementById('gestion').value;
+          var manquants = [];
+          marquer(loginInput, 'loginError', !loginInput.value.trim());
+          if (!loginInput.value.trim()) manquants.push(loginInput);
+          marquer(passwordInput, 'passwordError', !passwordInput.value);
+          if (!passwordInput.value) manquants.push(passwordInput);
+          marquer(gestionSelect, 'gestionError', !gestionSelect.value);
+          if (!gestionSelect.value) manquants.push(gestionSelect);
 
-          if (!login || !password || !gestion) {
+          if (manquants.length) {
             e.preventDefault();
-            alert('Veuillez remplir tous les champs obligatoires');
+            manquants[0].focus();
             return false;
           }
+          if (btnLogin.disabled) { e.preventDefault(); return false; } // évite le double envoi
 
-          // Animation du bouton
+          loginInput.value = loginInput.value.trim();
+          ecrire(STORAGE_LOGIN, loginInput.value);
+          ecrire(STORAGE_GESTION, gestionSelect.value);
+
           btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i>Connexion en cours...';
           btnLogin.disabled = true;
-          
-          console.log('Soumission du formulaire...');
         });
       }
 
+      // Retour arrière du navigateur : le bouton ne doit pas rester bloqué sur « Connexion en cours »
+      window.addEventListener('pageshow', function(e) {
+        if (!e.persisted) return;
+        if (btnLogin) { btnLogin.disabled = false; btnLogin.innerHTML = libelleBouton; }
+        if (passwordInput) passwordInput.value = '';
+      });
 
-      // Toggle password visibility
-      const togglePassword = document.getElementById('togglePassword');
-      const passwordInput = document.getElementById('password');
-
+      // Afficher / masquer le mot de passe (souris et clavier)
       if (togglePassword && passwordInput) {
         togglePassword.addEventListener('click', function() {
-          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-          passwordInput.setAttribute('type', type);
-          
-          // Toggle eye icon
-          this.classList.toggle('fa-eye');
-          this.classList.toggle('fa-eye-slash');
-          
-          console.log('👁️ Visibilité du mot de passe:', type === 'text' ? 'visible' : 'masqué');
+          var visible = passwordInput.getAttribute('type') === 'password';
+          passwordInput.setAttribute('type', visible ? 'text' : 'password');
+          this.classList.toggle('fa-eye', !visible);
+          this.classList.toggle('fa-eye-slash', visible);
+          var libelle = visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe';
+          this.setAttribute('title', libelle);
+          this.setAttribute('aria-label', libelle);
+          this.setAttribute('aria-pressed', visible ? 'true' : 'false');
+          passwordInput.focus();
         });
       }
-      console.log('✅ Initialisation terminée');
+
+      // Avertissement verrouillage des majuscules
+      if (passwordInput && capsWarning) {
+        var verifierMaj = function(e) {
+          if (e.getModifierState) capsWarning.classList.toggle('show', e.getModifierState('CapsLock'));
+        };
+        passwordInput.addEventListener('keyup', verifierMaj);
+        passwordInput.addEventListener('keydown', verifierMaj);
+        passwordInput.addEventListener('blur', function() { capsWarning.classList.remove('show'); });
+      }
     })();
   </script>
 </body>
